@@ -10,22 +10,27 @@
 </head>
 <body>
   
-  <div id="authArea" style="padding:16px; max-width:900px; margin:0 auto 12px auto; background:#fff; border-radius:12px;">
-    <button id="googleLoginBtn">使用 Google 登入</button>
-    <button id="logoutBtn" style="display:none;">登出</button>
-
-    <div id="userInfo" style="display:none; margin-top:8px;">
-      目前登入：<strong id="userEmail"></strong>
+  <div id="authArea" class="auth-card">
+  <div class="auth-top">
+    <div>
+      <div class="auth-title">雲端同步</div>
+      <div id="syncStatus" class="auth-status">尚未登入</div>
     </div>
 
-    <button id="migrateOldDataBtn" style="display:none; margin-top:8px;">
-      匯入舊資料到我的 Google 帳號
-    </button>
-
-    <div id="syncStatus" style="margin-top:8px; font-size:14px; color:#666;">
-      尚未登入
+    <div class="auth-actions">
+      <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
+      <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
     </div>
   </div>
+
+  <div id="userInfo" class="auth-user" style="display:none;">
+    目前登入：<strong id="userEmail"></strong>
+  </div>
+
+  <button id="migrateOldDataBtn" class="secondary-btn" style="display:none;">
+    匯入舊資料到我的 Google 帳號
+  </button>
+</div>
 
   <div class="container">
     <h2>戰鬥陀螺管理表</h2>
