@@ -460,6 +460,10 @@ window.saveEditRow = function (button, tableType) {
 
     newValues[2] = String(partCount);
   }
+  
+  if (tableType === "beyblade") {
+  newValues[0] = normalizeModel(newValues[0]);
+  }
 
   for (let i = 0; i < lastIndex; i++) {
     row.cells[i].innerText = newValues[i];
@@ -601,7 +605,7 @@ function saveConfigEditRow(button) {
 
   const row = button.parentElement.parentElement;
 
-  const model = getEditCellValue(row, 0);
+  const model = normalizeModel(getEditCellValue(row, 0));
 
   if (!model) {
     alert("請輸入陀螺型號！");
@@ -866,10 +870,15 @@ function applyDataToTables(data) {
     });
   }
 
-  sortBeybladeTable();
-  refreshSelectors();
+  const changedByNormalize = normalizeAllModelCells();
 
-  isApplyingRemoteData = false;
+sortBeybladeTable();
+refreshSelectors();
+
+isApplyingRemoteData = false;
+
+if (changedByNormalize) {
+  saveData();
 }
 
 function startCloudListener() {
@@ -957,7 +966,7 @@ window.addRow = function () {
 
   if (!tbody) return;
 
-  const model = getValue("model");
+  const model = normalizeModel(getValue("model"));
 
   if (!model) {
     alert("請輸入型號");
@@ -1213,7 +1222,7 @@ window.addConfig = function () {
   if (!requireLogin()) return;
   
   const modelInput = document.getElementById("confModel");
-  const model = modelInput.value.trim();
+  const model = normalizeModel(modelInput.value.trim());
 
   if (!model) {
     alert("請輸入陀螺型號！");
