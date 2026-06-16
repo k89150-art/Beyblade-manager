@@ -251,6 +251,8 @@ function getEditingButtons(tableType) {
 /* ====== 刪除功能 ====== */
 
 window.deleteRow = function (button) {
+  if (!requireLogin()) return;
+  
   const ok = confirm("確定要刪除這筆資料嗎？");
 
   if (!ok) return;
@@ -265,6 +267,7 @@ window.deleteRow = function (button) {
 /* ====== 表格內修改功能 ====== */
 
 window.editRow = function (button, tableType) {
+    if (!requireLogin()) return;
   const row = button.parentElement.parentElement;
     if (row.dataset.editing === "true") return;
 
@@ -340,6 +343,8 @@ window.editRow = function (button, tableType) {
 };
 
 window.saveEditRow = function (button, tableType) {
+  if (!requireLogin()) return;
+  
   if (tableType === "config") {
     saveConfigEditRow(button);
     return;
@@ -871,6 +876,8 @@ async function migrateOldDataToCurrentUser() {
 /* ====== 第一區：新增陀螺配置 ====== */
 
 window.addRow = function () {
+  if (!requireLogin()) return;
+  
   const tbody = document.querySelector("#beybladeTable tbody");
 
   if (!tbody) return;
@@ -974,6 +981,8 @@ window.addRow = function () {
 /* ====== 第二區：新增零件庫存 ====== */
 
 window.addPart = function () {
+  if (!requireLogin()) return;
+  
   const type = document.getElementById("partType").value;
   const nameInput = document.getElementById("partName");
   const countInput = document.getElementById("partCount");
@@ -1126,6 +1135,8 @@ function checkStock(type, name, total, used) {
 /* ====== 第三區：新增配置紀錄 ====== */
 
 window.addConfig = function () {
+  if (!requireLogin()) return;
+  
   const modelInput = document.getElementById("confModel");
   const model = modelInput.value.trim();
 
