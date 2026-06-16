@@ -75,7 +75,7 @@ function getUserDocRef() {
 function requireLogin() {
   if (!currentUser) {
     alert("請先使用 Google 登入，才能操作資料。");
-    setSyncStatus("請先登入後再操作");
+    setSyncStatus("請先登入後再操作", "muted");
     return false;
   }
 
@@ -729,10 +729,10 @@ async function saveData() {
   const userDocRef = getUserDocRef();
 
   if (!userDocRef) {
-    console.log("尚未登入，暫不儲存");
-    setSyncStatus("尚未登入，資料不會儲存到雲端");
-    return;
-  }
+  console.log("尚未登入，暫不儲存");
+  setSyncStatus("尚未登入，資料不會儲存到雲端", "muted");
+  return;
+}
 
     const data = collectCurrentData();
 
@@ -851,17 +851,17 @@ function startCloudListener() {
       if (!snapshot.exists()) {
         clearAllTables();
         refreshSelectors();
-        setSyncStatus("此 Google 帳號目前沒有資料，可按「匯入舊資料」");
+        setSyncStatus("目前沒有資料，可以開始新增", "muted");
         return;
       }
 
       applyDataToTables(snapshot.data());
-      setSyncStatus("已載入你的 Google 帳號雲端資料");
+      setSyncStatus("資料已同步", "saved");
     },
     error => {
       console.error("Firestore 讀取失敗：", error);
       alert("Firestore 讀取失敗：" + error.message);
-      setSyncStatus("讀取失敗");
+      setSyncStatus("讀取失敗", "error");
     }
   );
 }
@@ -1383,7 +1383,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   clearAllTables();
   refreshSelectors();
-  setSyncStatus("請先使用 Google 登入");
+  setSyncStatus("請先使用 Google 登入", "muted");
 
   onAuthStateChanged(auth, user => {
     currentUser = user;
@@ -1395,12 +1395,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (user) {
-      setSyncStatus("已登入，正在載入你的雲端資料...");
+      setSyncStatus("已登入，正在載入雲端資料...", "login");
       startCloudListener();
     } else {
       clearAllTables();
       refreshSelectors();
-      setSyncStatus("尚未登入");
+      setSyncStatus("尚未登入", "muted");
     }
   });
 });
