@@ -137,6 +137,43 @@ const configEditColumnMap = {
   8: "軸心"
 };
 
+function normalizeModel(model) {
+  const text = String(model || "").trim().replace(/\s+/g, " ");
+
+  const match = text.match(/^(UX|BX|CX)\s*-?\s*(\d+)(.*)$/i);
+
+  if (!match) return text;
+
+  const series = match[1].toUpperCase();
+  const number = match[2];
+  const rest = (match[3] || "").trim().replace(/\s+/g, " ");
+
+  return `${series}-${number}${rest ? " " + rest : ""}`;
+}
+
+function normalizeAllModelCells() {
+  let changed = false;
+
+  ["beybladeTable", "configTable"].forEach(tableId => {
+    const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+
+    rows.forEach(row => {
+      const cell = row.cells[0];
+      if (!cell) return;
+
+      const oldModel = cell.innerText.trim();
+      const newModel = normalizeModel(oldModel);
+
+      if (oldModel !== newModel) {
+        cell.innerText = newModel;
+        changed = true;
+      }
+    });
+  });
+
+  return changed;
+}
+
 function getSeriesFromModel(model) {
   const text = model.trim().toUpperCase();
 
