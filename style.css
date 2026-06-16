@@ -352,3 +352,70 @@ td button {
     width: 100%;
   }
 }
+
+/* ====== 登入區簡化版 ====== */
+
+.auth-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.auth-user {
+  font-size: 14px;
+  color: #dcdcdc;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.auth-user strong {
+  color: #ffffff;
+}
+
+.auth-status {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-muted {
+  color: #999999;
+}
+
+.status-saving {
+  color: #ffcc66;
+}
+
+.status-saved {
+  color: #69db7c;
+}
+
+.status-error {
+  color: #ff8787;
+}
+
+.status-login {
+  color: #74c0fc;
+}
+
+@media (max-width: 600px) {
+  .auth-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .auth-actions {
+    width: 100%;
+  }
+
+  .auth-actions button {
+    width: 100%;
+  }
+}
