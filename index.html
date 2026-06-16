@@ -3,180 +3,165 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Firebase Google 登入測試</title>
-  <style>
-    body {
-      font-family: Arial, "Microsoft JhengHei", sans-serif;
-      padding: 20px;
-      max-width: 420px;
-      margin: auto;
-      background: #f5f5f5;
-    }
 
-    h1 {
-      font-size: 24px;
-    }
+  <title>戰鬥陀螺管理表</title>
 
-    input, button {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      margin: 8px 0;
-      font-size: 16px;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    .box {
-      background: white;
-      padding: 16px;
-      border-radius: 12px;
-      margin-top: 16px;
-    }
-
-    .small {
-      color: #666;
-      font-size: 14px;
-      word-break: break-all;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Firebase Google 登入測試</h1>
-
-  <div id="loginArea" class="box">
+  <div id="authArea" style="padding:16px; max-width:900px; margin:0 auto 12px auto; background:#fff; border-radius:12px;">
     <button id="googleLoginBtn">使用 Google 登入</button>
+    <button id="logoutBtn" style="display:none;">登出</button>
+
+    <div id="userInfo" style="display:none; margin-top:8px;">
+      目前登入：<strong id="userEmail"></strong>
+    </div>
+
+    <button id="migrateOldDataBtn" style="display:none; margin-top:8px;">
+      匯入舊資料到我的 Google 帳號
+    </button>
+
+    <div id="syncStatus" style="margin-top:8px; font-size:14px; color:#666;">
+      尚未登入
+    </div>
   </div>
 
-  <div id="userArea" class="box" style="display:none;">
-    <p>目前登入：</p>
-    <strong id="userEmail"></strong>
-    <p class="small">UID：<span id="userUid"></span></p>
+  <div class="container">
+  <div class="container">
+    <h2>戰鬥陀螺管理表</h2>
 
-    <input id="testText" placeholder="輸入測試資料，例如：這是我的資料" />
+    <h3>陀螺配置</h3>
 
-    <button id="saveBtn">儲存到自己的雲端</button>
-    <button id="loadBtn">讀取自己的雲端資料</button>
-    <button id="logoutBtn">登出</button>
+    <div class="input-row">
+      <input type="text" id="model" placeholder="型號，例如 CX-01、UX-01">
+      <input type="text" id="layer" placeholder="上蓋">
 
-    <hr />
+      <input type="text" id="lock" placeholder="紋章鎖">
+      <input type="text" id="primaryBlade" placeholder="主要戰刃">
+      <input type="text" id="transcendBlade" placeholder="超越戰刃">
+      <input type="text" id="metalBlade" placeholder="金屬戰刃">
+      <input type="text" id="aux" placeholder="輔助戰刃">
 
-    <p>雲端資料：</p>
-    <strong id="cloudData">尚未讀取</strong>
+      <input type="text" id="fix" placeholder="固鎖">
+      <input type="text" id="axis" placeholder="軸心">
+
+      <button onclick="addRow()">新增</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="beybladeTable">
+        <thead>
+          <tr>
+            <th>型號</th>
+            <th>上蓋</th>
+            <th>紋章鎖</th>
+            <th>主要戰刃</th>
+            <th>超越戰刃</th>
+            <th>金屬戰刃</th>
+            <th>輔助戰刃</th>
+            <th>固鎖</th>
+            <th>軸心</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h3>零件庫存表</h3>
+
+    <div class="part-input-row">
+      <select id="partType">
+        <option value="上蓋">上蓋</option>
+        <option value="紋章鎖">紋章鎖</option>
+        <option value="主要戰刃">主要戰刃</option>
+        <option value="超越戰刃">超越戰刃</option>
+        <option value="金屬戰刃">金屬戰刃</option>
+        <option value="輔助戰刃">輔助戰刃</option>
+        <option value="固鎖">固鎖</option>
+        <option value="軸心">軸心</option>
+      </select>
+
+      <input type="text" id="partName" placeholder="零件名稱">
+      <input type="number" id="partCount" placeholder="數量">
+      <button onclick="addPart()">新增零件</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="partTable">
+        <thead>
+          <tr>
+            <th>類別</th>
+            <th>零件名稱</th>
+            <th>數量</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h3>配置紀錄區</h3>
+
+    <div id="config-selector">
+      <input type="text" id="confModel" placeholder="輸入陀螺型號">
+
+      <select id="sel上蓋">
+        <option value="">選擇上蓋</option>
+      </select>
+
+      <select id="sel紋章鎖">
+        <option value="">選擇紋章鎖</option>
+      </select>
+
+      <select id="sel主要戰刃">
+        <option value="">選擇主要戰刃</option>
+      </select>
+
+      <select id="sel超越戰刃">
+        <option value="">選擇超越戰刃</option>
+      </select>
+
+      <select id="sel金屬戰刃">
+        <option value="">選擇金屬戰刃</option>
+      </select>
+
+      <select id="sel輔助戰刃">
+        <option value="">選擇輔助戰刃</option>
+      </select>
+
+      <select id="sel固鎖">
+        <option value="">選擇固鎖</option>
+      </select>
+
+      <select id="sel軸心">
+        <option value="">選擇軸心</option>
+      </select>
+
+      <button onclick="addConfig()">加入配置表</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="configTable">
+        <thead>
+          <tr>
+            <th>型號</th>
+            <th>上蓋</th>
+            <th>紋章鎖</th>
+            <th>主要戰刃</th>
+            <th>超越戰刃</th>
+            <th>金屬戰刃</th>
+            <th>輔助戰刃</th>
+            <th>固鎖</th>
+            <th>軸心</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-
-    import {
-      getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-
-    import {
-      getFirestore,
-      doc,
-      setDoc,
-      getDoc
-    } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyABQadKr-Am-55GgFJmhZ0tkRY-joARNAQ",
-      authDomain: "k89150-web-login.firebaseapp.com",
-      projectId: "k89150-web-login",
-      storageBucket: "k89150-web-login.firebasestorage.app",
-      messagingSenderId: "488040360398",
-      appId: "1:488040360398:web:759698c16eb67e14f1639f"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    const db = getFirestore(app);
-
-    const loginArea = document.getElementById("loginArea");
-    const userArea = document.getElementById("userArea");
-    const userEmail = document.getElementById("userEmail");
-    const userUid = document.getElementById("userUid");
-    const testText = document.getElementById("testText");
-    const cloudData = document.getElementById("cloudData");
-
-    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (error) {
-        alert("Google 登入失敗：" + error.message);
-        console.error(error);
-      }
-    });
-
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await signOut(auth);
-    });
-
-    document.getElementById("saveBtn").addEventListener("click", async () => {
-      const user = auth.currentUser;
-
-      if (!user) {
-        alert("尚未登入");
-        return;
-      }
-
-      try {
-        await setDoc(doc(db, "users", user.uid, "appData", "main"), {
-          text: testText.value,
-          email: user.email,
-          updatedAt: new Date().toISOString()
-        });
-
-        alert("已儲存到自己的雲端");
-      } catch (error) {
-        alert("儲存失敗：" + error.message);
-        console.error(error);
-      }
-    });
-
-    document.getElementById("loadBtn").addEventListener("click", async () => {
-      const user = auth.currentUser;
-
-      if (!user) {
-        alert("尚未登入");
-        return;
-      }
-
-      try {
-        const snap = await getDoc(doc(db, "users", user.uid, "appData", "main"));
-
-        if (snap.exists()) {
-          cloudData.textContent = snap.data().text || "沒有文字資料";
-        } else {
-          cloudData.textContent = "目前沒有資料";
-        }
-      } catch (error) {
-        alert("讀取失敗：" + error.message);
-        console.error(error);
-      }
-    });
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginArea.style.display = "none";
-        userArea.style.display = "block";
-        userEmail.textContent = user.email;
-        userUid.textContent = user.uid;
-      } else {
-        loginArea.style.display = "block";
-        userArea.style.display = "none";
-        userEmail.textContent = "";
-        userUid.textContent = "";
-        cloudData.textContent = "尚未讀取";
-      }
-    });
-  </script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
