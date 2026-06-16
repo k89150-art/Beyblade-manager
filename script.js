@@ -872,13 +872,14 @@ function applyDataToTables(data) {
 
   const changedByNormalize = normalizeAllModelCells();
 
-sortBeybladeTable();
-refreshSelectors();
+  sortBeybladeTable();
+  refreshSelectors();
 
-isApplyingRemoteData = false;
+  isApplyingRemoteData = false;
 
-if (changedByNormalize) {
-  saveData();
+  if (changedByNormalize) {
+    saveData();
+  }
 }
 
 function startCloudListener() {
@@ -890,6 +891,27 @@ function startCloudListener() {
     unsubscribeCloudData();
     unsubscribeCloudData = null;
   }
+
+  unsubscribeCloudData = onSnapshot(
+    userDocRef,
+    snapshot => {
+      if (!snapshot.exists()) {
+        clearAllTables();
+        refreshSelectors();
+        setSyncStatus("目前沒有資料，可以開始新增", "muted");
+        return;
+      }
+
+      applyDataToTables(snapshot.data());
+      setSyncStatus("資料已同步", "saved");
+    },
+    error => {
+      console.error("Firestore 讀取失敗：", error);
+      alert("Firestore 讀取失敗：" + error.message);
+      setSyncStatus("讀取失敗", "error");
+    }
+  );
+}
 
   unsubscribeCloudData = onSnapshot(
     userDocRef,
