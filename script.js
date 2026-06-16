@@ -734,15 +734,18 @@ async function saveData() {
     return;
   }
 
-  const data = collectCurrentData();
+    const data = collectCurrentData();
 
   try {
+    setSyncStatus("儲存中...", "saving");
+
     await setDoc(userDocRef, data);
-    setSyncStatus("已儲存到你的 Google 帳號雲端");
+
+    setSyncStatus("已儲存", "saved");
   } catch (error) {
     console.error("Firestore 儲存失敗：", error);
     alert("Firestore 儲存失敗：" + error.message);
-    setSyncStatus("儲存失敗");
+    setSyncStatus("儲存失敗", "error");
   }
 }
 
