@@ -913,27 +913,6 @@ function startCloudListener() {
   );
 }
 
-  unsubscribeCloudData = onSnapshot(
-    userDocRef,
-    snapshot => {
-      if (!snapshot.exists()) {
-        clearAllTables();
-        refreshSelectors();
-        setSyncStatus("目前沒有資料，可以開始新增", "muted");
-        return;
-      }
-
-      applyDataToTables(snapshot.data());
-      setSyncStatus("資料已同步", "saved");
-    },
-    error => {
-      console.error("Firestore 讀取失敗：", error);
-      alert("Firestore 讀取失敗：" + error.message);
-      setSyncStatus("讀取失敗", "error");
-    }
-  );
-}
-
 /* ====== 匯入舊 Realtime Database 資料 ====== */
 
 async function migrateOldDataToCurrentUser() {
