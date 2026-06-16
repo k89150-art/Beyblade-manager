@@ -1263,7 +1263,7 @@ function updateAuthUI(user) {
     if (logoutBtn) logoutBtn.style.display = "inline-block";
     if (userInfo) userInfo.style.display = "block";
     if (userEmail) userEmail.textContent = user.email || "";
-    if (migrateOldDataBtn) migrateOldDataBtn.style.display = "inline-block";
+    if (migrateOldDataBtn) migrateOldDataBtn.style.display = "none";
   } else {
     if (googleLoginBtn) googleLoginBtn.style.display = "inline-block";
     if (logoutBtn) logoutBtn.style.display = "none";
