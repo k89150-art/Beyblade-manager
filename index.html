@@ -11,20 +11,23 @@
 <body>
   
   <div id="authArea" class="auth-card">
-  <div class="auth-top">
+  <div class="auth-main">
     <div>
       <div class="auth-title">雲端同步</div>
-      <div id="syncStatus" class="auth-status">尚未登入</div>
+
+      <div id="userInfo" class="auth-user" style="display:none;">
+        已登入：<strong id="userEmail"></strong>
+      </div>
+
+      <div id="syncStatus" class="auth-status status-muted">
+        尚未登入
+      </div>
     </div>
 
     <div class="auth-actions">
       <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
       <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
     </div>
-  </div>
-
-  <div id="userInfo" class="auth-user" style="display:none;">
-    目前登入：<strong id="userEmail"></strong>
   </div>
 
   <button id="migrateOldDataBtn" class="secondary-btn" style="display:none;">
