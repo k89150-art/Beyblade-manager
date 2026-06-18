@@ -268,6 +268,7 @@ td button {
   text-align: left;
 }
 
+```css
 /* ====== 刪除原因彈出視窗 ====== */
 
 body.dialog-open {
@@ -275,12 +276,18 @@ body.dialog-open {
 }
 
 #deleteReasonDialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   border: none;
   padding: 0;
   background: transparent;
   width: min(420px, calc(100vw - 32px));
   max-width: calc(100vw - 32px);
-  margin: auto;
+  height: fit-content;
+  max-height: calc(100dvh - 32px);
+  overflow: visible;
+  z-index: 999999;
 }
 
 #deleteReasonDialog::backdrop {
@@ -336,102 +343,11 @@ body.dialog-open {
   margin-top: 14px;
 }
 
-@media (max-width: 800px) {
-  .container,
-  .auth-card {
-    width: 680px;
-    max-width: 95vw;
-  }
-
-  .input-row {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  #config-selector {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .part-input-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .auth-main {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .auth-actions {
-    width: 100%;
-  }
-
-  .auth-actions button {
-    width: 100%;
-  }
-}
-
 @media (max-width: 600px) {
-  body {
-    padding: 8px;
-  }
-
-  .container,
-  .auth-card {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  h2 {
-    font-size: 23px;
-  }
-
-  h3 {
-    font-size: 18px;
-  }
-
-  .input-row,
-  .part-input-row,
-  #config-selector {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .input-row input,
-  .input-row button,
-  .part-input-row input,
-  .part-input-row select,
-  .part-input-row button,
-  #config-selector input,
-  #config-selector select,
-  #config-selector button {
-    width: 100%;
-  }
-
-  table {
-    font-size: 12px;
-    min-width: 720px;
-  }
-
-  th,
-  td {
-    padding: 7px 4px;
-  }
-
-  button {
-    min-height: 38px;
-  }
-
-  .auth-card {
-    padding: 14px;
-  }
-
-  .secondary-btn {
-    width: 100%;
-  }
-
   #deleteReasonDialog {
     width: calc(100vw - 24px);
     max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
   }
 
   .reason-dialog-actions {
