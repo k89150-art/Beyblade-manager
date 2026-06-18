@@ -388,7 +388,7 @@ row.insertCell(4).innerText = record.result || "-";
 row.insertCell(5).innerText = record.note || "-";
 row.insertCell(6).innerText = record.date || "-";
 row.insertCell(7).innerHTML = `     <button onclick="restoreHistoryRow(this)">還原</button>     <button onclick="deleteHistoryRow(this)">刪除</button>
-  `;
+;
 }
 
 function findHistoryByComboKey(comboKey) {
