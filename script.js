@@ -415,60 +415,107 @@ function findHistoryByComboKey(comboKey) {
   return null;
 }
 
+```js
 function askDeleteReasonForConfig(row) {
   return new Promise(resolve => {
     const backdrop = document.createElement("div");
-    backdrop.className = "modal-backdrop";
 
-    backdrop.innerHTML = `
-      <div class="modal-card">
-        <h4>刪除配置紀錄</h4>
+    backdrop.style.position = "fixed";
+    backdrop.style.left = "0";
+    backdrop.style.top = "0";
+    backdrop.style.width = "100vw";
+    backdrop.style.height = "100vh";
+    backdrop.style.background = "rgba(0, 0, 0, 0.75)";
+    backdrop.style.zIndex = "999999";
+    backdrop.style.display = "flex";
+    backdrop.style.alignItems = "center";
+    backdrop.style.justifyContent = "center";
+    backdrop.style.padding = "16px";
+    backdrop.style.boxSizing = "border-box";
 
-        <label>請選擇拆掉原因</label>
-        <select id="deleteReasonSelect">
-          <option value="不好用">不好用</option>
-          <option value="好用，暫時拆掉">好用，但暫時拆掉測其他組合</option>
-          <option value="普通 / 無感">普通 / 無感</option>
-          <option value="打錯，不記錄">打錯，不記錄</option>
-        </select>
+    const card = document.createElement("div");
 
-        <label>備註</label>
-        <textarea id="deleteReasonNote" placeholder="例如：太容易爆、持久不夠、攻擊不穩。可不填。"></textarea>
+    card.style.width = "420px";
+    card.style.maxWidth = "100%";
+    card.style.background = "#1b1b1b";
+    card.style.border = "1px solid #3a3a3a";
+    card.style.borderRadius = "14px";
+    card.style.padding = "16px";
+    card.style.boxShadow = "0 12px 32px rgba(0, 0, 0, 0.55)";
+    card.style.boxSizing = "border-box";
+    card.style.color = "#ffffff";
 
-        <div class="modal-actions">
-          <button type="button" id="cancelDeleteReasonBtn">取消刪除</button>
-          <button type="button" id="confirmDeleteReasonBtn">確認刪除</button>
-        </div>
+    card.innerHTML = `
+      <h4 style="margin:0 0 12px 0;font-size:18px;color:#ffffff;">
+        刪除配置紀錄
+      </h4>
+
+      <div style="margin-bottom:10px;color:#dcdcdc;font-size:14px;line-height:1.5;">
+        請選擇這個配置拆掉的原因
+      </div>
+
+      <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">
+        原因
+      </label>
+
+      <select id="deleteReasonSelect" style="width:100%;margin-bottom:12px;">
+        <option value="不好用">不好用</option>
+        <option value="好用，暫時拆掉">好用，但暫時拆掉測其他組合</option>
+        <option value="普通 / 無感">普通 / 無感</option>
+        <option value="打錯，不記錄">打錯，不記錄</option>
+      </select>
+
+      <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">
+        備註
+      </label>
+
+      <textarea
+        id="deleteReasonNote"
+        placeholder="例如：太容易爆、持久不夠、攻擊不穩。可不填。"
+        style="width:100%;min-height:80px;resize:vertical;margin-bottom:14px;"
+      ></textarea>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" id="cancelDeleteReasonBtn">取消刪除</button>
+        <button type="button" id="confirmDeleteReasonBtn">確認刪除</button>
       </div>
     `;
 
+    backdrop.appendChild(card);
     document.body.appendChild(backdrop);
 
-    const reasonSelect = backdrop.querySelector("#deleteReasonSelect");
-    const noteInput = backdrop.querySelector("#deleteReasonNote");
-    const cancelBtn = backdrop.querySelector("#cancelDeleteReasonBtn");
-    const confirmBtn = backdrop.querySelector("#confirmDeleteReasonBtn");
+    document.body.style.overflow = "hidden";
+
+    const reasonSelect = card.querySelector("#deleteReasonSelect");
+    const noteInput = card.querySelector("#deleteReasonNote");
+    const cancelBtn = card.querySelector("#cancelDeleteReasonBtn");
+    const confirmBtn = card.querySelector("#confirmDeleteReasonBtn");
+
+    function closeModal(value) {
+      backdrop.remove();
+      document.body.style.overflow = "";
+      resolve(value);
+    }
 
     cancelBtn.addEventListener("click", () => {
-      backdrop.remove();
-      resolve(null);
+      closeModal(null);
     });
 
     confirmBtn.addEventListener("click", () => {
       const reason = reasonSelect.value;
       const note = noteInput.value.trim();
 
-      backdrop.remove();
-
       if (reason === "打錯，不記錄") {
-        resolve(false);
+        closeModal(false);
         return;
       }
 
-      resolve(buildHistoryRecordFromConfigRow(row, reason, note));
+      closeModal(buildHistoryRecordFromConfigRow(row, reason, note));
     });
   });
 }
+```
+
 
 window.restoreHistoryRow = function (button) {
   if (!requireLogin()) return;
