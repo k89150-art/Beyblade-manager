@@ -416,58 +416,133 @@ function findHistoryByComboKey(comboKey) {
 }
 
 function askDeleteReasonForConfig(row) {
-  return new Promise(resolve => {
-    const backdrop = document.createElement("div");
-    backdrop.className = "modal-backdrop";
+return new Promise(resolve => {
+let modal = document.getElementById("deleteReasonModal");
 
-    backdrop.innerHTML = `
-      <div class="modal-card">
-        <h4>刪除配置紀錄</h4>
+```
+if (!modal) {
+  modal = document.createElement("div");
+  modal.id = "deleteReasonModal";
+  document.body.appendChild(modal);
+}
 
-        <label>請選擇拆掉原因</label>
-        <select id="deleteReasonSelect">
-          <option value="不好用">不好用</option>
-          <option value="好用，暫時拆掉">好用，但暫時拆掉測其他組合</option>
-          <option value="普通 / 無感">普通 / 無感</option>
-          <option value="打錯，不記錄">打錯，不記錄</option>
-        </select>
+modal.innerHTML = `
+  <div style="
+    width:420px;
+    max-width:calc(100vw - 24px);
+    background:#1b1b1b;
+    color:#ffffff;
+    border:1px solid #3a3a3a;
+    border-radius:14px;
+    padding:16px;
+    box-sizing:border-box;
+    box-shadow:0 12px 32px rgba(0,0,0,0.65);
+    font-family:Arial, 'Microsoft JhengHei', sans-serif;
+  ">
+    <h4 style="margin:0 0 12px 0;font-size:18px;color:#ffffff;">
+      刪除配置紀錄
+    </h4>
 
-        <label>備註</label>
-        <textarea id="deleteReasonNote" placeholder="例如：太容易爆、持久不夠、攻擊不穩。可不填。"></textarea>
+    <p style="margin:0 0 12px 0;color:#dcdcdc;font-size:14px;line-height:1.5;">
+      請選擇這個配置拆掉的原因
+    </p>
 
-        <div class="modal-actions">
-          <button type="button" id="cancelDeleteReasonBtn">取消刪除</button>
-          <button type="button" id="confirmDeleteReasonBtn">確認刪除</button>
-        </div>
-      </div>
-    `;
+    <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">
+      原因
+    </label>
 
-    document.body.appendChild(backdrop);
+    <select id="deleteReasonSelect" style="
+      width:100%;
+      margin-bottom:12px;
+      background:#242424;
+      color:#ffffff;
+      border:1px solid #444;
+      border-radius:7px;
+      padding:9px 10px;
+      box-sizing:border-box;
+      font-size:14px;
+    ">
+      <option value="不好用">不好用</option>
+      <option value="好用，暫時拆掉">好用，但暫時拆掉測其他組合</option>
+      <option value="普通 / 無感">普通 / 無感</option>
+      <option value="打錯，不記錄">打錯，不記錄</option>
+    </select>
 
-    const reasonSelect = backdrop.querySelector("#deleteReasonSelect");
-    const noteInput = backdrop.querySelector("#deleteReasonNote");
-    const cancelBtn = backdrop.querySelector("#cancelDeleteReasonBtn");
-    const confirmBtn = backdrop.querySelector("#confirmDeleteReasonBtn");
+    <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">
+      備註
+    </label>
 
-    cancelBtn.addEventListener("click", () => {
-      backdrop.remove();
-      resolve(null);
-    });
+    <textarea
+      id="deleteReasonNote"
+      placeholder="例如：太容易爆、持久不夠、攻擊不穩。可不填。"
+      style="
+        width:100%;
+        min-height:80px;
+        resize:vertical;
+        margin-bottom:14px;
+        background:#242424;
+        color:#ffffff;
+        border:1px solid #444;
+        border-radius:7px;
+        padding:9px 10px;
+        box-sizing:border-box;
+        font-size:14px;
+      "
+    ></textarea>
 
-    confirmBtn.addEventListener("click", () => {
-      const reason = reasonSelect.value;
-      const note = noteInput.value.trim();
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+      <button type="button" id="cancelDeleteReasonBtn">取消刪除</button>
+      <button type="button" id="confirmDeleteReasonBtn">確認刪除</button>
+    </div>
+  </div>
+`;
 
-      backdrop.remove();
+modal.style.position = "fixed";
+modal.style.left = "0";
+modal.style.top = "0";
+modal.style.right = "0";
+modal.style.bottom = "0";
+modal.style.width = "100vw";
+modal.style.height = "100dvh";
+modal.style.background = "rgba(0,0,0,0.78)";
+modal.style.zIndex = "2147483647";
+modal.style.display = "flex";
+modal.style.alignItems = "center";
+modal.style.justifyContent = "center";
+modal.style.padding = "12px";
+modal.style.boxSizing = "border-box";
 
-      if (reason === "打錯，不記錄") {
-        resolve(false);
-        return;
-      }
+document.body.style.overflow = "hidden";
 
-      resolve(buildHistoryRecordFromConfigRow(row, reason, note));
-    });
-  });
+const reasonSelect = modal.querySelector("#deleteReasonSelect");
+const noteInput = modal.querySelector("#deleteReasonNote");
+const cancelBtn = modal.querySelector("#cancelDeleteReasonBtn");
+const confirmBtn = modal.querySelector("#confirmDeleteReasonBtn");
+
+function closeModal(value) {
+  modal.style.display = "none";
+  modal.innerHTML = "";
+  document.body.style.overflow = "";
+  resolve(value);
+}
+
+cancelBtn.onclick = () => {
+  closeModal(null);
+};
+
+confirmBtn.onclick = () => {
+  const reason = reasonSelect.value;
+  const note = noteInput.value.trim();
+
+  if (reason === "打錯，不記錄") {
+    closeModal(false);
+    return;
+  }
+
+  closeModal(buildHistoryRecordFromConfigRow(row, reason, note));
+};
+
+});
 }
 
 window.restoreHistoryRow = function (button) {
