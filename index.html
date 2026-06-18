@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -7,203 +6,194 @@
 
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20260619-fix5" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  
   <div id="authArea" class="auth-card">
-    <div class="auth-main">
-      <div>
-        <div class="auth-title">雲端同步</div>
+  <div class="auth-main">
+    <div>
+      <div class="auth-title">雲端同步</div>
 
-    <div id="userInfo" class="auth-user" style="display:none;">
-      已登入：<strong id="userEmail"></strong>
+      <div id="userInfo" class="auth-user" style="display:none;">
+        已登入：<strong id="userEmail"></strong>
+      </div>
+
+      <div id="syncStatus" class="auth-status status-muted">
+        尚未登入
+      </div>
     </div>
 
-    <div id="syncStatus" class="auth-status status-muted">
-      尚未登入
+    <div class="auth-actions">
+      <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
+      <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
     </div>
   </div>
 
-  <div class="auth-actions">
-    <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
-    <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
-  </div>
+  <button id="migrateOldDataBtn" class="secondary-btn" style="display:none;">
+    匯入舊資料到我的 Google 帳號
+  </button>
 </div>
-
-<button id="migrateOldDataBtn" class="secondary-btn" style="display:none;">
-  匯入舊資料到我的 Google 帳號
-</button>
-
-  </div>
-
-  <div id="deleteReasonModal" class="reason-modal" style="display:none;" aria-hidden="true">
-    <div class="reason-modal-card">
-      <h4>刪除配置紀錄</h4>
-
-  <p class="reason-modal-text">
-    請選擇這個配置拆掉的原因
-  </p>
-
-  <label for="deleteReasonSelect">原因</label>
-  <select id="deleteReasonSelect">
-    <option value="不好用">不好用</option>
-    <option value="好用，暫時拆掉">好用，但暫時拆掉測其他組合</option>
-    <option value="普通 / 無感">普通 / 無感</option>
-    <option value="打錯，不記錄">打錯，不記錄</option>
-  </select>
-
-  <label for="deleteReasonNote">備註</label>
-  <textarea
-    id="deleteReasonNote"
-    placeholder="例如：太容易爆、持久不夠、攻擊不穩。可不填。"
-  ></textarea>
-
-  <div class="reason-modal-actions">
-    <button type="button" id="cancelDeleteReasonBtn">取消刪除</button>
-    <button type="button" id="confirmDeleteReasonBtn">確認刪除</button>
-  </div>
-</div>
-
-  </div>
 
   <div class="container">
     <h2>戰鬥陀螺管理表</h2>
 
-<h3>陀螺配置</h3>
+    <h3>陀螺配置</h3>
 
-<div class="input-row">
-  <input type="text" id="model" placeholder="型號，例如 CX-01、UX-01">
-  <input type="text" id="layer" placeholder="上蓋">
+    <div class="input-row">
+      <input type="text" id="model" placeholder="型號，例如 CX-01、UX-01">
+      <input type="text" id="layer" placeholder="上蓋">
 
-  <input type="text" id="lock" placeholder="紋章鎖">
-  <input type="text" id="primaryBlade" placeholder="主要戰刃">
-  <input type="text" id="transcendBlade" placeholder="超越戰刃">
-  <input type="text" id="metalBlade" placeholder="金屬戰刃">
-  <input type="text" id="aux" placeholder="輔助戰刃">
+      <input type="text" id="lock" placeholder="紋章鎖">
+      <input type="text" id="primaryBlade" placeholder="主要戰刃">
+      <input type="text" id="transcendBlade" placeholder="超越戰刃">
+      <input type="text" id="metalBlade" placeholder="金屬戰刃">
+      <input type="text" id="aux" placeholder="輔助戰刃">
 
-  <input type="text" id="fix" placeholder="固鎖">
-  <input type="text" id="axis" placeholder="軸心">
+      <input type="text" id="fix" placeholder="固鎖">
+      <input type="text" id="axis" placeholder="軸心">
 
-  <button onclick="addRow()">新增</button>
-</div>
+      <button onclick="addRow()">新增</button>
+    </div>
 
-<div class="table-wrap">
-  <table id="beybladeTable">
-    <thead>
-      <tr>
-        <th>型號</th>
-        <th>上蓋</th>
-        <th>紋章鎖</th>
-        <th>主要戰刃</th>
-        <th>超越戰刃</th>
-        <th>金屬戰刃</th>
-        <th>輔助戰刃</th>
-        <th>固鎖</th>
-        <th>軸心</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+    <div class="table-wrap">
+      <table id="beybladeTable">
+        <thead>
+          <tr>
+            <th>型號</th>
+            <th>上蓋</th>
+            <th>紋章鎖</th>
+            <th>主要戰刃</th>
+            <th>超越戰刃</th>
+            <th>金屬戰刃</th>
+            <th>輔助戰刃</th>
+            <th>固鎖</th>
+            <th>軸心</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-<h3>零件庫存表</h3>
+    <h3>零件庫存表</h3>
 
-<div class="part-input-row">
-  <select id="partType">
-    <option value="上蓋">上蓋</option>
-    <option value="紋章鎖">紋章鎖</option>
-    <option value="主要戰刃">主要戰刃</option>
-    <option value="超越戰刃">超越戰刃</option>
-    <option value="金屬戰刃">金屬戰刃</option>
-    <option value="輔助戰刃">輔助戰刃</option>
-    <option value="固鎖">固鎖</option>
-    <option value="軸心">軸心</option>
-  </select>
+    <div class="part-input-row">
+      <select id="partType">
+        <option value="上蓋">上蓋</option>
+        <option value="紋章鎖">紋章鎖</option>
+        <option value="主要戰刃">主要戰刃</option>
+        <option value="超越戰刃">超越戰刃</option>
+        <option value="金屬戰刃">金屬戰刃</option>
+        <option value="輔助戰刃">輔助戰刃</option>
+        <option value="固鎖">固鎖</option>
+        <option value="軸心">軸心</option>
+      </select>
 
-  <input type="text" id="partName" placeholder="零件名稱">
-  <input type="number" id="partCount" placeholder="數量">
-  <button onclick="addPart()">新增零件</button>
-</div>
+      <input type="text" id="partName" placeholder="零件名稱">
+      <input type="number" id="partCount" placeholder="數量">
+      <button onclick="addPart()">新增零件</button>
+    </div>
 
-<div class="table-wrap">
-  <table id="partTable">
-    <thead>
-      <tr>
-        <th>類別</th>
-        <th>零件名稱</th>
-        <th>數量</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+    <div class="table-wrap">
+      <table id="partTable">
+        <thead>
+          <tr>
+            <th>類別</th>
+            <th>零件名稱</th>
+            <th>數量</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-<h3>配置紀錄區</h3>
+    <h3>配置紀錄區</h3>
 
-<div id="config-selector">
-  <input type="text" id="confModel" placeholder="輸入陀螺型號">
+    <div id="config-selector">
+      <input type="text" id="confModel" placeholder="輸入陀螺型號">
 
-  <select id="sel上蓋"><option value="">選擇上蓋</option></select>
-  <select id="sel紋章鎖"><option value="">選擇紋章鎖</option></select>
-  <select id="sel主要戰刃"><option value="">選擇主要戰刃</option></select>
-  <select id="sel超越戰刃"><option value="">選擇超越戰刃</option></select>
-  <select id="sel金屬戰刃"><option value="">選擇金屬戰刃</option></select>
-  <select id="sel輔助戰刃"><option value="">選擇輔助戰刃</option></select>
-  <select id="sel固鎖"><option value="">選擇固鎖</option></select>
-  <select id="sel軸心"><option value="">選擇軸心</option></select>
+      <select id="sel上蓋">
+        <option value="">選擇上蓋</option>
+      </select>
 
-  <button onclick="addConfig()">加入配置表</button>
-</div>
+      <select id="sel紋章鎖">
+        <option value="">選擇紋章鎖</option>
+      </select>
 
-<div class="table-wrap">
-  <table id="configTable">
-    <thead>
-      <tr>
-        <th>型號</th>
-        <th>上蓋</th>
-        <th>紋章鎖</th>
-        <th>主要戰刃</th>
-        <th>超越戰刃</th>
-        <th>金屬戰刃</th>
-        <th>輔助戰刃</th>
-        <th>固鎖</th>
-        <th>軸心</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+      <select id="sel主要戰刃">
+        <option value="">選擇主要戰刃</option>
+      </select>
 
-<h3>歷史測試紀錄</h3>
+      <select id="sel超越戰刃">
+        <option value="">選擇超越戰刃</option>
+      </select>
 
-<div class="history-note">
-  這裡會記錄曾經拆掉的配置。下次如果再加入相同組合，系統會提醒你以前測試過。
-</div>
+      <select id="sel金屬戰刃">
+        <option value="">選擇金屬戰刃</option>
+      </select>
 
-<div class="table-wrap">
-  <table id="historyTable">
-    <thead>
-      <tr>
-        <th>型號</th>
-        <th>組合</th>
-        <th>固鎖</th>
-        <th>軸心</th>
-        <th>結果</th>
-        <th>備註</th>
-        <th>日期</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+      <select id="sel輔助戰刃">
+        <option value="">選擇輔助戰刃</option>
+      </select>
 
+      <select id="sel固鎖">
+        <option value="">選擇固鎖</option>
+      </select>
+
+      <select id="sel軸心">
+        <option value="">選擇軸心</option>
+      </select>
+
+      <button onclick="addConfig()">加入配置表</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="configTable">
+        <thead>
+          <tr>
+            <th>型號</th>
+            <th>上蓋</th>
+            <th>紋章鎖</th>
+            <th>主要戰刃</th>
+            <th>超越戰刃</th>
+            <th>金屬戰刃</th>
+            <th>輔助戰刃</th>
+            <th>固鎖</th>
+            <th>軸心</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h3>歷史測試紀錄</h3>
+
+    <div class="history-note">
+      這裡會記錄曾經拆掉的配置。下次如果再加入相同組合，系統會提醒你以前測試過。
+    </div>
+
+    <div class="table-wrap">
+      <table id="historyTable">
+        <thead>
+          <tr>
+            <th>型號</th>
+            <th>組合</th>
+            <th>固鎖</th>
+            <th>軸心</th>
+            <th>結果</th>
+            <th>備註</th>
+            <th>日期</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
-  <script type="module" src="script.js?v=20260619-fix5"></script>
-
+  <script type="module" src="script.js"></script>
 </body>
 </html>
