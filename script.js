@@ -489,22 +489,19 @@ function askDeleteReasonForConfig(row) {
 
     document.body.classList.add("dialog-open");
 
-    if (typeof dialog.showModal === "function") {
-      dialog.showModal();
-    } else {
+    try {
+      if (typeof dialog.showModal === "function") {
+        dialog.showModal();
+      } else {
+        throw new Error("dialog.showModal not supported");
+      }
+    } catch (error) {
       const choice = prompt(
-        "這個配置要移除，請選擇原因：
-
-" +
-        "1：不好用
-" +
-        "2：好用，但暫時拆掉測其他組合
-" +
-        "3：普通 / 無感
-" +
-        "4：打錯，不記錄
-
-" +
+        "這個配置要移除，請選擇原因：\n\n" +
+        "1：不好用\n" +
+        "2：好用，但暫時拆掉測其他組合\n" +
+        "3：普通 / 無感\n" +
+        "4：打錯，不記錄\n\n" +
         "請輸入 1、2、3 或 4"
       );
 
