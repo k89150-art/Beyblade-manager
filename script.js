@@ -373,22 +373,22 @@ function buildHistoryRecordFromConfigValues(data) {
 }
 
 function createHistoryRow(record) {
-const tbody = document.querySelector("#historyTable tbody");
-if (!tbody) return;
+  const tbody = document.querySelector("#historyTable tbody");
+  if (!tbody) return;
 
-const row = tbody.insertRow();
+  const row = tbody.insertRow();
 
-row.dataset.comboKey = record.comboKey || "";
+  row.dataset.comboKey = record.comboKey || "";
 
-row.insertCell(0).innerText = record.model || "-";
-row.insertCell(1).innerText = record.combo || "-";
-row.insertCell(2).innerText = record.fix || "-";
-row.insertCell(3).innerText = record.axis || "-";
-row.insertCell(4).innerText = record.result || "-";
-row.insertCell(5).innerText = record.note || "-";
-row.insertCell(6).innerText = record.date || "-";
-row.insertCell(7).innerHTML = `     <button onclick="restoreHistoryRow(this)">還原</button>     <button onclick="deleteHistoryRow(this)">刪除</button>
-  `;
+  row.insertCell(0).innerText = record.model || "-";
+  row.insertCell(1).innerText = record.combo || "-";
+  row.insertCell(2).innerText = record.fix || "-";
+  row.insertCell(3).innerText = record.axis || "-";
+  row.insertCell(4).innerText = record.result || "-";
+  row.insertCell(5).innerText = record.note || "-";
+  row.insertCell(6).innerText = record.date || "-";
+  row.insertCell(7).innerHTML =
+    '<button onclick="deleteHistoryRow(this)">刪除</button>';
 }
 
 function findHistoryByComboKey(comboKey) {
