@@ -415,16 +415,24 @@ function findHistoryByComboKey(comboKey) {
   return null;
 }
 
+```js
 function askDeleteReasonForConfig(row) {
   return new Promise(resolve => {
-    const backdrop = document.createElement("div");
-    backdrop.className = "modal-backdrop";
+    const oldDialog = document.getElementById("deleteReasonDialog");
+    if (oldDialog) oldDialog.remove();
 
-    backdrop.innerHTML = `
-      <div class="modal-card">
+    const dialog = document.createElement("dialog");
+    dialog.id = "deleteReasonDialog";
+
+    dialog.innerHTML = `
+      <div class="reason-dialog-card">
         <h4>刪除配置紀錄</h4>
 
-        <label>請選擇拆掉原因</label>
+        <p class="reason-dialog-text">
+          請選擇這個配置拆掉的原因
+        </p>
+
+        <label for="deleteReasonSelect">原因</label>
         <select id="deleteReasonSelect">
           <option value="不好用">不好用</option>
           <option value="好用，暫時拆掉">好用，但暫時拆掉測其他組合</option>
@@ -432,41 +440,56 @@ function askDeleteReasonForConfig(row) {
           <option value="打錯，不記錄">打錯，不記錄</option>
         </select>
 
-        <label>備註</label>
-        <textarea id="deleteReasonNote" placeholder="例如：太容易爆、持久不夠、攻擊不穩。可不填。"></textarea>
+        <label for="deleteReasonNote">備註</label>
+        <textarea
+          id="deleteReasonNote"
+          placeholder="例如：太容易爆、持久不夠、攻擊不穩。可不填。"
+        ></textarea>
 
-        <div class="modal-actions">
+        <div class="reason-dialog-actions">
           <button type="button" id="cancelDeleteReasonBtn">取消刪除</button>
           <button type="button" id="confirmDeleteReasonBtn">確認刪除</button>
         </div>
       </div>
     `;
 
-    document.body.appendChild(backdrop);
+    document.body.appendChild(dialog);
 
-    const reasonSelect = backdrop.querySelector("#deleteReasonSelect");
-    const noteInput = backdrop.querySelector("#deleteReasonNote");
-    const cancelBtn = backdrop.querySelector("#cancelDeleteReasonBtn");
-    const confirmBtn = backdrop.querySelector("#confirmDeleteReasonBtn");
+    const reasonSelect = dialog.querySelector("#deleteReasonSelect");
+    const noteInput = dialog.querySelector("#deleteReasonNote");
+    const cancelBtn = dialog.querySelector("#cancelDeleteReasonBtn");
+    const confirmBtn = dialog.querySelector("#confirmDeleteReasonBtn");
+
+    function closeDialog(value) {
+      if (dialog.open) dialog.close();
+      dialog.remove();
+      document.body.classList.remove("dialog-open");
+      resolve(value);
+    }
 
     cancelBtn.addEventListener("click", () => {
-      backdrop.remove();
-      resolve(null);
+      closeDialog(null);
     });
 
     confirmBtn.addEventListener("click", () => {
       const reason = reasonSelect.value;
       const note = noteInput.value.trim();
 
-      backdrop.remove();
-
       if (reason === "打錯，不記錄") {
-        resolve(false);
+        closeDialog(false);
         return;
       }
 
-      resolve(buildHistoryRecordFromConfigRow(row, reason, note));
+      closeDialog(buildHistoryRecordFromConfigRow(row, reason, note));
     });
+
+    dialog.addEventListener("cancel", event => {
+      event.preventDefault();
+      closeDialog(null);
+    });
+
+    document.body.classList.add("dialog-open");
+    dialog.showModal();
   });
 }
 
