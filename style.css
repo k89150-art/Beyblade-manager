@@ -419,3 +419,25 @@ td button {
     width: 100%;
   }
 }
+/* ====== 歷史測試紀錄 ====== */
+
+.history-note {
+  background: #181818;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  color: #bdbdbd;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#historyTable th,
+#historyTable td {
+  font-size: 12px;
+}
+
+#historyTable td:nth-child(2),
+#historyTable td:nth-child(6) {
+  text-align: left;
+}
