@@ -416,80 +416,102 @@ function findHistoryByComboKey(comboKey) {
 }
 
 function askDeleteReasonForConfig(row) {
-  return new Promise(resolve => {
-    const oldDialog = document.getElementById("deleteReasonDialog");
-    if (oldDialog) oldDialog.remove();
+return new Promise(resolve => {
+const modal = document.getElementById("deleteReasonModal");
 
-    const dialog = document.createElement("dialog");
-    dialog.id = "deleteReasonDialog";
+```
+function fallbackPrompt() {
+  const choice = prompt(
+    "這個配置要移除，請選擇原因：\n\n" +
+    "1：不好用\n" +
+    "2：好用，但暫時拆掉測其他組合\n" +
+    "3：普通 / 無感\n" +
+    "4：打錯，不記錄\n\n" +
+    "請輸入 1、2、3 或 4"
+  );
 
-    dialog.innerHTML = `
-      <div class="reason-dialog-card">
-        <h4>刪除配置紀錄</h4>
+  if (choice === null) {
+    resolve(null);
+    return;
+  }
 
-        <p class="reason-dialog-text">
-          請選擇這個配置拆掉的原因
-        </p>
+  const reasonMap = {
+    "1": "不好用",
+    "2": "好用，暫時拆掉",
+    "3": "普通 / 無感",
+    "4": "打錯，不記錄"
+  };
 
-        <label for="deleteReasonSelect">原因</label>
-        <select id="deleteReasonSelect">
-          <option value="不好用">不好用</option>
-          <option value="好用，暫時拆掉">好用，但暫時拆掉測其他組合</option>
-          <option value="普通 / 無感">普通 / 無感</option>
-          <option value="打錯，不記錄">打錯，不記錄</option>
-        </select>
+  if (!reasonMap[choice]) {
+    alert("請輸入 1、2、3 或 4");
+    resolve(null);
+    return;
+  }
 
-        <label for="deleteReasonNote">備註</label>
-        <textarea
-          id="deleteReasonNote"
-          placeholder="例如：太容易爆、持久不夠、攻擊不穩。可不填。"
-        ></textarea>
+  if (choice === "4") {
+    resolve(false);
+    return;
+  }
 
-        <div class="reason-dialog-actions">
-          <button type="button" id="cancelDeleteReasonBtn">取消刪除</button>
-          <button type="button" id="confirmDeleteReasonBtn">確認刪除</button>
-        </div>
-      </div>
-    `;
+  const note = prompt(
+    "可以輸入備註，例如：太容易爆、持久不夠、攻擊不穩。\n\n沒有要寫可以空白。",
+    ""
+  );
 
-    document.body.appendChild(dialog);
+  resolve(buildHistoryRecordFromConfigRow(row, reasonMap[choice], note || ""));
+}
 
-    const reasonSelect = dialog.querySelector("#deleteReasonSelect");
-    const noteInput = dialog.querySelector("#deleteReasonNote");
-    const cancelBtn = dialog.querySelector("#cancelDeleteReasonBtn");
-    const confirmBtn = dialog.querySelector("#confirmDeleteReasonBtn");
+if (!modal) {
+  fallbackPrompt();
+  return;
+}
 
-    function closeDialog(value) {
-      if (dialog.open) dialog.close();
-      dialog.remove();
-      document.body.classList.remove("dialog-open");
-      resolve(value);
-    }
+const reasonSelect = modal.querySelector("#deleteReasonSelect");
+const noteInput = modal.querySelector("#deleteReasonNote");
+const cancelBtn = modal.querySelector("#cancelDeleteReasonBtn");
+const confirmBtn = modal.querySelector("#confirmDeleteReasonBtn");
 
-    cancelBtn.addEventListener("click", () => {
-      closeDialog(null);
-    });
+if (!reasonSelect || !noteInput || !cancelBtn || !confirmBtn) {
+  fallbackPrompt();
+  return;
+}
 
-    confirmBtn.addEventListener("click", () => {
-      const reason = reasonSelect.value;
-      const note = noteInput.value.trim();
+reasonSelect.value = "不好用";
+noteInput.value = "";
 
-      if (reason === "打錯，不記錄") {
-        closeDialog(false);
-        return;
-      }
+function closeModal(value) {
+  modal.style.display = "none";
+  modal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("dialog-open");
 
-      closeDialog(buildHistoryRecordFromConfigRow(row, reason, note));
-    });
+  cancelBtn.onclick = null;
+  confirmBtn.onclick = null;
 
-    dialog.addEventListener("cancel", event => {
-      event.preventDefault();
-      closeDialog(null);
-    });
+  resolve(value);
+}
 
-    document.body.classList.add("dialog-open");
-    dialog.showModal();
-  });
+cancelBtn.onclick = () => {
+  closeModal(null);
+};
+
+confirmBtn.onclick = () => {
+  const reason = reasonSelect.value;
+  const note = noteInput.value.trim();
+
+  if (reason === "打錯，不記錄") {
+    closeModal(false);
+    return;
+  }
+
+  closeModal(buildHistoryRecordFromConfigRow(row, reason, note));
+};
+
+modal.style.display = "flex";
+modal.setAttribute("aria-hidden", "false");
+document.body.classList.add("dialog-open");
+```
+
+});
 }
 
 window.restoreHistoryRow = function (button) {
