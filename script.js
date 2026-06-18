@@ -418,87 +418,110 @@ function findHistoryByComboKey(comboKey) {
 ```js
 function askDeleteReasonForConfig(row) {
   return new Promise(resolve => {
-    const backdrop = document.createElement("div");
+    const dialog = document.createElement("dialog");
 
-    backdrop.style.position = "fixed";
-    backdrop.style.left = "0";
-    backdrop.style.top = "0";
-    backdrop.style.width = "100vw";
-    backdrop.style.height = "100vh";
-    backdrop.style.background = "rgba(0, 0, 0, 0.75)";
-    backdrop.style.zIndex = "999999";
-    backdrop.style.display = "flex";
-    backdrop.style.alignItems = "center";
-    backdrop.style.justifyContent = "center";
-    backdrop.style.padding = "16px";
-    backdrop.style.boxSizing = "border-box";
+    dialog.innerHTML = `
+      <form method="dialog" style="
+        width: 360px;
+        max-width: 90vw;
+        background: #1b1b1b;
+        color: #ffffff;
+        border: 1px solid #3a3a3a;
+        border-radius: 14px;
+        padding: 16px;
+        box-sizing: border-box;
+        font-family: Arial, 'Microsoft JhengHei', sans-serif;
+      ">
+        <h4 style="margin:0 0 12px 0;font-size:18px;color:#ffffff;">
+          刪除配置紀錄
+        </h4>
 
-    const card = document.createElement("div");
+        <div style="margin-bottom:12px;color:#dcdcdc;font-size:14px;line-height:1.5;">
+          請選擇這個配置拆掉的原因
+        </div>
 
-    card.style.width = "420px";
-    card.style.maxWidth = "100%";
-    card.style.background = "#1b1b1b";
-    card.style.border = "1px solid #3a3a3a";
-    card.style.borderRadius = "14px";
-    card.style.padding = "16px";
-    card.style.boxShadow = "0 12px 32px rgba(0, 0, 0, 0.55)";
-    card.style.boxSizing = "border-box";
-    card.style.color = "#ffffff";
+        <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">
+          原因
+        </label>
 
-    card.innerHTML = `
-      <h4 style="margin:0 0 12px 0;font-size:18px;color:#ffffff;">
-        刪除配置紀錄
-      </h4>
+        <select id="deleteReasonSelect" style="
+          width:100%;
+          margin-bottom:12px;
+          background:#242424;
+          color:#ffffff;
+          border:1px solid #444;
+          border-radius:7px;
+          padding:9px 10px;
+          box-sizing:border-box;
+        ">
+          <option value="不好用">不好用</option>
+          <option value="好用，暫時拆掉">好用，但暫時拆掉測其他組合</option>
+          <option value="普通 / 無感">普通 / 無感</option>
+          <option value="打錯，不記錄">打錯，不記錄</option>
+        </select>
 
-      <div style="margin-bottom:10px;color:#dcdcdc;font-size:14px;line-height:1.5;">
-        請選擇這個配置拆掉的原因
-      </div>
+        <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">
+          備註
+        </label>
 
-      <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">
-        原因
-      </label>
+        <textarea
+          id="deleteReasonNote"
+          placeholder="例如：太容易爆、持久不夠、攻擊不穩。可不填。"
+          style="
+            width:100%;
+            min-height:80px;
+            resize:vertical;
+            margin-bottom:14px;
+            background:#242424;
+            color:#ffffff;
+            border:1px solid #444;
+            border-radius:7px;
+            padding:9px 10px;
+            box-sizing:border-box;
+          "
+        ></textarea>
 
-      <select id="deleteReasonSelect" style="width:100%;margin-bottom:12px;">
-        <option value="不好用">不好用</option>
-        <option value="好用，暫時拆掉">好用，但暫時拆掉測其他組合</option>
-        <option value="普通 / 無感">普通 / 無感</option>
-        <option value="打錯，不記錄">打錯，不記錄</option>
-      </select>
-
-      <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">
-        備註
-      </label>
-
-      <textarea
-        id="deleteReasonNote"
-        placeholder="例如：太容易爆、持久不夠、攻擊不穩。可不填。"
-        style="width:100%;min-height:80px;resize:vertical;margin-bottom:14px;"
-      ></textarea>
-
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button type="button" id="cancelDeleteReasonBtn">取消刪除</button>
-        <button type="button" id="confirmDeleteReasonBtn">確認刪除</button>
-      </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button type="button" id="cancelDeleteReasonBtn">取消刪除</button>
+          <button type="button" id="confirmDeleteReasonBtn">確認刪除</button>
+        </div>
+      </form>
     `;
 
-    backdrop.appendChild(card);
-    document.body.appendChild(backdrop);
+    dialog.style.border = "none";
+    dialog.style.padding = "0";
+    dialog.style.background = "transparent";
+    dialog.style.maxWidth = "95vw";
+    dialog.style.position = "fixed";
+    dialog.style.top = "50%";
+    dialog.style.left = "50%";
+    dialog.style.transform = "translate(-50%, -50%)";
+    dialog.style.zIndex = "999999";
 
-    document.body.style.overflow = "hidden";
+    document.body.appendChild(dialog);
 
-    const reasonSelect = card.querySelector("#deleteReasonSelect");
-    const noteInput = card.querySelector("#deleteReasonNote");
-    const cancelBtn = card.querySelector("#cancelDeleteReasonBtn");
-    const confirmBtn = card.querySelector("#confirmDeleteReasonBtn");
+    const style = document.createElement("style");
+    style.textContent = `
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.75);
+      }
+    `;
+    document.head.appendChild(style);
 
-    function closeModal(value) {
-      backdrop.remove();
-      document.body.style.overflow = "";
+    const reasonSelect = dialog.querySelector("#deleteReasonSelect");
+    const noteInput = dialog.querySelector("#deleteReasonNote");
+    const cancelBtn = dialog.querySelector("#cancelDeleteReasonBtn");
+    const confirmBtn = dialog.querySelector("#confirmDeleteReasonBtn");
+
+    function closeDialog(value) {
+      dialog.close();
+      dialog.remove();
+      style.remove();
       resolve(value);
     }
 
     cancelBtn.addEventListener("click", () => {
-      closeModal(null);
+      closeDialog(null);
     });
 
     confirmBtn.addEventListener("click", () => {
@@ -506,16 +529,16 @@ function askDeleteReasonForConfig(row) {
       const note = noteInput.value.trim();
 
       if (reason === "打錯，不記錄") {
-        closeModal(false);
+        closeDialog(false);
         return;
       }
 
-      closeModal(buildHistoryRecordFromConfigRow(row, reason, note));
+      closeDialog(buildHistoryRecordFromConfigRow(row, reason, note));
     });
+
+    dialog.showModal();
   });
 }
-```
-
 
 window.restoreHistoryRow = function (button) {
   if (!requireLogin()) return;
