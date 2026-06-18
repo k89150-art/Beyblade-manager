@@ -6,34 +6,33 @@
 
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20260618-modal1" />
+  <link rel="stylesheet" href="style.css?v=20260619-fixed2" />
 </head>
 <body>
-  
   <div id="authArea" class="auth-card">
-  <div class="auth-main">
-    <div>
-      <div class="auth-title">雲端同步</div>
+    <div class="auth-main">
+      <div>
+        <div class="auth-title">雲端同步</div>
 
-      <div id="userInfo" class="auth-user" style="display:none;">
-        已登入：<strong id="userEmail"></strong>
+        <div id="userInfo" class="auth-user" style="display:none;">
+          已登入：<strong id="userEmail"></strong>
+        </div>
+
+        <div id="syncStatus" class="auth-status status-muted">
+          尚未登入
+        </div>
       </div>
 
-      <div id="syncStatus" class="auth-status status-muted">
-        尚未登入
+      <div class="auth-actions">
+        <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
+        <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
       </div>
     </div>
 
-    <div class="auth-actions">
-      <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
-      <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
-    </div>
+    <button id="migrateOldDataBtn" class="secondary-btn" style="display:none;">
+      匯入舊資料到我的 Google 帳號
+    </button>
   </div>
-
-  <button id="migrateOldDataBtn" class="secondary-btn" style="display:none;">
-    匯入舊資料到我的 Google 帳號
-  </button>
-</div>
 
   <div class="container">
     <h2>戰鬥陀螺管理表</h2>
@@ -114,37 +113,14 @@
     <div id="config-selector">
       <input type="text" id="confModel" placeholder="輸入陀螺型號">
 
-      <select id="sel上蓋">
-        <option value="">選擇上蓋</option>
-      </select>
-
-      <select id="sel紋章鎖">
-        <option value="">選擇紋章鎖</option>
-      </select>
-
-      <select id="sel主要戰刃">
-        <option value="">選擇主要戰刃</option>
-      </select>
-
-      <select id="sel超越戰刃">
-        <option value="">選擇超越戰刃</option>
-      </select>
-
-      <select id="sel金屬戰刃">
-        <option value="">選擇金屬戰刃</option>
-      </select>
-
-      <select id="sel輔助戰刃">
-        <option value="">選擇輔助戰刃</option>
-      </select>
-
-      <select id="sel固鎖">
-        <option value="">選擇固鎖</option>
-      </select>
-
-      <select id="sel軸心">
-        <option value="">選擇軸心</option>
-      </select>
+      <select id="sel上蓋"><option value="">選擇上蓋</option></select>
+      <select id="sel紋章鎖"><option value="">選擇紋章鎖</option></select>
+      <select id="sel主要戰刃"><option value="">選擇主要戰刃</option></select>
+      <select id="sel超越戰刃"><option value="">選擇超越戰刃</option></select>
+      <select id="sel金屬戰刃"><option value="">選擇金屬戰刃</option></select>
+      <select id="sel輔助戰刃"><option value="">選擇輔助戰刃</option></select>
+      <select id="sel固鎖"><option value="">選擇固鎖</option></select>
+      <select id="sel軸心"><option value="">選擇軸心</option></select>
 
       <button onclick="addConfig()">加入配置表</button>
     </div>
@@ -194,6 +170,6 @@
     </div>
   </div>
 
-  <script type="module" src="script.js?v=20260619-dialog1"></script>
+  <script type="module" src="script.js?v=20260619-fixed2"></script>
 </body>
 </html>
