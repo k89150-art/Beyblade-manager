@@ -12,7 +12,6 @@ import {
   getFirestore,
   doc,
   setDoc,
-  getDoc,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
@@ -35,7 +34,7 @@ const newFirebaseConfig = {
 };
 
 /*
-  舊 Firebase：只用來匯入你原本已經記錄好的 Realtime Database 資料
+  舊 Firebase：只用來匯入舊 Realtime Database 資料
 */
 const oldFirebaseConfig = {
   apiKey: "AIzaSyAi_TtnfCr5DOCIkxWIf2yTkBoH9MWTchA",
@@ -55,11 +54,6 @@ const provider = new GoogleAuthProvider();
 const db = getFirestore(newApp);
 const oldDatabase = getDatabase(oldApp);
 
-/*
-  你的舊資料路徑。
-  你的網頁用 chris。
-  朋友的網頁之後改成 friend。
-*/
 const OLD_USER_ID = "chris";
 const OLD_DB_PATH = `beybladeData/${OLD_USER_ID}`;
 
@@ -175,7 +169,7 @@ function normalizeAllModelCells() {
 }
 
 function getSeriesFromModel(model) {
-  const text = model.trim().toUpperCase();
+  const text = String(model || "").trim().toUpperCase();
 
   if (text.startsWith("CX")) return "CX";
   if (text.startsWith("BX")) return "BX";
@@ -183,8 +177,6 @@ function getSeriesFromModel(model) {
 
   return "OTHER";
 }
-
-/* ====== 第一區排序：UX → BX → CX → 其他 ====== */
 
 function sortBeybladeTable() {
   const tbody = document.querySelector("#beybladeTable tbody");
@@ -285,6 +277,9 @@ function getEditingButtons(tableType) {
     <button onclick="cancelEditRow(this, '${tableType}')">取消</button>
   `;
 }
+
+/* ====== 歷史測試紀錄功能 ====== */
+
 function normalizeComboValue(value) {
   const text = String(value || "").trim();
   return text && text !== "-" ? text : "-";
@@ -475,9 +470,7 @@ window.deleteRow = function (button) {
     if (model || layer) {
       deleteName = `${model} ${layer}`.trim();
     }
-  }
-
-  else if (tableId === "partTable") {
+  } else if (tableId === "partTable") {
     const type = row.cells[0]?.innerText.trim() || "";
     const name = row.cells[1]?.innerText.trim() || "";
     const count = row.cells[2]?.innerText.trim() || "";
@@ -485,9 +478,7 @@ window.deleteRow = function (button) {
     if (type || name) {
       deleteName = `${type}：${name}，數量 ${count}`;
     }
-  }
-
-  else if (tableId === "configTable") {
+  } else if (tableId === "configTable") {
     const model = row.cells[0]?.innerText.trim() || "";
     const layer = row.cells[1]?.innerText.trim() || "";
 
@@ -520,9 +511,11 @@ window.deleteRow = function (button) {
 /* ====== 表格內修改功能 ====== */
 
 window.editRow = function (button, tableType) {
-    if (!requireLogin()) return;
+  if (!requireLogin()) return;
+
   const row = button.parentElement.parentElement;
-    if (row.dataset.editing === "true") return;
+
+  if (row.dataset.editing === "true") return;
 
   row.dataset.editing = "true";
 
@@ -558,32 +551,24 @@ window.editRow = function (button, tableType) {
       `;
 
       row.cells[i].querySelector("select").value = currentType;
-    }
-
-    else if (tableType === "part" && i === 2) {
+    } else if (tableType === "part" && i === 2) {
       const currentText = row.cells[i].innerText.trim();
 
       row.cells[i].innerHTML = `
         <input type="number" min="1" step="1" value="${escapeHtml(currentText)}">
       `;
-    }
-
-    else if (tableType === "config" && i === 0) {
+    } else if (tableType === "config" && i === 0) {
       const currentText = row.cells[i].innerText.trim();
 
       row.cells[i].innerHTML = `
         <input type="text" value="${escapeHtml(currentText)}">
       `;
-    }
-
-    else if (tableType === "config" && configEditColumnMap[i]) {
+    } else if (tableType === "config" && configEditColumnMap[i]) {
       const type = configEditColumnMap[i];
       const currentText = row.cells[i].innerText.trim();
 
       row.cells[i].innerHTML = buildConfigEditSelect(type, currentText, row);
-    }
-
-    else {
+    } else {
       const currentText = row.cells[i].innerText.trim();
 
       row.cells[i].innerHTML = `
@@ -597,7 +582,7 @@ window.editRow = function (button, tableType) {
 
 window.saveEditRow = function (button, tableType) {
   if (!requireLogin()) return;
-  
+
   if (tableType === "config") {
     saveConfigEditRow(button);
     return;
@@ -641,9 +626,9 @@ window.saveEditRow = function (button, tableType) {
 
     newValues[2] = String(partCount);
   }
-  
+
   if (tableType === "beyblade") {
-  newValues[0] = normalizeModel(newValues[0]);
+    newValues[0] = normalizeModel(newValues[0]);
   }
 
   for (let i = 0; i < lastIndex; i++) {
@@ -908,7 +893,8 @@ function getEditCellValue(row, index) {
 
   return row.cells[index].innerText.trim();
 }
-/* ====== 儲存資料：改存到登入者自己的 Firestore ====== */
+
+/* ====== 儲存資料：存到登入者自己的 Firestore ====== */
 
 function getTableData(tableId, hasStockName = false) {
   const rows = document.querySelectorAll(`#${tableId} tbody tr`);
@@ -934,18 +920,6 @@ function getTableData(tableId, hasStockName = false) {
   return data;
 }
 
-function collectCurrentData() {
-  sortBeybladeTable();
-
-  return {
-    beybladeTable: getTableData("beybladeTable", true),
-    partTable: getTableData("partTable", false),
-    configTable: getTableData("configTable", true),
-    historyTable: getHistoryData(),
-    updatedAt: Date.now()
-  };
-}
-
 function getHistoryData() {
   const rows = document.querySelectorAll("#historyTable tbody tr");
   const data = [];
@@ -966,7 +940,30 @@ function getHistoryData() {
   return data;
 }
 
-    const data = collectCurrentData();
+function collectCurrentData() {
+  sortBeybladeTable();
+
+  return {
+    beybladeTable: getTableData("beybladeTable", true),
+    partTable: getTableData("partTable", false),
+    configTable: getTableData("configTable", true),
+    historyTable: getHistoryData(),
+    updatedAt: Date.now()
+  };
+}
+
+async function saveData() {
+  if (isApplyingRemoteData) return;
+
+  const userDocRef = getUserDocRef();
+
+  if (!userDocRef) {
+    console.log("尚未登入，暫不儲存");
+    setSyncStatus("尚未登入，資料不會儲存到雲端", "muted");
+    return;
+  }
+
+  const data = collectCurrentData();
 
   try {
     setSyncStatus("儲存中...", "saving");
@@ -985,6 +982,8 @@ function getHistoryData() {
 
 function createBeybladeRow(cells, mainStockName) {
   const tbody = document.querySelector("#beybladeTable tbody");
+  if (!tbody) return;
+
   const row = tbody.insertRow();
 
   cells.forEach((text, index) => {
@@ -1001,6 +1000,8 @@ function createBeybladeRow(cells, mainStockName) {
 
 function createPartRow(cells) {
   const tbody = document.querySelector("#partTable tbody");
+  if (!tbody) return;
+
   const row = tbody.insertRow();
 
   cells.forEach((text, index) => {
@@ -1012,6 +1013,8 @@ function createPartRow(cells) {
 
 function createConfigRow(cells, mainStockName) {
   const tbody = document.querySelector("#configTable tbody");
+  if (!tbody) return;
+
   const row = tbody.insertRow();
 
   cells.forEach((text, index) => {
@@ -1027,11 +1030,14 @@ function createConfigRow(cells, mainStockName) {
 }
 
 function clearAllTables() {
-  document.querySelector("#beybladeTable tbody").innerHTML = "";
-  document.querySelector("#partTable tbody").innerHTML = "";
-  document.querySelector("#configTable tbody").innerHTML = "";
-
+  const beybladeBody = document.querySelector("#beybladeTable tbody");
+  const partBody = document.querySelector("#partTable tbody");
+  const configBody = document.querySelector("#configTable tbody");
   const historyBody = document.querySelector("#historyTable tbody");
+
+  if (beybladeBody) beybladeBody.innerHTML = "";
+  if (partBody) partBody.innerHTML = "";
+  if (configBody) configBody.innerHTML = "";
   if (historyBody) historyBody.innerHTML = "";
 }
 
@@ -1057,15 +1063,16 @@ function applyDataToTables(data) {
       createPartRow(item.cells);
     });
   }
-    if (data.historyTable) {
-    data.historyTable.forEach(item => {
-      createHistoryRow(item);
-    });
-  }
 
   if (data.configTable) {
     data.configTable.forEach(item => {
       createConfigRow(item.cells, item.mainStockName);
+    });
+  }
+
+  if (data.historyTable) {
+    data.historyTable.forEach(item => {
+      createHistoryRow(item);
     });
   }
 
@@ -1128,13 +1135,13 @@ async function migrateOldDataToCurrentUser() {
   if (!ok) return;
 
   try {
-    setSyncStatus("正在讀取舊資料...");
+    setSyncStatus("正在讀取舊資料...", "login");
 
     const oldSnap = await get(ref(oldDatabase, OLD_DB_PATH));
 
     if (!oldSnap.exists()) {
       alert("找不到舊資料：" + OLD_DB_PATH);
-      setSyncStatus("找不到舊資料");
+      setSyncStatus("找不到舊資料", "error");
       return;
     }
 
@@ -1149,20 +1156,21 @@ async function migrateOldDataToCurrentUser() {
       migratedAt: Date.now(),
       updatedAt: Date.now()
     });
-    
+
     alert("舊資料匯入成功");
-    setSyncStatus("舊資料已匯入到你的 Google 帳號");
+    setSyncStatus("舊資料已匯入到你的 Google 帳號", "saved");
   } catch (error) {
     console.error("匯入失敗：", error);
     alert("匯入失敗：" + error.message);
-    setSyncStatus("匯入失敗");
+    setSyncStatus("匯入失敗", "error");
   }
 }
+
 /* ====== 第一區：新增陀螺配置 ====== */
 
 window.addRow = function () {
   if (!requireLogin()) return;
-  
+
   const tbody = document.querySelector("#beybladeTable tbody");
 
   if (!tbody) return;
@@ -1267,7 +1275,7 @@ window.addRow = function () {
 
 window.addPart = function () {
   if (!requireLogin()) return;
-  
+
   const type = document.getElementById("partType").value;
   const nameInput = document.getElementById("partName");
   const countInput = document.getElementById("partCount");
@@ -1417,11 +1425,12 @@ function checkStock(type, name, total, used) {
 
   return true;
 }
+
 /* ====== 第三區：新增配置紀錄 ====== */
 
 window.addConfig = function () {
   if (!requireLogin()) return;
-  
+
   const modelInput = document.getElementById("confModel");
   const model = normalizeModel(modelInput.value.trim());
 
@@ -1639,6 +1648,7 @@ async function logoutGoogle() {
     alert("登出失敗：" + error.message);
   }
 }
+
 /* ====== 初始化 ====== */
 
 document.addEventListener("DOMContentLoaded", function () {
