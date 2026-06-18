@@ -285,6 +285,177 @@ function getEditingButtons(tableType) {
     <button onclick="cancelEditRow(this, '${tableType}')">取消</button>
   `;
 }
+function normalizeComboValue(value) {
+  const text = String(value || "").trim();
+  return text && text !== "-" ? text : "-";
+}
+
+function getConfigComboKeyFromValues(values) {
+  return values.map(normalizeComboValue).join("|");
+}
+
+function getConfigComboKeyFromRow(row) {
+  const values = [];
+
+  for (let i = 1; i <= 8; i++) {
+    const cell = row.cells[i];
+
+    if (i === 3) {
+      values.push(getStockNameFromCell(cell) || cell?.innerText.trim() || "-");
+    } else {
+      values.push(cell?.innerText.trim() || "-");
+    }
+  }
+
+  return getConfigComboKeyFromValues(values);
+}
+
+function buildHistoryRecordFromConfigRow(row, result, note) {
+  const model = normalizeModel(row.cells[0]?.innerText.trim() || "");
+  const layer = row.cells[1]?.innerText.trim() || "-";
+  const lock = row.cells[2]?.innerText.trim() || "-";
+  const main = row.cells[3]?.innerText.trim() || "-";
+  const transcend = row.cells[4]?.innerText.trim() || "-";
+  const metal = row.cells[5]?.innerText.trim() || "-";
+  const aux = row.cells[6]?.innerText.trim() || "-";
+  const fix = row.cells[7]?.innerText.trim() || "-";
+  const axis = row.cells[8]?.innerText.trim() || "-";
+
+  const comboParts = [layer, lock, main, transcend, metal, aux]
+    .filter(item => item && item !== "-")
+    .join(" / ");
+
+  return {
+    model,
+    combo: comboParts || "-",
+    fix,
+    axis,
+    result,
+    note: note || "",
+    date: new Date().toLocaleDateString("zh-TW"),
+    comboKey: getConfigComboKeyFromRow(row)
+  };
+}
+
+function buildHistoryRecordFromConfigValues(data) {
+  const comboParts = [
+    data.layer,
+    data.lockPart,
+    data.mainPart,
+    data.transcendPart,
+    data.metalPart,
+    data.auxPart
+  ]
+    .filter(item => item && item !== "-")
+    .join(" / ");
+
+  const comboKey = getConfigComboKeyFromValues([
+    data.layer,
+    data.lockPart,
+    data.mainPart,
+    data.transcendPart,
+    data.metalPart,
+    data.auxPart,
+    data.fix,
+    data.axis
+  ]);
+
+  return {
+    model: data.model,
+    combo: comboParts || "-",
+    fix: data.fix || "-",
+    axis: data.axis || "-",
+    result: "",
+    note: "",
+    date: "",
+    comboKey
+  };
+}
+
+function createHistoryRow(record) {
+  const tbody = document.querySelector("#historyTable tbody");
+  if (!tbody) return;
+
+  const row = tbody.insertRow();
+
+  row.dataset.comboKey = record.comboKey || "";
+
+  row.insertCell(0).innerText = record.model || "-";
+  row.insertCell(1).innerText = record.combo || "-";
+  row.insertCell(2).innerText = record.fix || "-";
+  row.insertCell(3).innerText = record.axis || "-";
+  row.insertCell(4).innerText = record.result || "-";
+  row.insertCell(5).innerText = record.note || "-";
+  row.insertCell(6).innerText = record.date || "-";
+  row.insertCell(7).innerHTML = `<button onclick="deleteHistoryRow(this)">刪除</button>`;
+}
+
+function findHistoryByComboKey(comboKey) {
+  if (!comboKey) return null;
+
+  const rows = document.querySelectorAll("#historyTable tbody tr");
+
+  for (const row of rows) {
+    if (row.dataset.comboKey === comboKey) {
+      return {
+        model: row.cells[0]?.innerText.trim() || "",
+        combo: row.cells[1]?.innerText.trim() || "",
+        fix: row.cells[2]?.innerText.trim() || "",
+        axis: row.cells[3]?.innerText.trim() || "",
+        result: row.cells[4]?.innerText.trim() || "",
+        note: row.cells[5]?.innerText.trim() || "",
+        date: row.cells[6]?.innerText.trim() || "",
+        comboKey
+      };
+    }
+  }
+
+  return null;
+}
+
+function askDeleteReasonForConfig(row) {
+  const choice = prompt(
+    "這個配置要移除，請選擇原因：\n\n" +
+    "1：不好用\n" +
+    "2：好用，但暫時拆掉測其他組合\n" +
+    "3：普通 / 無感\n" +
+    "4：打錯，不記錄\n\n" +
+    "請輸入 1、2、3 或 4"
+  );
+
+  if (choice === null) return null;
+
+  const reasonMap = {
+    "1": "不好用",
+    "2": "好用，暫時拆掉",
+    "3": "普通 / 無感",
+    "4": "打錯，不記錄"
+  };
+
+  if (!reasonMap[choice]) {
+    alert("請輸入 1、2、3 或 4");
+    return null;
+  }
+
+  if (choice === "4") {
+    return false;
+  }
+
+  const note = prompt("可以輸入備註，例如：太容易爆、持久不夠、攻擊不穩。沒有要寫可以空白。", "");
+
+  return buildHistoryRecordFromConfigRow(row, reasonMap[choice], note || "");
+}
+
+window.deleteHistoryRow = function (button) {
+  if (!requireLogin()) return;
+
+  const ok = confirm("確定要刪除這筆歷史測試紀錄嗎？");
+
+  if (!ok) return;
+
+  button.parentElement.parentElement.remove();
+  saveData();
+};
 
 /* ====== 刪除功能 ====== */
 
@@ -328,6 +499,16 @@ window.deleteRow = function (button) {
   const ok = confirm(`確定要刪除「${deleteName}」嗎？`);
 
   if (!ok) return;
+
+  if (tableId === "configTable") {
+    const historyRecord = askDeleteReasonForConfig(row);
+
+    if (historyRecord === null) return;
+
+    if (historyRecord) {
+      createHistoryRow(historyRecord);
+    }
+  }
 
   row.remove();
 
@@ -760,35 +941,58 @@ function collectCurrentData() {
     beybladeTable: getTableData("beybladeTable", true),
     partTable: getTableData("partTable", false),
     configTable: getTableData("configTable", true),
+    historyTable: getHistoryData(),
     updatedAt: Date.now()
   };
 }
 
+function getHistoryData() {
+  const rows = document.querySelectorAll("#historyTable tbody tr");
+  const data = [];
+
+  rows.forEach(row => {
+    data.push({
+      model: row.cells[0]?.innerText.trim() || "",
+      combo: row.cells[1]?.innerText.trim() || "",
+      fix: row.cells[2]?.innerText.trim() || "",
+      axis: row.cells[3]?.innerText.trim() || "",
+      result: row.cells[4]?.innerText.trim() || "",
+      note: row.cells[5]?.innerText.trim() || "",
+      date: row.cells[6]?.innerText.trim() || "",
+      comboKey: row.dataset.comboKey || ""
+    });
+  });
+
+  return data;
+}
+
 async function saveData() {
-  if (isApplyingRemoteData) return;
+if (isApplyingRemoteData) return;
 
-  const userDocRef = getUserDocRef();
+const userDocRef = getUserDocRef();
 
-  if (!userDocRef) {
-  console.log("尚未登入，暫不儲存");
-  setSyncStatus("尚未登入，資料不會儲存到雲端", "muted");
-  return;
+if (!userDocRef) {
+console.log("尚未登入，暫不儲存");
+setSyncStatus("尚未登入，資料不會儲存到雲端", "muted");
+return;
 }
 
-    const data = collectCurrentData();
+const data = collectCurrentData();
 
-  try {
-    setSyncStatus("儲存中...", "saving");
+try {
+setSyncStatus("儲存中...", "saving");
 
-    await setDoc(userDocRef, data);
+await setDoc(userDocRef, data);
 
-    setSyncStatus("已儲存", "saved");
-  } catch (error) {
-    console.error("Firestore 儲存失敗：", error);
-    alert("Firestore 儲存失敗：" + error.message);
-    setSyncStatus("儲存失敗", "error");
-  }
+setSyncStatus("已儲存", "saved");
+
+} catch (error) {
+console.error("Firestore 儲存失敗：", error);
+alert("Firestore 儲存失敗：" + error.message);
+setSyncStatus("儲存失敗", "error");
 }
+}
+
 
 /* ====== 載入資料 ====== */
 
@@ -839,6 +1043,9 @@ function clearAllTables() {
   document.querySelector("#beybladeTable tbody").innerHTML = "";
   document.querySelector("#partTable tbody").innerHTML = "";
   document.querySelector("#configTable tbody").innerHTML = "";
+
+  const historyBody = document.querySelector("#historyTable tbody");
+  if (historyBody) historyBody.innerHTML = "";
 }
 
 function applyDataToTables(data) {
@@ -861,6 +1068,11 @@ function applyDataToTables(data) {
   if (data.partTable) {
     data.partTable.forEach(item => {
       createPartRow(item.cells);
+    });
+  }
+    if (data.historyTable) {
+    data.historyTable.forEach(item => {
+      createHistoryRow(item);
     });
   }
 
@@ -945,11 +1157,12 @@ async function migrateOldDataToCurrentUser() {
       beybladeTable: oldData.beybladeTable || [],
       partTable: oldData.partTable || [],
       configTable: oldData.configTable || [],
+      historyTable: oldData.historyTable || [],
       migratedFrom: OLD_DB_PATH,
       migratedAt: Date.now(),
       updatedAt: Date.now()
     });
-
+    
     alert("舊資料匯入成功");
     setSyncStatus("舊資料已匯入到你的 Google 帳號");
   } catch (error) {
@@ -1306,6 +1519,36 @@ window.addConfig = function () {
 
   for (const [type, name] of selectedParts) {
     if (!checkStock(type, name, total, used)) return;
+  }
+
+  const candidateHistory = buildHistoryRecordFromConfigValues({
+    model,
+    layer,
+    lockPart,
+    mainPart,
+    transcendPart,
+    metalPart,
+    auxPart,
+    fix: fixSel,
+    axis: axisSel
+  });
+
+  const oldHistory = findHistoryByComboKey(candidateHistory.comboKey);
+
+  if (oldHistory) {
+    const stillAdd = confirm(
+      "這個組合以前測試過！\n\n" +
+      `型號：${oldHistory.model}\n` +
+      `組合：${oldHistory.combo}\n` +
+      `固鎖：${oldHistory.fix}\n` +
+      `軸心：${oldHistory.axis}\n` +
+      `結果：${oldHistory.result}\n` +
+      `備註：${oldHistory.note || "無"}\n` +
+      `日期：${oldHistory.date || "無"}\n\n` +
+      "是否仍要加入配置表？"
+    );
+
+    if (!stillAdd) return;
   }
 
   const tbody = document.querySelector("#configTable tbody");
