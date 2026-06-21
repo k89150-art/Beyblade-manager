@@ -386,36 +386,52 @@ function findHistoryByComboKey(comboKey) {
 }
 
 function askDeleteReasonForConfig(row) {
-  const choice = prompt(
-    "這個配置要移除，請選擇原因：\n\n" +
-    "1：不好用\n" +
-    "2：好用，但暫時拆掉測其他組合\n" +
-    "3：普通 / 無感\n" +
-    "4：打錯，不記錄\n\n" +
-    "請輸入 1、2、3 或 4"
-  );
+  return new Promise(resolve => {
+    const modal = document.getElementById("deleteConfigModal");
+    const reasonSelect = document.getElementById("deleteReasonSelect");
+    const noteInput = document.getElementById("deleteNoteInput");
+    const confirmBtn = document.getElementById("deleteConfigConfirmBtn");
+    const cancelBtn = document.getElementById("deleteConfigCancelBtn");
+    const backdrop = document.getElementById("deleteConfigModalBackdrop");
 
-  if (choice === null) return null;
+    reasonSelect.value = "";
+    noteInput.value = "";
+    reasonSelect.style.borderColor = "";
+    modal.style.display = "block";
 
-  const reasonMap = {
-    "1": "不好用",
-    "2": "好用，暫時拆掉",
-    "3": "普通 / 無感",
-    "4": "打錯，不記錄"
-  };
+    function cleanup() {
+      modal.style.display = "none";
+      confirmBtn.removeEventListener("click", onConfirm);
+      cancelBtn.removeEventListener("click", onCancel);
+      backdrop.removeEventListener("click", onCancel);
+    }
 
-  if (!reasonMap[choice]) {
-    alert("請輸入 1、2、3 或 4");
-    return null;
-  }
+    function onConfirm() {
+      const reason = reasonSelect.value;
+      if (!reason) {
+        reasonSelect.style.borderColor = "#ff8787";
+        reasonSelect.focus();
+        return;
+      }
+      reasonSelect.style.borderColor = "";
+      cleanup();
+      if (reason === "打錯，不記錄") {
+        resolve(false);
+        return;
+      }
+      const note = noteInput.value.trim();
+      resolve(buildHistoryRecordFromConfigRow(row, reason, note));
+    }
 
-  if (choice === "4") {
-    return false;
-  }
+    function onCancel() {
+      cleanup();
+      resolve(null);
+    }
 
-  const note = prompt("可以輸入備註，例如：太容易爆、持久不夠、攻擊不穩。沒有要寫可以空白。", "");
-
-  return buildHistoryRecordFromConfigRow(row, reasonMap[choice], note || "");
+    confirmBtn.addEventListener("click", onConfirm);
+    cancelBtn.addEventListener("click", onCancel);
+    backdrop.addEventListener("click", onCancel);
+  });
 }
 
 window.deleteHistoryRow = function (button) {
@@ -431,58 +447,42 @@ window.deleteHistoryRow = function (button) {
 
 /* ====== 刪除功能 ====== */
 
-window.deleteRow = function (button) {
-if (!requireLogin()) return;
+window.deleteRow = async function (button) {
+  if (!requireLogin()) return;
 
-const row = button.parentElement.parentElement;
-const table = row.closest("table");
-const tableId = table ? table.id : "";
+  const row = button.parentElement.parentElement;
+  const table = row.closest("table");
+  const tableId = table ? table.id : "";
 
-let deleteName = "這筆資料";
+  let deleteName = "這筆資料";
 
-if (tableId === "beybladeTable") {
-const model = row.cells[0]?.innerText.trim() || "";
-const layer = row.cells[1]?.innerText.trim() || "";
+  if (tableId === "beybladeTable") {
+    const model = row.cells[0]?.innerText.trim() || "";
+    const layer = row.cells[1]?.innerText.trim() || "";
+    if (model || layer) deleteName = `${model} ${layer}`.trim();
+    const ok = confirm(`確定要刪除「${deleteName}」嗎？`);
+    if (!ok) return;
+  }
 
-if (model || layer) {
-  deleteName = `${model} ${layer}`.trim();
-}
+  else if (tableId === "partTable") {
+    const type = row.cells[0]?.innerText.trim() || "";
+    const name = row.cells[1]?.innerText.trim() || "";
+    const count = row.cells[2]?.innerText.trim() || "";
+    if (type || name) deleteName = `${type}：${name}，數量 ${count}`;
+    const ok = confirm(`確定要刪除「${deleteName}」嗎？`);
+    if (!ok) return;
+  }
 
-const ok = confirm(`確定要刪除「${deleteName}」嗎？`);
-if (!ok) return;
+  else if (tableId === "configTable") {
+    const historyRecord = await askDeleteReasonForConfig(row);
+    if (historyRecord === null) return;
+    if (historyRecord) createHistoryRow(historyRecord);
+  }
 
-}
-
-else if (tableId === "partTable") {
-const type = row.cells[0]?.innerText.trim() || "";
-const name = row.cells[1]?.innerText.trim() || "";
-const count = row.cells[2]?.innerText.trim() || "";
-
-if (type || name) {
-  deleteName = `${type}：${name}，數量 ${count}`;
-}
-
-const ok = confirm(`確定要刪除「${deleteName}」嗎？`);
-if (!ok) return;
-
-}
-
-else if (tableId === "configTable") {
-const historyRecord = askDeleteReasonForConfig(row);
-
-if (historyRecord === null) return;
-
-if (historyRecord) {
-  createHistoryRow(historyRecord);
-}
-
-}
-
-row.remove();
-
-sortBeybladeTable();
-refreshSelectors();
-saveData();
+  row.remove();
+  sortBeybladeTable();
+  refreshSelectors();
+  saveData();
 };
 
 /* ====== 表格內修改功能 ====== */
