@@ -532,8 +532,6 @@ window.restoreHistoryRow = function (button) {
 
   createConfigRow(cells, mainStockName);
 
-  historyRow.remove();
-
   sortBeybladeTable();
   refreshSelectors();
   saveData();
