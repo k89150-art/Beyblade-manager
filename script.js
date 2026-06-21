@@ -197,6 +197,21 @@ function getValue(id) {
   const el = document.getElementById(id);
   return el ? el.value.trim() : "";
 }
+function preventInvalidPartCountInput(input) {
+  input.addEventListener("keydown", event => {
+    if (["-", "+", ".", "e", "E"].includes(event.key)) {
+      event.preventDefault();
+    }
+  });
+
+  input.addEventListener("input", () => {
+    const value = Number(input.value);
+
+    if (input.value && (!Number.isInteger(value) || value < 1)) {
+      input.value = "";
+    }
+  });
+}
 
 function clearFirstAreaInputs() {
   [
@@ -1216,8 +1231,8 @@ window.addPart = function () {
     return;
   }
 
-  if (count <= 0) {
-    alert("數量必須大於 0");
+  if (!Number.isInteger(count) || count <= 0) {
+    alert("數量必須是大於 0 的整數");
     return;
   }
 
@@ -1577,6 +1592,11 @@ async function logoutGoogle() {
 document.addEventListener("DOMContentLoaded", function () {
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
+  const partCountInput = document.getElementById("partCount");
+
+  if (partCountInput) {
+    preventInvalidPartCountInput(partCountInput);
+  }
 
   if (googleLoginBtn) {
     googleLoginBtn.addEventListener("click", loginWithGoogle);
