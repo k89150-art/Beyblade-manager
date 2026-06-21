@@ -9,6 +9,14 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     /* ====== 刪除配置對話框 ====== */
+    @keyframes modalSlideUp {
+      from { transform: translate(-50%, calc(-50% + 20px)); opacity: 0; }
+      to   { transform: translate(-50%, -50%);              opacity: 1; }
+    }
+    @keyframes modalSheetUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
     #deleteConfigModalBackdrop {
       position: fixed;
       inset: 0;
@@ -28,6 +36,7 @@
       width: 340px;
       max-width: 92vw;
       box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      animation: modalSlideUp 0.2s ease;
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -56,6 +65,34 @@
       padding: 9px 18px;
       font-size: 14px;
       font-weight: 700;
+    }
+    .modal-field select,
+    .modal-field input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @media (max-width: 600px) {
+      #deleteConfigModalBox {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 18px 18px 0 0;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        transform: none;
+        animation: modalSheetUp 0.25s ease;
+        padding: 24px 20px 32px 20px;
+      }
+      .modal-actions {
+        flex-direction: column-reverse;
+        gap: 10px;
+      }
+      .modal-actions button {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+        min-height: 48px;
+      }
     }
   </style>
 </head>
