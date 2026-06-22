@@ -10,11 +10,12 @@
   <style>
     .side-menu-button { position: fixed; left: 14px; top: 14px; z-index: 1200; width: 44px; height: 44px; border-radius: 12px; background: #242424; color: #ffffff; border: 1px solid #444; font-size: 22px; font-weight: 700; line-height: 1; box-shadow: 0 8px 22px rgba(0,0,0,0.35); }
     .side-menu-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.62); z-index: 1300; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
-    .side-menu { position: fixed; left: 0; top: 0; bottom: 0; width: 280px; max-width: 82vw; background: #161616; border-right: 1px solid #333; z-index: 1301; transform: translateX(-100%); transition: transform 0.22s ease; box-shadow: 12px 0 32px rgba(0,0,0,0.55); padding: 18px; box-sizing: border-box; }
+    .side-menu { position: fixed; left: 0; top: 0; bottom: 0; width: 280px; max-width: 82vw; background: #161616; border-right: 1px solid #333; z-index: 1301; transform: translateX(-100%); transition: transform 0.22s ease; box-shadow: 12px 0 32px rgba(0,0,0,0.55); padding: 18px; box-sizing: border-box; overflow-y: auto; }
     body.side-menu-open .side-menu-backdrop { opacity: 1; pointer-events: auto; }
     body.side-menu-open .side-menu { transform: translateX(0); }
     .side-menu-title { color: #ffffff; font-size: 18px; font-weight: 800; margin-bottom: 6px; }
     .side-menu-subtitle { color: #999; font-size: 13px; line-height: 1.5; margin-bottom: 18px; }
+    .side-menu-section { color: #8d8d8d; font-size: 12px; font-weight: 700; margin: 16px 0 8px; }
     .side-menu-link { display: block; text-decoration: none; color: #e8e8e8; background: #202020; border: 1px solid #333; border-radius: 10px; padding: 12px 13px; margin-bottom: 10px; font-size: 15px; font-weight: 700; }
     .side-menu-link:hover { background: #2a2a2a; }
     .side-menu-link.active { border-color: #3d7eff; background: rgba(61,126,255,0.18); color: #ffffff; }
@@ -62,8 +63,19 @@
   <nav class="side-menu" aria-label="主選單">
     <div class="side-menu-title">戰鬥陀螺管理表</div>
     <div class="side-menu-subtitle">選擇要使用的功能頁面</div>
+
+    <div class="side-menu-section">工具</div>
     <a href="index.html" class="side-menu-link">陀螺配置</a>
     <a href="tournament.html" class="side-menu-link active">參賽紀錄</a>
+
+    <div class="side-menu-section">說明</div>
+    <a href="home.html" class="side-menu-link">首頁</a>
+    <a href="guide.html" class="side-menu-link">使用教學</a>
+    <a href="changelog.html" class="side-menu-link">更新紀錄</a>
+    <a href="privacy.html" class="side-menu-link">隱私權政策</a>
+    <a href="about.html" class="side-menu-link">關於本站</a>
+    <a href="contact.html" class="side-menu-link">聯絡方式</a>
+
     <button type="button" class="side-menu-close" onclick="closeSideMenu()">關閉選單</button>
   </nav>
 
