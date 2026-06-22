@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>更新紀錄｜戰鬥陀螺管理表</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .site-nav { display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 18px; }
+    .site-nav a { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:9px 12px; }
+    .info-card { background:#181818; border:1px solid #333; border-radius:14px; padding:18px; margin-bottom:16px; line-height:1.8; }
+    .version-title { color:#fff; font-size:18px; font-weight:800; margin-bottom:8px; }
+    .update-list { margin:0; padding-left:20px; }
+    .update-list li { margin-bottom:6px; }
+    @media (max-width:600px){ .site-nav{flex-direction:column;} .site-nav a{width:100%; box-sizing:border-box;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>更新紀錄</h2>
+    <div class="site-nav">
+      <a class="secondary-btn" href="home.html">首頁</a>
+      <a class="primary-btn" href="index.html">開始使用</a>
+      <a class="secondary-btn" href="guide.html">使用教學</a>
+      <a class="secondary-btn" href="privacy.html">隱私權政策</a>
+    </div>
+
+    <div class="info-card">
+      <div class="version-title">v1.4.0｜參賽紀錄正式上線</div>
+      <ul class="update-list">
+        <li>新增獨立參賽紀錄頁面。</li>
+        <li>可記錄比賽名稱、日期、地點、名次與備註。</li>
+        <li>每場比賽可記錄多個對局。</li>
+        <li>每局可記錄自己的 3 顆陀螺。</li>
+        <li>支援從配置紀錄選擇陀螺，也可手動輸入。</li>
+        <li>新增每回合得分與失分紀錄。</li>
+        <li>支援極限勝利、擊飛勝利、爆裂勝利與迴轉勝利計分。</li>
+        <li>系統會自動計算比分並顯示本局勝利或落敗。</li>
+        <li>新增左側滑出式選單，可切換陀螺配置與參賽紀錄。</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <div class="version-title">v1.3.0｜歷史測試與抽包系列</div>
+      <ul class="update-list">
+        <li>配置刪除時可選擇拆掉原因。</li>
+        <li>刪除後可保留到歷史測試紀錄。</li>
+        <li>歷史紀錄支援還原功能。</li>
+        <li>零件數量加入正整數限制。</li>
+        <li>新增抽包系列判定，支援 BX、UX、CX 抽包型號。</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <div class="version-title">v1.2.0｜Google 登入與雲端同步</div>
+      <ul class="update-list">
+        <li>新增 Google 登入。</li>
+        <li>每位使用者資料獨立儲存。</li>
+        <li>支援手機與電腦雲端同步。</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
