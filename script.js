@@ -162,6 +162,18 @@ function normalizeAllModelCells() {
   return changed;
 }
 
+// 抽包系列型號（不強制 CX 戰刃規則，也不強制上蓋）
+const RANDOM_BOOSTER_MODELS = new Set([
+  "BX14", "BX24", "BX31", "BX36", "UX12",
+  "BX39", "CX05", "CX06", "CX08", "UX18",
+  "BX48", "CX17", "BX50", "CX18"
+]);
+
+function isRandomBooster(model) {
+  const normalized = (model || "").toUpperCase().replace(/[-\s]/g, "");
+  return RANDOM_BOOSTER_MODELS.has(normalized);
+}
+
 function getSeriesFromModel(model) {
   const text = model.trim().toUpperCase();
 
@@ -900,7 +912,9 @@ function saveConfigEditRow(button) {
   let metalPart = "-";
   let auxPart = "-";
 
-  if (series === "CX") {
+  const isBooster = isRandomBooster(model);
+
+  if (series === "CX" && !isBooster) {
     if (!lockSel || !auxSel || !fixSel || !axisSel) {
       alert("CX 系列請選擇：紋章鎖、輔助戰刃、固鎖、軸心");
       return;
@@ -916,7 +930,6 @@ function saveConfigEditRow(button) {
 
     if (useNormalMainBlade) {
       layer = `${lockSel}${mainSel}${auxSel}`;
-
       lockPart = lockSel;
       mainPart = mainSel;
       transcendPart = "-";
@@ -926,19 +939,28 @@ function saveConfigEditRow(button) {
 
     if (useSplitMainBlade) {
       layer = `${lockSel}${metalSel}${transcendSel}${auxSel}`;
-
       lockPart = lockSel;
       mainPart = `${transcendSel}/${metalSel}`;
       transcendPart = transcendSel;
       metalPart = metalSel;
       auxPart = auxSel;
     }
+  } else if (isBooster) {
+    if (!fixSel || !axisSel) {
+      alert("抽包系列請選擇：固鎖、軸心（其他選填）");
+      return;
+    }
+    layer = layerSel || "-";
+    lockPart = lockSel || "-";
+    mainPart = mainSel || "-";
+    transcendPart = transcendSel || "-";
+    metalPart = metalSel || "-";
+    auxPart = auxSel || "-";
   } else {
     if (!layerSel || !fixSel || !axisSel) {
       alert("BX / UX 系列請選擇：上蓋、固鎖、軸心");
       return;
     }
-
     layer = layerSel;
   }
 
@@ -946,7 +968,7 @@ function saveConfigEditRow(button) {
   const used = getUsedPartsExceptRow(row);
 
   const selectedParts = [
-    ["上蓋", series === "CX" ? "" : layerSel],
+    ["上蓋", (series === "CX" && !isBooster) ? "" : layerSel],
     ["紋章鎖", lockPart === "-" ? "" : lockPart],
     ["主要戰刃", mainPart.includes("/") ? "" : mainPart],
     ["超越戰刃", transcendPart === "-" ? "" : transcendPart],
@@ -1249,7 +1271,9 @@ window.addRow = function () {
   let metalPart = "-";
   let auxPart = "-";
 
-  if (series === "CX") {
+  const isBooster = isRandomBooster(model);
+
+  if (series === "CX" && !isBooster) {
     if (!lock || !aux || !fix || !axis) {
       alert("CX 系列請填：紋章鎖、輔助戰刃、固鎖、軸心");
       return;
@@ -1265,7 +1289,6 @@ window.addRow = function () {
 
     if (useNormalMainBlade) {
       layer = `${lock}${primaryBlade}${aux}`;
-
       lockPart = lock;
       mainPart = primaryBlade;
       transcendPart = "-";
@@ -1275,19 +1298,29 @@ window.addRow = function () {
 
     if (useSplitMainBlade) {
       layer = `${lock}${metalBlade}${transcendBlade}${aux}`;
-
       lockPart = lock;
       mainPart = `${transcendBlade}/${metalBlade}`;
       transcendPart = transcendBlade;
       metalPart = metalBlade;
       auxPart = aux;
     }
+  } else if (isBooster) {
+    // 抽包系列：只需要固鎖和軸心，其餘選填
+    if (!fix || !axis) {
+      alert("抽包系列請填：固鎖、軸心（其他欄位選填）");
+      return;
+    }
+    layer = layerInput || "-";
+    lockPart = lock || "-";
+    mainPart = primaryBlade || "-";
+    transcendPart = transcendBlade || "-";
+    metalPart = metalBlade || "-";
+    auxPart = aux || "-";
   } else {
     if (!layerInput || !fix || !axis) {
       alert("BX / UX 系列請填：上蓋、固鎖、軸心");
       return;
     }
-
     layer = layerInput;
   }
 
@@ -1505,7 +1538,9 @@ window.addConfig = function () {
   let metalPart = "-";
   let auxPart = "-";
 
-  if (series === "CX") {
+  const isBooster = isRandomBooster(model);
+
+  if (series === "CX" && !isBooster) {
     if (!lockSel || !auxSel || !fixSel || !axisSel) {
       alert("CX 系列請選擇：紋章鎖、輔助戰刃、固鎖、軸心");
       return;
@@ -1515,13 +1550,12 @@ window.addConfig = function () {
     const useSplitMainBlade = !mainSel && transcendSel && metalSel;
 
     if (!useNormalMainBlade && !useSplitMainBlade) {
-      alert("CX 系列主要戰刃請二選一選擇：\n1. 主要戰刃\n2. 超越戰刃 + 金屬戰刃");
+      alert("CX 系列主要戰刃請二選一選擇:\n1. 主要戰刃\n2. 超越戰刃 + 金屬戰刃");
       return;
     }
 
     if (useNormalMainBlade) {
       layer = `${lockSel}${mainSel}${auxSel}`;
-
       lockPart = lockSel;
       mainPart = mainSel;
       transcendPart = "-";
@@ -1531,19 +1565,28 @@ window.addConfig = function () {
 
     if (useSplitMainBlade) {
       layer = `${lockSel}${metalSel}${transcendSel}${auxSel}`;
-
       lockPart = lockSel;
       mainPart = `${transcendSel}/${metalSel}`;
       transcendPart = transcendSel;
       metalPart = metalSel;
       auxPart = auxSel;
     }
+  } else if (isBooster) {
+    if (!fixSel || !axisSel) {
+      alert("抽包系列請選擇：固鎖、軸心（其他選填）");
+      return;
+    }
+    layer = layerSel || "-";
+    lockPart = lockSel || "-";
+    mainPart = mainSel || "-";
+    transcendPart = transcendSel || "-";
+    metalPart = metalSel || "-";
+    auxPart = auxSel || "-";
   } else {
     if (!layerSel || !fixSel || !axisSel) {
       alert("BX / UX 系列請選擇：上蓋、固鎖、軸心");
       return;
     }
-
     layer = layerSel;
   }
 
@@ -1551,7 +1594,7 @@ window.addConfig = function () {
   const used = getUsedParts();
 
   const selectedParts = [
-    ["上蓋", series === "CX" ? "" : layerSel],
+    ["上蓋", (series === "CX" && !isBooster) ? "" : layerSel],
     ["紋章鎖", lockPart === "-" ? "" : lockPart],
     ["主要戰刃", mainPart.includes("/") ? "" : mainPart],
     ["超越戰刃", transcendPart === "-" ? "" : transcendPart],
