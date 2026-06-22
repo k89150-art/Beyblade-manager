@@ -1,0 +1,116 @@
+.side-menu-button {
+  position: fixed;
+  left: 14px;
+  top: 14px;
+  z-index: 1200;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #242424;
+  color: #ffffff;
+  border: 1px solid #444;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+}
+
+.side-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.62);
+  z-index: 1300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.side-menu {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 280px;
+  max-width: 82vw;
+  background: #161616;
+  border-right: 1px solid #333;
+  z-index: 1301;
+  transform: translateX(-100%);
+  transition: transform 0.22s ease;
+  box-shadow: 12px 0 32px rgba(0,0,0,0.55);
+  padding: 18px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+body.side-menu-open .side-menu-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.side-menu-open .side-menu {
+  transform: translateX(0);
+}
+
+.side-menu-title {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.side-menu-subtitle {
+  color: #999;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.side-menu-section {
+  color: #8d8d8d;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 16px 0 8px;
+}
+
+.side-menu-link {
+  display: block;
+  text-decoration: none;
+  color: #e8e8e8;
+  background: #202020;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 12px 13px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.side-menu-link:hover {
+  background: #2a2a2a;
+}
+
+.side-menu-link.active {
+  border-color: #3d7eff;
+  background: rgba(61,126,255,0.18);
+  color: #ffffff;
+}
+
+.side-menu-close {
+  width: 100%;
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .side-menu-button {
+    left: 10px;
+    top: 10px;
+    width: 42px;
+    height: 42px;
+  }
+
+  body.has-side-menu-padding .container,
+  body.has-side-menu-padding .auth-card {
+    margin-top: 56px;
+  }
+}
