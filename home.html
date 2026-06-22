@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>首頁｜戰鬥陀螺管理表</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .site-nav { display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 18px; }
+    .site-nav a { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:9px 12px; }
+    .info-card { background:#181818; border:1px solid #333; border-radius:14px; padding:18px; margin-bottom:16px; line-height:1.75; }
+    .info-card h3 { margin-top:0; }
+    .feature-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; }
+    .feature-card { background:#151515; border:1px solid #303030; border-radius:12px; padding:14px; }
+    .feature-title { color:#fff; font-weight:800; margin-bottom:6px; }
+    .hero-title { font-size:28px; color:#fff; margin: 8px 0 8px; }
+    .hero-subtitle { color:#cfcfcf; line-height:1.7; }
+    @media (max-width:600px){ .feature-grid{grid-template-columns:1fr;} .site-nav{flex-direction:column;} .site-nav a{width:100%; box-sizing:border-box;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="hero-title">戰鬥陀螺管理表</h1>
+    <div class="hero-subtitle">這是一個用來管理戰鬥陀螺零件、配置組合、歷史測試與參賽紀錄的個人工具。支援 Google 登入與雲端同步，讓不同玩家可以各自保存自己的資料。</div>
+
+    <div class="site-nav">
+      <a class="primary-btn" href="index.html">開始使用</a>
+      <a class="secondary-btn" href="tournament.html">參賽紀錄</a>
+      <a class="secondary-btn" href="guide.html">使用教學</a>
+      <a class="secondary-btn" href="changelog.html">更新紀錄</a>
+      <a class="secondary-btn" href="privacy.html">隱私權政策</a>
+      <a class="secondary-btn" href="about.html">關於本站</a>
+      <a class="secondary-btn" href="contact.html">聯絡方式</a>
+    </div>
+
+    <div class="info-card">
+      <h3>工具用途</h3>
+      <p>本工具可協助玩家記錄擁有的零件、目前使用中的配置、已拆掉的測試組合，以及比賽中的對局與每回合得失分。</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card"><div class="feature-title">零件管理</div><div>記錄上蓋、固鎖、軸心與 CX 系列零件，並管理庫存數量。</div></div>
+      <div class="feature-card"><div class="feature-title">配置紀錄</div><div>把零件組合成完整配置，避免重複使用同一個零件。</div></div>
+      <div class="feature-card"><div class="feature-title">歷史測試</div><div>拆掉配置時可保留測試結果，方便日後查詢曾經用過的組合。</div></div>
+      <div class="feature-card"><div class="feature-title">參賽紀錄</div><div>記錄比賽、對手、3 顆陀螺與每回合得失分。</div></div>
+    </div>
+  </div>
+</body>
+</html>
