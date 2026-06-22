@@ -8,6 +8,17 @@
 
   <link rel="stylesheet" href="style.css" />
   <style>
+    .side-menu-button { position: fixed; left: 14px; top: 14px; z-index: 1200; width: 44px; height: 44px; border-radius: 12px; background: #242424; color: #ffffff; border: 1px solid #444; font-size: 22px; font-weight: 700; line-height: 1; box-shadow: 0 8px 22px rgba(0,0,0,0.35); }
+    .side-menu-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.62); z-index: 1300; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+    .side-menu { position: fixed; left: 0; top: 0; bottom: 0; width: 280px; max-width: 82vw; background: #161616; border-right: 1px solid #333; z-index: 1301; transform: translateX(-100%); transition: transform 0.22s ease; box-shadow: 12px 0 32px rgba(0,0,0,0.55); padding: 18px; box-sizing: border-box; }
+    body.side-menu-open .side-menu-backdrop { opacity: 1; pointer-events: auto; }
+    body.side-menu-open .side-menu { transform: translateX(0); }
+    .side-menu-title { color: #ffffff; font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+    .side-menu-subtitle { color: #999; font-size: 13px; line-height: 1.5; margin-bottom: 18px; }
+    .side-menu-link { display: block; text-decoration: none; color: #e8e8e8; background: #202020; border: 1px solid #333; border-radius: 10px; padding: 12px 13px; margin-bottom: 10px; font-size: 15px; font-weight: 700; }
+    .side-menu-link:hover { background: #2a2a2a; }
+    .side-menu-link.active { border-color: #3d7eff; background: rgba(61,126,255,0.18); color: #ffffff; }
+    .side-menu-close { width: 100%; margin-top: 8px; }
     .page-nav { margin: -6px 0 18px 0; display: flex; gap: 8px; flex-wrap: wrap; }
     .nav-link { display: inline-flex; align-items: center; justify-content: center; padding: 9px 14px; text-decoration: none; min-height: 38px; box-sizing: border-box; }
     .tournament-form { display: grid; grid-template-columns: 150px 1fr 1fr 120px 1fr 120px; gap: 8px; background: #181818; padding: 12px; border-radius: 10px; margin-bottom: 16px; border: 1px solid #333; }
@@ -42,10 +53,20 @@
     .progress-text { color: #ffcc66; }
     .empty-state { background: #181818; border: 1px solid #333; border-radius: 10px; padding: 12px; color: #bdbdbd; font-size: 14px; line-height: 1.5; }
     @media (max-width: 900px) { .tournament-form { grid-template-columns: repeat(2, 1fr); } .round-form { grid-template-columns: repeat(2, 1fr); } .tournament-summary, .match-header { flex-direction: column; } .tournament-actions, .match-actions { width: 100%; justify-content: flex-start; } }
-    @media (max-width: 600px) { .page-nav { flex-direction: column; } .nav-link { width: 100%; } .tournament-form, .match-form, .round-form { display: flex; flex-direction: column; gap: 8px; } .deck-input-group { display: flex; flex-direction: column; align-items: stretch; gap: 6px; } .tournament-actions button, .match-actions button { width: 100%; min-height: 40px; } .tournament-card, .match-card { border-radius: 10px; } }
+    @media (max-width: 600px) { .side-menu-button { left: 10px; top: 10px; width: 42px; height: 42px; } .auth-card { margin-top: 56px; } .page-nav { flex-direction: column; } .nav-link { width: 100%; } .tournament-form, .match-form, .round-form { display: flex; flex-direction: column; gap: 8px; } .deck-input-group { display: flex; flex-direction: column; align-items: stretch; gap: 6px; } .tournament-actions button, .match-actions button { width: 100%; min-height: 40px; } .tournament-card, .match-card { border-radius: 10px; } }
   </style>
 </head>
 <body>
+  <button type="button" class="side-menu-button" onclick="openSideMenu()">☰</button>
+  <div class="side-menu-backdrop" onclick="closeSideMenu()"></div>
+  <nav class="side-menu" aria-label="主選單">
+    <div class="side-menu-title">戰鬥陀螺管理表</div>
+    <div class="side-menu-subtitle">選擇要使用的功能頁面</div>
+    <a href="index.html" class="side-menu-link">陀螺配置</a>
+    <a href="tournament.html" class="side-menu-link active">參賽紀錄</a>
+    <button type="button" class="side-menu-close" onclick="closeSideMenu()">關閉選單</button>
+  </nav>
+
   <div id="authArea" class="auth-card">
     <div class="auth-main">
       <div>
@@ -70,10 +91,6 @@
   <div class="container">
     <h2>參賽紀錄</h2>
 
-    <div class="page-nav">
-      <a href="index.html" class="secondary-btn nav-link">返回管理表</a>
-    </div>
-
     <div class="history-note">
       這裡可以記錄每場比賽、對手局、每回合得失分與當局使用的 3 顆陀螺。
     </div>
@@ -94,6 +111,14 @@
     <div id="tournamentList" class="tournament-list"></div>
   </div>
 
+  <script>
+    function openSideMenu() {
+      document.body.classList.add("side-menu-open");
+    }
+    function closeSideMenu() {
+      document.body.classList.remove("side-menu-open");
+    }
+  </script>
   <script type="module" src="tournament.js?v=20260622-tournament2"></script>
 </body>
 </html>
