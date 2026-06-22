@@ -126,7 +126,6 @@ function buildConfigTextFromCells(cells) {
   const comboParts = [cells[1], cells[2], cells[3], cells[4], cells[5], cells[6]]
     .filter(item => item && item !== "-")
     .join(" / ");
-
   const fix = cells[7] && cells[7] !== "-" ? `固鎖：${cells[7]}` : "";
   const axis = cells[8] && cells[8] !== "-" ? `軸心：${cells[8]}` : "";
 
@@ -141,10 +140,7 @@ function rebuildConfigOptions() {
   configOptions = rows
     .map((item, index) => {
       const text = buildConfigTextFromCells(item.cells || []);
-      return {
-        id: `config_${index}`,
-        text
-      };
+      return { id: `config_${index}`, text };
     })
     .filter(item => item.text);
 }
@@ -231,6 +227,7 @@ function renderTournamentList() {
 function renderTournamentCard(record) {
   const isOpen = openedTournamentIds.has(record.id);
   const matchCount = (record.matches || []).length;
+  const isFinished = record.isFinished === true;
 
   return `
     <div class="tournament-card" data-tournament-id="${escapeHtml(record.id)}">
@@ -242,6 +239,7 @@ function renderTournamentCard(record) {
             <span>地點：${escapeHtml(record.location || "-")}</span>
             <span>名次：${escapeHtml(record.rank || "-")}</span>
             <span>對局數：${matchCount}</span>
+            <span class="${isFinished ? "win-text" : "progress-text"}">狀態：${isFinished ? "已完成" : "編輯中"}</span>
           </div>
           ${record.note ? `<div class="tournament-note">備註：${escapeHtml(record.note)}</div>` : ""}
         </div>
@@ -250,6 +248,7 @@ function renderTournamentCard(record) {
           <button type="button" onclick="toggleTournamentDetail('${escapeHtml(record.id)}')">
             ${isOpen ? "收合" : "展開"}
           </button>
+          ${!isFinished ? `<button type="button" onclick="finishTournament('${escapeHtml(record.id)}')" class="primary-btn">完成</button>` : ""}
           <button type="button" onclick="editTournament('${escapeHtml(record.id)}')">修改</button>
           <button type="button" onclick="deleteTournament('${escapeHtml(record.id)}')" class="danger-btn">刪除</button>
         </div>
@@ -261,14 +260,18 @@ function renderTournamentCard(record) {
 }
 
 function renderTournamentDetail(record) {
+  const isFinished = record.isFinished === true;
+
   return `
     <div class="tournament-detail">
-      <h4>新增對局</h4>
-      ${renderAddMatchForm(record.id)}
+      ${isFinished
+        ? `<div class="empty-state">這場比賽已完成。若要新增對局或回合，請先按「修改」。</div>`
+        : `<h4>新增對局</h4>${renderAddMatchForm(record.id)}`
+      }
 
       <h4>對局紀錄</h4>
       ${(record.matches || []).length
-        ? record.matches.map(match => renderMatchCard(record.id, match)).join("")
+        ? record.matches.map(match => renderMatchCard(record.id, match, isFinished)).join("")
         : `<div class="empty-state">尚未新增對局。</div>`
       }
     </div>
@@ -303,7 +306,7 @@ function renderAddMatchForm(tournamentId) {
   `;
 }
 
-function renderMatchCard(tournamentId, match) {
+function renderMatchCard(tournamentId, match, isFinished) {
   const score = calculateMatchScore(match);
   const status = getMatchStatus(match);
   const statusClass = getMatchStatusClass(match);
@@ -320,8 +323,8 @@ function renderMatchCard(tournamentId, match) {
           </div>
         </div>
         <div class="match-actions">
-          <button type="button" onclick="editMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')">修改對局</button>
-          <button type="button" onclick="deleteMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')" class="danger-btn">刪除對局</button>
+          ${!isFinished ? `<button type="button" onclick="editMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')">修改對局</button>` : ""}
+          ${!isFinished ? `<button type="button" onclick="deleteMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')" class="danger-btn">刪除對局</button>` : ""}
         </div>
       </div>
 
@@ -331,8 +334,7 @@ function renderMatchCard(tournamentId, match) {
         <div><strong>陀螺 3：</strong>${escapeHtml(deck[2]?.configText || "-")}</div>
       </div>
 
-      <h5>新增回合</h5>
-      ${renderAddRoundForm(tournamentId, match)}
+      ${!isFinished ? `<h5>新增回合</h5>${renderAddRoundForm(tournamentId, match)}` : ""}
 
       <div class="table-wrap round-table-wrap">
         <table class="round-table">
@@ -349,7 +351,7 @@ function renderMatchCard(tournamentId, match) {
           </thead>
           <tbody>
             ${(match.rounds || []).length
-              ? (match.rounds || []).map(round => renderRoundRow(tournamentId, match.id, round)).join("")
+              ? (match.rounds || []).map(round => renderRoundRow(tournamentId, match.id, round, isFinished)).join("")
               : `<tr><td colspan="7">尚未新增回合。</td></tr>`
             }
           </tbody>
@@ -389,7 +391,7 @@ function renderAddRoundForm(tournamentId, match) {
   `;
 }
 
-function renderRoundRow(tournamentId, matchId, round) {
+function renderRoundRow(tournamentId, matchId, round, isFinished) {
   const scoreInfo = SCORE_TYPES[round.scoreType] || { label: "-", point: Number(round.point || 0) };
   const resultText = round.result === "win" ? "我方得分" : "我方失分";
   const resultClass = round.result === "win" ? "win-text" : "lose-text";
@@ -403,7 +405,7 @@ function renderRoundRow(tournamentId, matchId, round) {
       <td>${escapeHtml(round.point || scoreInfo.point || "-")}</td>
       <td>${escapeHtml(round.note || "-")}</td>
       <td>
-        <button type="button" onclick="deleteRound('${escapeHtml(tournamentId)}', '${escapeHtml(matchId)}', '${escapeHtml(round.id)}')" class="danger-btn">刪除</button>
+        ${!isFinished ? `<button type="button" onclick="deleteRound('${escapeHtml(tournamentId)}', '${escapeHtml(matchId)}', '${escapeHtml(round.id)}')" class="danger-btn">刪除</button>` : "-"}
       </td>
     </tr>
   `;
@@ -494,15 +496,20 @@ window.addTournament = async function () {
     return;
   }
 
+  const id = generateId("tournament");
+
   tournamentRecords.push({
-    id: generateId("tournament"),
+    id,
     tournamentName,
     date,
     location,
     rank,
     note,
+    isFinished: false,
     matches: []
   });
+
+  openedTournamentIds.add(id);
 
   dateInput.value = "";
   nameInput.value = "";
@@ -524,37 +531,123 @@ window.toggleTournamentDetail = function (tournamentId) {
   renderTournamentList();
 };
 
+window.finishTournament = async function (tournamentId) {
+  if (!requireLogin()) return;
+
+  const record = tournamentRecords.find(item => item.id === tournamentId);
+  if (!record) return;
+
+  const ok = confirm("確定要完成這場比賽嗎？完成後會隱藏新增對局與新增回合；按修改可重新開啟編輯。");
+  if (!ok) return;
+
+  record.isFinished = true;
+
+  await saveTournamentData();
+  renderTournamentList();
+};
+
+function openTournamentEditDialog(record) {
+  return new Promise(resolve => {
+    const oldOverlay = document.getElementById("tournamentEditOverlay");
+    if (oldOverlay) oldOverlay.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "tournamentEditOverlay";
+    overlay.style.position = "fixed";
+    overlay.style.inset = "0";
+    overlay.style.background = "rgba(0,0,0,0.72)";
+    overlay.style.zIndex = "2147483647";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.padding = "16px";
+    overlay.style.boxSizing = "border-box";
+
+    overlay.innerHTML = `
+      <div style="width:420px;max-width:100%;background:#1b1b1b;color:#fff;border:1px solid #3a3a3a;border-radius:14px;padding:16px;box-sizing:border-box;box-shadow:0 12px 32px rgba(0,0,0,0.65);font-family:Arial,'Microsoft JhengHei',sans-serif;">
+        <h4 style="margin:0 0 12px 0;font-size:18px;color:#fff;">修改比賽</h4>
+
+        <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">比賽名稱</label>
+        <input id="editTournamentName" type="text" value="${escapeHtml(record.tournamentName || "")}" style="width:100%;margin-bottom:10px;">
+
+        <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">日期</label>
+        <input id="editTournamentDate" type="date" value="${escapeHtml(record.date || "")}" style="width:100%;margin-bottom:10px;">
+
+        <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">地點</label>
+        <input id="editTournamentLocation" type="text" value="${escapeHtml(record.location || "")}" style="width:100%;margin-bottom:10px;">
+
+        <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">名次</label>
+        <input id="editTournamentRank" type="text" value="${escapeHtml(record.rank || "")}" style="width:100%;margin-bottom:10px;">
+
+        <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">備註</label>
+        <input id="editTournamentNote" type="text" value="${escapeHtml(record.note || "")}" style="width:100%;margin-bottom:14px;">
+
+        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+          <button type="button" id="cancelTournamentEditBtn">取消</button>
+          <button type="button" id="saveTournamentEditBtn" class="primary-btn">保存並進入編輯</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const nameInput = overlay.querySelector("#editTournamentName");
+    const dateInput = overlay.querySelector("#editTournamentDate");
+    const locationInput = overlay.querySelector("#editTournamentLocation");
+    const rankInput = overlay.querySelector("#editTournamentRank");
+    const noteInput = overlay.querySelector("#editTournamentNote");
+    const cancelBtn = overlay.querySelector("#cancelTournamentEditBtn");
+    const saveBtn = overlay.querySelector("#saveTournamentEditBtn");
+
+    function close(value) {
+      overlay.remove();
+      resolve(value);
+    }
+
+    cancelBtn.onclick = () => close(null);
+
+    saveBtn.onclick = () => {
+      const tournamentName = nameInput.value.trim();
+      const date = dateInput.value;
+
+      if (!tournamentName) {
+        alert("請輸入比賽名稱。");
+        return;
+      }
+
+      if (!date) {
+        alert("請選擇日期。");
+        return;
+      }
+
+      close({
+        tournamentName,
+        date,
+        location: locationInput.value.trim(),
+        rank: rankInput.value.trim(),
+        note: noteInput.value.trim()
+      });
+    };
+  });
+}
+
 window.editTournament = async function (tournamentId) {
   if (!requireLogin()) return;
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   if (!record) return;
 
-  const tournamentName = prompt("比賽名稱", record.tournamentName || "");
-  if (tournamentName === null) return;
+  const edited = await openTournamentEditDialog(record);
+  if (!edited) return;
 
-  const date = prompt("日期，格式 YYYY-MM-DD", record.date || "");
-  if (date === null) return;
+  record.tournamentName = edited.tournamentName;
+  record.date = edited.date;
+  record.location = edited.location;
+  record.rank = edited.rank;
+  record.note = edited.note;
+  record.isFinished = false;
 
-  if (!tournamentName.trim() || !date.trim()) {
-    alert("比賽名稱與日期不可空白。");
-    return;
-  }
-
-  const location = prompt("地點", record.location || "");
-  if (location === null) return;
-
-  const rank = prompt("名次", record.rank || "");
-  if (rank === null) return;
-
-  const note = prompt("備註", record.note || "");
-  if (note === null) return;
-
-  record.tournamentName = tournamentName.trim();
-  record.date = date.trim();
-  record.location = location.trim();
-  record.rank = rank.trim();
-  record.note = note.trim();
+  openedTournamentIds.add(tournamentId);
 
   await saveTournamentData();
   renderTournamentList();
@@ -581,6 +674,11 @@ window.addMatch = async function (tournamentId) {
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   if (!record) return;
+
+  if (record.isFinished) {
+    alert("這場比賽已完成。請先按修改，再新增對局。");
+    return;
+  }
 
   const card = document.querySelector(`[data-tournament-id="${tournamentId}"]`);
   if (!card) return;
@@ -626,6 +724,11 @@ window.editMatch = async function (tournamentId, matchId) {
   const match = record?.matches?.find(item => item.id === matchId);
   if (!record || !match) return;
 
+  if (record.isFinished) {
+    alert("這場比賽已完成。請先按修改，再調整對局。");
+    return;
+  }
+
   const opponentName = prompt("對手名稱", match.opponentName || "");
   if (opponentName === null) return;
 
@@ -659,6 +762,11 @@ window.deleteMatch = async function (tournamentId, matchId) {
   const record = tournamentRecords.find(item => item.id === tournamentId);
   if (!record) return;
 
+  if (record.isFinished) {
+    alert("這場比賽已完成。請先按修改，再刪除對局。");
+    return;
+  }
+
   const ok = confirm("確定要刪除這局對戰紀錄嗎？");
   if (!ok) return;
 
@@ -674,6 +782,11 @@ window.addRound = async function (tournamentId, matchId) {
   const record = tournamentRecords.find(item => item.id === tournamentId);
   const match = record?.matches?.find(item => item.id === matchId);
   if (!record || !match) return;
+
+  if (record.isFinished) {
+    alert("這場比賽已完成。請先按修改，再新增回合。");
+    return;
+  }
 
   const matchEl = document.querySelector(`[data-match-id="${matchId}"]`);
   if (!matchEl) return;
@@ -714,6 +827,11 @@ window.deleteRound = async function (tournamentId, matchId, roundId) {
   const record = tournamentRecords.find(item => item.id === tournamentId);
   const match = record?.matches?.find(item => item.id === matchId);
   if (!record || !match) return;
+
+  if (record.isFinished) {
+    alert("這場比賽已完成。請先按修改，再刪除回合。");
+    return;
+  }
 
   const ok = confirm("確定要刪除這筆回合紀錄嗎？");
   if (!ok) return;
