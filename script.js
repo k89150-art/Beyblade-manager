@@ -163,16 +163,14 @@ function normalizeAllModelCells() {
 }
 
 // 抽包系列型號（不強制 CX 戰刃規則，也不強制上蓋）
-// 統一用「系列 + 數字（不補零）」格式，例如 CX-5、BX-14
 const RANDOM_BOOSTER_MODELS = new Set([
   "BX-14", "BX-24", "BX-31", "BX-36", "UX-12",
-  "BX-39", "CX-5", "CX-6", "CX-8", "UX-18",
+  "BX-39", "CX-05", "CX-06", "CX-08", "UX-18",
   "BX-48", "CX-17", "BX-50", "CX-18"
 ]);
 
 function isRandomBooster(model) {
-  // normalizeModel 已把型號轉成「CX-5」這種格式（去前導零、加連字號）
-  // 直接比對即可
+  // normalizeModel 保留前導零（CX-05 不會變成 CX-5），直接大寫比對
   const normalized = (model || "").toUpperCase().trim();
   return RANDOM_BOOSTER_MODELS.has(normalized);
 }
