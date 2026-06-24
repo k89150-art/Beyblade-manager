@@ -40,7 +40,6 @@ function isAdmin() {
 function setSyncStatus(text, type = "muted") {
   const el = document.getElementById("syncStatus");
   if (!el) return;
-
   el.textContent = text;
   el.classList.remove("status-muted", "status-saving", "status-saved", "status-error", "status-login");
   el.classList.add(`status-${type}`);
@@ -49,7 +48,6 @@ function setSyncStatus(text, type = "muted") {
 function setPermission(text, ok) {
   const el = document.getElementById("permissionStatus");
   if (!el) return;
-
   el.textContent = text;
   el.classList.toggle("status-ok", ok);
   el.classList.toggle("status-no", !ok);
@@ -98,10 +96,8 @@ function countArray(data, key) {
 
 function formatTime(value) {
   if (!value) return "-";
-
   const date = typeof value === "number" ? new Date(value) : new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-
   return date.toLocaleString("zh-TW", {
     year: "numeric",
     month: "2-digit",
@@ -129,7 +125,7 @@ function renderTable() {
     return;
   }
 
-  tbody.innerHTML = adminRows.map((row, index) => `
+  tbody.innerHTML = adminRows.map(row => `
     <tr>
       <td>${row.uid}</td>
       <td>${row.beybladeCount}</td>
@@ -138,7 +134,7 @@ function renderTable() {
       <td>${row.historyCount}</td>
       <td>${row.tournamentCount}</td>
       <td>${row.updatedAtText}</td>
-      <td><button type="button" onclick="showAdminDetail(${index})">查看</button></td>
+      <td><button type="button" onclick="openUserPage('${row.uid}')">進入頁面</button></td>
     </tr>
   `).join("");
 }
@@ -159,26 +155,12 @@ function renderSummary() {
   document.getElementById("summaryTournaments").textContent = adminRows.reduce((sum, row) => sum + row.tournamentCount, 0);
 }
 
-window.showAdminDetail = function (index) {
-  const row = adminRows[index];
-  const detailBox = document.getElementById("detailBox");
-  const detailPre = document.getElementById("detailPre");
-
-  if (!row || !detailBox || !detailPre) return;
-
-  detailBox.style.display = "block";
-  detailPre.textContent = JSON.stringify({
-    uid: row.uid,
-    summary: {
-      beybladeCount: row.beybladeCount,
-      partCount: row.partCount,
-      configCount: row.configCount,
-      historyCount: row.historyCount,
-      tournamentCount: row.tournamentCount,
-      updatedAt: row.updatedAtText
-    },
-    data: row.data
-  }, null, 2);
+window.openUserPage = function (uid) {
+  if (!isAdmin()) {
+    alert("目前帳號沒有管理員權限。");
+    return;
+  }
+  window.location.href = `index.html?viewUid=${encodeURIComponent(uid)}`;
 };
 
 window.loadAdminData = async function () {
@@ -205,7 +187,6 @@ window.loadAdminData = async function () {
         const data = snapshot.data() || {};
         return {
           uid: getUidFromDoc(snapshot),
-          data,
           beybladeCount: countArray(data, "beybladeTable"),
           partCount: countArray(data, "partTable"),
           configCount: countArray(data, "configTable"),
