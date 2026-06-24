@@ -160,7 +160,7 @@ window.openUserPage = function (uid) {
     alert("目前帳號沒有管理員權限。");
     return;
   }
-  window.location.href = `index.html?viewUid=${encodeURIComponent(uid)}`;
+  window.location.href = `user-view.html?uid=${encodeURIComponent(uid)}`;
 };
 
 window.loadAdminData = async function () {
