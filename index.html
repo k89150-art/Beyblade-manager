@@ -112,45 +112,6 @@
         margin-top: 56px;
       }
     }
-    /* ====== 管理員面板 ====== */
-    #adminPanel {
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid #333;
-    }
-    .admin-panel-inner {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .admin-label {
-      font-size: 13px;
-      font-weight: 700;
-      color: #ffcc66;
-      white-space: nowrap;
-    }
-    #adminUidInput {
-      flex: 1;
-      min-width: 180px;
-      font-size: 13px;
-    }
-    .admin-panel-inner button {
-      padding: 8px 14px;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-    @media (max-width: 600px) {
-      .admin-panel-inner {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      #adminUidInput,
-      .admin-panel-inner button {
-        width: 100%;
-      }
-    }
-
     /* ====== 刪除配置對話框 ====== */
     @keyframes modalSlideUp {
       from { transform: translate(-50%, calc(-50% + 20px)); opacity: 0; }
@@ -259,6 +220,9 @@
     <a href="about.html" class="side-menu-link">關於本站</a>
     <a href="contact.html" class="side-menu-link">聯絡方式</a>
 
+    <div class="side-menu-section">管理</div>
+    <a href="admin.html" class="side-menu-link">管理員後台</a>
+
     <button type="button" class="side-menu-close" onclick="closeSideMenu()">關閉選單</button>
   </nav>
   
@@ -281,17 +245,6 @@
       <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
     </div>
   </div>
-
-  <!-- 管理員面板 -->
-  <div id="adminPanel" style="display:none;">
-    <div class="admin-panel-inner">
-      <span class="admin-label">🔑 管理員模式</span>
-      <input type="text" id="adminUidInput" placeholder="輸入使用者 UID">
-      <button onclick="adminViewUser()" class="primary-btn">檢視</button>
-      <button id="adminReturnBtn" onclick="adminViewSelf()" class="secondary-btn" style="display:none;">回到我的資料</button>
-    </div>
-  </div>
-
 </div>
 
   <div class="container">
@@ -492,6 +445,6 @@
       document.body.classList.remove("side-menu-open");
     }
   </script>
-  <script type="module" src="script.js?v=20260622-random-booster-fix1"></script>
+  <script type="module" src="script.js?v=20260624-admin-clean1"></script>
 </body>
 </html>
