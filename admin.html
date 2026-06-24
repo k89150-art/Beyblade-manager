@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理員後台｜戰鬥陀螺管理表</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="site-menu.css" />
+  <style>
+    .admin-hero { margin-top: 68px; }
+    .admin-card { background:#181818; border:1px solid #333; border-radius:14px; padding:16px; margin-bottom:16px; line-height:1.7; }
+    .admin-actions { display:flex; flex-wrap:wrap; gap:8px; margin: 12px 0 0; }
+    .admin-table { min-width: 820px; }
+    .admin-table td, .admin-table th { font-size:12px; }
+    .status-pill { display:inline-block; padding:3px 8px; border-radius:999px; font-weight:700; font-size:12px; }
+    .status-ok { color:#69db7c; background:rgba(105,219,124,0.12); border:1px solid rgba(105,219,124,0.35); }
+    .status-no { color:#ff8787; background:rgba(255,135,135,0.12); border:1px solid rgba(255,135,135,0.35); }
+    .admin-detail { margin-top:12px; background:#101010; border:1px solid #333; border-radius:10px; padding:12px; display:none; overflow:auto; max-height:360px; }
+    .admin-detail pre { margin:0; color:#dcdcdc; white-space:pre-wrap; word-break:break-word; font-size:12px; line-height:1.55; }
+    .admin-summary-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-top:12px; }
+    .admin-summary-item { background:#151515; border:1px solid #303030; border-radius:10px; padding:12px; }
+    .admin-summary-label { color:#999; font-size:12px; margin-bottom:4px; }
+    .admin-summary-value { color:#fff; font-size:20px; font-weight:800; }
+    @media (max-width:700px){ .admin-summary-grid{grid-template-columns:repeat(2,1fr);} .admin-actions{flex-direction:column;} .admin-actions button{width:100%;} }
+  </style>
+</head>
+<body>
+  <div id="authArea" class="auth-card admin-hero">
+    <div class="auth-main">
+      <div>
+        <div class="auth-title">管理員後台</div>
+        <div id="userInfo" class="auth-user" style="display:none;">已登入：<strong id="userEmail"></strong></div>
+        <div id="syncStatus" class="auth-status status-muted">尚未登入</div>
+      </div>
+      <div class="auth-actions">
+        <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
+        <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>管理員後台</h2>
+
+    <div class="admin-card">
+      <div>此頁面僅供管理員使用，用來查看目前 Firestore 內的使用者資料摘要。所有資料皆為唯讀，不會修改使用者內容。</div>
+      <div class="admin-actions">
+        <button type="button" class="primary-btn" onclick="loadAdminData()">重新整理資料</button>
+        <a href="index.html" class="secondary-btn" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:9px 12px;">回陀螺配置</a>
+      </div>
+    </div>
+
+    <div id="permissionBox" class="admin-card">
+      權限狀態：<span id="permissionStatus" class="status-pill status-no">尚未登入</span>
+    </div>
+
+    <div id="summaryBox" class="admin-summary-grid" style="display:none;">
+      <div class="admin-summary-item"><div class="admin-summary-label">使用者資料數</div><div id="summaryUsers" class="admin-summary-value">0</div></div>
+      <div class="admin-summary-item"><div class="admin-summary-label">配置紀錄</div><div id="summaryConfigs" class="admin-summary-value">0</div></div>
+      <div class="admin-summary-item"><div class="admin-summary-label">歷史紀錄</div><div id="summaryHistory" class="admin-summary-value">0</div></div>
+      <div class="admin-summary-item"><div class="admin-summary-label">參賽紀錄</div><div id="summaryTournaments" class="admin-summary-value">0</div></div>
+    </div>
+
+    <h3>使用者資料摘要</h3>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>UID</th>
+            <th>陀螺配置</th>
+            <th>零件庫存</th>
+            <th>配置紀錄</th>
+            <th>歷史紀錄</th>
+            <th>參賽紀錄</th>
+            <th>最後更新</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody">
+          <tr><td colspan="8">請先以管理員帳號登入。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="detailBox" class="admin-detail"><pre id="detailPre"></pre></div>
+  </div>
+
+  <script src="site-menu.js?v=20260622-site1"></script>
+  <script type="module" src="admin.js?v=20260622-admin1"></script>
+</body>
+</html>
