@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>使用者資料檢視｜戰鬥陀螺管理表</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="site-menu.css" />
+  <style>
+    .view-hero { margin-top: 68px; }
+    .view-card { background:#181818; border:1px solid #333; border-radius:14px; padding:16px; margin-bottom:16px; line-height:1.7; }
+    .view-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .view-actions a { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:9px 12px; }
+    .view-table { min-width: 760px; }
+    .view-table td, .view-table th { font-size:12px; }
+    .empty-state { background:#181818; border:1px solid #333; border-radius:10px; padding:12px; color:#bdbdbd; font-size:14px; line-height:1.5; }
+    .status-pill { display:inline-block; padding:3px 8px; border-radius:999px; font-weight:700; font-size:12px; color:#69db7c; background:rgba(105,219,124,0.12); border:1px solid rgba(105,219,124,0.35); }
+    @media (max-width:700px){ .view-actions{flex-direction:column;} .view-actions a{width:100%; box-sizing:border-box;} }
+  </style>
+</head>
+<body>
+  <div id="authArea" class="auth-card view-hero">
+    <div class="auth-main">
+      <div>
+        <div class="auth-title">使用者資料檢視</div>
+        <div id="userInfo" class="auth-user" style="display:none;">已登入：<strong id="userEmail"></strong></div>
+        <div id="syncStatus" class="auth-status status-muted">尚未登入</div>
+      </div>
+      <div class="auth-actions">
+        <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
+        <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>使用者資料檢視</h2>
+
+    <div class="view-card">
+      <div>目前檢視 UID：<span id="targetUidText" class="status-pill">-</span></div>
+      <div>此頁面為管理員唯讀檢視，不會修改使用者資料。</div>
+      <div class="view-actions">
+        <a class="secondary-btn" href="admin.html">回管理員後台</a>
+        <a class="secondary-btn" href="index.html">回我的陀螺配置</a>
+      </div>
+    </div>
+
+    <h3>陀螺配置</h3>
+    <div id="beybladeBox"></div>
+
+    <h3>零件庫存</h3>
+    <div id="partBox"></div>
+
+    <h3>配置紀錄</h3>
+    <div id="configBox"></div>
+
+    <h3>歷史測試紀錄</h3>
+    <div id="historyBox"></div>
+
+    <h3>參賽紀錄</h3>
+    <div id="tournamentBox"></div>
+  </div>
+
+  <script src="site-menu.js?v=20260622-site1"></script>
+  <script type="module" src="user-view.js?v=20260624-user-view1"></script>
+</body>
+</html>
