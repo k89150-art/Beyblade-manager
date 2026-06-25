@@ -45,6 +45,18 @@ function isAdmin() {
   return currentUser && currentUser.uid === ADMIN_UID;
 }
 
+function setAdminMenuVisibility(show) {
+  document.querySelectorAll('.side-menu a[href="admin.html"]').forEach(link => {
+    link.style.display = show ? "block" : "none";
+  });
+
+  document.querySelectorAll(".side-menu-section").forEach(section => {
+    if (section.textContent.trim() === "管理") {
+      section.style.display = show ? "block" : "none";
+    }
+  });
+}
+
 function isReadOnly() {
   return viewingUserId !== null;
 }
@@ -1742,13 +1754,16 @@ function updateAuthUI(user) {
   const userInfo = document.getElementById("userInfo");
   const userEmail = document.getElementById("userEmail");
   const adminPanel = document.getElementById("adminPanel");
+  const adminVisible = Boolean(user && isAdmin());
+
+  setAdminMenuVisibility(adminVisible);
 
   if (user) {
     if (googleLoginBtn) googleLoginBtn.style.display = "none";
     if (logoutBtn) logoutBtn.style.display = "inline-block";
     if (userInfo) userInfo.style.display = "block";
     if (userEmail) userEmail.textContent = user.email || "";
-    if (adminPanel) adminPanel.style.display = isAdmin() ? "block" : "none";
+    if (adminPanel) adminPanel.style.display = adminVisible ? "block" : "none";
   } else {
     if (googleLoginBtn) googleLoginBtn.style.display = "inline-block";
     if (logoutBtn) logoutBtn.style.display = "none";
