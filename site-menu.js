@@ -1,3 +1,13 @@
+const ADMIN_UID = "SesDhvXG6MUT38YhqGl0N6lVgMz1";
+const firebaseConfig = {
+  apiKey: "AIzaSyABQadKr-Am-55GgFJmhZ0tkRY-joARNAQ",
+  authDomain: "k89150-web-login.firebaseapp.com",
+  projectId: "k89150-web-login",
+  storageBucket: "k89150-web-login.firebasestorage.app",
+  messagingSenderId: "488040360398",
+  appId: "1:488040360398:web:759698c16eb67e14f1639f"
+};
+
 function openSideMenu() {
   document.body.classList.add("side-menu-open");
 }
@@ -6,8 +16,49 @@ function closeSideMenu() {
   document.body.classList.remove("side-menu-open");
 }
 
+function setAdminMenuVisibility(isAdmin) {
+  document.body.classList.toggle("is-admin", isAdmin);
+
+  document.querySelectorAll('.side-menu a[href="admin.html"]').forEach(link => {
+    link.style.display = isAdmin ? "block" : "none";
+  });
+
+  document.querySelectorAll('.side-menu-section').forEach(section => {
+    if (section.textContent.trim() === "管理") {
+      section.style.display = isAdmin ? "block" : "none";
+    }
+  });
+}
+
+function installAdminMenuGuard() {
+  setAdminMenuVisibility(false);
+
+  import("https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js")
+    .then(appModule => Promise.all([
+      appModule,
+      import("https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js")
+    ]))
+    .then(([appModule, authModule]) => {
+      const app = appModule.getApps().length
+        ? appModule.getApp()
+        : appModule.initializeApp(firebaseConfig);
+      const auth = authModule.getAuth(app);
+
+      authModule.onAuthStateChanged(auth, user => {
+        setAdminMenuVisibility(Boolean(user && user.uid === ADMIN_UID));
+      });
+    })
+    .catch(error => {
+      console.warn("管理員選單權限檢查初始化失敗：", error);
+      setAdminMenuVisibility(false);
+    });
+}
+
 (function initSideMenu() {
-  if (document.querySelector(".side-menu")) return;
+  if (document.querySelector(".side-menu")) {
+    installAdminMenuGuard();
+    return;
+  }
 
   const currentPage = location.pathname.split("/").pop() || "home.html";
 
@@ -20,7 +71,7 @@ function closeSideMenu() {
     { href: "privacy.html", label: "隱私權政策", group: "說明" },
     { href: "about.html", label: "關於本站", group: "說明" },
     { href: "contact.html", label: "聯絡方式", group: "說明" },
-    { href: "admin.html", label: "管理員後台", group: "管理" }
+    { href: "admin.html", label: "管理員後台", group: "管理", adminOnly: true }
   ];
 
   let html = `
@@ -35,11 +86,13 @@ function closeSideMenu() {
   items.forEach(item => {
     if (item.group !== currentGroup) {
       currentGroup = item.group;
-      html += `<div class="side-menu-section">${currentGroup}</div>`;
+      const hidden = item.adminOnly ? ' style="display:none;"' : "";
+      html += `<div class="side-menu-section"${hidden}>${currentGroup}</div>`;
     }
 
     const activeClass = item.href === currentPage ? " active" : "";
-    html += `<a href="${item.href}" class="side-menu-link${activeClass}">${item.label}</a>`;
+    const hidden = item.adminOnly ? ' style="display:none;"' : "";
+    html += `<a href="${item.href}" class="side-menu-link${activeClass}"${hidden}>${item.label}</a>`;
   });
 
   html += `
@@ -48,6 +101,7 @@ function closeSideMenu() {
   `;
 
   document.body.insertAdjacentHTML("afterbegin", html);
+  installAdminMenuGuard();
 })();
 
 window.openSideMenu = openSideMenu;
