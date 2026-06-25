@@ -1089,6 +1089,8 @@ function collectCurrentData() {
     partTable: getTableData("partTable", false),
     configTable: getTableData("configTable", true),
     historyTable: getHistoryData(),
+    ownerUid: currentUser ? currentUser.uid : "",
+    ownerEmail: currentUser ? currentUser.email || "" : "",
     updatedAt: Date.now()
   };
 }
