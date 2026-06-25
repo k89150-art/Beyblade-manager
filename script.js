@@ -197,42 +197,65 @@ function getSeriesFromModel(model) {
   return "OTHER";
 }
 
-/* ====== 第一區排序：UX → BX → CX → 其他 ====== */
+/* ====== 排序：UX → BX → CX → 其他（第一區與第三區共用） ====== */
 
-function sortBeybladeTable() {
-  const tbody = document.querySelector("#beybladeTable tbody");
+const TABLE_SORT_ORDER = { UX: 1, BX: 2, CX: 3, OTHER: 4 };
+
+let _configSortTimer = null;
+let _configSorting = false;
+
+function sortTable(tableId) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
   if (!tbody) return;
 
-  const order = {
-    UX: 1,
-    BX: 2,
-    CX: 3,
-    OTHER: 4
-  };
+  // 編輯中不排序
+  if (tbody.querySelector("input, select, textarea")) return;
+  if (Array.from(tbody.rows).some(r => r.dataset.editing === "true")) return;
 
   const rows = Array.from(tbody.querySelectorAll("tr"));
+  if (rows.length <= 1) return;
 
-  rows.sort((a, b) => {
+  const sorted = [...rows].sort((a, b) => {
     const modelA = a.cells[0]?.innerText.trim() || "";
     const modelB = b.cells[0]?.innerText.trim() || "";
-
-    const seriesA = getSeriesFromModel(modelA);
-    const seriesB = getSeriesFromModel(modelB);
-
-    const orderA = order[seriesA] || 99;
-    const orderB = order[seriesB] || 99;
-
-    if (orderA !== orderB) {
-      return orderA - orderB;
-    }
-
-    return modelA.localeCompare(modelB, "zh-Hant", {
-      numeric: true,
-      sensitivity: "base"
-    });
+    const orderA = TABLE_SORT_ORDER[getSeriesFromModel(modelA)] || 99;
+    const orderB = TABLE_SORT_ORDER[getSeriesFromModel(modelB)] || 99;
+    if (orderA !== orderB) return orderA - orderB;
+    return modelA.localeCompare(modelB, "zh-Hant", { numeric: true, sensitivity: "base" });
   });
 
-  rows.forEach(row => tbody.appendChild(row));
+  const alreadySorted = rows.every((r, i) => r === sorted[i]);
+  if (alreadySorted) return;
+
+  sorted.forEach(row => tbody.appendChild(row));
+}
+
+function sortBeybladeTable() {
+  sortTable("beybladeTable");
+}
+
+function sortConfigTable() {
+  if (_configSorting) return;
+  _configSorting = true;
+  sortTable("configTable");
+  _configSorting = false;
+}
+
+function scheduleConfigSort() {
+  clearTimeout(_configSortTimer);
+  _configSortTimer = setTimeout(sortConfigTable, 80);
+}
+
+function installConfigSort() {
+  const tbody = document.querySelector("#configTable tbody");
+  if (!tbody) { setTimeout(installConfigSort, 200); return; }
+
+  sortConfigTable();
+
+  const observer = new MutationObserver(() => {
+    if (!_configSorting) scheduleConfigSort();
+  });
+  observer.observe(tbody, { childList: true, subtree: true, characterData: true });
 }
 
 function getValue(id) {
@@ -1827,6 +1850,7 @@ document.addEventListener("DOMContentLoaded", function () {
   clearAllTables();
   refreshSelectors();
   setSyncStatus("請先使用 Google 登入", "muted");
+  installConfigSort();
 
   onAuthStateChanged(auth, user => {
     currentUser = user;
