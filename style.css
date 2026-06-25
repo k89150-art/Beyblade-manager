@@ -184,56 +184,7 @@ button:active {
   transform: scale(0.98);
 }
 
-/* ====== 表格外層 ====== */
 
-.table-wrap {
-  width: 100%;
-  margin-bottom: 28px;
-  overflow-x: auto;
-  border-radius: 10px;
-  border: 1px solid #333;
-}
-
-/* ====== 表格 ====== */
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #181818;
-  font-size: 13px;
-  table-layout: fixed;
-}
-
-th,
-td {
-  border: 1px solid #303030;
-  padding: 8px 5px;
-  text-align: center;
-  color: #d2d2d2;
-  word-break: break-word;
-}
-
-th {
-  background: #252525;
-  color: #ffffff;
-  font-weight: 700;
-}
-
-tbody tr:nth-child(even) {
-  background-color: #1d1d1d;
-}
-
-tbody tr:hover {
-  background-color: #242424;
-}
-
-/* 操作欄按鈕 */
-td button {
-  padding: 5px 8px;
-  font-size: 12px;
-  border-radius: 6px;
-  margin: 2px;
-}
 
 /* ====== 配置紀錄選擇區 ====== */
 
@@ -525,6 +476,7 @@ td button {
   font-size: 12px;
   border-radius: 8px;
   margin: 2px;
+  margin-top: 2px;
 }
 
 @media (max-width: 600px) {
