@@ -42,6 +42,8 @@ let tournamentRecords = [];
 let configOptions = [];
 const openedTournamentIds = new Set();
 
+const ADMIN_UID = "SesDhvXG6MUT38YhqGl0N6lVgMz1";
+
 function escapeHtml(text) {
   return String(text ?? "")
     .replaceAll("&", "&amp;")
@@ -52,6 +54,22 @@ function escapeHtml(text) {
 
 function generateId(prefix = "id") {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function isAdminUser(user) {
+  return Boolean(user && user.uid === ADMIN_UID);
+}
+
+function setAdminMenuVisibility(show) {
+  document.querySelectorAll('.side-menu a[href="admin.html"]').forEach(link => {
+    link.style.display = show ? "block" : "none";
+  });
+
+  document.querySelectorAll(".side-menu-section").forEach(section => {
+    if (section.textContent.trim() === "管理") {
+      section.style.display = show ? "block" : "none";
+    }
+  });
 }
 
 function getUserDocRef() {
@@ -79,6 +97,8 @@ function updateAuthUI(user) {
   const logoutBtn = document.getElementById("logoutBtn");
   const userInfo = document.getElementById("userInfo");
   const userEmail = document.getElementById("userEmail");
+
+  setAdminMenuVisibility(isAdminUser(user));
 
   if (user) {
     if (googleLoginBtn) googleLoginBtn.style.display = "none";
