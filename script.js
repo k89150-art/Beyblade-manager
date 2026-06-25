@@ -870,7 +870,7 @@ function updateMainStockName(row) {
 
 function getConfigEditCurrentValue(row, index) {
   const currentText = row.cells[index]?.innerText.trim() || "";
-  const model = normalizeModel(getEditCellValue(row, 0));
+  const model = normalizeModel(row.cells[0]?.innerText.trim() || "");
 
   if (getSeriesFromModel(model) !== "CX" || isRandomBooster(model)) {
     return currentText;
@@ -895,7 +895,7 @@ function getConfigEditCurrentValue(row, index) {
 function isCxAutoLayerEdit(row, index) {
   if (index !== 1) return false;
 
-  const model = normalizeModel(getEditCellValue(row, 0));
+  const model = normalizeModel(row.cells[0]?.innerText.trim() || "");
 
   return getSeriesFromModel(model) === "CX" && !isRandomBooster(model);
 }
