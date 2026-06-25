@@ -73,6 +73,54 @@
     observer.observe(status, { childList: true, subtree: true, characterData: true });
   }
 
+  function normalizeCellValue(text) {
+    const value = String(text || "").trim();
+    return value && value !== "-" ? value : "";
+  }
+
+  function isCxModel(text) {
+    return String(text || "").trim().toUpperCase().startsWith("CX");
+  }
+
+  function getOriginalCells(row) {
+    try {
+      return JSON.parse(row.dataset.originalCells || "[]");
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function prepareCxConfigEditRow(row) {
+    if (!row || !row.cells || row.cells.length < 9) return;
+
+    const originalCells = getOriginalCells(row);
+    const model = normalizeCellValue(originalCells[0] || row.cells[0]?.innerText);
+    if (!isCxModel(model)) return;
+
+    const originalMain = normalizeCellValue(originalCells[3] || row.cells[3]?.innerText);
+    const originalTranscend = normalizeCellValue(originalCells[4] || row.cells[4]?.innerText);
+    const originalMetal = normalizeCellValue(originalCells[5] || row.cells[5]?.innerText);
+
+    const mainSelect = row.cells[3]?.querySelector("select");
+    const transcendSelect = row.cells[4]?.querySelector("select");
+    const metalSelect = row.cells[5]?.querySelector("select");
+
+    const isSplitBlade = originalMain.includes("/") && originalTranscend && originalMetal;
+    const isNormalMainBlade = originalMain && !originalMain.includes("/") && !originalTranscend && !originalMetal;
+
+    if (isSplitBlade) {
+      if (mainSelect) mainSelect.value = "";
+      if (transcendSelect) transcendSelect.value = originalTranscend;
+      if (metalSelect) metalSelect.value = originalMetal;
+      return;
+    }
+
+    if (isNormalMainBlade) {
+      if (transcendSelect) transcendSelect.value = "";
+      if (metalSelect) metalSelect.value = "";
+    }
+  }
+
   function scrollToEditingRow(row) {
     if (!row || !row.scrollIntoView) return;
 
@@ -98,6 +146,11 @@
     window.editRow = function (button, tableType) {
       const row = button && button.closest ? button.closest("tr") : null;
       const result = originalEditRow.apply(this, arguments);
+
+      if (tableType === "config") {
+        setTimeout(() => prepareCxConfigEditRow(row), 30);
+      }
+
       scrollToEditingRow(row);
       return result;
     };
