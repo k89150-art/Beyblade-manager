@@ -10,7 +10,7 @@
     .admin-hero { margin-top: 68px; }
     .admin-card { background:#181818; border:1px solid #333; border-radius:14px; padding:16px; margin-bottom:16px; line-height:1.7; }
     .admin-actions { display:flex; flex-wrap:wrap; gap:8px; margin: 12px 0 0; }
-    .admin-table { min-width: 960px; }
+    .admin-table { min-width: 720px; }
     .admin-table td, .admin-table th { font-size:12px; }
     .status-pill { display:inline-block; padding:3px 8px; border-radius:999px; font-weight:700; font-size:12px; }
     .status-ok { color:#69db7c; background:rgba(105,219,124,0.12); border:1px solid rgba(105,219,124,0.35); }
@@ -66,23 +66,18 @@
           <tr>
             <th>Email</th>
             <th>UID</th>
-            <th>陀螺配置</th>
-            <th>零件庫存</th>
-            <th>配置紀錄</th>
-            <th>歷史紀錄</th>
-            <th>參賽紀錄</th>
             <th>最後更新</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody id="adminTableBody">
-          <tr><td colspan="9">請先以管理員帳號登入。</td></tr>
+          <tr><td colspan="4">請先以管理員帳號登入。</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
   <script src="site-menu.js?v=20260622-site1"></script>
-  <script type="module" src="admin.js?v=20260626-admin-email1"></script>
+  <script type="module" src="admin.js?v=20260626-admin-simple1"></script>
 </body>
 </html>
