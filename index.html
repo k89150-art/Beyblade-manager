@@ -448,7 +448,7 @@
 
   <script>
     // 1. 避免選填零件用「-」代表空值時，被拿去做主要戰刃庫存檢查。
-    // 2. CX-07、UX-19 本身沒有固鎖，允許固鎖選「-」並略過固鎖庫存檢查。
+    // 2. CX-07、UX-19 本身沒有固鎖：型號輸入後會自動用「-」當固鎖值，不需要手動輸入。
     (function () {
       const originalIncludes = String.prototype.includes;
       String.prototype.includes = function (searchString, position) {
@@ -473,9 +473,17 @@
         return `${match[1]}-${String(Number(match[2])).padStart(2, "0")}`;
       }
 
-      function isNoRatchetModel() {
-        const model = normalizeNoRatchetModel(document.getElementById("confModel")?.value || "");
+      function isNoRatchetModelFromText(text) {
+        const model = normalizeNoRatchetModel(text);
         return model === "CX-07" || model === "UX-19";
+      }
+
+      function isNoRatchetConfigModel() {
+        return isNoRatchetModelFromText(document.getElementById("confModel")?.value || "");
+      }
+
+      function isNoRatchetFirstAreaModel() {
+        return isNoRatchetModelFromText(document.getElementById("model")?.value || "");
       }
 
       function makeNoRatchetValue() {
@@ -483,6 +491,7 @@
         return {
           toString: function () { return "-"; },
           valueOf: function () { return "-"; },
+          trim: function () { return "-"; },
           [Symbol.toPrimitive]: function () {
             readCount += 1;
             if (readCount === 1) return "__NO_RATCHET_TOTAL__";
@@ -492,18 +501,33 @@
         };
       }
 
-      const valueDescriptor = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value");
+      const selectValueDescriptor = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value");
       Object.defineProperty(HTMLSelectElement.prototype, "value", {
         configurable: true,
         get: function () {
-          const value = valueDescriptor.get.call(this);
-          if (this.id === "sel固鎖" && value === "-" && isNoRatchetModel()) {
+          const value = selectValueDescriptor.get.call(this);
+          if (this.id === "sel固鎖" && (value === "" || value === "-") && isNoRatchetConfigModel()) {
             return makeNoRatchetValue();
           }
           return value;
         },
         set: function (value) {
-          return valueDescriptor.set.call(this, value);
+          return selectValueDescriptor.set.call(this, value);
+        }
+      });
+
+      const inputValueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+      Object.defineProperty(HTMLInputElement.prototype, "value", {
+        configurable: true,
+        get: function () {
+          const value = inputValueDescriptor.get.call(this);
+          if (this.id === "fix" && (value === "" || value === "-") && isNoRatchetFirstAreaModel()) {
+            return "-";
+          }
+          return value;
+        },
+        set: function (value) {
+          return inputValueDescriptor.set.call(this, value);
         }
       });
 
@@ -523,6 +547,6 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20260626-cx-edit2"></script>
+  <script type="module" src="script.js?v=20260626-no-ratchet-auto1"></script>
 </body>
 </html>
