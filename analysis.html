@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>配置分析實驗版｜戰鬥陀螺管理表</title>
+  <link rel="stylesheet" href="style.css?v=20260629-mobile-actions1" />
+  <link rel="stylesheet" href="site-menu.css" />
+  <style>
+    .analysis-hero { margin-top: 68px; }
+    .analysis-card { background:#181818; border:1px solid #333; border-radius:14px; padding:16px; margin-bottom:16px; line-height:1.7; }
+    .analysis-note { color:#aaa; font-size:13px; margin-top:6px; }
+    .analysis-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:12px; }
+    .analysis-grid input { width:100%; box-sizing:border-box; }
+    .analysis-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .analysis-result-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-top:12px; }
+    .score-box { background:#151515; border:1px solid #303030; border-radius:10px; padding:12px; }
+    .score-label { color:#999; font-size:12px; }
+    .score-value { color:#fff; font-size:20px; font-weight:800; margin-top:4px; }
+    .status-list { margin:10px 0 0; padding-left:20px; }
+    .status-list li { margin-bottom:6px; }
+    .status-good { color:#69db7c; }
+    .status-warn { color:#ffd43b; }
+    .status-bad { color:#ff8787; }
+    .analysis-pill { display:inline-block; padding:3px 8px; border-radius:999px; background:rgba(61,126,255,.16); border:1px solid rgba(61,126,255,.35); color:#dbe7ff; font-size:12px; font-weight:700; margin-right:4px; }
+    @media (max-width:700px){
+      .analysis-grid, .analysis-result-grid { grid-template-columns:1fr; }
+      .analysis-actions button { width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="authArea" class="auth-card analysis-hero">
+    <div class="auth-main">
+      <div>
+        <div class="auth-title">配置分析實驗版</div>
+        <div id="userInfo" class="auth-user" style="display:none;">已登入：<strong id="userEmail"></strong></div>
+        <div id="syncStatus" class="auth-status status-muted">尚未登入</div>
+      </div>
+      <div class="auth-actions">
+        <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
+        <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>配置分析實驗版</h2>
+
+    <div class="analysis-card">
+      <div>
+        第一版只做手動試配分析，不會保存、不會修改配置紀錄、不會扣庫存。
+      </div>
+      <div class="analysis-note">
+        請輸入簡單格式：戰刃 / 固鎖 / 軸心。例如：鳳凰飛翼 / 9-60 / R。
+      </div>
+    </div>
+
+    <div class="analysis-card">
+      <h3>手動試配</h3>
+      <div class="analysis-grid">
+        <input id="analysisBladeInput" type="text" placeholder="戰刃，例如 鳳凰飛翼">
+        <input id="analysisRatchetInput" type="text" placeholder="固鎖，例如 9-60">
+        <input id="analysisBitInput" type="text" placeholder="軸心，例如 R">
+      </div>
+      <div class="analysis-actions">
+        <button id="analyzeComboBtn" type="button" class="primary-btn">分析配置</button>
+        <button id="clearAnalysisBtn" type="button" class="secondary-btn">清除</button>
+      </div>
+    </div>
+
+    <div id="analysisResult" class="analysis-card" style="display:none;"></div>
+  </div>
+
+  <script src="site-menu.js?v=20260629-analysis1"></script>
+  <script type="module" src="analysis.js?v=20260629-analysis1"></script>
+</body>
+</html>
