@@ -14,15 +14,15 @@ service cloud.firestore {
     }
 
     match /users/{userId}/appData/{documentId} {
-      allow read: if isSignedIn() && (
+      allow read: if documentId == "main" && isSignedIn() && (
         request.auth.uid == userId || isAdmin()
       );
 
-      allow write: if isSignedIn() && request.auth.uid == userId;
+      allow write: if documentId == "main" && isSignedIn() && request.auth.uid == userId;
     }
 
     match /{path=**}/appData/{documentId} {
-      allow read: if isAdmin();
+      allow read: if documentId == "main" && isAdmin();
     }
   }
 }
