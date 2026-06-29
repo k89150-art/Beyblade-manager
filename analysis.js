@@ -1,4 +1,4 @@
-﻿import { analyzeCombo } from "./beyblade_x_analysis_engine_v1_zhTW.js?v=20260630-engine2";
+import { analyzeCombo } from "./beyblade_x_analysis_engine_v1_zhTW.js?v=20260630-engine2";
 
 let database = null;
 let rules = null;
@@ -6,14 +6,17 @@ let indexes = null;
 let currentMode = "standard";
 
 const INTEGRATED_BITS = new Set(["OP", "TR"]);
+const NO_RATCHET_MODELS = new Set(["UX-19"]);
+const UX16_MODELS = new Set(["UX-16"]);
+
 const SCORE_LABELS = {
-  attack: "?餅?",
-  stamina: "??",
-  defense: "?脩戌",
-  balance: "撟唾﹛",
-  burstSafety: "??摰",
-  control: "?批",
-  metaConfidence: "鞈?靽∪?"
+  attack: "攻擊",
+  stamina: "持久",
+  defense: "防禦",
+  balance: "平衡",
+  burstSafety: "爆裂安全",
+  control: "操控",
+  metaConfidence: "資料信心"
 };
 
 function normalizeText(value) {
@@ -42,7 +45,7 @@ function escapeHtml(value) {
 
 async function loadJson(url) {
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`霈?仃??${url}`);
+  if (!response.ok) throw new Error(`資料載入失敗：${url}`);
   return response.json();
 }
 
@@ -67,9 +70,7 @@ function addIndex(index, item, keys) {
 
 function buildPartIndex(items = []) {
   const index = new Map();
-  items.forEach(item => {
-    addIndex(index, item, [item.id, item.code, item.name, item.model].filter(Boolean));
-  });
+  items.forEach(item => addIndex(index, item, [item.id, item.code, item.name, item.model].filter(Boolean)));
   return index;
 }
 
@@ -103,7 +104,7 @@ function fillDatalist(id, items = []) {
 
 function fillOptions() {
   fillDatalist("bladeOptions", database.blades);
-  fillDatalist("ratchetOptions", [{ id: "-", name: "?∪?? }, ...(database.ratchets || [])]);
+  fillDatalist("ratchetOptions", [{ id: "-", name: "無固鎖" }, ...(database.ratchets || [])]);
   fillDatalist("bitOptions", database.bits);
   fillDatalist("cxLockOptions", database.cx?.lockChips);
   fillDatalist("cxMainBladeOptions", database.cx?.mainBlades);
@@ -114,7 +115,7 @@ function fillOptions() {
 
 function findPart(indexName, input) {
   const value = String(input || "").trim();
-  if (!value || value === "-" || value === "?∪??) return null;
+  if (!value || value === "-" || value === "無固鎖") return null;
   return indexes[indexName].get(normalizeText(value)) || null;
 }
 
@@ -133,28 +134,49 @@ function setMode(mode) {
 
 function isNoRatchetValue(value) {
   const text = String(value || "").trim();
-  return !text || text === "-" || text === "?∪??;
+  return !text || text === "-" || text === "無固鎖";
+}
+
+function codeOf(part) {
+  return part?.code || part?.id || "";
+}
+
+function modelCodeOf(part) {
+  const text = String(part?.model || part?.id || "").toUpperCase();
+  const match = text.match(/^(UX|BX|CX)\s*-?\s*(\d+)/);
+  if (!match) return text.trim();
+  return `${match[1]}-${String(Number(match[2])).padStart(2, "0")}`;
 }
 
 function hasIntegratedBit(bit) {
   return INTEGRATED_BITS.has(normalizeCode(bit?.code || bit?.id));
 }
 
-function fieldLabel(key) {
-  return {
-    blade: "銝?",
-    lock: "蝝???,
-    main: "銝餉??啣?",
-    metal: "?惇?啣?",
-    over: "頞??啣?",
-    assist: "頛?啣?",
-    ratchet: "?粹?",
-    bit: "頠詨?"
-  }[key] || key;
+function hasNoRatchetBlade(blade) {
+  return NO_RATCHET_MODELS.has(modelCodeOf(blade));
 }
 
-function codeOf(part) {
-  return part?.code || part?.id || "";
+function isUx16Blade(blade) {
+  return UX16_MODELS.has(modelCodeOf(blade));
+}
+
+function isSimpleRatchet(ratchet) {
+  const code = String(ratchet?.code || ratchet?.id || "").trim();
+  const match = code.match(/\d+\s*-\s*(\d+)/);
+  return Boolean(match && match[1].endsWith("5"));
+}
+
+function fieldLabel(key) {
+  return {
+    blade: "上蓋",
+    lock: "紋章鎖",
+    main: "主要戰刃",
+    metal: "金屬戰刃",
+    over: "超越戰刃",
+    assist: "輔助戰刃",
+    ratchet: "固鎖",
+    bit: "軸心"
+  }[key] || key;
 }
 
 function nameOf(part) {
@@ -164,7 +186,7 @@ function nameOf(part) {
 function collectStandard() {
   const ratchetInput = getInput("standardRatchetInput");
   return {
-    label: "BX / UX ?蔭",
+    label: "BX / UX 配置",
     inputs: {
       blade: getInput("bladeInput"),
       ratchet: ratchetInput,
@@ -183,7 +205,7 @@ function collectStandard() {
 function collectCxMain() {
   const ratchetInput = getInput("cxMainRatchetInput");
   return {
-    label: "CX 銝辣撘?,
+    label: "CX 主要戰刃",
     cxType: "main",
     inputs: {
       lock: getInput("cxMainLockInput"),
@@ -207,7 +229,7 @@ function collectCxMain() {
 function collectCxSplit() {
   const ratchetInput = getInput("cxSplitRatchetInput");
   return {
-    label: "CX ??撘?,
+    label: "CX 金屬 + 超越",
     cxType: "split",
     inputs: {
       lock: getInput("cxSplitLockInput"),
@@ -240,37 +262,46 @@ function validateConfig(config) {
   const fatal = [];
   const warnings = [];
   const { parts, inputs } = config;
+  const noRatchetSelected = isNoRatchetValue(config.ratchetInput);
+  const integratedBit = parts.bit && hasIntegratedBit(parts.bit);
+  const noRatchetBlade = parts.blade && hasNoRatchetBlade(parts.blade);
 
   config.required.forEach(key => {
-    if (!inputs[key]) fatal.push(`隢??{fieldLabel(key)}?);
-    else if (!parts[key]) fatal.push(`${fieldLabel(key)}??{inputs[key]}???函???澈銝准);
+    if (!inputs[key]) fatal.push(`請選擇${fieldLabel(key)}。`);
+    else if (!parts[key]) fatal.push(`${fieldLabel(key)}「${inputs[key]}」不在目前資料庫中。`);
   });
 
-  if (!isNoRatchetValue(config.ratchetInput) && !parts.ratchet) fatal.push(`?粹???{config.ratchetInput}???函???澈銝准);
-  if (parts.bit && hasIntegratedBit(parts.bit) && !isNoRatchetValue(config.ratchetInput)) fatal.push("Op / Tr ?臬??擃?頠詨?嚗??賢??剝?銝?砍??);
-  if (parts.bit && !hasIntegratedBit(parts.bit) && isNoRatchetValue(config.ratchetInput)) fatal.push("銝?祈遘敹?閬????芣? Op / Tr ??銝擃?頠詨??臭??詨??);
+  if (!noRatchetSelected && !parts.ratchet) fatal.push(`固鎖「${config.ratchetInput}」不在目前資料庫中。`);
+  if (integratedBit && !noRatchetSelected) fatal.push("Op / Tr 軸無法使用固鎖。");
+  if (noRatchetBlade && !noRatchetSelected) fatal.push("UX-19 無法使用固鎖。");
+  if (!integratedBit && !noRatchetBlade && noRatchetSelected) fatal.push("一般配置需要選擇固鎖；只有 UX-19 或 Op / Tr 軸可以無固鎖。");
+  if (isUx16Blade(parts.blade) && parts.ratchet && !isSimpleRatchet(parts.ratchet)) fatal.push("時鐘幻象只能使用簡易固鎖。");
 
   if (config.cxType === "main") {
-    warnings.push("CX 銝辣撘蝙?剁?蝝???+ 銝餉??啣? + 頛?啣???);
+    warnings.push("CX 主要戰刃模式會以：紋章鎖 + 主要戰刃 + 輔助戰刃分析。暫不自動推回完整上蓋名稱。");
     const recommended = parts.main?.recommendedAssistBlades || [];
     if (recommended.length && parts.assist && !recommended.includes(codeOf(parts.assist))) {
-      warnings.push(`${nameOf(parts.assist)} 銝??{nameOf(parts.main)}???西??拇???桐葉嚗皜砌?撱箄降瘜冽??豢扼);
+      warnings.push(`${nameOf(parts.assist)} 不是 ${nameOf(parts.main)} 資料中優先建議的輔助戰刃，可測試但信心會較保守。`);
     }
   }
 
-  if (config.cxType === "split") warnings.push("CX ??撘蝙?剁?蝝???+ ?惇?啣? + 頞??啣? + 頛?啣???);
+  if (config.cxType === "split") {
+    warnings.push("CX 金屬 + 超越模式會以：紋章鎖 + 金屬戰刃 + 超越戰刃 + 輔助戰刃分析。");
+  }
 
   return { fatal, warnings };
 }
 
 function toEngineInput(config) {
   const { parts } = config;
+  const ratchetCode = codeOf(parts.ratchet);
+
   if (config.cxType === "main") {
     return {
       lockChipName: nameOf(parts.lock),
       mainBladeName: nameOf(parts.main),
       assistBladeCode: codeOf(parts.assist),
-      ratchetCode: codeOf(parts.ratchet),
+      ratchetCode,
       bitCode: codeOf(parts.bit)
     };
   }
@@ -281,14 +312,14 @@ function toEngineInput(config) {
       metalBladeName: nameOf(parts.metal),
       overBladeCode: codeOf(parts.over),
       assistBladeCode: codeOf(parts.assist),
-      ratchetCode: codeOf(parts.ratchet),
+      ratchetCode,
       bitCode: codeOf(parts.bit)
     };
   }
 
   return {
     bladeIdOrName: nameOf(parts.blade),
-    ratchetCode: codeOf(parts.ratchet),
+    ratchetCode,
     bitCode: codeOf(parts.bit)
   };
 }
@@ -302,15 +333,14 @@ function partTitle(part) {
 
 function detailLine(part) {
   if (!part) return "";
-  const tier = part.metaTier ? `Tier ${part.metaTier}` : "?芣? Tier";
-  const confidence = part.confidence ? `靽∪? ${part.confidence}` : "靽∪??芣?";
-  const role = part.role ? `嚗?{part.role}` : "";
-  return `${partTitle(part)}嚗?{tier}嚗?{confidence}${role}`;
+  const tier = part.metaTier ? `Tier ${part.metaTier}` : "未標 Tier";
+  const confidence = part.confidence ? `信心 ${part.confidence}` : "信心未標";
+  const role = part.role ? `，${part.role}` : "";
+  return `${partTitle(part)}，${tier}，${confidence}${role}`;
 }
 
 function scorePercent(value) {
-  const normalized = Math.max(0, Math.min(100, Math.round(((Number(value) || 0) + 5) * 10)));
-  return normalized;
+  return Math.max(0, Math.min(100, Math.round(((Number(value) || 0) + 5) * 10)));
 }
 
 function renderScores(scores) {
@@ -331,7 +361,7 @@ function renderScores(scores) {
 function renderList(items, className = "") {
   return items?.length
     ? items.map(item => `<li class="${className}">${escapeHtml(item)}</li>`).join("")
-    : `<li class="${className}">?桀?瘝??Ⅱ鞈???/li>`;
+    : `<li class="${className}">目前沒有明顯項目。</li>`;
 }
 
 function renderAnalysis() {
@@ -341,52 +371,51 @@ function renderAnalysis() {
 
   const detailParts = Object.entries(config.parts)
     .filter(([, part]) => part)
-    .map(([key, part]) => `${fieldLabel(key)}嚗?{detailLine(part)}`);
+    .map(([key, part]) => `${fieldLabel(key)}：${detailLine(part)}`);
 
   if (validation.fatal.length) {
     result.style.display = "block";
     result.innerHTML = `
-      <h3>??蝯?</h3>
+      <h3>無法分析</h3>
       <div class="result-card">
-        <div class="section-title">?⊥???</div>
+        <div class="section-title">需要先修正</div>
         <ul class="status-list">${renderList(validation.fatal, "status-bad")}</ul>
-        <div class="section-title">撌脰儘霅隞?/div>
+        <div class="section-title">已辨識零件</div>
         <ul class="status-list">${renderList(detailParts)}</ul>
       </div>
     `;
     return;
   }
 
-  const engineInput = toEngineInput(config);
-  const analysis = analyzeCombo(engineInput, database, rules);
+  const analysis = analyzeCombo(toEngineInput(config), database, rules);
   const warnings = [...validation.warnings, ...(analysis.warnings || [])];
 
   result.style.display = "block";
   result.innerHTML = `
-    <h3>??蝯?</h3>
+    <h3>分析結果</h3>
     <div class="pill-row">
       <span class="analysis-pill">${escapeHtml(config.label)}</span>
-      <span class="analysis-pill">${escapeHtml(analysis.primaryRole || "?芸摰?)}</span>
-      <span class="analysis-pill">靽∪? ${escapeHtml(analysis.confidence || "敺?霅?)}</span>
-      <span class="analysis-pill">${escapeHtml(analysis.deckRole || "皜祈岫雿?)}</span>
+      <span class="analysis-pill">${escapeHtml(analysis.primaryRole || "定位未明")}</span>
+      <span class="analysis-pill">信心：${escapeHtml(analysis.confidence || "未判定")}</span>
+      <span class="analysis-pill">${escapeHtml(analysis.deckRole || "牌組位置未判定")}</span>
     </div>
     <div class="result-card">
-      <div class="section-title">銝?亥店摰?</div>
-      <div>${escapeHtml(analysis.summary || "?桀?鞈?銝雲嚗遣霅啣祕皜祈???)}</div>
+      <div class="section-title">一句話定位</div>
+      <div>${escapeHtml(analysis.summary || "目前資料不足，建議先作為測試配置觀察。")}</div>
     </div>
-    <div class="section-title">銝雁?</div>
+    <div class="section-title">七維分數</div>
     <div class="score-card-grid">${renderScores(analysis.scores)}</div>
-    <div class="section-title">撌脰儘霅隞?/div>
+    <div class="section-title">已辨識零件</div>
     <ul class="status-list">${renderList(detailParts)}</ul>
-    <div class="section-title">?芷?</div>
+    <div class="section-title">優點</div>
     <ul class="status-list">${renderList(analysis.strengths || [], "status-good")}</ul>
-    <div class="section-title">憸券??</div>
+    <div class="section-title">風險提醒</div>
     <ul class="status-list">${renderList(warnings, "status-warn")}</ul>
-    <div class="section-title">?寡?撱箄降</div>
+    <div class="section-title">改裝建議</div>
     <ul class="status-list">${renderList(analysis.recommendations || [])}</ul>
-    <div class="section-title">3G / 5G 撱箄降雿蔭</div>
-    <div class="result-card">${escapeHtml(analysis.deckRole || "皜祈岫雿?)}</div>
-    <div class="analysis-note">??雿輻 analyzeCombo() ????v1.0-alpha嚗??豢?撘霈嚗?隞?”撖行????/div>
+    <div class="section-title">3G / 5G 建議位置</div>
+    <div class="result-card">${escapeHtml(analysis.deckRole || "建議先作為測試位，累積實戰後再調整。")}</div>
+    <div class="analysis-note">分析使用 analyzeCombo() 與 v1.0-alpha 規則。這是理論輔助，不等於實戰勝率保證。</div>
   `;
 }
 
@@ -411,12 +440,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     await loadData();
   } catch (error) {
-    console.error("?蔭??鞈?霈?仃??", error);
+    console.error("配置分析資料載入失敗", error);
     const result = document.getElementById("analysisResult");
     if (result) {
       result.style.display = "block";
-      result.innerHTML = `<h3>鞈?霈?仃??/h3><div class="status-bad">${escapeHtml(error.message)}</div>`;
+      result.innerHTML = `<h3>資料載入失敗</h3><div class="status-bad">${escapeHtml(error.message)}</div>`;
     }
   }
 });
-
