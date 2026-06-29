@@ -107,7 +107,7 @@ async function logoutGoogle() {
 async function loadAnalysisDb() {
   if (analysisDb) return analysisDb;
 
-  const response = await fetch("./beyblade_x_part_analysis_db_v0_2.json?v=20260629-analysis1");
+  const response = await fetch("./beyblade_x_part_analysis_db_v0_2.json?v=20260629-ratchet-v16");
   if (!response.ok) {
     throw new Error("分析資料庫讀取失敗");
   }
@@ -249,6 +249,28 @@ function clampScore(value) {
   return Math.max(0, Math.min(10, Math.round(value * 10) / 10));
 }
 
+function getPartModifiers(part) {
+  if (!part) return {};
+
+  const modifiers = { ...(part.modifiers || {}) };
+  const bonusMap = {
+    attackBonus: "attack",
+    defenseBonus: "defense",
+    staminaBonus: "stamina",
+    stabilityBonus: "stability",
+    burstRiskModifier: "burstRisk",
+    controlDifficultyModifier: "controlDifficulty"
+  };
+
+  Object.entries(bonusMap).forEach(([sourceKey, targetKey]) => {
+    if (typeof part[sourceKey] === "number" && typeof modifiers[targetKey] !== "number") {
+      modifiers[targetKey] = part[sourceKey];
+    }
+  });
+
+  return modifiers;
+}
+
 function analyzeScores(blade, ratchet, bit) {
   const scores = {
     attack: blade?.scores?.attack ?? 5,
@@ -259,7 +281,7 @@ function analyzeScores(blade, ratchet, bit) {
   };
 
   [ratchet, bit].forEach(part => {
-    const modifiers = part?.modifiers || {};
+    const modifiers = getPartModifiers(part);
     Object.keys(scores).forEach(key => {
       if (typeof modifiers[key] === "number") scores[key] += modifiers[key];
     });
@@ -327,6 +349,9 @@ function hasTag(part, pattern) {
     ...(part?.typeTags || []),
     part?.role,
     part?.notes,
+    ...(part?.bestUse || []),
+    ...(part?.badUse || []),
+    ...(part?.simulationNotes || []),
     part?.enName,
     part?.zhName
   ].join(" ").toLowerCase();
@@ -363,6 +388,10 @@ function getStrengths(blade, ratchet, bit, scores) {
     strengths.push("固鎖與軸心標籤方向接近，相性較一致");
   }
 
+  if (ratchet?.recommendedBits?.includes(bit?.id)) {
+    strengths.push(`${bit.id} 符合此固鎖資料中的推薦軸心方向`);
+  }
+
   return strengths.length ? strengths : ["此配置沒有明顯突出優勢，建議以實測確認方向。"];
 }
 
@@ -374,6 +403,7 @@ function getWeaknesses(blade, ratchet, bit, scores) {
   if (scores.stamina < 5) weaknesses.push("後段持久可能不足");
   if (scores.stability < 5) weaknesses.push("穩定性偏低，可能容易晃動或失控");
   if (blade?.badBits?.includes(bit?.id)) weaknesses.push(`${bit.id} 在此上蓋資料中被列為不建議軸心`);
+  if (ratchet?.avoidBits?.includes(bit?.id)) weaknesses.push(`${bit.id} 在此固鎖資料中被列為應避免的軸心`);
   if (scores.controlDifficulty >= 7) weaknesses.push("操作難度偏高，對發射與控場要求較高");
 
   return weaknesses.length ? weaknesses : ["目前沒有明顯短板，但仍需要實戰確認。"];
@@ -407,8 +437,12 @@ function getRiskWarnings(blade, ratchet, bit, scores) {
     warnings.push("此配置操作難度偏高，實戰穩定性需要測試。");
   }
 
-  if (ratchet?.modifiers?.burstRisk > 0.25) {
+  if (getPartModifiers(ratchet).burstRisk > 0.25) {
     warnings.push("此固鎖的爆裂或失誤風險偏高，建議注意對攻擊型對手的穩定性。");
+  }
+
+  if (ratchet?.avoidBits?.includes(bit?.id)) {
+    warnings.push("目前軸心落在此固鎖資料的避免清單，建議優先測試其他軸心。");
   }
 
   return warnings;
