@@ -255,6 +255,11 @@ function validateRatchetRules(model, axis, ratchet) {
     return false;
   }
 
+  if (isNoRatchetModel(model) && fix && fix !== "-") {
+    alert("UX-19 無法使用固鎖。");
+    return false;
+  }
+
   if (getBaseModelCode(model) === "UX-16" && !isSimpleRatchet(fix)) {
     alert("時鐘幻象只能使用簡易固鎖");
     return false;
