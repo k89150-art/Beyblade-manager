@@ -1,10 +1,10 @@
 {
   "meta": {
     "name": "Beyblade X 零件分析資料庫",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "created": "2026-06-29",
     "purpose": "給 Codex 匯入網站使用：自由輸入玩家手上零件後，用零件資料即時計算配置，不是固定配置查表。",
-    "status": "目前已收集/分析可用的初版資料；不是最終完整大數據庫。未完全納入 WBO、Reddit、日本大型賽事與 YouTube 全量資料。",
+    "status": "已更新固鎖資料到 v1.6 seed；分析頁仍為實驗版，結果需搭配實戰驗證。",
     "rules": [
       "中文名以使用者指定中文網站資料為準；找不到就標待確認，不自行翻譯。",
       "verifiedCombos 只作為加權參考，不限制玩家自由輸入配置。",
@@ -27,7 +27,9 @@
         "url": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/",
         "usage": "官方產品/系列存在性"
       }
-    ]
+    ],
+    "updated": "2026-06-29",
+    "ratchetsSource": "ratchetsSeed_v1_6_full / uploaded_pdf_model_table_20260515"
   },
   "blades": {
     "鳳凰飛翼": {
@@ -749,171 +751,1414 @@
     }
   },
   "ratchets": {
-    "1-60": {
-      "id": "1-60",
+    "0-60": {
+      "id": "0-60",
+      "category": "ratchets",
       "height": 60,
+      "gearCount": 0,
+      "role": "低資料量穩定型測試",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
-        "attack"
+        "attack",
+        "defense",
+        "stamina",
+        "balance"
       ],
       "modifiers": {
-        "attack": 1.5,
-        "defense": -0.5,
-        "stamina": -0.5,
-        "stability": -0.3,
-        "burstRisk": 0.3
+        "attack": -0.1,
+        "defense": 0.6,
+        "stamina": 0.4,
+        "stability": 0.6,
+        "burstRisk": -0.05,
+        "controlDifficulty": 0
       },
-      "notes": "撞擊集中、爆發高，但容錯低。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "bestUse": [
+        "穩定測試",
+        "防守持久",
+        "低資料量配置"
+      ],
+      "badUse": [
+        "高爆發攻擊",
+        "需要明確攻擊角度的配置"
+      ],
+      "recommendedBits": [
+        "H",
+        "B",
+        "O",
+        "DB",
+        "FB"
+      ],
+      "avoidBits": [
+        "LR",
+        "R",
+        "GF",
+        "FF",
+        "A"
+      ],
+      "simulationNotes": [
+        "0系固鎖資料量較少，先以穩定/防守備案處理。",
+        "60高度相對安全，可作低資料量測試。",
+        "不應直接給高信心推薦。"
+      ],
+      "notes": "低資料量穩定型測試；0系固鎖資料量較少，先以穩定/防守備案處理。；60高度相對安全，可作低資料量測試。；不應直接給高信心推薦。",
+      "evidenceLevel": "D",
+      "confidence": 36
+    },
+    "0-70": {
+      "id": "0-70",
+      "category": "ratchets",
+      "height": 70,
+      "gearCount": 0,
+      "role": "高位特殊配置 / 平衡測試",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "high",
+        "attack",
+        "defense",
+        "balance"
+      ],
+      "modifiers": {
+        "attack": 0,
+        "defense": 0.5,
+        "stamina": 0.1,
+        "stability": 0.1,
+        "burstRisk": 0.2,
+        "controlDifficulty": 0.2
+      },
+      "bestUse": [
+        "特殊測試",
+        "高位平衡",
+        "防禦實驗"
+      ],
+      "badUse": [
+        "低位攻擊",
+        "高信心主力"
+      ],
+      "recommendedBits": [
+        "Z",
+        "H",
+        "P",
+        "T"
+      ],
+      "avoidBits": [
+        "LR",
+        "FF",
+        "GF",
+        "A"
+      ],
+      "simulationNotes": [
+        "0-70 屬低資料量高位特殊固鎖。",
+        "70高度有一定重心風險，但低於80/85高度。",
+        "適合實驗，不建議自動推薦為主力。"
+      ],
+      "notes": "高位特殊配置 / 平衡測試；0-70 屬低資料量高位特殊固鎖。；70高度有一定重心風險，但低於80/85高度。；適合實驗，不建議自動推薦為主力。",
+      "evidenceLevel": "D",
+      "confidence": 34
+    },
+    "0-80": {
+      "id": "0-80",
+      "category": "ratchets",
+      "height": 80,
+      "gearCount": 0,
+      "role": "高位防禦 / 特殊穩定測試",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "high",
+        "attack",
+        "defense",
+        "balance"
+      ],
+      "modifiers": {
+        "attack": -0.2,
+        "defense": 0.6,
+        "stamina": -0.2,
+        "stability": -0.4,
+        "burstRisk": 0.25,
+        "controlDifficulty": 0.3
+      },
+      "bestUse": [
+        "特殊高位防禦",
+        "實驗配置",
+        "冷門測試"
+      ],
+      "badUse": [
+        "高速攻擊",
+        "低位爆發攻擊",
+        "高信心主力"
+      ],
+      "recommendedBits": [
+        "GB",
+        "DB",
+        "H",
+        "C",
+        "E"
+      ],
+      "avoidBits": [
+        "LR",
+        "R",
+        "GF",
+        "FF",
+        "A"
+      ],
+      "simulationNotes": [
+        "0-80 高度達80，必須觸發高位風險提示。",
+        "0凸數帶來的接觸與鎖定特性資料不足，先以lowData模型處理。",
+        "適合特殊測試，不建議直接列為主力推薦。"
+      ],
+      "notes": "高位防禦 / 特殊穩定測試；0-80 高度達80，必須觸發高位風險提示。；0凸數帶來的接觸與鎖定特性資料不足，先以lowData模型處理。；適合特殊測試，不建議直接列為主力推薦。",
+      "evidenceLevel": "D",
+      "confidence": 30
     },
     "1-50": {
       "id": "1-50",
+      "category": "ratchets",
       "height": 50,
+      "gearCount": 1,
+      "role": "低位爆發攻擊",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
+        "low",
         "attack",
-        "low"
+        "defense",
+        "stamina",
+        "balance",
+        "burstRisk",
+        "controlRisk"
+      ],
+      "modifiers": {
+        "attack": 1.8,
+        "defense": -0.4,
+        "stamina": -0.5,
+        "stability": -0.6,
+        "burstRisk": 0.7,
+        "controlDifficulty": 0.7
+      },
+      "bestUse": [
+        "攻擊型",
+        "低位重擊",
+        "爆發型CX"
+      ],
+      "badUse": [
+        "持久型",
+        "新手穩定配置",
+        "防守站場"
+      ],
+      "recommendedBits": [
+        "LR",
+        "R",
+        "I",
+        "F",
+        "A"
+      ],
+      "avoidBits": [
+        "B",
+        "FB",
+        "O",
+        "DB"
+      ],
+      "simulationNotes": [
+        "1-50 是低位高爆發固鎖，攻擊上限高。",
+        "穩定與爆裂風險較高，適合攻擊型上蓋或CX攻擊配置。",
+        "若搭純持久軸，方向通常衝突。"
+      ],
+      "notes": "低位爆發攻擊；1-50 是低位高爆發固鎖，攻擊上限高。；穩定與爆裂風險較高，適合攻擊型上蓋或CX攻擊配置。；若搭純持久軸，方向通常衝突。",
+      "evidenceLevel": "B",
+      "confidence": 72
+    },
+    "1-60": {
+      "id": "1-60",
+      "category": "ratchets",
+      "height": 60,
+      "gearCount": 1,
+      "role": "低位攻擊",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "attack",
+        "defense",
+        "stamina",
+        "burstRisk",
+        "controlRisk"
       ],
       "modifiers": {
         "attack": 1.6,
-        "defense": -0.4,
-        "stamina": -0.4,
-        "stability": 0.2,
-        "burstRisk": 0.2
+        "defense": -0.2,
+        "stamina": -0.3,
+        "stability": -0.2,
+        "burstRisk": 0.45,
+        "controlDifficulty": 0.45
       },
-      "notes": "更低重心攻擊，需注意與上層/軸心相性。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
-    },
-    "3-60": {
-      "id": "3-60",
-      "height": 60,
-      "typeTags": [
-        "attack",
-        "balance"
+      "bestUse": [
+        "攻擊型上蓋",
+        "低位集中衝撞",
+        "爆發攻擊"
       ],
-      "modifiers": {
-        "attack": 1,
-        "defense": 0.2,
-        "stamina": 0,
-        "stability": 0.5,
-        "burstRisk": 0
-      },
-      "notes": "泛用攻擊/平衡固鎖。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
-    },
-    "4-50": {
-      "id": "4-50",
-      "height": 50,
-      "typeTags": [
-        "attack",
-        "low"
+      "badUse": [
+        "純持久",
+        "保守防禦"
       ],
-      "modifiers": {
-        "attack": 1.2,
-        "defense": 0,
-        "stamina": -0.2,
-        "stability": 0.8,
-        "burstRisk": 0
-      },
-      "notes": "低重心，常見於攻擊效率高的配置。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "recommendedBits": [
+        "LR",
+        "R",
+        "F",
+        "I",
+        "A",
+        "T"
+      ],
+      "avoidBits": [
+        "B",
+        "FB",
+        "O"
+      ],
+      "simulationNotes": [
+        "1-60 是攻擊型常用低位固鎖。",
+        "比1-50更穩一點，但仍有攻擊型風險。",
+        "適合暴力攻擊、低位攻擊與高壓配置。"
+      ],
+      "notes": "低位攻擊；1-60 是攻擊型常用低位固鎖。；比1-50更穩一點，但仍有攻擊型風險。；適合暴力攻擊、低位攻擊與高壓配置。",
+      "evidenceLevel": "B",
+      "confidence": 78
     },
-    "4-55": {
-      "id": "4-55",
-      "height": 55,
+    "1-70": {
+      "id": "1-70",
+      "category": "ratchets",
+      "height": 70,
+      "gearCount": 1,
+      "role": "高位攻擊角度",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
+        "high",
         "attack",
-        "balance",
-        "low"
+        "defense",
+        "stamina",
+        "burstRisk",
+        "controlRisk"
       ],
       "modifiers": {
         "attack": 0.9,
-        "defense": 0.2,
-        "stamina": 0,
-        "stability": 0.7,
-        "burstRisk": 0
+        "defense": -0.2,
+        "stamina": -0.3,
+        "stability": -0.5,
+        "burstRisk": 0.45,
+        "controlDifficulty": 0.5
       },
-      "notes": "低重心，可做攻擊/耐久混合。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "bestUse": [
+        "高位攻擊角度",
+        "特殊攻擊測試"
+      ],
+      "badUse": [
+        "純持久",
+        "防守站場",
+        "高信心主力"
+      ],
+      "recommendedBits": [
+        "K",
+        "R",
+        "UF",
+        "P"
+      ],
+      "avoidBits": [
+        "B",
+        "FB",
+        "O"
+      ],
+      "simulationNotes": [
+        "1-70 保留1系攻擊特性，但70高度提高重心風險。",
+        "可作特殊攻擊角度測試。",
+        "若上蓋本身高反彈，需提示自爆與被抬起風險。"
+      ],
+      "notes": "高位攻擊角度；1-70 保留1系攻擊特性，但70高度提高重心風險。；可作特殊攻擊角度測試。；若上蓋本身高反彈，需提示自爆與被抬起風險。",
+      "evidenceLevel": "C",
+      "confidence": 56
     },
-    "5-60": {
-      "id": "5-60",
-      "height": 60,
+    "1-80": {
+      "id": "1-80",
+      "category": "ratchets",
+      "height": 80,
+      "gearCount": 1,
+      "role": "高位攻擊角度 / 高風險測試",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
+        "high",
         "attack",
+        "defense",
+        "stamina",
+        "balance",
+        "burstRisk",
+        "controlRisk"
+      ],
+      "modifiers": {
+        "attack": 0.5,
+        "defense": -0.3,
+        "stamina": -0.5,
+        "stability": -0.8,
+        "burstRisk": 0.65,
+        "controlDifficulty": 0.8
+      },
+      "bestUse": [
+        "高位攻擊角度測試",
+        "娛樂或特殊實驗"
+      ],
+      "badUse": [
+        "持久型",
+        "穩定防禦",
+        "主力配置"
+      ],
+      "recommendedBits": [
+        "R",
+        "A",
+        "GF",
+        "F"
+      ],
+      "avoidBits": [
+        "B",
+        "FB",
+        "O",
+        "DB",
+        "S"
+      ],
+      "simulationNotes": [
+        "1系固鎖本身偏攻擊，但80高度會大幅增加晃動與被抬起風險。",
+        "如果搭高反彈上蓋，應給明顯自爆與失控警告。",
+        "不建議系統自動推薦，除非使用者明確想測高風險攻擊。"
+      ],
+      "notes": "高位攻擊角度 / 高風險測試；1系固鎖本身偏攻擊，但80高度會大幅增加晃動與被抬起風險。；如果搭高反彈上蓋，應給明顯自爆與失控警告。；不建議系統自動推薦，除非使用者明確想測高風險攻擊。",
+      "evidenceLevel": "D",
+      "confidence": 28
+    },
+    "2-60": {
+      "id": "2-60",
+      "category": "ratchets",
+      "height": 60,
+      "gearCount": 2,
+      "role": "低資料量平衡備案",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "stamina",
+        "balance"
+      ],
+      "modifiers": {
+        "attack": 0.5,
+        "defense": 0.1,
+        "stamina": 0,
+        "stability": 0.1,
+        "burstRisk": 0.2,
+        "controlDifficulty": 0.1
+      },
+      "bestUse": [
+        "平衡測試",
+        "低資料量備案",
+        "左旋原廠配置參考"
+      ],
+      "badUse": [
+        "高信心主力",
+        "純持久競技配置"
+      ],
+      "recommendedBits": [
+        "P",
+        "T",
+        "R",
+        "C"
+      ],
+      "avoidBits": [
+        "FB",
+        "B"
+      ],
+      "simulationNotes": [
+        "2-60 屬低資料量平衡固鎖。",
+        "可作為特定原廠或左旋配置參考。",
+        "分析時不應給太高信心。"
+      ],
+      "notes": "低資料量平衡備案；2-60 屬低資料量平衡固鎖。；可作為特定原廠或左旋配置參考。；分析時不應給太高信心。",
+      "evidenceLevel": "D",
+      "confidence": 35
+    },
+    "2-70": {
+      "id": "2-70",
+      "category": "ratchets",
+      "height": 70,
+      "gearCount": 2,
+      "role": "低資料量高位平衡",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "high",
+        "attack",
+        "stamina",
+        "balance",
+        "burstRisk"
+      ],
+      "modifiers": {
+        "attack": 0.2,
+        "defense": 0.1,
+        "stamina": -0.2,
+        "stability": -0.4,
+        "burstRisk": 0.3,
+        "controlDifficulty": 0.3
+      },
+      "bestUse": [
+        "高位平衡",
+        "特殊測試"
+      ],
+      "badUse": [
+        "高信心主力",
+        "低位攻擊",
+        "純持久"
+      ],
+      "recommendedBits": [
+        "P",
+        "T",
+        "H"
+      ],
+      "avoidBits": [
+        "LR",
+        "B",
+        "FB"
+      ],
+      "simulationNotes": [
+        "2-70 是高位平衡備案，資料量不足。",
+        "70高度帶來一定被抬起風險。",
+        "若可選3-60、5-60、9-60，通常不會優先選2-70。"
+      ],
+      "notes": "低資料量高位平衡；2-70 是高位平衡備案，資料量不足。；70高度帶來一定被抬起風險。；若可選3-60、5-60、9-60，通常不會優先選2-70。",
+      "evidenceLevel": "D",
+      "confidence": 30
+    },
+    "2-80": {
+      "id": "2-80",
+      "category": "ratchets",
+      "height": 80,
+      "gearCount": 2,
+      "role": "高位平衡 / 低資料測試",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "high",
+        "attack",
+        "defense",
+        "stamina",
+        "balance",
+        "burstRisk",
+        "controlRisk"
+      ],
+      "modifiers": {
+        "attack": 0.1,
+        "defense": 0,
+        "stamina": -0.4,
+        "stability": -0.6,
+        "burstRisk": 0.45,
+        "controlDifficulty": 0.5
+      },
+      "bestUse": [
+        "特殊平衡測試",
+        "變體配置"
+      ],
+      "badUse": [
+        "高信心主力",
+        "純持久",
+        "穩定防禦"
+      ],
+      "recommendedBits": [
+        "GP",
+        "E",
+        "Q",
+        "P"
+      ],
+      "avoidBits": [
+        "LR",
+        "GF",
+        "FF",
+        "A"
+      ],
+      "simulationNotes": [
+        "2-80 屬高位低資料固鎖，容易有重心與穩定風險。",
+        "若搭攻擊軸，需提示自爆與被抬起風險。",
+        "目前僅能作理論分析。"
+      ],
+      "notes": "高位平衡 / 低資料測試；2-80 屬高位低資料固鎖，容易有重心與穩定風險。；若搭攻擊軸，需提示自爆與被抬起風險。；目前僅能作理論分析。",
+      "evidenceLevel": "D",
+      "confidence": 30
+    },
+    "3-60": {
+      "id": "3-60",
+      "category": "ratchets",
+      "height": 60,
+      "gearCount": 3,
+      "role": "萬用穩定基準",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "attack",
+        "stamina",
+        "balance"
+      ],
+      "modifiers": {
+        "attack": 0.6,
+        "defense": 0.6,
+        "stamina": 0.5,
+        "stability": 1.1,
+        "burstRisk": -0.2,
+        "controlDifficulty": -0.2
+      },
+      "bestUse": [
+        "萬用配置",
+        "平衡",
+        "持久",
+        "穩定攻擊"
+      ],
+      "badUse": [
+        "極端低位爆發需求"
+      ],
+      "recommendedBits": [
+        "H",
+        "B",
+        "R",
+        "P",
+        "O",
+        "FB"
+      ],
+      "avoidBits": [],
+      "simulationNotes": [
+        "3-60 是萬用穩定基準固鎖。",
+        "適合多數上蓋與多數軸心。",
+        "若不確定配置方向，3-60通常是安全測試選項。"
+      ],
+      "notes": "萬用穩定基準；3-60 是萬用穩定基準固鎖。；適合多數上蓋與多數軸心。；若不確定配置方向，3-60通常是安全測試選項。",
+      "evidenceLevel": "B",
+      "confidence": 76
+    },
+    "3-70": {
+      "id": "3-70",
+      "category": "ratchets",
+      "height": 70,
+      "gearCount": 3,
+      "role": "3-60高位版本 / 高位平衡",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "high",
+        "attack",
+        "stamina",
+        "balance"
+      ],
+      "modifiers": {
+        "attack": 0.4,
+        "defense": 0.1,
+        "stamina": -0.1,
+        "stability": -0.2,
+        "burstRisk": 0.25,
+        "controlDifficulty": 0.25
+      },
+      "bestUse": [
+        "高位平衡",
+        "特殊攻擊角度",
+        "實驗配置"
+      ],
+      "badUse": [
+        "純持久主力",
+        "低位攻擊"
+      ],
+      "recommendedBits": [
+        "J",
+        "P",
+        "T",
+        "E",
+        "A"
+      ],
+      "avoidBits": [
+        "B",
+        "FB"
+      ],
+      "simulationNotes": [
+        "3-70 可視為3-60的高位版本。",
+        "70高度增加晃動與被抬起風險。",
+        "適合特殊角度或特定原廠配置，不是穩定主力首選。"
+      ],
+      "notes": "3-60高位版本 / 高位平衡；3-70 可視為3-60的高位版本。；70高度增加晃動與被抬起風險。；適合特殊角度或特定原廠配置，不是穩定主力首選。",
+      "evidenceLevel": "C",
+      "confidence": 45
+    },
+    "3-80": {
+      "id": "3-80",
+      "category": "ratchets",
+      "height": 80,
+      "gearCount": 3,
+      "role": "高位風險固鎖",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "high",
+        "attack",
+        "defense",
+        "stamina",
+        "burstRisk",
+        "controlRisk"
+      ],
+      "modifiers": {
+        "attack": -0.1,
+        "defense": 0.2,
+        "stamina": -0.4,
+        "stability": -0.7,
+        "burstRisk": 0.4,
+        "controlDifficulty": 0.5
+      },
+      "bestUse": [
+        "早期防禦復現",
+        "高位實驗"
+      ],
+      "badUse": [
+        "高信心主力",
+        "高速攻擊",
+        "純持久"
+      ],
+      "recommendedBits": [
+        "N",
+        "H",
+        "B"
+      ],
+      "avoidBits": [
+        "LR",
+        "R",
+        "GF",
+        "FF"
+      ],
+      "simulationNotes": [
+        "3-80 高度風險明顯。",
+        "若搭攻擊軸，應大幅提高自爆與失衡警告。",
+        "大多數情況下，3-60或9-60更安全。"
+      ],
+      "notes": "高位風險固鎖；3-80 高度風險明顯。；若搭攻擊軸，應大幅提高自爆與失衡警告。；大多數情況下，3-60或9-60更安全。",
+      "evidenceLevel": "D",
+      "confidence": 32
+    },
+    "3-85": {
+      "id": "3-85",
+      "category": "ratchets",
+      "height": 85,
+      "gearCount": 3,
+      "role": "超高位特殊固鎖 / 防禦實驗",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "high",
+        "attack",
+        "defense",
+        "stamina",
+        "balance",
+        "burstRisk",
+        "controlRisk"
+      ],
+      "modifiers": {
+        "attack": -0.1,
+        "defense": 0.4,
+        "stamina": -0.6,
+        "stability": -1,
+        "burstRisk": 0.65,
+        "controlDifficulty": 0.8
+      },
+      "bestUse": [
+        "特殊高位防禦",
+        "實驗型配置"
+      ],
+      "badUse": [
+        "攻擊型",
+        "純持久",
+        "主力穩定配置"
+      ],
+      "recommendedBits": [
+        "BS",
+        "GB",
+        "HN",
+        "A"
+      ],
+      "avoidBits": [
+        "LR",
+        "R",
+        "GF",
+        "FF",
+        "Q"
+      ],
+      "simulationNotes": [
+        "3-85 是高度非常高的固鎖，必須給高位風險警告。",
+        "即使搭防禦軸，也可能因重心過高而被抬起或失衡。",
+        "只適合特殊用途，不應自動推薦。"
+      ],
+      "notes": "超高位特殊固鎖 / 防禦實驗；3-85 是高度非常高的固鎖，必須給高位風險警告。；即使搭防禦軸，也可能因重心過高而被抬起或失衡。；只適合特殊用途，不應自動推薦。",
+      "evidenceLevel": "D",
+      "confidence": 26
+    },
+    "4-50": {
+      "id": "4-50",
+      "category": "ratchets",
+      "height": 50,
+      "gearCount": 4,
+      "role": "低位攻擊 / 低重心測試",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "attack",
+        "defense",
+        "stamina",
         "balance"
       ],
       "modifiers": {
         "attack": 1,
-        "defense": 0.5,
-        "stamina": 0,
-        "stability": 1,
-        "burstRisk": -0.5
+        "defense": 0.1,
+        "stamina": -0.1,
+        "stability": 0.4,
+        "burstRisk": 0.25,
+        "controlDifficulty": 0.25
       },
-      "notes": "泛用、穩定，攻擊與平衡都可用。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "bestUse": [
+        "低位攻擊",
+        "低重心平衡",
+        "攻擊測試"
+      ],
+      "badUse": [
+        "純持久",
+        "站樁防禦"
+      ],
+      "recommendedBits": [
+        "FF",
+        "R",
+        "K",
+        "P",
+        "I"
+      ],
+      "avoidBits": [
+        "B",
+        "FB",
+        "DB"
+      ],
+      "simulationNotes": [
+        "4-50 是低位但比1系更穩的攻擊/平衡測試固鎖。",
+        "適合攻擊上蓋或需要低重心的配置。",
+        "資料信心中等，應保留實測提醒。"
+      ],
+      "notes": "低位攻擊 / 低重心測試；4-50 是低位但比1系更穩的攻擊/平衡測試固鎖。；適合攻擊上蓋或需要低重心的配置。；資料信心中等，應保留實測提醒。",
+      "evidenceLevel": "C",
+      "confidence": 62
     },
-    "5-70": {
-      "id": "5-70",
-      "height": 70,
+    "4-55": {
+      "id": "4-55",
+      "category": "ratchets",
+      "height": 55,
+      "gearCount": 4,
+      "role": "CX低位穩定 / 持久",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "attack",
+        "stamina",
+        "balance"
+      ],
+      "modifiers": {
+        "attack": 0.1,
+        "defense": 0.3,
+        "stamina": 0.5,
+        "stability": 0.7,
+        "burstRisk": 0.05,
+        "controlDifficulty": 0
+      },
+      "bestUse": [
+        "CX持久",
+        "低位穩定",
+        "中低位控場"
+      ],
+      "badUse": [
+        "高爆發攻擊"
+      ],
+      "recommendedBits": [
+        "LO",
+        "Y",
+        "B",
+        "H",
+        "O"
+      ],
+      "avoidBits": [
+        "LR",
+        "R",
+        "FF"
+      ],
+      "simulationNotes": [
+        "4-55 是低位穩定型固鎖，常見於CX持久或低位穩定方向。",
+        "適合搭LO、Y等偏持久軸心。",
+        "若搭高機動攻擊軸，方向可能衝突。"
+      ],
+      "notes": "CX低位穩定 / 持久；4-55 是低位穩定型固鎖，常見於CX持久或低位穩定方向。；適合搭LO、Y等偏持久軸心。；若搭高機動攻擊軸，方向可能衝突。",
+      "evidenceLevel": "C",
+      "confidence": 50
+    },
+    "4-60": {
+      "id": "4-60",
+      "category": "ratchets",
+      "height": 60,
+      "gearCount": 4,
+      "role": "早期中庸平衡固鎖",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
         "balance"
       ],
       "modifiers": {
-        "attack": 0.3,
-        "defense": 0.6,
-        "stamina": 0.3,
+        "attack": 0.1,
+        "defense": 0.2,
+        "stamina": 0.1,
         "stability": 0.2,
-        "burstRisk": 0
+        "burstRisk": 0.1,
+        "controlDifficulty": 0
       },
-      "notes": "較高身位的均衡固鎖，需注意被抬起。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "bestUse": [
+        "早期平衡",
+        "普通測試",
+        "中庸配置"
+      ],
+      "badUse": [
+        "高信心競技主力"
+      ],
+      "recommendedBits": [
+        "T",
+        "P",
+        "H",
+        "R",
+        "LF"
+      ],
+      "avoidBits": [],
+      "simulationNotes": [
+        "4-60 是早期中庸固鎖，無明顯專精。",
+        "可用於一般測試，但上限不應高估。",
+        "若有3-60、5-60、9-60，通常那些更優先。"
+      ],
+      "notes": "早期中庸平衡固鎖；4-60 是早期中庸固鎖，無明顯專精。；可用於一般測試，但上限不應高估。；若有3-60、5-60、9-60，通常那些更優先。",
+      "evidenceLevel": "C",
+      "confidence": 45
     },
-    "6-60": {
-      "id": "6-60",
-      "height": 60,
+    "4-70": {
+      "id": "4-70",
+      "category": "ratchets",
+      "height": 70,
+      "gearCount": 4,
+      "role": "高位平衡",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
+        "low",
+        "high",
+        "attack",
+        "stamina",
+        "balance"
+      ],
+      "modifiers": {
+        "attack": 0.1,
+        "defense": 0.3,
+        "stamina": 0,
+        "stability": -0.1,
+        "burstRisk": 0.25,
+        "controlDifficulty": 0.2
+      },
+      "bestUse": [
+        "高位平衡",
+        "中速控場",
+        "特殊配置"
+      ],
+      "badUse": [
+        "低位爆發",
+        "高信心持久主力"
+      ],
+      "recommendedBits": [
+        "TP",
+        "T",
+        "P",
+        "H",
+        "LF",
+        "E"
+      ],
+      "avoidBits": [
+        "LR",
+        "FF"
+      ],
+      "simulationNotes": [
+        "4-70 是高位平衡固鎖。",
+        "70高度需要注意晃動與被抬起風險。",
+        "適合平衡上蓋與中速控場，不適合極端攻擊。"
+      ],
+      "notes": "高位平衡；4-70 是高位平衡固鎖。；70高度需要注意晃動與被抬起風險。；適合平衡上蓋與中速控場，不適合極端攻擊。",
+      "evidenceLevel": "C",
+      "confidence": 42
+    },
+    "4-80": {
+      "id": "4-80",
+      "category": "ratchets",
+      "height": 80,
+      "gearCount": 4,
+      "role": "高位平衡 / 早期配置延伸",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "high",
+        "attack",
+        "defense",
+        "stamina",
+        "balance",
+        "burstRisk"
+      ],
+      "modifiers": {
+        "attack": 0,
+        "defense": 0.2,
+        "stamina": -0.3,
+        "stability": -0.5,
+        "burstRisk": 0.35,
+        "controlDifficulty": 0.4
+      },
+      "bestUse": [
+        "防禦測試",
+        "平衡測試",
+        "早期配置復現"
+      ],
+      "badUse": [
+        "高速攻擊",
+        "低位爆發",
+        "高信心持久主力"
+      ],
+      "recommendedBits": [
+        "HN",
+        "N",
+        "GB",
+        "B",
+        "LF",
+        "LR"
+      ],
+      "avoidBits": [
+        "GF",
+        "FF",
+        "A",
+        "Q"
+      ],
+      "simulationNotes": [
+        "4-80 在早期配置中常見，但80高度仍有被抬起與晃動風險。",
+        "若上蓋本身持久或防禦穩定，可作低中信心分析。",
+        "若搭攻擊軸，應降低穩定分數。"
+      ],
+      "notes": "高位平衡 / 早期配置延伸；4-80 在早期配置中常見，但80高度仍有被抬起與晃動風險。；若上蓋本身持久或防禦穩定，可作低中信心分析。；若搭攻擊軸，應降低穩定分數。",
+      "evidenceLevel": "C",
+      "confidence": 42
+    },
+    "5-60": {
+      "id": "5-60",
+      "category": "ratchets",
+      "height": 60,
+      "gearCount": 5,
+      "role": "穩定攻擊 / 攻防平衡",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "attack",
+        "defense",
+        "balance"
+      ],
+      "modifiers": {
+        "attack": 0.7,
+        "defense": 0.8,
+        "stamina": 0.4,
+        "stability": 0.8,
+        "burstRisk": -0.05,
+        "controlDifficulty": -0.05
+      },
+      "bestUse": [
+        "穩定攻擊",
+        "平衡",
+        "左旋維持",
+        "防禦反擊"
+      ],
+      "badUse": [
+        "極端低位爆發"
+      ],
+      "recommendedBits": [
+        "E",
+        "R",
+        "P",
+        "H",
+        "FB",
+        "T"
+      ],
+      "avoidBits": [],
+      "simulationNotes": [
+        "5-60 是穩定攻防平衡固鎖。",
+        "適合攻擊穩定化、平衡配置與左旋維持。",
+        "泛用性高，適合多數中信心配置。"
+      ],
+      "notes": "穩定攻擊 / 攻防平衡；5-60 是穩定攻防平衡固鎖。；適合攻擊穩定化、平衡配置與左旋維持。；泛用性高，適合多數中信心配置。",
+      "evidenceLevel": "B",
+      "confidence": 74
+    },
+    "5-70": {
+      "id": "5-70",
+      "category": "ratchets",
+      "height": 70,
+      "gearCount": 5,
+      "role": "左旋 / 平衡中長局",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "high",
+        "attack",
         "stamina",
         "balance"
       ],
       "modifiers": {
         "attack": 0.2,
         "defense": 0.5,
-        "stamina": 0.6,
-        "stability": 0.8,
-        "burstRisk": -0.2
+        "stamina": 0.3,
+        "stability": 0.2,
+        "burstRisk": 0.15,
+        "controlDifficulty": 0.15
       },
-      "notes": "穩定/持久補正。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "bestUse": [
+        "左旋維持",
+        "中長局平衡",
+        "高位控場"
+      ],
+      "badUse": [
+        "低位爆發",
+        "高速攻擊"
+      ],
+      "recommendedBits": [
+        "L",
+        "E",
+        "P",
+        "H",
+        "O"
+      ],
+      "avoidBits": [
+        "LR",
+        "FF"
+      ],
+      "simulationNotes": [
+        "5-70 是5系高位平衡固鎖。",
+        "70高度帶來一點風險，但比80高度安全。",
+        "適合左旋或中長局平衡配置。"
+      ],
+      "notes": "左旋 / 平衡中長局；5-70 是5系高位平衡固鎖。；70高度帶來一點風險，但比80高度安全。；適合左旋或中長局平衡配置。",
+      "evidenceLevel": "C",
+      "confidence": 48
     },
-    "7-60": {
-      "id": "7-60",
-      "height": 60,
+    "5-80": {
+      "id": "5-80",
+      "category": "ratchets",
+      "height": 80,
+      "gearCount": 5,
+      "role": "高位重量平衡 / 重型防禦測試",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
+        "low",
+        "high",
+        "attack",
+        "defense",
+        "stamina",
+        "balance",
+        "weight"
+      ],
+      "modifiers": {
+        "attack": 0.1,
+        "defense": 0.5,
+        "stamina": -0.2,
+        "stability": -0.2,
+        "burstRisk": 0.25,
+        "controlDifficulty": 0.35
+      },
+      "bestUse": [
+        "重型平衡",
+        "高位防禦",
+        "反擊測試"
+      ],
+      "badUse": [
+        "低位攻擊",
+        "純持久主力"
+      ],
+      "recommendedBits": [
+        "E",
+        "H",
+        "T",
+        "GB",
+        "Q",
+        "GF"
+      ],
+      "avoidBits": [
+        "LR",
+        "FF",
+        "A"
+      ],
+      "simulationNotes": [
+        "5系本身穩定感較好，但80高度仍會拉高重心。",
+        "適合重型上蓋做高位反擊或防禦測試。",
+        "若搭持久軸，需評估是否被更低位持久配置拖贏。"
+      ],
+      "notes": "高位重量平衡 / 重型防禦測試；5系本身穩定感較好，但80高度仍會拉高重心。；適合重型上蓋做高位反擊或防禦測試。；若搭持久軸，需評估是否被更低位持久配置拖贏。",
+      "evidenceLevel": "C",
+      "confidence": 44
+    },
+    "6-60": {
+      "id": "6-60",
+      "category": "ratchets",
+      "height": 60,
+      "gearCount": 6,
+      "role": "穩定 / 防禦備案",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "attack",
+        "defense",
+        "stamina",
+        "balance"
+      ],
+      "modifiers": {
+        "attack": 0.1,
+        "defense": 0.7,
+        "stamina": 0.4,
+        "stability": 0.8,
+        "burstRisk": -0.1,
+        "controlDifficulty": -0.05
+      },
+      "bestUse": [
+        "穩定",
+        "防禦",
+        "持久備案"
+      ],
+      "badUse": [
+        "高爆發攻擊"
+      ],
+      "recommendedBits": [
+        "H",
+        "B",
+        "LO",
+        "P",
+        "E"
+      ],
+      "avoidBits": [
+        "LR"
+      ],
+      "simulationNotes": [
+        "6-60 是穩定防禦型備案。",
+        "沒有9系抗爆裂優勢，但整體穩定。",
+        "適合防禦、持久、穩定型配置。"
+      ],
+      "notes": "穩定 / 防禦備案；6-60 是穩定防禦型備案。；沒有9系抗爆裂優勢，但整體穩定。；適合防禦、持久、穩定型配置。",
+      "evidenceLevel": "B",
+      "confidence": 62
+    },
+    "6-70": {
+      "id": "6-70",
+      "category": "ratchets",
+      "height": 70,
+      "gearCount": 6,
+      "role": "中高位穩定 / 平衡防禦",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "high",
+        "attack",
         "defense",
         "balance"
       ],
       "modifiers": {
-        "attack": 0,
-        "defense": 1,
-        "stamina": 0.5,
-        "stability": 1,
-        "burstRisk": -0.3
+        "attack": 0.1,
+        "defense": 0.6,
+        "stamina": 0.2,
+        "stability": 0.4,
+        "burstRisk": 0.1,
+        "controlDifficulty": 0.15
       },
-      "notes": "穩定性佳，防禦/平衡常用。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "bestUse": [
+        "平衡型",
+        "防禦型",
+        "穩定測試"
+      ],
+      "badUse": [
+        "低位爆發攻擊"
+      ],
+      "recommendedBits": [
+        "M",
+        "H",
+        "P",
+        "T",
+        "B"
+      ],
+      "avoidBits": [
+        "LR",
+        "GF",
+        "FF"
+      ],
+      "simulationNotes": [
+        "6-70 可視為6系穩定取向的中高位版本。",
+        "70高度仍需注意被抬起風險，但比80/85高度安全。",
+        "適合平衡或防禦上蓋。"
+      ],
+      "notes": "中高位穩定 / 平衡防禦；6-70 可視為6系穩定取向的中高位版本。；70高度仍需注意被抬起風險，但比80/85高度安全。；適合平衡或防禦上蓋。",
+      "evidenceLevel": "D",
+      "confidence": 42
+    },
+    "6-80": {
+      "id": "6-80",
+      "category": "ratchets",
+      "height": 80,
+      "gearCount": 6,
+      "role": "高位防禦 / CX防守測試",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "high",
+        "attack",
+        "defense",
+        "balance",
+        "burstRisk"
+      ],
+      "modifiers": {
+        "attack": -0.1,
+        "defense": 0.7,
+        "stamina": -0.1,
+        "stability": -0.3,
+        "burstRisk": 0.3,
+        "controlDifficulty": 0.35
+      },
+      "bestUse": [
+        "高位防禦",
+        "CX防禦測試",
+        "復刻/特殊配置"
+      ],
+      "badUse": [
+        "高速攻擊",
+        "低位爆發"
+      ],
+      "recommendedBits": [
+        "W",
+        "V",
+        "GN",
+        "H",
+        "B"
+      ],
+      "avoidBits": [
+        "LR",
+        "GF",
+        "FF",
+        "A"
+      ],
+      "simulationNotes": [
+        "6-80 防禦面向較明確，但80高度必須給穩定風險。",
+        "若搭防禦軸可作可測試配置；若搭攻擊軸則不優先。",
+        "CX原廠配置中有出現，可保留低中信心。"
+      ],
+      "notes": "高位防禦 / CX防守測試；6-80 防禦面向較明確，但80高度必須給穩定風險。；若搭防禦軸可作可測試配置；若搭攻擊軸則不優先。；CX原廠配置中有出現，可保留低中信心。",
+      "evidenceLevel": "C",
+      "confidence": 45
+    },
+    "7-55": {
+      "id": "7-55",
+      "category": "ratchets",
+      "height": 55,
+      "gearCount": 7,
+      "role": "低中位重量穩定 / 防禦平衡",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "attack",
+        "defense",
+        "balance",
+        "weight"
+      ],
+      "modifiers": {
+        "attack": 0.3,
+        "defense": 0.9,
+        "stamina": 0.4,
+        "stability": 1,
+        "burstRisk": -0.15,
+        "controlDifficulty": -0.1
+      },
+      "bestUse": [
+        "防禦平衡",
+        "穩定攻擊",
+        "低中位控場"
+      ],
+      "badUse": [
+        "極端爆發攻擊"
+      ],
+      "recommendedBits": [
+        "W",
+        "G",
+        "H",
+        "P",
+        "T",
+        "B"
+      ],
+      "avoidBits": [
+        "GF",
+        "FF",
+        "A"
+      ],
+      "simulationNotes": [
+        "7-55 高度較低且7系穩定，理論上很適合穩定型配置。",
+        "可視為7-60的低位版本，但資料量仍不足。",
+        "如果搭防禦或平衡上蓋，值得列為可測試。"
+      ],
+      "notes": "低中位重量穩定 / 防禦平衡；7-55 高度較低且7系穩定，理論上很適合穩定型配置。；可視為7-60的低位版本，但資料量仍不足。；如果搭防禦或平衡上蓋，值得列為可測試。",
+      "evidenceLevel": "D",
+      "confidence": 48
+    },
+    "7-60": {
+      "id": "7-60",
+      "category": "ratchets",
+      "height": 60,
+      "gearCount": 7,
+      "role": "重量穩定 / 防禦平衡",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "attack",
+        "defense",
+        "balance",
+        "weight"
+      ],
+      "modifiers": {
+        "attack": 0.4,
+        "defense": 1,
+        "stamina": 0.4,
+        "stability": 1,
+        "burstRisk": -0.15,
+        "controlDifficulty": -0.05
+      },
+      "bestUse": [
+        "重型平衡",
+        "防禦",
+        "穩定攻擊"
+      ],
+      "badUse": [
+        "極端高速攻擊"
+      ],
+      "recommendedBits": [
+        "T",
+        "H",
+        "P",
+        "B",
+        "R"
+      ],
+      "avoidBits": [
+        "LR"
+      ],
+      "simulationNotes": [
+        "7-60 具重量與穩定特色。",
+        "適合防禦、平衡與穩定攻擊。",
+        "若搭高風險攻擊軸，要注意重心與控制。"
+      ],
+      "notes": "重量穩定 / 防禦平衡；7-60 具重量與穩定特色。；適合防禦、平衡與穩定攻擊。；若搭高風險攻擊軸，要注意重心與控制。",
+      "evidenceLevel": "B",
+      "confidence": 72
     },
     "7-70": {
       "id": "7-70",
+      "category": "ratchets",
       "height": 70,
+      "gearCount": 7,
+      "role": "高位重量平衡",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
+        "low",
+        "high",
+        "attack",
+        "defense",
         "balance",
         "weight"
       ],
@@ -921,103 +2166,405 @@
         "attack": 0.2,
         "defense": 0.8,
         "stamina": 0.2,
-        "stability": 0,
-        "burstRisk": 0
+        "stability": 0.2,
+        "burstRisk": 0.15,
+        "controlDifficulty": 0.2
       },
-      "notes": "高重量/高身位方向，重心風險需評估。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "bestUse": [
+        "高位防禦",
+        "重量平衡",
+        "中速控場"
+      ],
+      "badUse": [
+        "低位攻擊",
+        "高爆發配置"
+      ],
+      "recommendedBits": [
+        "T",
+        "W",
+        "P",
+        "H"
+      ],
+      "avoidBits": [
+        "LR",
+        "FF"
+      ],
+      "simulationNotes": [
+        "7-70 保留7系重量穩定，但70高度有重心風險。",
+        "適合防禦或平衡上蓋。",
+        "如果需要更穩，可優先比較7-60或9-60。"
+      ],
+      "notes": "高位重量平衡；7-70 保留7系重量穩定，但70高度有重心風險。；適合防禦或平衡上蓋。；如果需要更穩，可優先比較7-60或9-60。",
+      "evidenceLevel": "B",
+      "confidence": 60
     },
     "7-80": {
       "id": "7-80",
+      "category": "ratchets",
       "height": 80,
+      "gearCount": 7,
+      "role": "高位重量防禦 / 高風險站場",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
-        "weight",
-        "high"
+        "high",
+        "attack",
+        "defense",
+        "stamina",
+        "balance",
+        "weight"
       ],
       "modifiers": {
-        "attack": 0.3,
+        "attack": 0.1,
         "defense": 0.8,
-        "stamina": 0,
-        "stability": -0.8,
-        "burstRisk": 0.2
+        "stamina": -0.2,
+        "stability": -0.3,
+        "burstRisk": 0.25,
+        "controlDifficulty": 0.4
       },
-      "notes": "高身位，搭重型攻擊需抽速支撐。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "bestUse": [
+        "高位防禦",
+        "重量反擊",
+        "特殊配置"
+      ],
+      "badUse": [
+        "純持久主力",
+        "高速攻擊"
+      ],
+      "recommendedBits": [
+        "GU",
+        "GP",
+        "H",
+        "B",
+        "UN"
+      ],
+      "avoidBits": [
+        "LR",
+        "GF",
+        "FF",
+        "A",
+        "Q"
+      ],
+      "simulationNotes": [
+        "7系帶來穩定與重量，但80高度仍是主要風險。",
+        "適合防禦或重型上蓋測試，不適合作為預設推薦。",
+        "若上蓋反彈高，應顯示被抬起和自爆風險。"
+      ],
+      "notes": "高位重量防禦 / 高風險站場；7系帶來穩定與重量，但80高度仍是主要風險。；適合防禦或重型上蓋測試，不適合作為預設推薦。；若上蓋反彈高，應顯示被抬起和自爆風險。",
+      "evidenceLevel": "D",
+      "confidence": 36
     },
     "8-70": {
       "id": "8-70",
+      "category": "ratchets",
       "height": 70,
+      "gearCount": 8,
+      "role": "高位防禦 / CX迎擊",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
+        "low",
+        "high",
+        "attack",
         "defense",
-        "balance"
+        "weight",
+        "burstRisk"
       ],
       "modifiers": {
         "attack": 0,
         "defense": 1,
-        "stamina": 0,
-        "stability": -0.5,
-        "burstRisk": 0
+        "stamina": 0.2,
+        "stability": -0.1,
+        "burstRisk": 0.35,
+        "controlDifficulty": 0.3
       },
-      "notes": "偏防禦但高度較高，後段晃動與被抬起需注意。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "bestUse": [
+        "防禦型CX",
+        "迎擊型",
+        "高位防守"
+      ],
+      "badUse": [
+        "高速攻擊",
+        "低位爆發"
+      ],
+      "recommendedBits": [
+        "UN",
+        "H",
+        "B",
+        "W"
+      ],
+      "avoidBits": [
+        "LR",
+        "R",
+        "FF"
+      ],
+      "simulationNotes": [
+        "8-70 防禦取向明顯，但70高度仍有風險。",
+        "適合防禦型CX或重型防守配置。",
+        "若搭攻擊軸，應提示定位衝突。"
+      ],
+      "notes": "高位防禦 / CX迎擊；8-70 防禦取向明顯，但70高度仍有風險。；適合防禦型CX或重型防守配置。；若搭攻擊軸，應提示定位衝突。",
+      "evidenceLevel": "C",
+      "confidence": 58
     },
     "9-60": {
       "id": "9-60",
+      "category": "ratchets",
       "height": 60,
+      "gearCount": 9,
+      "role": "抗爆裂 / 穩定 / 持久",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
+        "low",
+        "attack",
         "defense",
         "stamina",
         "balance"
       ],
       "modifiers": {
-        "attack": 0,
-        "defense": 1,
-        "stamina": 1,
-        "stability": 1.5,
-        "burstRisk": -0.5
+        "attack": 0.5,
+        "defense": 1.1,
+        "stamina": 0.6,
+        "stability": 1.1,
+        "burstRisk": -0.45,
+        "controlDifficulty": -0.1
       },
-      "notes": "低重心、穩定、泛用。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "bestUse": [
+        "持久",
+        "防禦",
+        "穩定平衡",
+        "抗爆裂攻擊"
+      ],
+      "badUse": [
+        "極端低位爆發需求"
+      ],
+      "recommendedBits": [
+        "B",
+        "H",
+        "FB",
+        "O",
+        "R",
+        "E"
+      ],
+      "avoidBits": [],
+      "simulationNotes": [
+        "9-60 是高穩定與抗爆裂的核心固鎖。",
+        "適合持久、防禦、穩定攻擊與平衡配置。",
+        "泛用性高，是多數配置的安全選項。"
+      ],
+      "notes": "抗爆裂 / 穩定 / 持久；9-60 是高穩定與抗爆裂的核心固鎖。；適合持久、防禦、穩定攻擊與平衡配置。；泛用性高，是多數配置的安全選項。",
+      "evidenceLevel": "B",
+      "confidence": 80
+    },
+    "9-65": {
+      "id": "9-65",
+      "category": "ratchets",
+      "height": 65,
+      "gearCount": 9,
+      "role": "抗爆裂 / 中低位持久穩定",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "attack",
+        "defense",
+        "stamina",
+        "balance"
+      ],
+      "modifiers": {
+        "attack": 0.3,
+        "defense": 1,
+        "stamina": 0.6,
+        "stability": 0.9,
+        "burstRisk": -0.35,
+        "controlDifficulty": -0.05
+      },
+      "bestUse": [
+        "持久",
+        "防禦",
+        "穩定平衡",
+        "抗爆裂"
+      ],
+      "badUse": [
+        "低位爆發攻擊"
+      ],
+      "recommendedBits": [
+        "B",
+        "LO",
+        "H",
+        "O",
+        "FB"
+      ],
+      "avoidBits": [
+        "GF",
+        "FF",
+        "A"
+      ],
+      "simulationNotes": [
+        "9-65 可視為9-60的中高一點版本。",
+        "保留9系抗爆裂與穩定優勢，但高度略高於60。",
+        "適合持久、防禦與穩定平衡配置。"
+      ],
+      "notes": "抗爆裂 / 中低位持久穩定；9-65 可視為9-60的中高一點版本。；保留9系抗爆裂與穩定優勢，但高度略高於60。；適合持久、防禦與穩定平衡配置。",
+      "evidenceLevel": "D",
+      "confidence": 50
     },
     "9-70": {
       "id": "9-70",
+      "category": "ratchets",
       "height": 70,
+      "gearCount": 9,
+      "role": "高位抗爆裂",
+      "source": "uploaded_pdf_model_table_20260515",
       "typeTags": [
+        "low",
+        "high",
+        "attack",
         "defense",
-        "stamina"
+        "stamina",
+        "balance"
+      ],
+      "modifiers": {
+        "attack": 0.2,
+        "defense": 1,
+        "stamina": 0.3,
+        "stability": 0.4,
+        "burstRisk": -0.25,
+        "controlDifficulty": 0.15
+      },
+      "bestUse": [
+        "高位防禦",
+        "抗爆裂平衡",
+        "持久測試"
+      ],
+      "badUse": [
+        "低位攻擊",
+        "高速爆發"
+      ],
+      "recommendedBits": [
+        "H",
+        "B",
+        "O",
+        "W",
+        "GR"
+      ],
+      "avoidBits": [
+        "LR",
+        "FF"
+      ],
+      "simulationNotes": [
+        "9-70 有9系抗爆裂優勢，但高度帶來重心風險。",
+        "適合高位防禦或持久測試。",
+        "若要更穩，9-60通常更安全。"
+      ],
+      "notes": "高位抗爆裂；9-70 有9系抗爆裂優勢，但高度帶來重心風險。；適合高位防禦或持久測試。；若要更穩，9-60通常更安全。",
+      "evidenceLevel": "B",
+      "confidence": 58
+    },
+    "9-80": {
+      "id": "9-80",
+      "category": "ratchets",
+      "height": 80,
+      "gearCount": 9,
+      "role": "高位抗爆裂但高風險",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "low",
+        "high",
+        "attack",
+        "defense",
+        "stamina",
+        "balance",
+        "controlRisk"
+      ],
+      "modifiers": {
+        "attack": -0.1,
+        "defense": 0.8,
+        "stamina": -0.2,
+        "stability": -0.5,
+        "burstRisk": -0.1,
+        "controlDifficulty": 0.45
+      },
+      "bestUse": [
+        "高位防禦測試",
+        "特殊抗爆裂配置"
+      ],
+      "badUse": [
+        "低位攻擊",
+        "高信心持久主力",
+        "高速攻擊"
+      ],
+      "recommendedBits": [
+        "H",
+        "W",
+        "N",
+        "K",
+        "B"
+      ],
+      "avoidBits": [
+        "LR",
+        "R",
+        "FF",
+        "I"
+      ],
+      "simulationNotes": [
+        "9-80 有9系抗爆裂特性，但80高度明顯增加穩定風險。",
+        "不能因為是9系就直接高分，必須扣高位風險。",
+        "適合特殊防禦測試，不宜作預設主力推薦。"
+      ],
+      "notes": "高位抗爆裂但高風險；9-80 有9系抗爆裂特性，但80高度明顯增加穩定風險。；不能因為是9系就直接高分，必須扣高位風險。；適合特殊防禦測試，不宜作預設主力推薦。",
+      "evidenceLevel": "D",
+      "confidence": 34
+    },
+    "M-85": {
+      "id": "M-85",
+      "category": "ratchets",
+      "height": 85,
+      "gearCount": null,
+      "role": "特殊高位固鎖 / 低資料型",
+      "source": "uploaded_pdf_model_table_20260515",
+      "typeTags": [
+        "high",
+        "attack",
+        "stamina",
+        "burstRisk",
+        "controlRisk"
       ],
       "modifiers": {
         "attack": 0,
-        "defense": 1,
-        "stamina": 0.7,
-        "stability": 0.2,
-        "burstRisk": -0.2
+        "defense": 0.3,
+        "stamina": -0.6,
+        "stability": -1,
+        "burstRisk": 0.65,
+        "controlDifficulty": 0.8
       },
-      "notes": "較高身位的防禦/持久。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
-    },
-    "1-70": {
-      "id": "1-70",
-      "height": 70,
-      "typeTags": [
-        "attack",
-        "high"
+      "bestUse": [
+        "特殊測試",
+        "高位實驗"
       ],
-      "modifiers": {
-        "attack": 1.2,
-        "defense": -0.4,
-        "stamina": -0.5,
-        "stability": -0.7,
-        "burstRisk": 0.3
-      },
-      "notes": "高身位攻擊，風險較大。",
-      "evidenceLevel": "tierListed",
-      "confidence": 0.55
+      "badUse": [
+        "主力配置",
+        "純持久",
+        "高速攻擊"
+      ],
+      "recommendedBits": [
+        "HN",
+        "BS",
+        "H"
+      ],
+      "avoidBits": [
+        "LR",
+        "R",
+        "GF",
+        "FF",
+        "A",
+        "Q"
+      ],
+      "simulationNotes": [
+        "M-85 屬特殊固鎖型號，無法用一般凸數完全推論。",
+        "85高度非常高，必須列為高風險。",
+        "除非使用者明確要測特殊配置，否則不建議優先。"
+      ],
+      "notes": "特殊高位固鎖 / 低資料型；M-85 屬特殊固鎖型號，無法用一般凸數完全推論。；85高度非常高，必須列為高風險。；除非使用者明確要測特殊配置，否則不建議優先。",
+      "evidenceLevel": "D",
+      "confidence": 24
     }
   },
   "bits": {
