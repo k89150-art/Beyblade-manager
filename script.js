@@ -405,8 +405,14 @@ function escapeHtml(text) {
 }
 
 function getOperationButtons(tableType) {
-  if (isReadOnly()) return "";
+  const analyzeButton = tableType === "config"
+    ? '<button onclick="analyzeConfigRow(this)">分析</button>'
+    : "";
+
+  if (isReadOnly()) return analyzeButton;
+
   return `
+    ${analyzeButton}
     <button onclick="editRow(this, '${tableType}')">修改</button>
     <button onclick="deleteRow(this)">刪除</button>
   `;
@@ -442,6 +448,54 @@ function getConfigComboKeyFromRow(row) {
 
   return getConfigComboKeyFromValues(values);
 }
+
+function getTextCell(row, index) {
+  return row.cells[index]?.innerText.trim() || "-";
+}
+
+function cleanAnalysisValue(value) {
+  const text = String(value || "").trim();
+  return text && text !== "-" ? text : "";
+}
+
+window.analyzeConfigRow = function (button) {
+  const row = button?.closest("tr");
+  if (!row) return;
+
+  const model = getTextCell(row, 0);
+  const layer = getTextCell(row, 1);
+  const lock = getTextCell(row, 2);
+  const main = getStockNameFromCell(row.cells[3]) || getTextCell(row, 3);
+  const transcend = getTextCell(row, 4);
+  const metal = getTextCell(row, 5);
+  const aux = getTextCell(row, 6);
+  const ratchet = getTextCell(row, 7);
+  const bit = getTextCell(row, 8);
+  const params = new URLSearchParams();
+
+  if (cleanAnalysisValue(lock) && cleanAnalysisValue(aux) && cleanAnalysisValue(metal) && cleanAnalysisValue(transcend)) {
+    params.set("mode", "cx-split");
+    params.set("lock", lock);
+    params.set("metal", metal);
+    params.set("over", transcend);
+    params.set("assist", aux);
+  } else if (cleanAnalysisValue(lock) && cleanAnalysisValue(aux) && cleanAnalysisValue(main)) {
+    params.set("mode", "cx-main");
+    params.set("lock", lock);
+    params.set("main", main);
+    params.set("assist", aux);
+  } else {
+    params.set("mode", "standard");
+    params.set("blade", layer);
+  }
+
+  params.set("model", model);
+  params.set("ratchet", ratchet);
+  params.set("bit", bit);
+  params.set("auto", "1");
+
+  window.location.href = `analysis.html?${params.toString()}`;
+};
 
 function buildHistoryRecordFromConfigRow(row, result, note) {
   const model = normalizeModel(row.cells[0]?.innerText.trim() || "");
