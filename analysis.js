@@ -1,4 +1,4 @@
-import { analyzeCombo } from "./beyblade_x_analysis_engine_v1_zhTW.js?v=20260630-engine2";
+import { analyzeCombo } from "./beyblade_x_analysis_engine_v1_zhTW.js?v=20260630-v11-contextual1";
 
 let database = null;
 let rules = null;
@@ -619,7 +619,7 @@ function detailLine(part) {
 }
 
 function scorePercent(value) {
-  return Math.max(0, Math.min(100, Math.round(((Number(value) || 0) + 5) * 10)));
+  return Math.max(0, Math.min(100, Math.round((Number(value) || 0) * 10)));
 }
 
 function renderScores(scores) {
@@ -668,7 +668,7 @@ function renderAnalysis() {
     return;
   }
 
-  const analysis = analyzeCombo(toEngineInput(config), database, rules);
+  const analysis = analyzeCombo(toEngineInput(config), database, { debug: false });
   const role = classifyBuild(config, analysis);
   const summary = buildSummary(config, analysis, role);
   const strengths = buildStrengths(config, analysis);
