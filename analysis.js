@@ -1,4 +1,5 @@
-import { analyzeCombo } from "./beyblade_x_analysis_engine_v1_zhTW.js?v=20260630-v11-contextual1";
+import { analyzeCombo as analyzeLegacyCombo } from "./beyblade_x_analysis_engine_v1_zhTW.js?v=20260630-v11-contextual1";
+import { analyzeCombo as analyzeV18Combo } from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260701-v18-data1";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -73,15 +74,70 @@ function escapeHtml(value) {
 
 async function loadJson(url) {
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`資料載入失敗：${url}`);
+  if (!response.ok) throw new Error(資料載入失敗： + url);
   return response.json();
 }
 
+function toV18Input(input) {
+  return {
+    blade: input.blade || input.bladeIdOrName || "",
+    ratchet: input.ratchet || input.ratchetCode || "",
+    bit: input.bit || input.bitCode || ""
+  };
+}
+
+function hasCxAnalysisInput(input) {
+  return Boolean(
+    input.cx ||
+    input.lockChipName ||
+    input.mainBladeName ||
+    input.metalBladeName ||
+    input.overBladeCode ||
+    input.assistBladeCode
+  );
+}
+
+function adaptV18Analysis(raw) {
+  const scores = raw?.scores || {};
+  const confidenceScore = Number(scores.metaConfidence || 0);
+
+  return {
+    version: "v1.8-helper",
+    input: raw?.input,
+    summary: raw?.role || "待判斷配置",
+    primaryRole: raw?.role || "待判斷配置",
+    scores,
+    strengths: raw?.advantages || [],
+    warnings: raw?.risks || [],
+    recommendations: raw?.suggestions || [],
+    deckRole: raw?.mainScore === "attack"
+      ? "主動攻擊位 / 奇襲測試位"
+      : raw?.mainScore === "stamina"
+        ? "保底持久位 / 後段收尾位"
+        : raw?.mainScore === "defense"
+          ? "抗攻擊位 / 防守反打位"
+          : "平衡測試位 / 依隊伍缺口調整",
+    confidence: confidenceScore >= 2 ? "高" : confidenceScore >= 1 ? "中" : "待驗證",
+    notes: raw?.notes || []
+  };
+}
+
+function analyzeCombo(input, db, options = {}) {
+  if (!hasCxAnalysisInput(input)) {
+    try {
+      return adaptV18Analysis(analyzeV18Combo(toV18Input(input), db.__v18 || db));
+    } catch (error) {
+      console.warn("v1.8 分析失敗，改用相容分析器。", error);
+    }
+  }
+
+  return analyzeLegacyCombo(input, db, options);
+}
 async function loadData() {
   if (database && rules) return;
 
   [database, rules] = await Promise.all([
-    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260630-engine2"),
+    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260701-v18-data1"),
     loadJson("./beyblade_x_analysis_rules_v1_zhTW.json?v=20260630-engine2")
   ]);
 
