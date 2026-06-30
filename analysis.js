@@ -74,7 +74,7 @@ function escapeHtml(value) {
 
 async function loadJson(url) {
   const response = await fetch(url);
-  if (!response.ok) throw new Error(資料載入失敗： + url);
+  if (!response.ok) throw new Error("資料載入失敗：" + url);
   return response.json();
 }
 
