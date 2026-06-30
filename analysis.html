@@ -33,9 +33,14 @@
     .score-card-value { color:#dbe7ff; font-weight:800; }
     .score-bar { height:8px; border-radius:999px; background:#292929; overflow:hidden; }
     .score-bar-fill { height:100%; border-radius:999px; background:#3d7eff; }
-    .result-card { background:#151515; border:1px solid #303030; border-radius:8px; padding:12px; margin-top:10px; }
+.result-card { background:#151515; border:1px solid #303030; border-radius:8px; padding:12px; margin-top:10px; }
+    .suggestion-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; margin-top:12px; }
+    .suggestion-card { background:#151515; border:1px solid #303030; border-radius:8px; padding:12px; }
+    .suggestion-card-top { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; }
+    .suggestion-title { color:#fff; font-weight:900; line-height:1.5; }
+    .suggestion-score { color:#dbe7ff; font-weight:900; }
     @media (max-width:700px){
-      .analysis-form-grid, .score-card-grid { grid-template-columns:1fr; }
+      .analysis-form-grid, .score-card-grid, .suggestion-grid { grid-template-columns:1fr; }
       .analysis-actions button, .mode-tab { width:100%; }
     }
   </style>
@@ -94,7 +99,17 @@
       </div>
     </div>
 
-    <div id="analysisResult" class="analysis-panel" style="display:none;"></div>
+<div id="analysisResult" class="analysis-panel" style="display:none;"></div>
+
+    <div class="analysis-panel">
+      <h3>從我的庫存推薦配置</h3>
+      <div>需要時才會讀取你自己的雲端資料，依照已建置的陀螺與零件庫存產生建議配置。</div>
+      <div class="analysis-note">目前第一版會優先推薦 BX / UX 標準配置；CX 自動配裝會等資料量更穩後再加上。</div>
+      <div class="analysis-actions">
+        <button id="suggestFromStockBtn" type="button" class="primary-btn">從我的庫存產生建議</button>
+      </div>
+      <div id="stockSuggestResult" style="display:none;"></div>
+    </div>
   </div>
 
   <datalist id="bladeOptions"></datalist>
@@ -107,6 +122,6 @@
   <datalist id="cxAssistOptions"></datalist>
 
   <script src="site-menu.js?v=20260630-engine2"></script>
-  <script type="module" src="analysis.js?v=20260630-v11-contextual1"></script>
+  <script type="module" src="analysis.js?v=20260630-stock-suggest1"></script>
 </body>
 </html>
