@@ -29,6 +29,20 @@
 
 
     <div class="info-card">
+      <div class="version-title">v1.6.0｜配置分析資料 v1.8 與推薦體驗優化</div>
+      <div class="version-meta">2026-07-01</div>
+      <ul class="update-list">
+        <li><span class="change-tag">資料</span>整合 Beyblade X Codex v1.8 資料包，優先使用 ASCII-safe 資料庫，降低中文亂碼風險。</li>
+        <li><span class="change-tag">分析</span>一般 BX / UX 配置分析優先使用 v1.8 helper；CX 分析保留既有穩定相容邏輯作為 fallback。</li>
+        <li><span class="change-tag">資料量</span>分析資料庫擴充至上蓋 50 筆、固鎖 37 筆、軸心 49 筆，並補入 CX 主要戰刃、金屬戰刃、Over 與輔助戰刃資料。</li>
+        <li><span class="change-tag">快捷</span>第三區配置紀錄每列新增「分析」按鈕，可直接帶入配置分析頁並自動分析，不會修改資料或扣除庫存。</li>
+        <li><span class="change-tag">手機</span>庫存推薦結果改為可展開卡片，手機版預設只展開第一筆，減少畫面過長。</li>
+        <li><span class="change-tag">成本</span>庫存推薦加入 60 秒頁面快取，短時間重複點擊不會重新讀取 Firestore。</li>
+        <li><span class="change-tag">提醒</span>補強說明：配置分析與推薦僅供理論參考，不保證實戰一定有效或取得勝利。</li>
+        <li><span class="change-tag">備份</span>本次更新後可直接從 GitHub 下載完整專案作為備份檔。</li>
+      </ul>
+    </div>
+    <div class="info-card">
       <div class="version-title">v1.5.7｜配置分析</div>
       <div class="version-meta">2026-06-30</div>
       <ul class="update-list">
