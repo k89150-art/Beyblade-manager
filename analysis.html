@@ -37,8 +37,11 @@
     .suggestion-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; margin-top:12px; }
     .suggestion-card { background:#151515; border:1px solid #303030; border-radius:8px; padding:12px; }
     .suggestion-card-top { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; }
-    .suggestion-title { color:#fff; font-weight:900; line-height:1.5; }
+    .suggestion-summary { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; cursor:pointer; list-style:none; }
+    .suggestion-summary::-webkit-details-marker { display:none; }
+    .suggestion-title { color:#fff; font-weight:900; line-height:1.5; display:block; margin-top:6px; }
     .suggestion-score { color:#dbe7ff; font-weight:900; }
+    .suggestion-detail { margin-top:10px; }
     @media (max-width:700px){
       .analysis-form-grid, .score-card-grid, .suggestion-grid { grid-template-columns:1fr; }
       .analysis-actions button, .mode-tab { width:100%; }
@@ -50,7 +53,8 @@
     <h2>配置分析</h2>
 
     <div class="analysis-panel">
-      <div>輸入想測試的配置，系統會依照零件定位、相性與風險規則產生分析結果。這不是勝率保證，而是幫你判斷方向是否合理。</div>
+      <div>輸入想測試的配置，系統會依照零件定位、相性與風險規則產生分析結果。</div>
+      <div class="analysis-note">分析與推薦僅供理論參考，不保證實戰一定有效，也不代表勝率、比賽結果或絕對強度。實際表現仍會受發射方式、場地、磨耗、對手配置與個人操作影響。</div>
       <div class="analysis-note">支援 BX / UX 標準配置，以及 CX 主要戰刃、金屬戰刃 + 超越戰刃兩種模式。</div>
     </div>
 
@@ -104,6 +108,7 @@
     <div class="analysis-panel">
       <h3>從我的庫存推薦配置</h3>
       <div>需要時才會讀取你自己的雲端資料，依照已建置的陀螺與零件庫存產生建議配置。</div>
+      <div class="analysis-note">庫存推薦是依資料庫與分析規則產生的測試方向，僅供參考，不保證實戰一定有用或能取得勝利。</div>
       <div class="analysis-note">目前第一版會優先推薦 BX / UX 標準配置；CX 自動配裝會等資料量更穩後再加上。</div>
       <div class="analysis-actions">
         <button id="suggestFromStockBtn" type="button" class="primary-btn">從我的庫存產生建議</button>
@@ -122,6 +127,6 @@
   <datalist id="cxAssistOptions"></datalist>
 
   <script src="site-menu.js?v=20260630-engine2"></script>
-  <script type="module" src="analysis.js?v=20260630-stock-suggest1"></script>
+  <script type="module" src="analysis.js?v=20260701-row-analysis-cache1"></script>
 </body>
 </html>
