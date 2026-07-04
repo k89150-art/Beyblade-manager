@@ -1,0 +1,19 @@
+{
+  "name": "戰鬥陀螺管理表",
+  "short_name": "陀螺管理",
+  "description": "管理戰鬥陀螺零件、配置、測試紀錄、參賽紀錄與配置分析。",
+  "start_url": "./home.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "./app-icon.svg?v=20260704-pwa1",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
