@@ -77,28 +77,28 @@ export function resolvePrimaryName(database, type, input) {
   const part = type === "blade" ? getBlade(database, input) : null;
   return part?.name || part?.name_zh || part?.displayNameZh || aliasCanonical(database, type, input);
 }
-function bladeZh(blade) { return blade?.name || blade?.name_zh || blade?.displayNameZh || blade?.id || "甇支???; }
+function bladeZh(blade) { return blade?.name || blade?.name_zh || blade?.displayNameZh || blade?.id || "此上蓋"; }
 function bladeEn(blade) { return blade?.name_en || blade?.referenceNameEn || blade?.model || ""; }
 function bitCode(bit) { return bit?.code || bit?.displayCode || bit?.id || ""; }
 function tagsOf(part) { return [...(part?.tags || []), ...(part?.roleTags || [])]; }
 function hasAny(part, tags) { return tags.some(tag => tagsOf(part).includes(tag)); }
 function textOf(part) { return [...allNames(part), part?.role, ...(part?.primaryRoles || []), ...(part?.roles || [])].join(" "); }
-function isAttackBlade(blade) { return hasAny(blade, ["?餅?", "meta_attack_core", "classic_attack", "heavy_attack", "burst_attack", "cx_one_hit_attack", "low_height_attack"]) || includesAny(textOf(blade), ["?餅?", "?", "???, "憯"]); }
-function isStaminaBlade(blade) { return hasAny(blade, ["??", "meta_stamina_core", "stamina_baseline", "stable_stamina", "defense_stamina"]) || includesAny(textOf(blade), ["??", "?急挾"]); }
-function isDefenseBlade(blade) { return hasAny(blade, ["?脩戌", "anti_attack", "anti-attack", "defense_counter", "cx_defense", "thick_defense"]) || includesAny(textOf(blade), ["?脣?", "?脩戌", "anti-attack", "??", "??"]); }
-function isLeftSpinBlade(blade) { return hasAny(blade, ["撌西艘??]) || includesAny(textOf(blade), ["撌西艘??, "撌行?", "??"]); }
-function isAttackBit(bit) { return hasAny(bit, ["attack", "?餅?", "one_hit", "high_speed", "low_height_attack"]) || includesAny(textOf(bit), ["?餅?", "?", "擃?]); }
-function isStaminaBit(bit) { return ["B","O","DB","FB","LO","E","L","Y","Nr"].includes(bitCode(bit)) || hasAny(bit, ["stamina", "??", "left_spin", "endgame"]); }
-function isDefenseBit(bit) { return ["H","WB","BS","UN","W"].includes(bitCode(bit)) || hasAny(bit, ["defense", "?脩戌", "anti_attack", "anti-attack"]); }
+function isAttackBlade(blade) { return hasAny(blade, ["攻擊", "meta_attack_core", "classic_attack", "heavy_attack", "burst_attack", "cx_one_hit_attack", "low_height_attack"]) || includesAny(textOf(blade), ["攻擊", "爆發", "重攻擊", "壓制"]); }
+function isStaminaBlade(blade) { return hasAny(blade, ["持久", "meta_stamina_core", "stamina_baseline", "stable_stamina", "defense_stamina"]) || includesAny(textOf(blade), ["持久", "末段"]); }
+function isDefenseBlade(blade) { return hasAny(blade, ["防禦", "anti_attack", "anti-attack", "defense_counter", "cx_defense", "thick_defense"]) || includesAny(textOf(blade), ["防守", "防禦", "anti-attack", "反打", "抗壓"]); }
+function isLeftSpinBlade(blade) { return hasAny(blade, ["左迴旋"]) || includesAny(textOf(blade), ["左迴旋", "左旋", "反旋"]); }
+function isAttackBit(bit) { return hasAny(bit, ["attack", "攻擊", "one_hit", "high_speed", "low_height_attack"]) || includesAny(textOf(bit), ["攻擊", "爆發", "高速"]); }
+function isStaminaBit(bit) { return ["B","O","DB","FB","LO","E","L","Y","Nr"].includes(bitCode(bit)) || hasAny(bit, ["stamina", "持久", "left_spin", "endgame"]); }
+function isDefenseBit(bit) { return ["H","WB","BS","UN","W"].includes(bitCode(bit)) || hasAny(bit, ["defense", "防禦", "anti_attack", "anti-attack"]); }
 function addScore(scores, key, value) { scores[key] = Math.round(((scores[key] || 0) + value) * 10) / 10; }
 function applyPartScores(scores, part, weight = 1) {
   const text = textOf(part);
   if (isAttackBlade(part) || isAttackBit(part)) addScore(scores, "attack", 2.5 * weight);
   if (isStaminaBlade(part) || isStaminaBit(part)) addScore(scores, "stamina", 2.5 * weight);
   if (isDefenseBlade(part) || isDefenseBit(part)) addScore(scores, "defense", 2.2 * weight);
-  if (includesAny(text, ["撟唾﹛", "?批", "?銵?, "??"])) addScore(scores, "balance", 1.8 * weight);
-  if (includesAny(text, ["蝛拙?", "?批", "??", "anti-attack"])) addScore(scores, "control", 1.2 * weight);
-  if (String(part?.confidence || part?.metaConfidence || "").includes("high") || String(part?.confidence || "").includes("擃?)) addScore(scores, "metaConfidence", 1 * weight);
+  if (includesAny(text, ["平衡", "控制", "技術", "反打"])) addScore(scores, "balance", 1.8 * weight);
+  if (includesAny(text, ["穩定", "控制", "反打", "anti-attack"])) addScore(scores, "control", 1.2 * weight);
+  if (String(part?.confidence || part?.metaConfidence || "").includes("high") || String(part?.confidence || "").includes("高")) addScore(scores, "metaConfidence", 1 * weight);
 }
 function routeFor(blade, bit, ratchet) {
   const code = bitCode(bit);
@@ -138,15 +138,15 @@ function analyzeCx(input, database) {
   const advantages = [], risks = [], suggestions = [], notes = [], flags = [];
   if (bit) applyPartScores(scores, bit, 1);
   if (ratchet) addScore(scores, "burstSafety", 1);
-  let role = rule?.role || "CX 皜祈岫?蔭";
+  let role = rule?.role || "CX 測試配置";
   let roleLocked = Boolean(rule?.roleLocked);
   if (rule?.scoreDelta) for (const [k,v] of Object.entries(rule.scoreDelta)) addScore(scores, k, v);
   if (rule?.scoreFloor) for (const [k,v] of Object.entries(rule.scoreFloor)) scores[k] = Math.max(scores[k] || 0, v);
-  if (rule) advantages.push(`?賭葉 ${rule.id} ?芸?閬?嚗?雿?摰${role}?);
-  if (rule?.requiresOrientation) { risks.push("甇?CX 蝯??芋撘??孵?閬?嚗?蝣箄?摰??孵?敺?撖行葫??); flags.push("requiresOrientation"); }
-  if (!rule) suggestions.push("甇?CX ?蔭撠?賭葉?芸?閬?嚗遣霅啣?隞亙??祕?啁Ⅱ隤楝蝺?);
-  if (!advantages.length) advantages.push("甇?CX ?蔭?臬?靘??頠詨??孵?撖行葫??);
-  if (!risks.length) risks.push("?桀?瘝??之蝯??折◢?迎?撱箄降?Ⅱ隤撠帘摰扼?);
+  if (rule) advantages.push(`命中 ${rule.id} 優先規則，定位鎖定為${role}。`);
+  if (rule?.requiresOrientation) { risks.push("此 CX 組合有模式或方向要求，需確認安裝方向後再實測。"); flags.push("requiresOrientation"); }
+  if (!rule) suggestions.push("此 CX 配置尚未命中優先規則，建議先以少量實戰確認路線。");
+  if (!advantages.length) advantages.push("此 CX 配置可先依戰刃與軸心方向實測。");
+  if (!risks.length) risks.push("目前沒有重大結構性風險，建議先確認發射穩定性。");
   const mainScore = Object.keys(scores).reduce((a,b)=>scores[a] >= scores[b] ? a : b);
   return { role, roleLocked, scores, mainScore, advantages, risks, suggestions, notes, flags, requiresOrientationWarning: flags.includes("requiresOrientation") };
 }
@@ -157,54 +157,54 @@ export function analyzeCombo(input, database) {
   const bit = getBit(database, input.bit || input.bitCode || "");
   const scores = { attack:0, stamina:0, defense:0, balance:0, burstSafety:0, control:0, metaConfidence:0 };
   const advantages = [], risks = [], suggestions = [], notes = [], flags = [];
-  let role = "敺?琿?蝵?;
+  let role = "待判斷配置";
   let roleLocked = false;
-  if (blade) { applyPartScores(scores, blade, 1.2); notes.push(`${bladeZh(blade)}嚗?{blade.role || ""}`); }
-  if (ratchet) { addScore(scores, "burstSafety", 1); if (/60|55|50/.test(ratchet.code || ratchet.id || "")) addScore(scores, "control", 0.7); notes.push(`${ratchet.code || ratchet.id}嚗?{ratchet.role || ""}`); }
-  if (bit) { applyPartScores(scores, bit, 1.2); notes.push(`${bitCode(bit)}嚗?{bit.role || ""}`); }
+  if (blade) { applyPartScores(scores, blade, 1.2); notes.push(`${bladeZh(blade)}：${blade.role || ""}`); }
+  if (ratchet) { addScore(scores, "burstSafety", 1); if (/60|55|50/.test(ratchet.code || ratchet.id || "")) addScore(scores, "control", 0.7); notes.push(`${ratchet.code || ratchet.id}：${ratchet.role || ""}`); }
+  if (bit) { applyPartScores(scores, bit, 1.2); notes.push(`${bitCode(bit)}：${bit.role || ""}`); }
   const route = routeFor(blade, bit, ratchet);
   if (route) {
     role = route.role;
-    advantages.push(`${bladeZh(blade)} ?剝? ${bitCode(bit)} ?賭葉??{route.role}?楝蝺);
+    advantages.push(`${bladeZh(blade)} 搭配 ${bitCode(bit)} 命中「${route.role}」路線。`);
     if (["mainstream", "established_secondary"].includes(route.evidenceClass)) addScore(scores, "metaConfidence", 1.5);
-    if (["successful_rogue", "single_sample"].includes(route.evidenceClass)) suggestions.push("甇方楝蝺惇?潛畾????桃?璅?嚗?葫閰虫?銝??箔蜓閬?艾?");
+    if (["successful_rogue", "single_sample"].includes(route.evidenceClass)) suggestions.push("此路線屬於特殊成功或單筆樣本，適合測試但不列為主要推薦。 ");
   }
   const bName = bladeZh(blade);
   const bCode = bitCode(bit);
-  if (/??撟餉情|Clock Mirage/.test(textOf(blade)) && /-55$/.test(ratchet?.code || ratchet?.id || "") && ["FB","B","LO","O"].includes(bCode)) {
-    role = "?脣????詨?";
+  if (/時鐘幻象|Clock Mirage/.test(textOf(blade)) && /-55$/.test(ratchet?.code || ratchet?.id || "") && ["FB","B","LO","O"].includes(bCode)) {
+    role = "防守持久核心";
     roleLocked = true;
     addScore(scores, "defense", 2); addScore(scores, "stamina", 2); addScore(scores, "burstSafety", 1);
-    advantages.push(`${bName} ?剝?蝪⊥??粹???${bCode} ?航粥?脣????詨??);
+    advantages.push(`${bName} 搭配簡易固鎖與 ${bCode} 可走防守持久核心。`);
   } else if (isAttackBlade(blade) && ["I","GF","A","V","FF"].includes(bCode)) {
-    role = route?.role || "銝???潭??";
+    role = route?.role || "一擊爆發攻擊型";
     addScore(scores, "attack", 2.5);
-    advantages.push(`${bName} ?剝? ${bCode} ?臭誑??銝???潦);
-    risks.push(`${bCode} 蝥??湧◢?芾?擃);
+    advantages.push(`${bName} 搭配 ${bCode} 可以提高一擊爆發。`);
+    risks.push(`${bCode} 續航與控場風險較高。`);
   } else if (isAttackBlade(blade) && ["R","LR","K"].includes(bCode)) {
-    role = route?.role || "?舀?餅???;
+    role = route?.role || "可控攻擊型";
   } else if (isStaminaBlade(blade) && ["B","O","DB","FB","LO"].includes(bCode)) {
-    role = route?.role || "蝝?銋?/ ?急挾??;
+    role = route?.role || "純持久 / 末段型";
   } else if (isDefenseBlade(blade) && isDefenseBit(bit)) {
-    role = route?.role || "?脣??? / anti-attack";
+    role = route?.role || "防守反打 / anti-attack";
   } else if (isLeftSpinBlade(blade) && bCode === "E") {
-    role = route?.role || "???急挾 / ????;
+    role = route?.role || "反旋末段 / 持久型";
   }
   const avoid = (blade?.avoidConflictForBits || []).map(codeOf).includes(codeOf(bCode));
   const trueConflict = (blade?.trueConflictBits || []).map(codeOf).includes(codeOf(bCode));
   if (trueConflict || (isAttackBlade(blade) && !isStaminaBlade(blade) && isStaminaBit(bit) && !avoid && !route)) {
-    flags.push("?餅?頝舐?銵?");
-    risks.push("?餅?銝??剜?銋遘敹?賡?雿蜓?????蝣箄??臬?餅??????寞?頝舐???);
+    flags.push("攻擊路線衝突");
+    risks.push("攻擊上蓋搭持久軸心可能降低主動得分，需確認是否刻意做反打或特殊路線。");
   }
-  if (/?潮???|Cobalt Dragoon/.test(textOf(blade)) && ["B","O","FB"].includes(bCode)) {
-    flags.push("?餅?頝舐?銵?");
-    risks.push("?潮????剔???頠詨?摰寞??銝餃??餅?頝舐???);
+  if (/蒼龍爆刃|Cobalt Dragoon/.test(textOf(blade)) && ["B","O","FB"].includes(bCode)) {
+    flags.push("攻擊路線衝突");
+    risks.push("蒼龍爆刃搭純持久軸心容易偏離主動攻擊路線。");
   }
-  if (/擉ㄚ?|Knight Mail/.test(textOf(blade)) && ["R","LR","K","J"].includes(bCode)) role = "??蝘餃??? / anti-attack";
-  if (/憭扯??|Orochi Cluster/.test(textOf(blade)) && bCode === "K") role = "?批?餅? / ??";
-  if (!advantages.length) advantages.push("甇日?蝵桀??銝餉?銝??遘敹?祕皜穿??凝隤踹??頠詨???");
-  if (!risks.length) risks.push(database.analysisRules?.emptyResultText?.risks || "?桀?瘝??之蝯??折◢?迎?撱箄降?祕皜祉撠帘摰扼?");
-  if (!suggestions.length) suggestions.push(database.analysisRules?.emptyResultText?.suggestions || "甇日?蝵格??蝣綽??臬?靽??詨??嗡辣皜祈岫嚗?靘祕?啁??凝隤踴?");
+  if (/騎士圓甲|Knight Mail/.test(textOf(blade)) && ["R","LR","K","J"].includes(bCode)) role = "厚型移動反打 / anti-attack";
+  if (/大蛇星叢|Orochi Cluster/.test(textOf(blade)) && bCode === "K") role = "控制攻擊 / 反打";
+  if (!advantages.length) advantages.push("此配置可先依主要上蓋與軸心方向實測，再微調固鎖或軸心。 ");
+  if (!risks.length) risks.push(database.analysisRules?.emptyResultText?.risks || "目前沒有重大結構性風險，建議先實測發射穩定性。 ");
+  if (!suggestions.length) suggestions.push(database.analysisRules?.emptyResultText?.suggestions || "此配置方向明確，可先保留核心零件測試，再依實戰結果微調。 ");
   const mainScore = Object.keys(scores).reduce((a,b)=>scores[a] >= scores[b] ? a : b);
-  return { role, roleLocked, scores, mainScore, advantages: uniq(advantages), risks: uniq(risks), suggestions: uniq(suggestions), notes: uniq(notes), flags: uniq(flags), confidence: scores.metaConfidence >= 2 ? "擃? : scores.metaConfidence >= 1 ? "銝? : "敺?霅? };
+  return { role, roleLocked, scores, mainScore, advantages: uniq(advantages), risks: uniq(risks), suggestions: uniq(suggestions), notes: uniq(notes), flags: uniq(flags), confidence: scores.metaConfidence >= 2 ? "高" : scores.metaConfidence >= 1 ? "中" : "待驗證" };
 }
