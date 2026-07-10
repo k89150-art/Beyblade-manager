@@ -10,7 +10,8 @@
   <meta name="apple-mobile-web-app-title" content="戰鬥陀螺管理表" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="manifest.json?v=20260704-pwa1" />
-  <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" /><title>更新紀錄｜戰鬥陀螺管理表</title>
+  <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
+  <title>更新紀錄｜戰鬥陀螺管理表</title>
   <link rel="stylesheet" href="style.css?v=20260705-stable-rollback1" />
   <style>
     .site-nav { display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 18px; }
@@ -35,7 +36,21 @@
     </div>
 
 
+
     <div class="info-card">
+      <div class="version-title">v1.7.0｜2026-07-11 資料庫與分析規則更新</div>
+      <div class="version-meta">2026-07-11</div>
+      <ul class="update-list">
+        <li><span class="change-tag">資料</span>合併 2026-07-11 Beyblade X 增量資料，新增 BX-49 蒼龍突擊、CX-18 腕龍鞭擊與多筆主流、次主流、特殊成功配置路線。</li>
+        <li><span class="change-tag">規則</span>新增 7 筆 CX priority rules，命中優先規則時會鎖定定位，避免被一般分數誤判。</li>
+        <li><span class="change-tag">名稱</span>修正名稱與縮寫對照：I 為 Ignition、Y 為 Yielding、極變為 Delta；Bit 分析句維持使用縮寫。</li>
+        <li><span class="change-tag">分析</span>調整分析流程為 alias 正規化、基礎向量、priority rules、情境規則、衝突偵測、同尺度計分與語意去重。</li>
+        <li><span class="change-tag">推薦</span>successful_rogue 與 single_sample 路線只作測試提示，不列為主要推薦，也不自動判定為路線衝突。</li>
+        <li><span class="change-tag">資料量</span>分析資料庫更新後：Blade 77 筆、Part 12 筆、Priority Rule 7 筆、Alias 8 筆、Bit 50 筆。</li>
+        <li><span class="change-tag">測試</span>完成 2026-07-11 regression tests：名稱顯示 5/5、Bit 顯示 4/4、分析邏輯 9/9 全部通過。</li>
+        <li><span class="change-tag">暫緩</span>依目前資料策略，BX-50 與 UX-20 暫時不加入資料庫。</li>
+      </ul>
+    </div>    <div class="info-card">
       <div class="version-title">v1.6.0｜配置分析資料 v1.8 與推薦體驗優化</div>
       <div class="version-meta">2026-07-01</div>
       <ul class="update-list">
