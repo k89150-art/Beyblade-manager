@@ -1,5 +1,5 @@
 import { analyzeCombo as analyzeLegacyCombo } from "./beyblade_x_analysis_engine_v1_zhTW.js?v=20260630-v11-contextual1";
-import { analyzeCombo as analyzeV18Combo } from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260701-v18-data1";
+import { analyzeCombo as analyzeV18Combo } from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260711-v19-delta1";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -125,7 +125,7 @@ function adaptV18Analysis(raw) {
 function analyzeCombo(input, db, options = {}) {
   if (!hasCxAnalysisInput(input)) {
     try {
-      return adaptV18Analysis(analyzeV18Combo(toV18Input(input), db.__v18 || db));
+      return adaptV18Analysis(analyzeV18Combo(input, db));
     } catch (error) {
       console.warn("v1.8 分析失敗，改用相容分析器。", error);
     }
@@ -137,7 +137,7 @@ async function loadData() {
   if (database && rules) return;
 
   [database, rules] = await Promise.all([
-    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260701-v18-data1"),
+    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260711-v19-delta1"),
     loadJson("./beyblade_x_analysis_rules_v1_zhTW.json?v=20260630-engine2")
   ]);
 
