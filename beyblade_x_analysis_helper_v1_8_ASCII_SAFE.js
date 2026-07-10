@@ -1,93 +1,210 @@
-
 /**
- * Beyblade X analysis helper v1.8
- * Use with beyblade_x_codex_database_v1_8_ASCII_SAFE.json
+ * Beyblade X analysis helper v1.9
+ * 2026-07-11 delta-compatible analysis and display resolver.
  */
+function normalize(value) {
+  return String(value || "").normalize("NFKC").trim().replace(/\s+/g, "").toLowerCase();
+}
+function codeOf(value) {
+  return String(value || "").normalize("NFKC").trim().toUpperCase();
+}
+function uniq(items) {
+  return [...new Set((items || []).filter(Boolean))];
+}
+function includesAny(text, words) {
+  return words.some(word => String(text || "").includes(word));
+}
+function allNames(item = {}) {
+  return uniq([
+    item.id,
+    item.code,
+    item.name,
+    item.name_zh,
+    item.name_en,
+    item.displayName,
+    item.displayNameZh,
+    item.referenceNameEn,
+    item.model,
+    item.combo,
+    item.updateId
+  ]);
+}
+function buildAliasRecords(database = {}) {
+  return database.aliases || [];
+}
+function aliasCanonical(database, type, input) {
+  const n = normalize(input);
+  for (const a of buildAliasRecords(database)) {
+    if (a.type !== type) continue;
+    const names = [a.canonicalZh, a.canonicalCode, a.referenceEn, ...(a.aliases || [])];
+    if (names.some(name => normalize(name) === n)) return a.canonicalZh || a.canonicalCode || a.referenceEn || input;
+  }
+  return input;
+}
+function aliasCanonicalBit(database, input) {
+  const n = normalize(input);
+  for (const a of buildAliasRecords(database)) {
+    if (a.type !== "bit") continue;
+    const names = [a.canonicalCode, a.referenceEn, ...(a.aliases || [])];
+    if (names.some(name => normalize(name) === n)) return a.canonicalCode || input;
+  }
+  return input;
+}
+function arrFor(database, section) {
+  const v18 = database.__v18 || database;
+  if (section === "blades") return uniq([...(database.blades || []), ...(v18.bladesTop30 || [])]);
+  if (section === "bits") return uniq([...(database.bits || []), ...(v18.bits || [])]);
+  if (section === "ratchets") return uniq([...(database.ratchets || []), ...(v18.ratchets || [])]);
+  return database?.[section] || [];
+}
 export function findPart(database, section, matcher) {
-  const arr = database?.[section] || [];
+  const arr = arrFor(database, section);
   if (typeof matcher === "string") {
-    return arr.find(x => x.code === matcher || x.name_en === matcher || x.name_zh === matcher || x.combo === matcher);
+    const canonical = section === "bits" ? aliasCanonicalBit(database, matcher) : aliasCanonical(database, section === "blades" ? "blade" : section, matcher);
+    const n = normalize(canonical);
+    return arr.find(x => allNames(x).some(name => normalize(name) === n));
   }
   return arr.find(matcher);
 }
 export function getBit(database, code) { return findPart(database, "bits", code); }
 export function getRatchet(database, code) { return findPart(database, "ratchets", code); }
-export function getBlade(database, name) {
-  return findPart(database, "bladesTop30", x => x.name_en === name || x.name_zh === name);
+export function getBlade(database, name) { return findPart(database, "blades", name); }
+export function resolvePrimaryName(database, type, input) {
+  if (type === "bit") {
+    const part = getBit(database, input);
+    return part?.code || aliasCanonicalBit(database, input);
+  }
+  const part = type === "blade" ? getBlade(database, input) : null;
+  return part?.name || part?.name_zh || part?.displayNameZh || aliasCanonical(database, type, input);
 }
-function hasAny(tags = [], wanted = []) { return wanted.some(w => tags.includes(w)); }
-export function analyzeCombo(input, database) {
-  const blade = input.blade ? getBlade(database, input.blade) : null;
-  const ratchet = input.ratchet ? getRatchet(database, input.ratchet) : null;
-  const bit = input.bit ? getBit(database, input.bit) : null;
-  const scores = { attack:0, stamina:0, defense:0, balance:0, burstSafety:0, control:0, metaConfidence:0 };
-  const advantages = [], risks = [], suggestions = [], notes = [];
-  let role = "\u5f85\u5224\u65b7\u914d\u7f6e";
-
-  if (blade) {
-    notes.push(`${blade.name_zh || blade.name_en}\uff1a${blade.role}`);
-    if (hasAny(blade.tags, ["meta_attack_core","classic_attack","heavy_attack","burst_attack","cx_one_hit_attack","low_height_attack"])) scores.attack += 3;
-    if (hasAny(blade.tags, ["meta_stamina_core","stamina_baseline","low_height_stamina","stable_stamina","defense_stamina"])) scores.stamina += 3;
-    if (hasAny(blade.tags, ["anti_attack","defense_counter","cx_defense","early_defense","thick_defense"])) scores.defense += 3;
-    if (hasAny(blade.tags, ["balance_counter","attack_stamina_hybrid","defense_balance"])) scores.balance += 2;
-    if ((blade.confidence || "").includes("\u9ad8")) scores.metaConfidence += 2;
-  }
-  if (ratchet) {
-    notes.push(`${ratchet.code}\uff1a${ratchet.role}`);
-    if (hasAny(ratchet.tags, ["low_height","low_height_attack"])) scores.burstSafety += 1;
-    if (hasAny(ratchet.tags, ["attack","offset_contact"])) scores.attack += 1;
-    if (hasAny(ratchet.tags, ["stamina","burst_safety"])) scores.stamina += 1;
-    if (hasAny(ratchet.tags, ["balance","stable"])) scores.control += 1;
-    if (hasAny(ratchet.tags, ["high_risk"])) risks.push(`${ratchet.code} \u5c6c\u65bc\u9ad8\u8eab\u4f4d\u6216\u7279\u5316\u56fa\u9396\uff0c\u9700\u6ce8\u610f\u88ab\u6253\u56fa\u9396\u98a8\u96aa\u3002`);
-  }
-  if (bit) {
-    notes.push(`${bit.code} / ${bit.name_zh}\uff1a${bit.role}`);
-    if (hasAny(bit.tags, ["attack","low_height_attack","one_hit","high_speed"])) scores.attack += 3;
-    if (hasAny(bit.tags, ["stamina","left_spin","spin_equalize","endgame","low_height_stamina"])) scores.stamina += 3;
-    if (hasAny(bit.tags, ["defense","anti_attack"])) scores.defense += 2;
-    if (hasAny(bit.tags, ["balance","technical","attack_stamina","hybrid"])) scores.balance += 2;
-    if (hasAny(bit.tags, ["controlled_attack","control_attack"])) scores.control += 1;
-    if (["GF","A","V","I","J","Q","RA","UF"].includes(bit.code)) risks.push(`${bit.code} \u7206\u767c\u9ad8\uff0c\u4f46\u7e8c\u822a\u8207\u63a7\u5834\u98a8\u96aa\u504f\u9ad8\u3002`);
-    if (["Op","Tr"].includes(bit.code)) notes.push(`${bit.code} \u662f\u56fa\u9396\u4e00\u9ad4\u5f0f\u8ef8\u5fc3\uff0c\u4e0d\u53ef\u7528\u4e00\u822c Ratchet + Bit \u908f\u8f2f\u5224\u65b7\u3002`);
-  }
-
-  const attackBlade = blade && hasAny(blade.tags, ["meta_attack_core","classic_attack","heavy_attack","burst_attack","low_height_attack","cx_one_hit_attack"]);
-  const staminaBlade = blade && hasAny(blade.tags, ["meta_stamina_core","stamina_baseline","low_height_stamina","stable_stamina","defense_stamina"]);
-  const defenseBlade = blade && hasAny(blade.tags, ["anti_attack","defense_counter","cx_defense","early_defense","thick_defense"]);
-
-  if (attackBlade && bit && ["R","LR","F","LF","GR"].includes(bit.code)) {
-    role = "\u53ef\u63a7\u653b\u64ca\u578b";
-    advantages.push(`${blade.name_zh} \u504f\u653b\u64ca\uff0c\u642d\u914d ${bit.code} \u53ef\u4fdd\u7559\u4e3b\u52d5\u9032\u653b\u540c\u6642\u964d\u4f4e\u5931\u63a7\u3002`);
-  }
-  if (attackBlade && bit && ["I","GF","A","V","J"].includes(bit.code)) {
-    role = "\u9ad8\u7206\u767c\u653b\u64ca / \u5947\u8972\u578b";
-    advantages.push(`${blade.name_zh} \u642d\u914d ${bit.code} \u80fd\u63d0\u9ad8\u7b2c\u4e00\u6ce2\u885d\u64ca\u8207\u64ca\u98db\u6a5f\u6703\u3002`);
-    risks.push(`\u82e5\u7b2c\u4e00\u6ce2\u6c92\u6709\u6253\u51fa\u6709\u6548\u63a5\u89f8\uff0c\u5f8c\u6bb5\u53ef\u80fd\u6703\u5931\u901f\u3002`);
-  }
-  if (staminaBlade && bit && ["B","O","DB","FB","LO"].includes(bit.code)) {
-    role = "\u6301\u4e45 / \u672b\u6bb5\u578b";
-    advantages.push(`${blade.name_zh} \u642d\u914d ${bit.code} \u662f\u6301\u4e45\u6216\u672b\u6bb5\u8def\u7dda\uff0c\u914d\u7f6e\u65b9\u5411\u660e\u78ba\u3002`);
-  }
-  if ((defenseBlade || staminaBlade) && bit && ["H","WB","FB"].includes(bit.code)) {
-    role = "\u9632\u5b88\u53cd\u6253 / anti-attack";
-    advantages.push(`${bit.code} \u80fd\u8b93 ${blade?.name_zh || ""} \u5f80\u6297\u653b\u64ca\u6216\u9632\u5b88\u6301\u4e45\u65b9\u5411\u767c\u5c55\u3002`);
-  }
-  if (blade && ["Cobalt Dragoon","Meteor Dragoon"].includes(blade.name_en) && bit?.code === "E") {
-    role = "\u5de6\u8ff4\u65cb\u672b\u6bb5 / \u53cd\u65cb\u6838\u5fc3";
-    advantages.push(`${blade.name_zh} \u662f\u5de6\u8ff4\u65cb\u6838\u5fc3\uff0c\u642d\u914d Elevate \u7684\u4e3b\u50f9\u503c\u5728\u53cd\u65cb\u672b\u6bb5\u3002`);
-  }
-  if (attackBlade && bit && ["B","O","DB","FB","LO"].includes(bit.code)) {
-    role = "\u7279\u5316 / \u8def\u7dda\u53ef\u80fd\u62b5\u6d88";
-    risks.push(`\u653b\u64ca\u4e0a\u84cb\u642d\u6301\u4e45\u8ef8\u5fc3\u53ef\u80fd\u964d\u4f4e\u4e3b\u52d5\u5f97\u5206\uff0c\u9700\u78ba\u8a8d\u662f\u5426\u523b\u610f\u505a\u53cd\u6253\u6216\u5947\u8972\u3002`);
-  }
-  if (ratchet && ["1-50","4-50","4-55"].includes(ratchet.code) && bit && hasAny(bit.tags, ["attack","one_hit","low_height_attack"])) {
-    advantages.push(`${ratchet.code} \u80fd\u58d3\u4f4e\u91cd\u5fc3\u4e26\u964d\u4f4e\u88ab\u6253\u56fa\u9396\u98a8\u96aa\uff0c\u9069\u5408\u4f4e\u8eab\u4f4d\u653b\u64ca\u3002`);
-    risks.push(`\u4f4e\u9ad8\u5ea6\u914d\u7f6e\u9700\u6ce8\u610f\u522e\u5730\u8207\u767c\u5c04\u89d2\u5ea6\u3002`);
-  }
-
-  if (advantages.length === 0) advantages.push("\u6b64\u914d\u7f6e\u53ef\u5148\u4f9d\u4e3b\u8981 Blade \u8207 Bit \u65b9\u5411\u5be6\u6e2c\uff0c\u518d\u5fae\u8abf\u56fa\u9396\u6216\u8ef8\u5fc3\u3002");
-  if (risks.length === 0) risks.push(database.analysisRules.emptyResultText.risks);
-  suggestions.push(database.analysisRules.emptyResultText.suggestions);
+function bladeZh(blade) { return blade?.name || blade?.name_zh || blade?.displayNameZh || blade?.id || "甇支???; }
+function bladeEn(blade) { return blade?.name_en || blade?.referenceNameEn || blade?.model || ""; }
+function bitCode(bit) { return bit?.code || bit?.displayCode || bit?.id || ""; }
+function tagsOf(part) { return [...(part?.tags || []), ...(part?.roleTags || [])]; }
+function hasAny(part, tags) { return tags.some(tag => tagsOf(part).includes(tag)); }
+function textOf(part) { return [...allNames(part), part?.role, ...(part?.primaryRoles || []), ...(part?.roles || [])].join(" "); }
+function isAttackBlade(blade) { return hasAny(blade, ["?餅?", "meta_attack_core", "classic_attack", "heavy_attack", "burst_attack", "cx_one_hit_attack", "low_height_attack"]) || includesAny(textOf(blade), ["?餅?", "?", "???, "憯"]); }
+function isStaminaBlade(blade) { return hasAny(blade, ["??", "meta_stamina_core", "stamina_baseline", "stable_stamina", "defense_stamina"]) || includesAny(textOf(blade), ["??", "?急挾"]); }
+function isDefenseBlade(blade) { return hasAny(blade, ["?脩戌", "anti_attack", "anti-attack", "defense_counter", "cx_defense", "thick_defense"]) || includesAny(textOf(blade), ["?脣?", "?脩戌", "anti-attack", "??", "??"]); }
+function isLeftSpinBlade(blade) { return hasAny(blade, ["撌西艘??]) || includesAny(textOf(blade), ["撌西艘??, "撌行?", "??"]); }
+function isAttackBit(bit) { return hasAny(bit, ["attack", "?餅?", "one_hit", "high_speed", "low_height_attack"]) || includesAny(textOf(bit), ["?餅?", "?", "擃?]); }
+function isStaminaBit(bit) { return ["B","O","DB","FB","LO","E","L","Y","Nr"].includes(bitCode(bit)) || hasAny(bit, ["stamina", "??", "left_spin", "endgame"]); }
+function isDefenseBit(bit) { return ["H","WB","BS","UN","W"].includes(bitCode(bit)) || hasAny(bit, ["defense", "?脩戌", "anti_attack", "anti-attack"]); }
+function addScore(scores, key, value) { scores[key] = Math.round(((scores[key] || 0) + value) * 10) / 10; }
+function applyPartScores(scores, part, weight = 1) {
+  const text = textOf(part);
+  if (isAttackBlade(part) || isAttackBit(part)) addScore(scores, "attack", 2.5 * weight);
+  if (isStaminaBlade(part) || isStaminaBit(part)) addScore(scores, "stamina", 2.5 * weight);
+  if (isDefenseBlade(part) || isDefenseBit(part)) addScore(scores, "defense", 2.2 * weight);
+  if (includesAny(text, ["撟唾﹛", "?批", "?銵?, "??"])) addScore(scores, "balance", 1.8 * weight);
+  if (includesAny(text, ["蝛拙?", "?批", "??", "anti-attack"])) addScore(scores, "control", 1.2 * weight);
+  if (String(part?.confidence || part?.metaConfidence || "").includes("high") || String(part?.confidence || "").includes("擃?)) addScore(scores, "metaConfidence", 1 * weight);
+}
+function routeFor(blade, bit, ratchet) {
+  const code = bitCode(bit);
+  const rCode = ratchet?.code || ratchet?.id || "";
+  return (blade?.routes || []).find(route => (route.bits || []).map(codeOf).includes(codeOf(code)) && (!(route.ratchets || []).length || (route.ratchets || []).includes(rCode)))
+    || (blade?.routes || []).find(route => (route.bits || []).map(codeOf).includes(codeOf(code)));
+}
+function cxName(input, key) { return input?.[key] || ""; }
+function priorityMatchesValue(actual, expected) {
+  if (!expected) return true;
+  return normalize(actual) === normalize(expected) || normalize(actual).includes(normalize(expected)) || normalize(expected).includes(normalize(actual));
+}
+function findPriorityRule(database, input) {
+  const rules = database.priorityRules || [];
+  const actual = {
+    mainBlade: cxName(input, "mainBladeName"),
+    metalBlade: cxName(input, "metalBladeName"),
+    overBlade: cxName(input, "overBladeCode"),
+    assistBlade: cxName(input, "assistBladeCode"),
+    bit: cxName(input, "bitCode") || cxName(input, "bit")
+  };
+  return rules.find(rule => {
+    const w = rule.when || {};
+    if (w.mainBlade && !priorityMatchesValue(actual.mainBlade, w.mainBlade)) return false;
+    if (w.metalBlade && !priorityMatchesValue(actual.metalBlade, w.metalBlade)) return false;
+    if (w.overBlade && codeOf(actual.overBlade) !== codeOf(w.overBlade)) return false;
+    if (w.assistBlade && codeOf(actual.assistBlade) !== codeOf(w.assistBlade)) return false;
+    if (w.bitIn && !w.bitIn.map(codeOf).includes(codeOf(actual.bit))) return false;
+    return true;
+  });
+}
+function analyzeCx(input, database) {
+  const bit = getBit(database, input.bitCode || input.bit || "");
+  const ratchet = getRatchet(database, input.ratchetCode || input.ratchet || "");
+  const rule = findPriorityRule(database, input);
+  const scores = { attack:0, stamina:0, defense:0, balance:0, burstSafety:0, control:0, metaConfidence:1 };
+  const advantages = [], risks = [], suggestions = [], notes = [], flags = [];
+  if (bit) applyPartScores(scores, bit, 1);
+  if (ratchet) addScore(scores, "burstSafety", 1);
+  let role = rule?.role || "CX 皜祈岫?蔭";
+  let roleLocked = Boolean(rule?.roleLocked);
+  if (rule?.scoreDelta) for (const [k,v] of Object.entries(rule.scoreDelta)) addScore(scores, k, v);
+  if (rule?.scoreFloor) for (const [k,v] of Object.entries(rule.scoreFloor)) scores[k] = Math.max(scores[k] || 0, v);
+  if (rule) advantages.push(`?賭葉 ${rule.id} ?芸?閬?嚗?雿?摰${role}?);
+  if (rule?.requiresOrientation) { risks.push("甇?CX 蝯??芋撘??孵?閬?嚗?蝣箄?摰??孵?敺?撖行葫??); flags.push("requiresOrientation"); }
+  if (!rule) suggestions.push("甇?CX ?蔭撠?賭葉?芸?閬?嚗遣霅啣?隞亙??祕?啁Ⅱ隤楝蝺?);
+  if (!advantages.length) advantages.push("甇?CX ?蔭?臬?靘??頠詨??孵?撖行葫??);
+  if (!risks.length) risks.push("?桀?瘝??之蝯??折◢?迎?撱箄降?Ⅱ隤撠帘摰扼?);
   const mainScore = Object.keys(scores).reduce((a,b)=>scores[a] >= scores[b] ? a : b);
-  return { role, scores, mainScore, advantages, risks, suggestions, notes };
+  return { role, roleLocked, scores, mainScore, advantages, risks, suggestions, notes, flags, requiresOrientationWarning: flags.includes("requiresOrientation") };
+}
+export function analyzeCombo(input, database) {
+  if (input?.lockChipName || input?.mainBladeName || input?.metalBladeName || input?.overBladeCode || input?.assistBladeCode) return analyzeCx(input, database);
+  const blade = getBlade(database, input.blade || input.bladeIdOrName || "");
+  const ratchet = getRatchet(database, input.ratchet || input.ratchetCode || "");
+  const bit = getBit(database, input.bit || input.bitCode || "");
+  const scores = { attack:0, stamina:0, defense:0, balance:0, burstSafety:0, control:0, metaConfidence:0 };
+  const advantages = [], risks = [], suggestions = [], notes = [], flags = [];
+  let role = "敺?琿?蝵?;
+  let roleLocked = false;
+  if (blade) { applyPartScores(scores, blade, 1.2); notes.push(`${bladeZh(blade)}嚗?{blade.role || ""}`); }
+  if (ratchet) { addScore(scores, "burstSafety", 1); if (/60|55|50/.test(ratchet.code || ratchet.id || "")) addScore(scores, "control", 0.7); notes.push(`${ratchet.code || ratchet.id}嚗?{ratchet.role || ""}`); }
+  if (bit) { applyPartScores(scores, bit, 1.2); notes.push(`${bitCode(bit)}嚗?{bit.role || ""}`); }
+  const route = routeFor(blade, bit, ratchet);
+  if (route) {
+    role = route.role;
+    advantages.push(`${bladeZh(blade)} ?剝? ${bitCode(bit)} ?賭葉??{route.role}?楝蝺);
+    if (["mainstream", "established_secondary"].includes(route.evidenceClass)) addScore(scores, "metaConfidence", 1.5);
+    if (["successful_rogue", "single_sample"].includes(route.evidenceClass)) suggestions.push("甇方楝蝺惇?潛畾????桃?璅?嚗?葫閰虫?銝??箔蜓閬?艾?");
+  }
+  const bName = bladeZh(blade);
+  const bCode = bitCode(bit);
+  if (/??撟餉情|Clock Mirage/.test(textOf(blade)) && /-55$/.test(ratchet?.code || ratchet?.id || "") && ["FB","B","LO","O"].includes(bCode)) {
+    role = "?脣????詨?";
+    roleLocked = true;
+    addScore(scores, "defense", 2); addScore(scores, "stamina", 2); addScore(scores, "burstSafety", 1);
+    advantages.push(`${bName} ?剝?蝪⊥??粹???${bCode} ?航粥?脣????詨??);
+  } else if (isAttackBlade(blade) && ["I","GF","A","V","FF"].includes(bCode)) {
+    role = route?.role || "銝???潭??";
+    addScore(scores, "attack", 2.5);
+    advantages.push(`${bName} ?剝? ${bCode} ?臭誑??銝???潦);
+    risks.push(`${bCode} 蝥??湧◢?芾?擃);
+  } else if (isAttackBlade(blade) && ["R","LR","K"].includes(bCode)) {
+    role = route?.role || "?舀?餅???;
+  } else if (isStaminaBlade(blade) && ["B","O","DB","FB","LO"].includes(bCode)) {
+    role = route?.role || "蝝?銋?/ ?急挾??;
+  } else if (isDefenseBlade(blade) && isDefenseBit(bit)) {
+    role = route?.role || "?脣??? / anti-attack";
+  } else if (isLeftSpinBlade(blade) && bCode === "E") {
+    role = route?.role || "???急挾 / ????;
+  }
+  const avoid = (blade?.avoidConflictForBits || []).map(codeOf).includes(codeOf(bCode));
+  const trueConflict = (blade?.trueConflictBits || []).map(codeOf).includes(codeOf(bCode));
+  if (trueConflict || (isAttackBlade(blade) && !isStaminaBlade(blade) && isStaminaBit(bit) && !avoid && !route)) {
+    flags.push("?餅?頝舐?銵?");
+    risks.push("?餅?銝??剜?銋遘敹?賡?雿蜓?????蝣箄??臬?餅??????寞?頝舐???);
+  }
+  if (/?潮???|Cobalt Dragoon/.test(textOf(blade)) && ["B","O","FB"].includes(bCode)) {
+    flags.push("?餅?頝舐?銵?");
+    risks.push("?潮????剔???頠詨?摰寞??銝餃??餅?頝舐???);
+  }
+  if (/擉ㄚ?|Knight Mail/.test(textOf(blade)) && ["R","LR","K","J"].includes(bCode)) role = "??蝘餃??? / anti-attack";
+  if (/憭扯??|Orochi Cluster/.test(textOf(blade)) && bCode === "K") role = "?批?餅? / ??";
+  if (!advantages.length) advantages.push("甇日?蝵桀??銝餉?銝??遘敹?祕皜穿??凝隤踹??頠詨???");
+  if (!risks.length) risks.push(database.analysisRules?.emptyResultText?.risks || "?桀?瘝??之蝯??折◢?迎?撱箄降?祕皜祉撠帘摰扼?");
+  if (!suggestions.length) suggestions.push(database.analysisRules?.emptyResultText?.suggestions || "甇日?蝵格??蝣綽??臬?靽??詨??嗡辣皜祈岫嚗?靘祕?啁??凝隤踴?");
+  const mainScore = Object.keys(scores).reduce((a,b)=>scores[a] >= scores[b] ? a : b);
+  return { role, roleLocked, scores, mainScore, advantages: uniq(advantages), risks: uniq(risks), suggestions: uniq(suggestions), notes: uniq(notes), flags: uniq(flags), confidence: scores.metaConfidence >= 2 ? "擃? : scores.metaConfidence >= 1 ? "銝? : "敺?霅? };
 }
