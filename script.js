@@ -1742,6 +1742,37 @@ function updateResponsiveTableCells() {
 
     table.querySelectorAll("tbody tr").forEach(row => {
       const cells = Array.from(row.cells);
+      const model = cells[0]?.textContent.trim() || "";
+      const seriesMatch = model.toUpperCase().match(/^(BX|UX|CX)/);
+      const series = seriesMatch ? seriesMatch[1] : "OTHER";
+
+      row.dataset.series = series;
+      if (cells[0]) cells[0].dataset.series = series;
+
+      if (tableId === "configTable") {
+        const layer = cells[1]?.textContent.trim() || "";
+        const summary = cells
+          .slice(1, 9)
+          .map(cell => cell.textContent.trim())
+          .filter(value => value && value !== "-")
+          .join(" · ");
+
+        if (cells[0]) {
+          cells[0].dataset.cardTitle = [model, layer !== "-" ? layer : ""]
+            .filter(Boolean)
+            .join(" ");
+        }
+        if (cells[1]) cells[1].dataset.cardSummary = summary || "-";
+      }
+
+      if (tableId === "historyTable") {
+        const result = cells[4]?.textContent.trim() || "";
+        row.dataset.resultTone = result.includes("不好")
+          ? "bad"
+          : result.includes("好用")
+            ? "good"
+            : "neutral";
+      }
 
       cells.forEach((cell, index) => {
         cell.dataset.label = labels[index] || "";
