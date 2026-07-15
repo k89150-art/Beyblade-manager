@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="manifest.json?v=20260715-ui1" />
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" /><title>使用者資料檢視｜戰鬥陀螺管理表</title>
-  <link rel="stylesheet" href="style.css?v=20260716-ui14" />
+  <link rel="stylesheet" href="style.css?v=20260716-ui15" />
   <link rel="stylesheet" href="site-menu.css?v=20260716-ui2" />
   <style>
     .view-hero { margin-top: 68px; }
@@ -22,7 +22,16 @@
     .view-table td, .view-table th { font-size:12px; }
     .empty-state { background:#181818; border:1px solid #333; border-radius:10px; padding:12px; color:#bdbdbd; font-size:14px; line-height:1.5; }
     .status-pill { display:inline-block; padding:3px 8px; border-radius:999px; font-weight:700; font-size:12px; color:#69db7c; background:rgba(105,219,124,0.12); border:1px solid rgba(105,219,124,0.35); }
-    @media (max-width:700px){ .view-actions{flex-direction:column;} .view-actions a{width:100%; box-sizing:border-box;} }
+    .readonly-config-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:14px; align-items:start; }
+    .readonly-config-card { min-width:0; min-height:156px; box-sizing:border-box; display:flex; flex-direction:column; padding:18px; border:1px solid #263441; border-radius:8px; background:#0e151c; box-shadow:0 10px 24px rgba(0,0,0,.18); }
+    .readonly-series-badge { align-self:flex-start; display:inline-flex; align-items:center; min-height:25px; padding:1px 9px; border:1px solid rgba(72,133,255,.55); border-radius:999px; color:#7eb0ff; background:rgba(45,104,211,.12); font-size:11px; font-weight:800; line-height:1; }
+    .readonly-config-card[data-series="CX"] .readonly-series-badge { color:#6ce3df; border-color:rgba(59,203,198,.48); background:rgba(31,137,133,.12); }
+    .readonly-config-card h4 { margin:14px 0 7px; color:#f5f8fb; font-size:19px; font-weight:800; line-height:1.35; overflow-wrap:anywhere; }
+    .readonly-config-card p { margin:0; color:#9aa9b8; font-size:14px; line-height:1.55; overflow-wrap:anywhere; }
+    .readonly-config-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; padding-top:18px; }
+    .readonly-config-tags span { display:inline-flex; align-items:center; min-height:25px; padding:2px 8px; border-radius:5px; color:#aebdca; background:#17212b; font-size:11px; font-weight:700; line-height:1.2; }
+    @media (min-width:1280px){ .readonly-config-grid{grid-template-columns:repeat(4, minmax(0, 1fr));} }
+    @media (max-width:700px){ .view-actions{flex-direction:column;} .view-actions a{width:100%; box-sizing:border-box;} .readonly-config-grid{grid-template-columns:1fr;} .readonly-config-card{min-height:142px;} }
   </style>
 </head>
 <body>
@@ -69,6 +78,6 @@
   </div>
 
   <script src="site-menu.js?v=20260716-ui2"></script>
-  <script type="module" src="user-view.js?v=20260715-ui1"></script>
+  <script type="module" src="user-view.js?v=20260716-card1"></script>
 </body>
 </html>

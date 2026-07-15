@@ -116,6 +116,90 @@ function renderTable(targetId, headers, rows) {
   `;
 }
 
+function hasDisplayValue(value) {
+  const text = String(value ?? "").trim();
+  return Boolean(text && text !== "-");
+}
+
+function getConfigCardData(item) {
+  const cells = Array.isArray(item?.cells) ? item.cells : [];
+  const [model, layer, crestLock, mainBlade, exceedBlade, metalBlade, assistBlade, ratchet, bit] = cells;
+  const seriesMatch = String(model || "").trim().toUpperCase().match(/^(BX|UX|CX)/);
+  const series = seriesMatch ? seriesMatch[1] : "X";
+  const isCx = series === "CX";
+  const hasCxParts = [crestLock, mainBlade, exceedBlade, metalBlade, assistBlade].some(hasDisplayValue);
+  const cxCore = hasDisplayValue(metalBlade) ? metalBlade : mainBlade;
+  const titlePart = isCx && hasCxParts
+    ? [crestLock, cxCore].filter(hasDisplayValue).join("")
+    : layer;
+  const summaryParts = isCx && hasCxParts
+    ? [
+        crestLock,
+        hasDisplayValue(metalBlade) ? "" : mainBlade,
+        metalBlade,
+        exceedBlade,
+        assistBlade,
+        ratchet,
+        bit
+      ]
+    : [layer, ratchet, bit];
+  const tags = [];
+
+  if (isCx && hasCxParts) {
+    if (hasDisplayValue(crestLock)) tags.push("紋章鎖");
+    if (hasDisplayValue(metalBlade) && hasDisplayValue(exceedBlade)) {
+      tags.push("金屬+超越");
+    } else if (hasDisplayValue(mainBlade)) {
+      tags.push("主要戰刃");
+    } else {
+      if (hasDisplayValue(metalBlade)) tags.push("金屬戰刃");
+      if (hasDisplayValue(exceedBlade)) tags.push("超越戰刃");
+    }
+    if (hasDisplayValue(assistBlade)) tags.push("輔助");
+  } else {
+    if (hasDisplayValue(layer)) tags.push("上蓋");
+    if (hasDisplayValue(ratchet)) tags.push("固鎖");
+    if (hasDisplayValue(bit)) tags.push("軸心");
+  }
+
+  return {
+    series,
+    title: [model, titlePart].filter(hasDisplayValue).join(" ") || "未命名配置",
+    summary: summaryParts.filter(hasDisplayValue).join(" ・ ") || "尚無零件資料",
+    tags
+  };
+}
+
+function renderConfigCards(targetId, items) {
+  const box = document.getElementById(targetId);
+  if (!box) return;
+
+  if (!Array.isArray(items) || !items.length) {
+    box.innerHTML = `<div class="empty-state">沒有資料。</div>`;
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="readonly-config-grid">
+      ${items.map(item => {
+        const card = getConfigCardData(item);
+        return `
+          <article class="readonly-config-card" data-series="${escapeHtml(card.series)}">
+            <span class="readonly-series-badge">${escapeHtml(card.series)}</span>
+            <h4>${escapeHtml(card.title)}</h4>
+            <p>${escapeHtml(card.summary)}</p>
+            ${card.tags.length ? `
+              <div class="readonly-config-tags">
+                ${card.tags.map(tag => `<span>${escapeHtml(tag)}</span>`).join("")}
+              </div>
+            ` : ""}
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
 function renderTournamentRecords(records) {
   const box = document.getElementById("tournamentBox");
   if (!box) return;
@@ -173,11 +257,7 @@ async function loadTargetUserData() {
 
     const data = snapshot.data() || {};
 
-    renderTable(
-      "beybladeBox",
-      ["型號", "上蓋", "紋章鎖", "主要戰刃", "超越戰刃", "金屬戰刃", "輔助戰刃", "固鎖", "軸心"],
-      (data.beybladeTable || []).map(item => item.cells || [])
-    );
+    renderConfigCards("beybladeBox", data.beybladeTable || []);
 
     renderTable(
       "partBox",
@@ -185,11 +265,7 @@ async function loadTargetUserData() {
       (data.partTable || []).map(item => item.cells || [])
     );
 
-    renderTable(
-      "configBox",
-      ["型號", "上蓋", "紋章鎖", "主要戰刃", "超越戰刃", "金屬戰刃", "輔助戰刃", "固鎖", "軸心"],
-      (data.configTable || []).map(item => item.cells || [])
-    );
+    renderConfigCards("configBox", data.configTable || []);
 
     renderTable(
       "historyBox",
