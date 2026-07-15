@@ -40,6 +40,9 @@ let currentUser = null;
 let viewingUserId = null;   // null = 看自己；有值 = 管理員在看別人
 let unsubscribeCloudData = null;
 let isApplyingRemoteData = false;
+let isSavingCloudData = false;
+let hasPendingCloudSave = false;
+let lastLocalWriteUpdatedAt = 0;
 
 const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260716-3";
 let stockInputMode = "auto";
@@ -773,7 +776,8 @@ window.deleteHistoryRow = function (button) {
 window.deleteRow = async function (button) {
   if (!requireLogin()) return;
 
-  const row = button.parentElement.parentElement;
+  const row = button.closest("tr");
+  if (!row) return;
   const table = row.closest("table");
   const tableId = table ? table.id : "";
 
@@ -1360,30 +1364,47 @@ function getHistoryData() {
 }
 
 async function saveData() {
-if (isApplyingRemoteData) return;
+  if (isApplyingRemoteData) return;
 
-const userDocRef = getUserDocRef();
+  hasPendingCloudSave = true;
+  if (isSavingCloudData) return;
 
-if (!userDocRef) {
-console.log("尚未登入，暫不儲存");
-setSyncStatus("尚未登入，資料不會儲存到雲端", "muted");
-return;
-}
+  const initialUserDocRef = getUserDocRef();
+  if (!initialUserDocRef) {
+    hasPendingCloudSave = false;
+    console.log("尚未登入，暫不儲存");
+    setSyncStatus("尚未登入，資料不會儲存到雲端", "muted");
+    return;
+  }
 
-const data = collectCurrentData();
+  isSavingCloudData = true;
+  setSyncStatus("儲存中...", "saving");
 
-try {
-setSyncStatus("儲存中...", "saving");
+  try {
+    while (hasPendingCloudSave) {
+      hasPendingCloudSave = false;
 
-await setDoc(userDocRef, data);
+      const userDocRef = getUserDocRef();
+      if (!userDocRef) {
+        setSyncStatus("尚未登入，資料不會儲存到雲端", "muted");
+        return;
+      }
 
-setSyncStatus("已儲存", "saved");
+      const data = collectCurrentData();
+      data.updatedAt = Math.max(Number(data.updatedAt) || 0, lastLocalWriteUpdatedAt + 1);
+      lastLocalWriteUpdatedAt = data.updatedAt;
+      await setDoc(userDocRef, data);
+    }
 
-} catch (error) {
-console.error("Firestore 儲存失敗：", error);
-alert("Firestore 儲存失敗：" + error.message);
-setSyncStatus("儲存失敗", "error");
-}
+    setSyncStatus("已儲存", "saved");
+  } catch (error) {
+    hasPendingCloudSave = false;
+    console.error("Firestore 儲存失敗：", error);
+    alert("Firestore 儲存失敗：" + error.message);
+    setSyncStatus("儲存失敗", "error");
+  } finally {
+    isSavingCloudData = false;
+  }
 }
 
 
@@ -1515,6 +1536,8 @@ function startCloudListener() {
   unsubscribeCloudData = onSnapshot(
     userDocRef,
     snapshot => {
+      if (snapshot.metadata?.hasPendingWrites) return;
+
       if (!snapshot.exists()) {
         clearAllTables();
         refreshSelectors();
@@ -1522,7 +1545,13 @@ function startCloudListener() {
         return;
       }
 
-      applyDataToTables(snapshot.data());
+      const snapshotData = snapshot.data();
+      if (Number(snapshotData.updatedAt) === lastLocalWriteUpdatedAt) {
+        if (!isSavingCloudData) setSyncStatus("已儲存", "saved");
+        return;
+      }
+
+      applyDataToTables(snapshotData);
       setSyncStatus("資料已同步", "saved");
     },
     error => {
