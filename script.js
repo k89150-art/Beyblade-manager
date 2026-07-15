@@ -1691,6 +1691,60 @@ function getUsedParts() {
   return used;
 }
 
+function setUiSummaryValue(id, value) {
+  const element = document.getElementById(id);
+  if (element) element.textContent = String(value);
+}
+
+function updateUiSummaries() {
+  const collectionRows = document.querySelectorAll("#beybladeTable tbody tr");
+  const inventoryRows = document.querySelectorAll("#partTable tbody tr");
+  const configRows = document.querySelectorAll("#configTable tbody tr");
+  const historyRows = document.querySelectorAll("#historyTable tbody tr");
+  const inventoryByPart = new Map();
+  let inventoryTotal = 0;
+
+  inventoryRows.forEach(row => {
+    const type = row.cells[0]?.innerText.trim() || "";
+    const name = row.cells[1]?.innerText.trim() || "";
+    const count = Number(row.cells[2]?.innerText.trim() || 0);
+    if (!type || !name || !Number.isFinite(count)) return;
+
+    const key = `${type}\u0000${name}`;
+    inventoryByPart.set(key, (inventoryByPart.get(key) || 0) + count);
+    inventoryTotal += count;
+  });
+
+  const usedParts = getUsedParts();
+  let inventoryUsed = 0;
+
+  inventoryByPart.forEach((count, key) => {
+    const [type, name] = key.split("\u0000");
+    inventoryUsed += Math.min(count, usedParts[type]?.[name] || 0);
+  });
+
+  setUiSummaryValue("collectionCount", collectionRows.length);
+  setUiSummaryValue("inventoryKinds", inventoryByPart.size);
+  setUiSummaryValue("inventoryKindSummary", inventoryByPart.size);
+  setUiSummaryValue("inventoryTotal", inventoryTotal);
+  setUiSummaryValue("inventoryUsed", inventoryUsed);
+  setUiSummaryValue("inventoryAvailable", Math.max(0, inventoryTotal - inventoryUsed));
+  setUiSummaryValue("configCount", configRows.length);
+  setUiSummaryValue("historyCount", historyRows.length);
+}
+
+function installUiSummaryObservers() {
+  ["beybladeTable", "partTable", "configTable", "historyTable"].forEach(tableId => {
+    const tbody = document.querySelector(`#${tableId} tbody`);
+    if (!tbody) return;
+
+    const observer = new MutationObserver(updateUiSummaries);
+    observer.observe(tbody, { childList: true, subtree: true, characterData: true });
+  });
+
+  updateUiSummaries();
+}
+
 function updateNoRatchetConfigOption() {
   const modelInput = document.getElementById("confModel");
   const fixSelect = document.getElementById(selectorMap["固鎖"]);
@@ -2094,6 +2148,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   clearAllTables();
   refreshSelectors();
+  installUiSummaryObservers();
   setSyncStatus("請先使用 Google 登入", "muted");
   installConfigSort();
 

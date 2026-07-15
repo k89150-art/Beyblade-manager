@@ -4,15 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <meta name="theme-color" content="#111111" />
+  <meta name="theme-color" content="#090d12" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="戰鬥陀螺管理表" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="manifest" href="manifest.json?v=20260704-pwa1" />
+  <link rel="manifest" href="manifest.json?v=20260715-ui1" />
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>更新紀錄｜戰鬥陀螺管理表</title>
-  <link rel="stylesheet" href="style.css?v=20260705-stable-rollback1" />
+  <link rel="stylesheet" href="style.css?v=20260715-ui1" />
+  <link rel="stylesheet" href="site-menu.css?v=20260715-ui1" />
   <style>
     .site-nav { display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 18px; }
     .site-nav a { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:9px 12px; }
@@ -36,6 +37,19 @@
     </div>
 
 
+
+    <div class="info-card">
+      <div class="version-title">v1.8.0｜2026-07-15 全站介面更新</div>
+      <div class="version-meta">2026-07-15</div>
+      <ul class="update-list">
+        <li><span class="change-tag">介面</span>重新設計為手機優先的收藏與配置管理介面，使用較大的操作區、清楚的資訊層級與一致的科技競技風格。</li>
+        <li><span class="change-tag">導覽</span>桌面版改用固定左側功能欄，手機版新增收藏、庫存、配置、分析與賽事底部導覽。</li>
+        <li><span class="change-tag">手機</span>收藏、額外零件、配置與歷史紀錄在手機上改為卡片顯示，不再需要橫向拖曳才能查看全部欄位。</li>
+        <li><span class="change-tag">庫存</span>額外零件庫存區只顯示使用者自行新增的零件，並新增種類、持有、使用中與可用數量摘要。</li>
+        <li><span class="change-tag">保留</span>Google 登入、Firestore 資料、CX 規則、數量防呆、配置修改刪除與歷史還原流程全部沿用原有邏輯。</li>
+        <li><span class="change-tag">備份</span>更新前版本已保存於 <strong>backup/pre-ui-redesign-20260715</strong> 分支，可隨時回復。</li>
+      </ul>
+    </div>
 
     <div class="info-card">
       <div class="version-title">v1.7.0｜2026-07-11 資料庫與分析規則更新</div>
@@ -185,5 +199,6 @@
       </ul>
     </div>
   </div>
+  <script src="site-menu.js?v=20260715-ui1"></script>
 </body>
 </html>

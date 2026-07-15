@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   
-  <meta name="theme-color" content="#111111" />
+  <meta name="theme-color" content="#090d12" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="戰鬥陀螺管理表" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="manifest" href="manifest.json?v=20260704-pwa1" />
+  <link rel="manifest" href="manifest.json?v=20260715-ui1" />
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20260705-stable-rollback1" />
-  <link rel="stylesheet" href="site-menu.css?v=20260711-menu2" />
+  <link rel="stylesheet" href="style.css?v=20260715-ui1" />
+  <link rel="stylesheet" href="site-menu.css?v=20260715-ui1" />
   <style>
 
     /* ====== 側拉式選單 ====== */
@@ -236,7 +236,7 @@
     <button type="button" class="side-menu-close" onclick="closeSideMenu()">關閉選單</button>
   </nav>
   
-  <div id="authArea" class="auth-card">
+  <div id="authArea" class="auth-card app-auth">
   <div class="auth-main">
     <div>
       <div class="auth-title">雲端同步</div>
@@ -257,17 +257,23 @@
   </div>
 </div>
 
-  <div class="container">
-    <h2>戰鬥陀螺管理表</h2>
+  <main class="container tool-container">
+    <header class="page-heading">
+      <div>
+        <span class="eyebrow">COLLECTION SYSTEM</span>
+        <h1>戰鬥陀螺管理</h1>
+        <p>收藏、額外零件與實戰配置分區管理，現有資料與操作方式全部保留。</p>
+      </div>
+    </header>
 
-    <div class="page-nav">
-      <a href="tournament.html" class="secondary-btn nav-link">參賽紀錄</a>
-      <a href="analysis.html" class="secondary-btn nav-link">配置分析</a>
-    </div>
+    <section id="collectionSection" class="tool-section">
+      <div class="section-heading">
+        <div><span class="eyebrow">MY COLLECTION</span><h2>我的陀螺收藏</h2></div>
+        <span class="count-pill"><strong id="collectionCount">0</strong> 顆</span>
+      </div>
+      <p class="section-note">記錄整顆陀螺與原裝零件。CX 上蓋仍會依既有規則由分件自動整合。</p>
 
-    <h3>陀螺配置</h3>
-
-    <div class="input-row">
+    <div class="input-row entry-panel">
       <input type="text" id="model" placeholder="型號，例如 CX-01、UX-01">
       <input type="text" id="layer" placeholder="上蓋">
 
@@ -302,10 +308,23 @@
         <tbody></tbody>
       </table>
     </div>
+    </section>
 
-    <h3>零件庫存表</h3>
+    <section id="inventorySection" class="tool-section">
+      <div class="section-heading">
+        <div><span class="eyebrow">EXTRA PARTS</span><h2>額外零件庫存</h2></div>
+        <span class="count-pill"><strong id="inventoryKinds">0</strong> 種</span>
+      </div>
+      <p class="section-note">這裡只顯示你另外新增的零件，不重複列出收藏區內整顆陀螺所包含的零件。</p>
 
-    <div class="part-input-row">
+      <div class="summary-strip" aria-label="額外零件庫存摘要">
+        <div><span>零件種類</span><strong id="inventoryKindSummary">0</strong></div>
+        <div><span>持有總數</span><strong id="inventoryTotal">0</strong></div>
+        <div><span>使用中</span><strong id="inventoryUsed">0</strong></div>
+        <div><span>可用</span><strong class="accent" id="inventoryAvailable">0</strong></div>
+      </div>
+
+    <div class="part-input-row entry-panel">
       <select id="partType">
         <option value="上蓋">上蓋</option>
         <option value="紋章鎖">紋章鎖</option>
@@ -335,10 +354,16 @@
         <tbody></tbody>
       </table>
     </div>
+    </section>
 
-    <h3>配置紀錄區</h3>
+    <section id="configSection" class="tool-section">
+      <div class="section-heading">
+        <div><span class="eyebrow">BUILD SETUPS</span><h2>配置紀錄</h2></div>
+        <span class="count-pill"><strong id="configCount">0</strong> 組</span>
+      </div>
+      <p class="section-note">從收藏與額外庫存挑選零件。已用完的零件仍會由既有數量防呆阻擋。</p>
 
-    <div id="config-selector">
+    <div id="config-selector" class="entry-panel">
       <input type="text" id="confModel" placeholder="輸入陀螺型號">
 
       <select id="sel上蓋">
@@ -395,8 +420,13 @@
         <tbody></tbody>
       </table>
     </div>
+    </section>
 
-    <h3>歷史測試紀錄</h3>
+    <section id="historySection" class="tool-section history-section">
+      <div class="section-heading">
+        <div><span class="eyebrow">TEST HISTORY</span><h2>歷史測試紀錄</h2></div>
+        <span class="count-pill"><strong id="historyCount">0</strong> 筆</span>
+      </div>
 
     <div class="history-note">
       這裡會記錄曾經拆掉的配置。下次如果再加入相同組合，系統會提醒你以前測試過。
@@ -419,7 +449,8 @@
         <tbody></tbody>
       </table>
     </div>
-  </div>
+    </section>
+  </main>
 
   <!-- 刪除配置原因對話框 -->
   <div id="deleteConfigModal" style="display:none;">
@@ -558,7 +589,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20260701-row-analysis1"></script>
-  <script src="site-menu.js?v=20260711-menu2"></script>
+  <script type="module" src="script.js?v=20260715-ui1"></script>
+  <script src="site-menu.js?v=20260715-ui1"></script>
 </body>
 </html>

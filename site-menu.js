@@ -9,9 +9,11 @@ const firebaseConfig = {
 };
 
 const SIDE_MENU_ITEMS = [
-  { href: "index.html", label: "陀螺配置", group: "工具" },
-  { href: "tournament.html", label: "參賽紀錄", group: "工具" },
-  { href: "analysis.html", label: "配置分析", group: "工具" },
+  { href: "index.html#collectionSection", label: "收藏", symbol: "C", group: "工具", section: "collectionSection", bottom: true },
+  { href: "index.html#inventorySection", label: "庫存", symbol: "I", group: "工具", section: "inventorySection", bottom: true },
+  { href: "index.html#configSection", label: "配置", symbol: "X", group: "工具", section: "configSection", bottom: true },
+  { href: "analysis.html", label: "分析", symbol: "A", group: "工具", page: "analysis.html", bottom: true },
+  { href: "tournament.html", label: "賽事", symbol: "3G", group: "工具", page: "tournament.html", bottom: true },
   { href: "home.html", label: "首頁", group: "說明" },
   { href: "guide.html", label: "使用教學", group: "說明" },
   { href: "changelog.html", label: "更新紀錄", group: "說明" },
@@ -30,11 +32,30 @@ function closeSideMenu() {
 }
 
 function currentPageName() {
-  return location.pathname.split("/").pop() || "home.html";
+  return location.pathname.split("/").pop() || "index.html";
+}
+
+function getInitialToolSection() {
+  const hash = location.hash.replace("#", "");
+  return ["collectionSection", "inventorySection", "configSection"].includes(hash)
+    ? hash
+    : "collectionSection";
+}
+
+let activeToolSection = getInitialToolSection();
+
+function isMenuItemActive(item) {
+  const page = currentPageName();
+  if (item.section) return page === "index.html" && item.section === activeToolSection;
+  return (item.page || item.href.split("#")[0]) === page;
+}
+
+function buildMenuLinkInnerHtml(item) {
+  const symbol = item.symbol ? `<span class="nav-symbol">${item.symbol}</span>` : "";
+  return `${symbol}<span>${item.label}</span>`;
 }
 
 function buildSideMenuInnerHtml() {
-  const currentPage = currentPageName();
   let html = `
     <div class="side-menu-title">戰鬥陀螺管理表</div>
     <div class="side-menu-subtitle">選擇要使用的功能頁面</div>
@@ -48,9 +69,10 @@ function buildSideMenuInnerHtml() {
       html += `<div class="side-menu-section" data-menu-group="${item.group}"${hidden}>${item.group}</div>`;
     }
 
-    const activeClass = item.href === currentPage ? " active" : "";
+    const activeClass = isMenuItemActive(item) ? " active" : "";
     const hidden = item.adminOnly ? ' style="display:none;"' : "";
-    html += `<a href="${item.href}" class="side-menu-link${activeClass}"${hidden}>${item.label}</a>`;
+    const sectionTarget = item.section ? ` data-section-target="${item.section}"` : "";
+    html += `<a href="${item.href}" class="side-menu-link${activeClass}"${sectionTarget}${hidden}>${buildMenuLinkInnerHtml(item)}</a>`;
   });
 
   html += `<button type="button" class="side-menu-close" onclick="closeSideMenu()">關閉選單</button>`;
@@ -75,9 +97,65 @@ function ensureSideMenuShell() {
   return menu;
 }
 
+function ensureBottomNavShell() {
+  let nav = document.querySelector(".bottom-nav");
+  if (!nav) {
+    document.body.insertAdjacentHTML("beforeend", '<nav class="bottom-nav" aria-label="手機版主要導覽"></nav>');
+    nav = document.querySelector(".bottom-nav");
+  }
+  return nav;
+}
+
+function renderBottomNav() {
+  const nav = ensureBottomNavShell();
+  nav.innerHTML = SIDE_MENU_ITEMS
+    .filter(item => item.bottom)
+    .map(item => {
+      const activeClass = isMenuItemActive(item) ? " active" : "";
+      const sectionTarget = item.section ? ` data-section-target="${item.section}"` : "";
+      return `<a href="${item.href}" class="bottom-nav-link${activeClass}"${sectionTarget}>${buildMenuLinkInnerHtml(item)}</a>`;
+    })
+    .join("");
+}
+
+function updateNavigationActiveState(sectionId) {
+  if (sectionId) activeToolSection = sectionId;
+
+  document.querySelectorAll("[data-section-target]").forEach(link => {
+    link.classList.toggle(
+      "active",
+      currentPageName() === "index.html" && link.dataset.sectionTarget === activeToolSection
+    );
+  });
+}
+
+function installToolSectionTracking() {
+  if (currentPageName() !== "index.html") return;
+
+  const sections = ["collectionSection", "inventorySection", "configSection"]
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+
+  document.querySelectorAll("[data-section-target]").forEach(link => {
+    link.addEventListener("click", () => updateNavigationActiveState(link.dataset.sectionTarget));
+  });
+
+  if (!("IntersectionObserver" in window) || sections.length === 0) return;
+
+  const observer = new IntersectionObserver(entries => {
+    const visible = entries
+      .filter(entry => entry.isIntersecting)
+      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    if (visible) updateNavigationActiveState(visible.target.id);
+  }, { rootMargin: "-18% 0px -62%", threshold: [0, 0.1, 0.35] });
+
+  sections.forEach(section => observer.observe(section));
+}
+
 function renderSideMenu() {
   const menu = ensureSideMenuShell();
   menu.innerHTML = buildSideMenuInnerHtml();
+  renderBottomNav();
 }
 
 function setAdminMenuVisibility(isAdmin) {
@@ -119,7 +197,9 @@ function installAdminMenuGuard() {
 }
 
 (function initSideMenu() {
+  document.body.classList.add("site-shell-ready");
   renderSideMenu();
+  installToolSectionTracking();
   installAdminMenuGuard();
 })();
 

@@ -108,7 +108,7 @@ function renderTable(targetId, headers, rows) {
         <thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join("")}</tr></thead>
         <tbody>
           ${rows.map(row => `
-            <tr>${row.map(cell => `<td>${escapeHtml(cell || "-")}</td>`).join("")}</tr>
+            <tr>${row.map((cell, index) => `<td data-label="${escapeHtml(headers[index] || "欄位")}">${escapeHtml(cell || "-")}</td>`).join("")}</tr>
           `).join("")}
         </tbody>
       </table>
