@@ -1395,7 +1395,8 @@ async function saveData() {
       data.updatedAt = Math.max(Number(data.updatedAt) || 0, lastLocalWriteUpdatedAt + 1);
       lastLocalWriteUpdatedAt = data.updatedAt;
       lastAppliedRemoteUpdatedAt = data.updatedAt;
-      await setDoc(userDocRef, data);
+      // Keep data owned by other pages, such as tournamentRecords.
+      await setDoc(userDocRef, data, { merge: true });
     }
 
     setSyncStatus("已儲存", "saved");

@@ -471,16 +471,12 @@ async function saveTournamentData() {
   try {
     setSyncStatus("儲存參賽紀錄中...", "saving");
 
-    const snapshot = await getDoc(userDocRef);
-    const oldData = snapshot.exists() ? snapshot.data() : {};
+    const updatedAt = Date.now();
+    mainData = { ...mainData, tournamentRecords, updatedAt };
 
-    mainData = {
-      ...oldData,
-      tournamentRecords,
-      updatedAt: Date.now()
-    };
-
-    await setDoc(userDocRef, mainData);
+    // Only update tournament-owned fields so stale page data cannot overwrite
+    // collection, inventory, configuration, or history records.
+    await setDoc(userDocRef, { tournamentRecords, updatedAt }, { merge: true });
 
     rebuildConfigOptions();
     setSyncStatus("參賽紀錄已儲存", "saved");

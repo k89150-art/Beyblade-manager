@@ -16,10 +16,14 @@
   <style>
     .site-nav { display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 18px; }
     .site-nav a { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:9px 12px; }
-    .info-card { background:#181818; border:1px solid #333; border-radius:14px; padding:18px; margin-bottom:16px; line-height:1.8; }
+    .guide-intro { margin-bottom:16px; padding:14px 16px; border-left:3px solid #3d7eff; color:#b8c4d0; background:rgba(61,126,255,.08); line-height:1.7; }
+    .guide-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .info-card { min-width:0; background:#181818; border:1px solid #333; border-radius:8px; padding:18px; line-height:1.8; }
     .info-card h3 { margin-top:0; }
     .step-list { padding-left: 20px; }
     .step-list li { margin-bottom: 8px; }
+    .guide-note { color:#9eaab6; font-size:13px; }
+    @media (max-width:760px){ .guide-grid{grid-template-columns:1fr;} }
     @media (max-width:600px){ .site-nav{flex-direction:column;} .site-nav a{width:100%; box-sizing:border-box;} }
   </style>
 </head>
@@ -34,48 +38,81 @@
       <a class="secondary-btn" href="changelog.html">更新紀錄</a>
     </div>
 
-    <div class="info-card">
-      <h3>一、先登入 Google</h3>
-      <ol class="step-list">
-        <li>進入「陀螺配置」頁面。</li>
-        <li>按「使用 Google 登入」。</li>
-        <li>登入後資料會儲存在自己的帳號底下，不會與其他玩家共用。</li>
-      </ol>
-    </div>
+    <div class="guide-intro">網站分為收藏、額外零件庫存、配置、分析與賽事五個主要功能。手機可使用底部導覽，電腦可使用左側欄快速切換。</div>
 
-    <div class="info-card">
-      <h3>二、新增零件庫存</h3>
-      <ol class="step-list">
-        <li>在「零件庫存表」選擇零件類別，例如上蓋、固鎖、軸心。</li>
-        <li>輸入零件名稱與數量。</li>
-        <li>按「新增零件」。</li>
-      </ol>
-    </div>
+    <div class="guide-grid">
+      <section class="info-card">
+        <h3>一、登入與同步</h3>
+        <ol class="step-list">
+          <li>使用 Google 登入後，收藏、配置與參賽紀錄會儲存在自己的帳號。</li>
+          <li>手機與電腦使用相同帳號即可讀取同一份資料。</li>
+          <li>操作後請等待狀態顯示「已儲存」或「資料已同步」再關閉頁面。</li>
+        </ol>
+      </section>
 
-    <div class="info-card">
-      <h3>三、CX 系列零件填寫方式</h3>
-      <p>CX 系列可依照實際零件拆分填入：紋章鎖、主要戰刃、超越戰刃、金屬戰刃、輔助戰刃、固鎖與軸心。</p>
-      <p>如果是抽包系列，系統會依照目前支援的抽包型號進行判斷，不會強制套用一般 CX 戰刃規則。</p>
-    </div>
+      <section class="info-card">
+        <h3>二、加入原裝收藏</h3>
+        <ol class="step-list">
+          <li>預設為「自動帶入」，輸入 UX-01、UX 01 或 UX01 都能辨識。</li>
+          <li>同一主型號有多種商品時，可選其中一顆或全部加入；雙陀螺套組會整組處理。</li>
+          <li>查不到商品時再切換「手動輸入」。收藏區只記錄原裝配置，改裝請到配置區。</li>
+        </ol>
+      </section>
 
-    <div class="info-card">
-      <h3>四、建立配置紀錄</h3>
-      <ol class="step-list">
-        <li>在「配置紀錄區」輸入陀螺型號。</li>
-        <li>從下拉選單選擇上蓋、固鎖、軸心與其他零件。</li>
-        <li>按「加入配置表」。</li>
-        <li>已被使用的零件會避免重複套用。</li>
-      </ol>
-    </div>
+      <section class="info-card">
+        <h3>三、額外零件庫存</h3>
+        <ol class="step-list">
+          <li>只需加入原裝收藏以外、另外持有的上蓋、CX 分件、固鎖或軸心。</li>
+          <li>選擇類別、輸入名稱與正整數數量後按「新增零件」。</li>
+          <li>摘要會顯示持有總數、配置使用中與目前可用數量。</li>
+        </ol>
+      </section>
 
-    <div class="info-card">
-      <h3>五、參賽紀錄</h3>
-      <ol class="step-list">
-        <li>進入「參賽紀錄」頁面。</li>
-        <li>新增比賽名稱、日期、地點、名次與備註。</li>
-        <li>每場比賽可新增多個對局。</li>
-        <li>每局可記錄自己的 3 顆陀螺與每回合得失分。</li>
-      </ol>
+      <section class="info-card">
+        <h3>四、建立自由配置</h3>
+        <ol class="step-list">
+          <li>到「配置」按「＋ 建立配置」，選擇 BX／UX 或 CX 模式。</li>
+          <li>BX／UX 使用上蓋、固鎖、軸心；CX 依實際結構選主要戰刃，或金屬＋超越戰刃。</li>
+          <li>選單只提供持有且尚有數量的零件，儲存前仍會檢查 Tr、UX-16、UX-19／UX-20 等規則。</li>
+        </ol>
+      </section>
+
+      <section class="info-card">
+        <h3>五、修改、刪除與歷史</h3>
+        <ol class="step-list">
+          <li>配置卡可直接「修改」或「刪除」；刪除時可填寫拆除原因與測試備註。</li>
+          <li>保留的資料會進入歷史測試紀錄，之後可還原成配置。</li>
+          <li>收藏區為原裝紀錄，因此不提供改裝；需要不同組合請另建配置。</li>
+        </ol>
+      </section>
+
+      <section class="info-card">
+        <h3>六、配置分析與建議</h3>
+        <ol class="step-list">
+          <li>可從配置卡按「分析」，或到分析頁自行選擇 BX／UX、CX 三件式或 CX 分體式。</li>
+          <li>結果包含定位、七維分數、優點、風險、改裝方向與 3G／5G 建議位置。</li>
+          <li>庫存建議只在按下按鈕時讀取持有零件並產生候選配置。</li>
+        </ol>
+        <div class="guide-note">分析與推薦屬於理論參考，不保證實戰結果或比賽勝利。</div>
+      </section>
+
+      <section class="info-card">
+        <h3>七、參賽紀錄</h3>
+        <ol class="step-list">
+          <li>先新增比賽日期、名稱、地點、名次與備註，再展開比賽新增對局。</li>
+          <li>每個對局可從配置區選擇或手動輸入 3 顆陀螺，並逐回合記錄得失分方式。</li>
+          <li>按「完成」會鎖定新增操作；需要補資料時按「修改」即可重新編輯。</li>
+        </ol>
+      </section>
+
+      <section class="info-card">
+        <h3>八、常見問題</h3>
+        <ol class="step-list">
+          <li>資料沒立即出現：確認登入帳號並等待同步完成，再重新開啟頁面。</li>
+          <li>零件無法選擇：通常代表可用數量已用完，請檢查收藏、額外庫存與現有配置。</li>
+          <li>安裝到手機桌面後仍看到舊畫面：完全關閉 App 後重新開啟以載入新版。</li>
+        </ol>
+      </section>
     </div>
   </div>
   <script src="site-menu.js?v=20260716-ui2"></script>
