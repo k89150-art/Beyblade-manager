@@ -313,6 +313,111 @@ button:active {
   width: 100%;
 }
 
+.collection-entry-panel {
+  align-items: end;
+}
+
+.stock-mode-switch {
+  grid-column: 1 / -1;
+  padding: 4px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(8,13,18,.8);
+}
+
+.stock-mode-btn {
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+}
+
+.stock-mode-btn.active {
+  color: #fff;
+  background: var(--accent);
+  box-shadow: 0 5px 16px rgba(44,117,255,.24);
+}
+
+.stock-model-field {
+  grid-column: span 2;
+  display: grid;
+  gap: 6px;
+  color: #aab5c0;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.stock-auto-preview {
+  min-height: 66px;
+  padding: 10px 12px;
+  grid-column: span 2;
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  border: 1px solid rgba(55,196,205,.26);
+  border-radius: 7px;
+  color: #afbdc9;
+  background: rgba(20,92,99,.08);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.stock-auto-preview.is-found {
+  border-color: rgba(58,203,130,.32);
+  background: rgba(58,203,130,.07);
+}
+
+.stock-auto-preview.is-missing,
+.stock-auto-preview.is-error {
+  border-color: rgba(240,179,69,.36);
+  color: #f3c86d;
+  background: rgba(240,179,69,.07);
+}
+
+.stock-auto-preview[hidden] {
+  display: none !important;
+}
+
+.stock-preview-item {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.stock-preview-item + .stock-preview-item {
+  padding-top: 7px;
+  border-top: 1px solid rgba(80,100,116,.34);
+}
+
+.stock-preview-item strong {
+  overflow-wrap: anywhere;
+  color: #f3f6f8;
+  font-size: 13px;
+}
+
+.stock-preview-item span {
+  color: #93a1ae;
+}
+
+.stock-manual-fields {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.stock-manual-fields[hidden] {
+  display: none !important;
+}
+
+#addCollectionBtn {
+  min-height: 44px;
+}
+
 .part-input-row {
   display: grid;
   grid-template-columns: 150px minmax(180px, 1fr) 110px 120px;
@@ -1234,6 +1339,15 @@ td select {
   .auth-card {
     width: min(920px, calc(100% - 32px));
   }
+
+  .stock-model-field,
+  .stock-auto-preview {
+    grid-column: span 2;
+  }
+
+  .stock-manual-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 820px) {
@@ -1352,6 +1466,16 @@ td select {
   #config-selector button {
     grid-column: 1 / -1;
     min-height: 46px;
+  }
+
+  .stock-model-field,
+  .stock-auto-preview,
+  #addCollectionBtn {
+    grid-column: 1 / -1;
+  }
+
+  .stock-manual-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .summary-strip > div {

@@ -41,6 +41,12 @@ let viewingUserId = null;   // null = 看自己；有值 = 管理員在看別人
 let unsubscribeCloudData = null;
 let isApplyingRemoteData = false;
 
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260715";
+let stockInputMode = "auto";
+let stockProductsLoadPromise = null;
+let stockProductsLoaded = false;
+let stockProductsByCode = new Map();
+
 function isAdmin() {
   return currentUser && currentUser.uid === ADMIN_UID;
 }
@@ -139,6 +145,12 @@ const configEditColumnMap = {
 
 function normalizeModel(model) {
   const text = String(model || "").trim().replace(/\s+/g, " ");
+
+  const normalizedHyphens = text.replace(/\s*-\s*/g, "-");
+  if (!/\s/.test(normalizedHyphens)
+      && /^(BX|UX|CX|BXG|BXH)-\d+(?:-\d+){0,2}$/i.test(normalizedHyphens)) {
+    return normalizedHyphens.toUpperCase();
+  }
 
   const match = text.match(/^(UX|BX|CX)\s*-?\s*(\d+)(.*)$/i);
 
@@ -410,6 +422,10 @@ function getOperationButtons(tableType) {
     : "";
 
   if (isReadOnly()) return analyzeButton;
+
+  if (tableType === "beyblade") {
+    return '<button onclick="deleteRow(this)">刪除</button>';
+  }
 
   return `
     ${analyzeButton}
@@ -763,6 +779,25 @@ window.deleteRow = async function (button) {
   if (tableId === "beybladeTable") {
     const model = row.cells[0]?.innerText.trim() || "";
     const layer = row.cells[1]?.innerText.trim() || "";
+
+    if (row.dataset.stockSetInstanceId) {
+      const setRows = Array.from(document.querySelectorAll("#beybladeTable tbody tr"))
+        .filter(candidate => candidate.dataset.stockSetInstanceId === row.dataset.stockSetInstanceId);
+      const setCode = row.dataset.stockProductCode || row.dataset.stockSetId || model;
+      const names = setRows
+        .map(candidate => candidate.cells[1]?.innerText.trim() || candidate.cells[0]?.innerText.trim() || "")
+        .filter(Boolean)
+        .join("、");
+      const ok = confirm(`「${setCode}」是雙陀螺套組。確定要一起刪除「${names}」嗎？`);
+      if (!ok) return;
+
+      setRows.forEach(candidate => candidate.remove());
+      sortBeybladeTable();
+      refreshSelectors();
+      saveData();
+      return;
+    }
+
     if (model || layer) deleteName = `${model} ${layer}`.trim();
     const ok = confirm(`確定要刪除「${deleteName}」嗎？`);
     if (!ok) return;
@@ -1267,6 +1302,20 @@ function getTableData(tableId, hasStockName = false) {
         "";
     }
 
+    if (tableId === "beybladeTable") {
+      [
+        "stockAutoFilled",
+        "stockRecordId",
+        "stockProductCode",
+        "stockSetId",
+        "stockSetInstanceId",
+        "stockAssemblySystem",
+        "stockRatchetMode"
+      ].forEach(key => {
+        if (row.dataset[key]) item[key] = row.dataset[key];
+      });
+    }
+
     data.push(item);
   });
 
@@ -1337,7 +1386,21 @@ setSyncStatus("儲存失敗", "error");
 
 /* ====== 載入資料 ====== */
 
-function createBeybladeRow(cells, mainStockName) {
+function applyBeybladeRowMetadata(row, metadata = {}) {
+  [
+    "stockAutoFilled",
+    "stockRecordId",
+    "stockProductCode",
+    "stockSetId",
+    "stockSetInstanceId",
+    "stockAssemblySystem",
+    "stockRatchetMode"
+  ].forEach(key => {
+    if (metadata[key]) row.dataset[key] = String(metadata[key]);
+  });
+}
+
+function createBeybladeRow(cells, mainStockName, metadata = {}) {
   const tbody = document.querySelector("#beybladeTable tbody");
   const row = tbody.insertRow();
 
@@ -1350,6 +1413,7 @@ function createBeybladeRow(cells, mainStockName) {
     }
   });
 
+  applyBeybladeRowMetadata(row, metadata);
   row.insertCell(9).innerHTML = getOperationButtons("beyblade");
 }
 
@@ -1402,7 +1466,7 @@ function applyDataToTables(data) {
 
   if (data.beybladeTable) {
     data.beybladeTable.forEach(item => {
-      createBeybladeRow(item.cells, item.mainStockName);
+      createBeybladeRow(item.cells, item.mainStockName, item);
     });
   }
 
@@ -1469,7 +1533,7 @@ function startCloudListener() {
 
 /* ====== 第一區：新增陀螺配置 ====== */
 
-window.addRow = function () {
+function addManualStockRow() {
   if (!requireLogin()) return;
   
   const tbody = document.querySelector("#beybladeTable tbody");
@@ -1584,6 +1648,45 @@ window.addRow = function () {
   sortBeybladeTable();
   refreshSelectors();
   saveData();
+}
+
+window.addRow = async function () {
+  if (!requireLogin()) return;
+
+  if (stockInputMode === "manual") {
+    addManualStockRow();
+    return;
+  }
+
+  const modelInput = document.getElementById("model");
+  const productCode = normalizeStockProductCode(modelInput?.value || "");
+
+  if (!productCode) {
+    alert("請輸入商品型號");
+    modelInput?.focus();
+    return;
+  }
+
+  try {
+    await loadStockProducts();
+  } catch (error) {
+    alert("原裝配置資料載入失敗，請重新整理頁面或切換為手動輸入。");
+    return;
+  }
+
+  const products = getStockProductsForCode(productCode);
+  if (!products.length) {
+    alert(`找不到「${productCode}」的原裝配置，請確認型號或切換為手動輸入。`);
+    renderStockAutoPreview();
+    return;
+  }
+
+  addAutoFilledStockProducts(products);
+  clearFirstAreaInputs();
+  renderStockAutoPreview();
+  sortBeybladeTable();
+  refreshSelectors();
+  saveData();
 };
 
 /* ====== 第二區：新增零件庫存 ====== */
@@ -1640,13 +1743,15 @@ function getTotalParts() {
   beybladeRows.forEach(row => {
     const model = row.cells[0].innerText.trim();
     const series = getSeriesFromModel(model);
+    const cxAssembly = String(row.dataset.stockAssemblySystem || "").startsWith("CX_");
 
     partTypes.forEach(type => {
       const cellIndex = beybladeCellMap[type];
       const cell = row.cells[cellIndex];
       const name = getStockNameFromCell(cell);
 
-      if (series === "CX" && type === "上蓋" && !isRandomBooster(model)) {
+      if (type === "上蓋"
+          && (cxAssembly || (series === "CX" && !isRandomBooster(model)))) {
         return;
       }
 
@@ -1882,6 +1987,210 @@ function updateResponsiveTableCells() {
         cell.classList.toggle("empty-value-cell", isEmptyValue);
       });
     });
+  });
+}
+
+function normalizeStockProductCode(value) {
+  return String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[‐‑‒–—−]/g, "-")
+    .replace(/\s+/g, "");
+}
+
+function getStockProductsForCode(value) {
+  return stockProductsByCode.get(normalizeStockProductCode(value)) || [];
+}
+
+function setStockAutoPreviewState(className, content) {
+  const preview = document.getElementById("stockAutoPreview");
+  if (!preview) return;
+
+  preview.className = `stock-auto-preview ${className}`.trim();
+  preview.innerHTML = content;
+}
+
+function formatStockProductParts(product) {
+  const parts = product?.parts || {};
+  const labels = [];
+
+  if (parts.blade) labels.push(`上蓋 ${parts.blade}`);
+  if (parts.lockChip) labels.push(`紋章鎖 ${parts.lockChip}`);
+  if (parts.mainBlade) labels.push(`主要戰刃 ${parts.mainBlade}`);
+  if (parts.metalBlade) labels.push(`金屬戰刃 ${parts.metalBlade}`);
+  if (parts.overBlade) labels.push(`超越戰刃 ${parts.overBlade}`);
+  if (parts.assistBlade) labels.push(`輔助戰刃 ${parts.assistBlade}`);
+
+  if (parts.ratchet) {
+    labels.push(`固鎖 ${parts.ratchet}`);
+  } else if (product.ratchetMode === "integrated_blade_ratchet") {
+    labels.push("固鎖 戰刃一體式");
+  } else if (product.ratchetMode === "integrated_ratchet_bit") {
+    labels.push("固鎖／軸心 一體式");
+  }
+
+  if (parts.bit) labels.push(`軸心 ${parts.bit}`);
+  return labels.join(" ・ ");
+}
+
+function renderStockAutoPreview() {
+  if (stockInputMode !== "auto") return;
+
+  const model = document.getElementById("model")?.value || "";
+  if (!stockProductsLoaded) {
+    setStockAutoPreviewState("is-loading", "正在載入原裝配置資料...");
+    return;
+  }
+
+  if (!model.trim()) {
+    setStockAutoPreviewState("", "輸入商品型號後，這裡會顯示即將加入的原裝配置。");
+    return;
+  }
+
+  const products = getStockProductsForCode(model);
+  if (!products.length) {
+    setStockAutoPreviewState(
+      "is-missing",
+      `找不到「${escapeHtml(normalizeStockProductCode(model))}」的原裝資料，請確認型號或切換為手動輸入。`
+    );
+    return;
+  }
+
+  const items = products.map(product => `
+    <div class="stock-preview-item">
+      <strong>${escapeHtml(product.recordId)} ${escapeHtml(product.displayNameZh)}</strong>
+      <span>${escapeHtml(formatStockProductParts(product))}</span>
+    </div>
+  `).join("");
+  const setNote = products.length > 1
+    ? `<div>此為雙陀螺套組，將一次加入 ${products.length} 顆。</div>`
+    : "";
+
+  setStockAutoPreviewState("is-found", `${items}${setNote}`);
+}
+
+async function loadStockProducts() {
+  if (stockProductsLoadPromise) return stockProductsLoadPromise;
+
+  stockProductsLoadPromise = fetch(STOCK_PRODUCTS_URL)
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    })
+    .then(data => {
+      if (!Array.isArray(data.stockProducts)) {
+        throw new Error("stockProducts 格式不正確");
+      }
+
+      const byCode = new Map();
+      data.stockProducts.forEach(product => {
+        if (!product.autoFillEnabled || product.needsReview) return;
+
+        const code = normalizeStockProductCode(product.productCode);
+        if (!code) return;
+        if (!byCode.has(code)) byCode.set(code, []);
+        byCode.get(code).push(product);
+      });
+
+      byCode.forEach(products => {
+        products.sort((a, b) => Number(a.setChildIndex || 0) - Number(b.setChildIndex || 0));
+      });
+
+      stockProductsByCode = byCode;
+      stockProductsLoaded = true;
+      renderStockAutoPreview();
+      return byCode;
+    })
+    .catch(error => {
+      console.error("原裝配置資料載入失敗：", error);
+      stockProductsLoaded = false;
+      stockProductsLoadPromise = null;
+      setStockAutoPreviewState(
+        "is-error",
+        "原裝配置資料載入失敗，請重新整理頁面或切換為手動輸入。"
+      );
+      throw error;
+    });
+
+  return stockProductsLoadPromise;
+}
+
+function setStockInputMode(mode) {
+  stockInputMode = mode === "manual" ? "manual" : "auto";
+  const manual = stockInputMode === "manual";
+
+  document.querySelectorAll("[data-stock-mode]").forEach(button => {
+    const active = button.dataset.stockMode === stockInputMode;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+
+  const manualFields = document.getElementById("stockManualFields");
+  const autoPreview = document.getElementById("stockAutoPreview");
+  const addButton = document.getElementById("addCollectionBtn");
+
+  if (manualFields) manualFields.hidden = !manual;
+  if (autoPreview) autoPreview.hidden = manual;
+  if (addButton) addButton.textContent = manual ? "手動加入原裝收藏" : "加入原裝收藏";
+
+  if (!manual) renderStockAutoPreview();
+}
+
+function getStockProductRowData(product) {
+  const parts = product.parts || {};
+  const valueOrDash = value => value || "-";
+  const hasSplitBlade = Boolean(parts.metalBlade && parts.overBlade);
+  let layer = parts.blade || "-";
+
+  if (!parts.blade && parts.lockChip) {
+    layer = hasSplitBlade
+      ? [parts.lockChip, parts.metalBlade, parts.overBlade, parts.assistBlade].filter(Boolean).join("")
+      : [parts.lockChip, parts.mainBlade, parts.assistBlade].filter(Boolean).join("");
+  }
+
+  const mainPart = hasSplitBlade
+    ? `${parts.overBlade}/${parts.metalBlade}`
+    : valueOrDash(parts.mainBlade);
+
+  return {
+    cells: [
+      product.isSetProduct ? product.recordId : product.productCode,
+      layer,
+      valueOrDash(parts.lockChip),
+      mainPart,
+      valueOrDash(parts.overBlade),
+      valueOrDash(parts.metalBlade),
+      valueOrDash(parts.assistBlade),
+      valueOrDash(parts.ratchet),
+      valueOrDash(parts.bit)
+    ],
+    mainStockName: hasSplitBlade ? "" : valueOrDash(parts.mainBlade),
+    metadata: {
+      stockAutoFilled: "true",
+      stockRecordId: product.recordId || "",
+      stockProductCode: product.productCode || "",
+      stockSetId: product.setId || "",
+      stockAssemblySystem: product.assemblySystem || "",
+      stockRatchetMode: product.ratchetMode || ""
+    }
+  };
+}
+
+function createStockSetInstanceId(productCode) {
+  const suffix = globalThis.crypto?.randomUUID
+    ? globalThis.crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `${normalizeStockProductCode(productCode)}-${suffix}`;
+}
+
+function addAutoFilledStockProducts(products) {
+  const isSet = products.length > 1 && products.every(product => product.isSetProduct);
+  const setInstanceId = isSet ? createStockSetInstanceId(products[0].productCode) : "";
+
+  products.forEach(product => {
+    const rowData = getStockProductRowData(product);
+    if (setInstanceId) rowData.metadata.stockSetInstanceId = setInstanceId;
+    createBeybladeRow(rowData.cells, rowData.mainStockName, rowData.metadata);
   });
 }
 
@@ -2345,6 +2654,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
   const partCountInput = document.getElementById("partCount");
+  const stockModelInput = document.getElementById("model");
   const configModelInput = document.getElementById("confModel");
   const configAxisSelect = document.getElementById(selectorMap["軸心"]);
   const openConfigEditorBtn = document.getElementById("openConfigEditorBtn");
@@ -2355,6 +2665,24 @@ document.addEventListener("DOMContentLoaded", function () {
   if (partCountInput) {
     preventInvalidPartCountInput(partCountInput);
   }
+
+  if (stockModelInput) {
+    stockModelInput.addEventListener("input", renderStockAutoPreview);
+    stockModelInput.addEventListener("change", renderStockAutoPreview);
+    stockModelInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        window.addRow();
+      }
+    });
+  }
+
+  document.querySelectorAll("[data-stock-mode]").forEach(button => {
+    button.addEventListener("click", () => setStockInputMode(button.dataset.stockMode));
+  });
+
+  setStockInputMode("auto");
+  loadStockProducts().catch(() => {});
 
   if (configModelInput) {
     configModelInput.addEventListener("input", updateNoRatchetConfigOption);

@@ -14,7 +14,7 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20260716-ui11" />
+  <link rel="stylesheet" href="style.css?v=20260716-ui12" />
   <link rel="stylesheet" href="site-menu.css?v=20260716-ui2" />
   <style>
 
@@ -271,22 +271,35 @@
         <div><span class="eyebrow">MY COLLECTION</span><h2>我的陀螺收藏</h2></div>
         <span class="count-pill"><strong id="collectionCount">0</strong> 顆</span>
       </div>
-      <p class="section-note">記錄整顆陀螺與原裝零件。CX 上蓋仍會依既有規則由分件自動整合。</p>
+      <p class="section-note">收藏只記錄原裝配置；每次新增代表持有 1 顆，雙陀螺套組會自動加入同組兩顆。改裝請到配置區操作。</p>
 
-    <div class="input-row entry-panel">
-      <input type="text" id="model" placeholder="型號，例如 CX-01、UX-01">
-      <input type="text" id="layer" placeholder="上蓋">
+    <div class="input-row entry-panel collection-entry-panel">
+      <div class="stock-mode-switch" role="group" aria-label="收藏輸入模式">
+        <button type="button" class="stock-mode-btn active" data-stock-mode="auto" aria-pressed="true">自動帶入</button>
+        <button type="button" class="stock-mode-btn" data-stock-mode="manual" aria-pressed="false">手動輸入</button>
+      </div>
 
-      <input type="text" id="lock" placeholder="紋章鎖">
-      <input type="text" id="primaryBlade" placeholder="主要戰刃">
-      <input type="text" id="transcendBlade" placeholder="超越戰刃">
-      <input type="text" id="metalBlade" placeholder="金屬戰刃">
-      <input type="text" id="aux" placeholder="輔助戰刃">
+      <label class="stock-model-field">
+        <span>商品型號</span>
+        <input type="text" id="model" autocomplete="off" placeholder="例如 BX-19、CX-14、BX-00-01">
+      </label>
 
-      <input type="text" id="fix" placeholder="固鎖">
-      <input type="text" id="axis" placeholder="軸心">
+      <div id="stockAutoPreview" class="stock-auto-preview is-loading" aria-live="polite">
+        正在載入原裝配置資料...
+      </div>
 
-      <button onclick="addRow()">新增</button>
+      <div id="stockManualFields" class="stock-manual-fields" hidden>
+        <input type="text" id="layer" placeholder="上蓋">
+        <input type="text" id="lock" placeholder="紋章鎖">
+        <input type="text" id="primaryBlade" placeholder="主要戰刃">
+        <input type="text" id="transcendBlade" placeholder="超越戰刃">
+        <input type="text" id="metalBlade" placeholder="金屬戰刃">
+        <input type="text" id="aux" placeholder="輔助戰刃">
+        <input type="text" id="fix" placeholder="固鎖">
+        <input type="text" id="axis" placeholder="軸心">
+      </div>
+
+      <button id="addCollectionBtn" type="button" onclick="addRow()">加入原裝收藏</button>
     </div>
 
     <div class="table-wrap record-card-wrap collection-card-wrap">
@@ -642,7 +655,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20260716-ui11"></script>
+  <script type="module" src="script.js?v=20260716-ui12"></script>
   <script src="site-menu.js?v=20260716-ui2"></script>
 </body>
 </html>
