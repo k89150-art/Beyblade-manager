@@ -1661,7 +1661,8 @@ window.addRow = async function () {
   }
 
   const modelInput = document.getElementById("model");
-  const productCode = normalizeStockProductCode(modelInput?.value || "");
+  const enteredProductCode = modelInput?.value || "";
+  const productCode = normalizeStockProductCode(enteredProductCode);
 
   if (!productCode) {
     alert("請輸入商品型號");
@@ -1678,13 +1679,14 @@ window.addRow = async function () {
 
   const products = getStockProductsForCode(productCode);
   if (!products.length) {
-    alert(`找不到「${productCode}」的原裝配置，請確認型號或切換為手動輸入。`);
+    alert(`找不到「${formatEnteredStockProductCode(enteredProductCode)}」的原裝配置，請確認型號或切換為手動輸入。`);
     renderStockAutoPreview();
     return;
   }
 
+  const matchedProductCode = products[0].productCode || formatEnteredStockProductCode(enteredProductCode);
   const selectedProducts = products.length > 1
-    ? await openStockProductChoice(products, productCode)
+    ? await openStockProductChoice(products, matchedProductCode)
     : products;
   if (!selectedProducts?.length) return;
 
@@ -2001,8 +2003,11 @@ function normalizeStockProductCode(value) {
   return String(value || "")
     .trim()
     .toUpperCase()
-    .replace(/[‐‑‒–—−]/g, "-")
-    .replace(/\s+/g, "");
+    .replace(/[^A-Z0-9]/g, "");
+}
+
+function formatEnteredStockProductCode(value) {
+  return String(value || "").trim().toUpperCase();
 }
 
 function getStockProductsForCode(value) {
@@ -2058,7 +2063,7 @@ function renderStockAutoPreview() {
   if (!products.length) {
     setStockAutoPreviewState(
       "is-missing",
-      `找不到「${escapeHtml(normalizeStockProductCode(model))}」的原裝資料，請確認型號或切換為手動輸入。`
+      `找不到「${escapeHtml(formatEnteredStockProductCode(model))}」的原裝資料，請確認型號或切換為手動輸入。`
     );
     return;
   }
