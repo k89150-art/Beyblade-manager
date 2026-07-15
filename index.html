@@ -14,7 +14,7 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20260716-ui12" />
+  <link rel="stylesheet" href="style.css?v=20260716-ui13" />
   <link rel="stylesheet" href="site-menu.css?v=20260716-ui2" />
   <style>
 
@@ -271,7 +271,7 @@
         <div><span class="eyebrow">MY COLLECTION</span><h2>我的陀螺收藏</h2></div>
         <span class="count-pill"><strong id="collectionCount">0</strong> 顆</span>
       </div>
-      <p class="section-note">收藏只記錄原裝配置；每次新增代表持有 1 顆，雙陀螺套組會自動加入同組兩顆。改裝請到配置區操作。</p>
+      <p class="section-note">收藏只記錄原裝配置；同一型號若有多顆陀螺，可選擇其中一顆或全部加入。改裝請到配置區操作。</p>
 
     <div class="input-row entry-panel collection-entry-panel">
       <div class="stock-mode-switch" role="group" aria-label="收藏輸入模式">
@@ -508,12 +508,31 @@
           </select>
         </label>
 
-        <div class="quick-editor-note">保留庫存耗盡、Tr、UX-19、UX-16 與 CX 二選一防呆。</div>
+        <div class="quick-editor-note">保留庫存耗盡、Tr、UX-19／UX-20、UX-16 與 CX 二選一防呆。</div>
       </div>
 
       <footer class="quick-editor-actions">
         <button id="cancelConfigEditorBtn" type="button" class="secondary-btn">取消</button>
         <button id="saveConfigEditorBtn" type="button" class="primary-btn" onclick="addConfig()">儲存</button>
+      </footer>
+    </section>
+  </div>
+
+  <div id="stockChoiceDialog" class="stock-choice-shell" hidden>
+    <button id="stockChoiceBackdrop" type="button" class="stock-choice-backdrop" aria-label="關閉陀螺選擇視窗"></button>
+    <section class="stock-choice-panel" role="dialog" aria-modal="true" aria-labelledby="stockChoiceTitle">
+      <header class="stock-choice-header">
+        <div>
+          <span class="eyebrow">STOCK OPTIONS</span>
+          <h2 id="stockChoiceTitle">選擇要加入的陀螺</h2>
+          <p id="stockChoiceDescription"></p>
+        </div>
+        <button id="closeStockChoiceBtn" type="button" class="stock-choice-close" aria-label="關閉陀螺選擇視窗">×</button>
+      </header>
+      <div id="stockChoiceList" class="stock-choice-list"></div>
+      <footer class="stock-choice-actions">
+        <button id="cancelStockChoiceBtn" type="button" class="secondary-btn">取消</button>
+        <button id="addAllStockChoicesBtn" type="button" class="primary-btn">全部加入</button>
       </footer>
     </section>
   </div>
@@ -583,7 +602,7 @@
 
       function isNoRatchetModelFromText(text) {
         const model = normalizeNoRatchetModel(text);
-        return model === "CX-07" || model === "UX-19";
+        return model === "CX-07" || model === "UX-19" || model === "UX-20";
       }
 
       function isNoRatchetConfigModel() {
@@ -655,7 +674,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20260716-ui12"></script>
+  <script type="module" src="script.js?v=20260716-ui13"></script>
   <script src="site-menu.js?v=20260716-ui2"></script>
 </body>
 </html>

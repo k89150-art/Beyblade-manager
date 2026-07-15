@@ -2,26 +2,29 @@
   "metadata": {
     "name": "Beyblade X 原裝配置起始資料",
     "source": "使用者提供：戰鬥陀螺X商品型號整理-更新至20260515.pdf",
-    "sourceUpdatedThrough": "2026-05-15",
+    "sourceUpdatedThrough": "2026-07-16",
     "createdAt": "2026-07-15",
     "purpose": "收藏區輸入商品型號後，自動帶出原裝零件；不供配置區修改或性能評分。",
-    "recordCount": 212,
-    "autoFillSafeCount": 202,
-    "needsReviewCount": 10,
+    "recordCount": 213,
+    "autoFillSafeCount": 213,
+    "needsReviewCount": 0,
     "importantRules": [
       "原裝配置只用於收藏登錄，不改變性能評分。",
       "收藏區不提供零件修改；改裝需前往配置區。",
       "不得只用型號前綴判斷組裝系統；CX 隨機包內可能是一般 BX/UX 結構。",
       "autoFillEnabled=false 的資料不得自動帶入。"
     ],
-    "version": "2026.07.15-confirmed",
-    "updated": "2026-07-15",
-    "totalRecords": 212,
-    "autoFillSafeRecords": 212,
+    "version": "2026.07.16-confirmed",
+    "updated": "2026-07-16",
+    "totalRecords": 213,
+    "autoFillSafeRecords": 213,
     "reviewNeededRecords": 0,
     "confirmedCorrections": {
       "UX-10-03": "翼龍神翼 7-70 B",
-      "BX-19": "戰犀重角 3-80 S"
+      "BX-19": "戰犀重角 3-80 S",
+      "UX-01": "蒼龍爆刃 1-60 A",
+      "UX-02": "惡魔重錘 3-70 H",
+      "UX-20": "榮耀戰神 戰刃一體式 LF"
     },
     "confirmedTwoBeySets": [
       "BX-00-01",
@@ -29,9 +32,9 @@
       "BX-00-03",
       "BX-00-04"
     ],
-    "setAutoFillRule": "Typing the official set code adds both child Beyblades.",
+    "setAutoFillRule": "When one product code has multiple Beyblades, let the user choose one or add all.",
     "dataset": "AUTOFILL_SAFE",
-    "note": "All 212 records are confirmed or otherwise marked safe for original-combo autofill."
+    "note": "All 213 records are confirmed or otherwise marked safe for original-combo autofill."
   },
   "stockProducts": [
     {
@@ -62,7 +65,7 @@
       "setChildIndex": 1,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -94,7 +97,7 @@
       "setChildIndex": 2,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -126,7 +129,7 @@
       "setChildIndex": 1,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -158,7 +161,7 @@
       "setChildIndex": 2,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -190,7 +193,7 @@
       "setChildIndex": 1,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -222,7 +225,7 @@
       "setChildIndex": 2,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -254,7 +257,7 @@
       "setChildIndex": 1,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -286,7 +289,7 @@
       "setChildIndex": 2,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -3944,7 +3947,7 @@
     },
     {
       "productCode": "UX-01",
-      "displayNameZh": "德蘭剋星",
+      "displayNameZh": "蒼龍爆刃",
       "series": "UX",
       "assemblySystem": "STANDARD",
       "ratchetMode": "standard",
@@ -3952,7 +3955,7 @@
       "needsReview": false,
       "sourceLine": 100,
       "parts": {
-        "blade": "德蘭剋星",
+        "blade": "蒼龍爆刃",
         "lockChip": null,
         "mainBlade": null,
         "metalBlade": null,
@@ -3966,7 +3969,7 @@
     },
     {
       "productCode": "UX-02",
-      "displayNameZh": "赫爾之錘",
+      "displayNameZh": "惡魔重錘",
       "series": "UX",
       "assemblySystem": "STANDARD",
       "ratchetMode": "standard",
@@ -3974,7 +3977,7 @@
       "needsReview": false,
       "sourceLine": 99,
       "parts": {
-        "blade": "赫爾之錘",
+        "blade": "惡魔重錘",
         "lockChip": null,
         "mainBlade": null,
         "metalBlade": null,
@@ -4828,13 +4831,39 @@
       "bitSelectable": true,
       "recordId": "UX-19",
       "isSetProduct": false
+    },
+    {
+      "productCode": "UX-20",
+      "displayNameZh": "榮耀戰神",
+      "series": "UX",
+      "assemblySystem": "UX_EXPAND",
+      "ratchetMode": "integrated_blade_ratchet",
+      "autoFillEnabled": true,
+      "needsReview": false,
+      "sourceLine": null,
+      "parts": {
+        "blade": "榮耀戰神",
+        "lockChip": null,
+        "mainBlade": null,
+        "metalBlade": null,
+        "overBlade": null,
+        "assistBlade": null,
+        "ratchet": null,
+        "bit": "LF"
+      },
+      "ratchetSelectable": false,
+      "bitSelectable": true,
+      "recordId": "UX-20",
+      "isSetProduct": false,
+      "confirmationStatus": "user_confirmed",
+      "confirmationDate": "2026-07-16"
     }
   ],
   "stockProductSets": [
     {
       "productCode": "BX-00-01",
       "setSize": 2,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "children": [
         {
           "recordId": "BX-00-01-01",
@@ -4853,7 +4882,7 @@
     {
       "productCode": "BX-00-02",
       "setSize": 2,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "children": [
         {
           "recordId": "BX-00-02-01",
@@ -4872,7 +4901,7 @@
     {
       "productCode": "BX-00-03",
       "setSize": 2,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "children": [
         {
           "recordId": "BX-00-03-01",
@@ -4891,7 +4920,7 @@
     {
       "productCode": "BX-00-04",
       "setSize": 2,
-      "autoFillBehavior": "add_all_set_children",
+      "autoFillBehavior": "choose_one_or_all",
       "children": [
         {
           "recordId": "BX-00-04-01",

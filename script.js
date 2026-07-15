@@ -41,11 +41,13 @@ let viewingUserId = null;   // null = 看自己；有值 = 管理員在看別人
 let unsubscribeCloudData = null;
 let isApplyingRemoteData = false;
 
-const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260715";
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260716-2";
 let stockInputMode = "auto";
 let stockProductsLoadPromise = null;
 let stockProductsLoaded = false;
 let stockProductsByCode = new Map();
+let stockChoiceResolve = null;
+let stockChoiceProducts = [];
 
 function isAdmin() {
   return currentUser && currentUser.uid === ADMIN_UID;
@@ -193,7 +195,7 @@ const RANDOM_BOOSTER_MODELS = new Set([
   "BX-48", "CX-17", "BX-50", "CX-18"
 ]);
 
-const NO_RATCHET_MODELS = new Set(["UX-19"]);
+const NO_RATCHET_MODELS = new Set(["UX-19", "UX-20"]);
 
 function getRandomBoosterBaseModel(model) {
   const normalized = normalizeModel(model).toUpperCase().trim();
@@ -268,7 +270,7 @@ function validateRatchetRules(model, axis, ratchet) {
   }
 
   if (isNoRatchetModel(model) && fix && fix !== "-") {
-    alert("UX-19 無法使用固鎖。");
+    alert(`${getBaseModelCode(model)} 無法使用固鎖。`);
     return false;
   }
 
@@ -1681,7 +1683,12 @@ window.addRow = async function () {
     return;
   }
 
-  addAutoFilledStockProducts(products);
+  const selectedProducts = products.length > 1
+    ? await openStockProductChoice(products, productCode)
+    : products;
+  if (!selectedProducts?.length) return;
+
+  addAutoFilledStockProducts(selectedProducts);
   clearFirstAreaInputs();
   renderStockAutoPreview();
   sortBeybladeTable();
@@ -2063,7 +2070,7 @@ function renderStockAutoPreview() {
     </div>
   `).join("");
   const setNote = products.length > 1
-    ? `<div>此為雙陀螺套組，將一次加入 ${products.length} 顆。</div>`
+    ? `<div>此型號有 ${products.length} 顆可選，新增時可選其中一顆或全部加入。</div>`
     : "";
 
   setStockAutoPreviewState("is-found", `${items}${setNote}`);
@@ -2191,6 +2198,47 @@ function addAutoFilledStockProducts(products) {
     const rowData = getStockProductRowData(product);
     if (setInstanceId) rowData.metadata.stockSetInstanceId = setInstanceId;
     createBeybladeRow(rowData.cells, rowData.mainStockName, rowData.metadata);
+  });
+}
+
+function closeStockProductChoice(selectedProducts = null) {
+  const dialog = document.getElementById("stockChoiceDialog");
+  if (dialog) dialog.hidden = true;
+  document.body.classList.remove("stock-choice-open");
+
+  const resolve = stockChoiceResolve;
+  stockChoiceResolve = null;
+  stockChoiceProducts = [];
+  if (resolve) resolve(selectedProducts);
+}
+
+function openStockProductChoice(products, productCode) {
+  const dialog = document.getElementById("stockChoiceDialog");
+  const list = document.getElementById("stockChoiceList");
+  const description = document.getElementById("stockChoiceDescription");
+  const addAllButton = document.getElementById("addAllStockChoicesBtn");
+
+  if (!dialog || !list || !description || !addAllButton) {
+    return Promise.resolve(products);
+  }
+
+  if (stockChoiceResolve) closeStockProductChoice(null);
+  stockChoiceProducts = [...products];
+  description.textContent = `${productCode} 查到 ${products.length} 顆，請選擇一顆或全部加入。`;
+  addAllButton.textContent = `全部加入（${products.length} 顆）`;
+  list.innerHTML = products.map((product, index) => `
+    <button type="button" class="stock-choice-option" data-stock-choice-index="${index}">
+      <strong>${escapeHtml(product.recordId)} ${escapeHtml(product.displayNameZh)}</strong>
+      <span>${escapeHtml(formatStockProductParts(product))}</span>
+    </button>
+  `).join("");
+
+  dialog.hidden = false;
+  document.body.classList.add("stock-choice-open");
+  requestAnimationFrame(() => list.querySelector(".stock-choice-option")?.focus());
+
+  return new Promise(resolve => {
+    stockChoiceResolve = resolve;
   });
 }
 
@@ -2661,6 +2709,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const closeConfigEditorBtn = document.getElementById("closeConfigEditorBtn");
   const cancelConfigEditorBtn = document.getElementById("cancelConfigEditorBtn");
   const configEditorBackdrop = document.getElementById("configEditorBackdrop");
+  const stockChoiceList = document.getElementById("stockChoiceList");
+  const addAllStockChoicesBtn = document.getElementById("addAllStockChoicesBtn");
+  const closeStockChoiceBtn = document.getElementById("closeStockChoiceBtn");
+  const cancelStockChoiceBtn = document.getElementById("cancelStockChoiceBtn");
+  const stockChoiceBackdrop = document.getElementById("stockChoiceBackdrop");
 
   if (partCountInput) {
     preventInvalidPartCountInput(partCountInput);
@@ -2679,6 +2732,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
   document.querySelectorAll("[data-stock-mode]").forEach(button => {
     button.addEventListener("click", () => setStockInputMode(button.dataset.stockMode));
+  });
+
+  if (stockChoiceList) {
+    stockChoiceList.addEventListener("click", event => {
+      const button = event.target.closest("[data-stock-choice-index]");
+      if (!button) return;
+
+      const product = stockChoiceProducts[Number(button.dataset.stockChoiceIndex)];
+      if (product) closeStockProductChoice([product]);
+    });
+  }
+
+  if (addAllStockChoicesBtn) {
+    addAllStockChoicesBtn.addEventListener("click", () => {
+      closeStockProductChoice([...stockChoiceProducts]);
+    });
+  }
+
+  [closeStockChoiceBtn, cancelStockChoiceBtn, stockChoiceBackdrop].forEach(button => {
+    if (button) button.addEventListener("click", () => closeStockProductChoice(null));
   });
 
   setStockInputMode("auto");
@@ -2707,6 +2780,11 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !document.getElementById("stockChoiceDialog")?.hidden) {
+      closeStockProductChoice(null);
+      return;
+    }
+
     if (event.key === "Escape" && !document.getElementById("configQuickEditor")?.hidden) {
       closeConfigQuickEditor();
     }

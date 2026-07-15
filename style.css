@@ -418,6 +418,130 @@ button:active {
   min-height: 44px;
 }
 
+.stock-choice-shell {
+  position: fixed;
+  z-index: 1700;
+  inset: 0;
+  padding: 20px;
+  display: grid;
+  place-items: center;
+}
+
+.stock-choice-shell[hidden] {
+  display: none !important;
+}
+
+.stock-choice-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: rgba(2,6,10,.78);
+  backdrop-filter: blur(5px);
+}
+
+.stock-choice-panel {
+  width: min(540px, 100%);
+  max-height: min(720px, calc(100vh - 40px));
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: #0d141b;
+  box-shadow: 0 24px 70px rgba(0,0,0,.52);
+}
+
+.stock-choice-header {
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.stock-choice-header h2 {
+  margin: 4px 0 6px;
+  font-size: 22px;
+}
+
+.stock-choice-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.stock-choice-close {
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  padding: 0;
+  flex: 0 0 42px;
+  border: 1px solid var(--line-strong);
+  color: #d8e0e8;
+  background: var(--surface-2);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.stock-choice-list {
+  padding: 14px 20px;
+  display: grid;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.stock-choice-option {
+  width: 100%;
+  min-height: 76px;
+  padding: 12px 14px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  color: #eff4f8;
+  background: rgba(20,29,38,.94);
+  text-align: left;
+}
+
+.stock-choice-option:hover,
+.stock-choice-option:focus-visible {
+  border-color: rgba(60,134,255,.72);
+  background: rgba(38,75,126,.3);
+}
+
+.stock-choice-option strong {
+  font-size: 14px;
+}
+
+.stock-choice-option span {
+  color: #96a4b1;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.stock-choice-actions {
+  padding: 14px 20px 18px;
+  display: grid;
+  grid-template-columns: minmax(100px, .8fr) minmax(0, 1.2fr);
+  gap: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.stock-choice-actions button {
+  min-height: 44px;
+}
+
+body.stock-choice-open {
+  overflow: hidden;
+}
+
 .part-input-row {
   display: grid;
   grid-template-columns: 150px minmax(180px, 1fr) 110px 120px;
@@ -1476,6 +1600,26 @@ td select {
 
   .stock-manual-fields {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stock-choice-shell {
+    padding: 0;
+    place-items: end stretch;
+  }
+
+  .stock-choice-panel {
+    width: 100%;
+    max-height: min(82vh, 720px);
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .stock-choice-header,
+  .stock-choice-list,
+  .stock-choice-actions {
+    padding-inline: 16px;
   }
 
   .summary-strip > div {
