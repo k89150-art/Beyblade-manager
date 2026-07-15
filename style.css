@@ -1162,54 +1162,20 @@ td select {
     gap: 8px;
   }
 
-  #configTable tbody tr:not(.editing-row).has-config-card-groups td:nth-child(2) {
-    display: none;
-  }
-
-  #configTable tbody tr:not(.editing-row).has-config-card-groups td:last-child {
-    margin-top: 0;
-    display: grid;
-    flex: 1 1 auto;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: auto minmax(8px, 1fr) 36px;
-    align-content: stretch;
-  }
-
-  #configTable .config-card-groups {
+  #configTable .config-card-tags {
     width: 100%;
     min-width: 0;
-    min-height: 53px;
-    padding: 0 0 11px;
+    min-height: 38px;
+    padding: 0 0 10px;
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
-    grid-column: 1 / -1;
-    grid-row: 1;
-    gap: 8px;
+    gap: 7px;
     overflow: hidden;
     border-bottom: 1px solid rgba(50,63,76,.76);
   }
 
-  #configTable .config-card-group {
-    min-width: 0;
-    display: grid;
-    flex: 0 1 auto;
-    gap: 6px;
-    justify-items: start;
-  }
-
-  #configTable .config-card-group strong {
-    max-width: 100%;
-    overflow: hidden;
-    color: #aab5c0;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1.2;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  #configTable .config-card-group small {
+  #configTable .config-card-tags span {
     height: 22px;
     min-height: 22px;
     padding: 0 7px;
@@ -1223,22 +1189,6 @@ td select {
     font-weight: 800;
     line-height: 1;
     white-space: nowrap;
-  }
-
-  #configTable tbody tr:not(.editing-row).has-config-card-groups td:last-child button {
-    grid-row: 3;
-  }
-
-  #configTable tbody tr:not(.editing-row).has-config-card-groups td:last-child button:nth-of-type(1) {
-    grid-column: 1;
-  }
-
-  #configTable tbody tr:not(.editing-row).has-config-card-groups td:last-child button:nth-of-type(2) {
-    grid-column: 2;
-  }
-
-  #configTable tbody tr:not(.editing-row).has-config-card-groups td:last-child button:nth-of-type(3) {
-    grid-column: 3;
   }
 
   #configTable tbody tr:not(.editing-row) td:last-child button {

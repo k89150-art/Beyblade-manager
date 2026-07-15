@@ -1816,52 +1816,43 @@ function updateResponsiveTableCells() {
         if (cells[1]) cells[1].dataset.cardSummary = summary || "-";
 
         if (!row.classList.contains("editing-row")) {
-          const cardGroups = [];
-          const addCardGroup = (value, label) => {
-            if (hasValue(value)) cardGroups.push({ value, label });
+          const cardTags = [];
+          const addCardTag = (value, label) => {
+            if (hasValue(value)) cardTags.push(label);
           };
 
-          if (series === "CX") {
-            if (hasCxParts) {
-              addCardGroup(lockValue, "紋章鎖");
-              if (hasValue(transcendValue) && hasValue(metalValue)) {
-                addCardGroup(`${metalValue} ・ ${transcendValue}`, "金屬+超越");
-              } else {
-                addCardGroup(mainValue, "主要戰刃");
-                addCardGroup(metalValue, "金屬戰刃");
-                addCardGroup(transcendValue, "超越戰刃");
-              }
-              addCardGroup(auxValue, "輔助");
+          if (series === "CX" && hasCxParts) {
+            addCardTag(lockValue, "紋章鎖");
+            if (hasValue(transcendValue) && hasValue(metalValue)) {
+              cardTags.push("金屬+超越");
+            } else if (hasValue(mainValue)) {
+              cardTags.push("主要戰刃");
             } else {
-              addCardGroup(resolvedLayer, "上蓋");
+              addCardTag(metalValue, "金屬戰刃");
+              addCardTag(transcendValue, "超越戰刃");
             }
+            addCardTag(auxValue, "輔助");
           } else {
-            addCardGroup(resolvedLayer, "上蓋");
+            addCardTag(resolvedLayer, "上蓋");
+            addCardTag(fixValue, "固鎖");
+            addCardTag(axisValue, "軸心");
           }
-
-          addCardGroup(fixValue, "固鎖");
-          addCardGroup(axisValue, "軸心");
 
           const operationCell = cells[cells.length - 1];
           if (operationCell) {
-            let groupList = operationCell.querySelector(".config-card-groups, .config-card-tags");
-            if (!groupList) {
-              groupList = document.createElement("div");
-              operationCell.prepend(groupList);
+            let tagList = operationCell.querySelector(".config-card-tags, .config-card-groups");
+            if (!tagList) {
+              tagList = document.createElement("div");
+              operationCell.prepend(tagList);
             }
-            groupList.className = "config-card-groups";
-            row.classList.toggle("has-config-card-groups", cardGroups.length > 0);
+            tagList.className = "config-card-tags";
+            row.classList.remove("has-config-card-groups");
 
-            const groupKey = cardGroups.map(group => `${group.value}:${group.label}`).join("|");
-            if (groupList.dataset.groupKey !== groupKey) {
-              groupList.dataset.groupKey = groupKey;
-              groupList.innerHTML = cardGroups
-                .map(group => `
-                  <span class="config-card-group">
-                    <strong>${escapeHtml(group.value)}</strong>
-                    <small>${escapeHtml(group.label)}</small>
-                  </span>
-                `)
+            const tagKey = cardTags.join("|");
+            if (tagList.dataset.tagKey !== tagKey) {
+              tagList.dataset.tagKey = tagKey;
+              tagList.innerHTML = cardTags
+                .map(tag => `<span>${escapeHtml(tag)}</span>`)
                 .join("");
             }
           }
