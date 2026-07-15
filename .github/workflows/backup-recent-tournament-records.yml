@@ -19,20 +19,13 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     steps:
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_K89150_WEB_LOGIN }}
-          token_format: access_token
-          access_token_scopes: https://www.googleapis.com/auth/datastore
-
       - name: Find and preserve the newest retained tournament data
         env:
-          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_K89150_WEB_LOGIN }}
           TARGET_UID: ${{ inputs.uid }}
           SCAN_MINUTES: ${{ inputs.scan_minutes }}
         run: |
+          python3 -m pip install --quiet google-auth requests
           python3 - <<'PY'
           import datetime
           import json
@@ -40,11 +33,19 @@ jobs:
           import urllib.error
           import urllib.parse
           import urllib.request
+          from google.auth.transport.requests import Request
+          from google.oauth2 import service_account
 
           project = "k89150-web-login"
           uid = os.environ["TARGET_UID"].strip()
           scan_minutes = min(59, max(1, int(os.environ["SCAN_MINUTES"])))
-          token = os.environ["ACCESS_TOKEN"]
+          account_info = json.loads(os.environ["SERVICE_ACCOUNT_JSON"])
+          credentials = service_account.Credentials.from_service_account_info(
+              account_info,
+              scopes=["https://www.googleapis.com/auth/datastore"],
+          )
+          credentials.refresh(Request())
+          token = credentials.token
           base = f"https://firestore.googleapis.com/v1/projects/{project}/databases/(default)/documents"
           source_path = f"users/{uid}/appData/main"
           source_url = f"{base}/{source_path}"
