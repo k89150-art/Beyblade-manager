@@ -41,11 +41,12 @@ let viewingUserId = null;   // null = 看自己；有值 = 管理員在看別人
 let unsubscribeCloudData = null;
 let isApplyingRemoteData = false;
 
-const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260716-2";
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260716-3";
 let stockInputMode = "auto";
 let stockProductsLoadPromise = null;
 let stockProductsLoaded = false;
-let stockProductsByCode = new Map();
+let stockProductsByExactCode = new Map();
+let stockProductsByBaseCode = new Map();
 let stockChoiceResolve = null;
 let stockChoiceProducts = [];
 
@@ -1652,6 +1653,14 @@ function addManualStockRow() {
   saveData();
 }
 
+function finishStockAdd() {
+  clearFirstAreaInputs();
+  renderStockAutoPreview();
+  sortBeybladeTable();
+  refreshSelectors();
+  saveData();
+}
+
 window.addRow = async function () {
   if (!requireLogin()) return;
 
@@ -1661,11 +1670,10 @@ window.addRow = async function () {
   }
 
   const modelInput = document.getElementById("model");
-  const enteredProductCode = modelInput?.value || "";
-  const productCode = normalizeStockProductCode(enteredProductCode);
+  const parsedInput = parseStockProductCode(modelInput?.value);
 
-  if (!productCode) {
-    alert("請輸入商品型號");
+  if (!parsedInput) {
+    alert("請輸入正確的商品型號");
     modelInput?.focus();
     return;
   }
@@ -1677,25 +1685,54 @@ window.addRow = async function () {
     return;
   }
 
-  const products = getStockProductsForCode(productCode);
-  if (!products.length) {
-    alert(`找不到「${formatEnteredStockProductCode(enteredProductCode)}」的原裝配置，請確認型號或切換為手動輸入。`);
-    renderStockAutoPreview();
+  const exactMatches = stockProductsByExactCode.get(parsedInput.exactKey) || [];
+  const variantMatches = !parsedInput.hasChildNumber && !exactMatches.length
+    ? stockProductsByBaseCode.get(parsedInput.baseKey) || []
+    : [];
+
+  console.debug("[stock lookup]", {
+    input: modelInput?.value,
+    parsedInput,
+    exactCount: exactMatches.length,
+    baseCount: variantMatches.length
+  });
+
+  if (exactMatches.length) {
+    const addAllAsSet = exactMatches.length > 1 && exactMatches.every(product =>
+      product.isSetProduct === true || product.autoFillBehavior === "add_all_set_children"
+    );
+
+    if (addAllAsSet || exactMatches.length === 1) {
+      addAutoFilledStockProducts(exactMatches);
+      finishStockAdd();
+      return;
+    }
+
+    const selectedProducts = await openStockProductChoice(exactMatches, parsedInput.canonical);
+    if (!selectedProducts?.length) return;
+
+    addAutoFilledStockProducts(selectedProducts);
+    finishStockAdd();
     return;
   }
 
-  const matchedProductCode = products[0].productCode || formatEnteredStockProductCode(enteredProductCode);
-  const selectedProducts = products.length > 1
-    ? await openStockProductChoice(products, matchedProductCode)
-    : products;
-  if (!selectedProducts?.length) return;
+  if (variantMatches.length === 1) {
+    addAutoFilledStockProducts(variantMatches);
+    finishStockAdd();
+    return;
+  }
 
-  addAutoFilledStockProducts(selectedProducts);
-  clearFirstAreaInputs();
+  if (variantMatches.length > 1) {
+    const selectedProducts = await openStockProductChoice(variantMatches, parsedInput.baseCode);
+    if (!selectedProducts?.length) return;
+
+    addAutoFilledStockProducts(selectedProducts);
+    finishStockAdd();
+    return;
+  }
+
+  alert(`找不到「${parsedInput.canonical}」的原裝配置，請確認型號或切換為手動輸入。`);
   renderStockAutoPreview();
-  sortBeybladeTable();
-  refreshSelectors();
-  saveData();
 };
 
 /* ====== 第二區：新增零件庫存 ====== */
@@ -1999,19 +2036,125 @@ function updateResponsiveTableCells() {
   });
 }
 
-function normalizeStockProductCode(value) {
+function toHalfWidth(value) {
   return String(value || "")
+    .replace(/[！-～]/g, char => String.fromCharCode(char.charCodeAt(0) - 0xFEE0))
+    .replace(/　/g, " ");
+}
+
+function parseStockProductCode(value) {
+  const normalized = toHalfWidth(value)
     .trim()
     .toUpperCase()
-    .replace(/[^A-Z0-9]/g, "");
+    .replace(/[＿_‐‑‒–—―−﹘﹣－]/g, "-")
+    .replace(/\s+/g, " ");
+
+  if (!normalized) return null;
+
+  const separatedMatch = normalized.match(
+    /^(BXG|BXH|BX|UX|CX)[ -]*(\d{1,2})(?:[ -]+(\d{1,2}))?$/
+  );
+
+  let series;
+  let mainNumber;
+  let childNumber;
+
+  if (separatedMatch) {
+    series = separatedMatch[1];
+    mainNumber = separatedMatch[2];
+    childNumber = separatedMatch[3] || null;
+  } else {
+    const compact = normalized.replace(/[ -]/g, "");
+    const compactMatch = compact.match(/^(BXG|BXH|BX|UX|CX)(\d{1,4})$/);
+    if (!compactMatch) return null;
+
+    series = compactMatch[1];
+    const digits = compactMatch[2];
+    if (digits.length <= 2) {
+      mainNumber = digits;
+      childNumber = null;
+    } else {
+      mainNumber = digits.slice(0, 2);
+      childNumber = digits.slice(2);
+    }
+  }
+
+  mainNumber = mainNumber.padStart(2, "0");
+  childNumber = childNumber ? childNumber.padStart(2, "0") : null;
+
+  const baseCode = `${series}-${mainNumber}`;
+  return {
+    canonical: childNumber ? `${baseCode}-${childNumber}` : baseCode,
+    exactKey: `${series}${mainNumber}${childNumber || ""}`,
+    baseCode,
+    baseKey: `${series}${mainNumber}`,
+    series,
+    mainNumber,
+    childNumber,
+    hasChildNumber: Boolean(childNumber)
+  };
 }
 
-function formatEnteredStockProductCode(value) {
-  return String(value || "").trim().toUpperCase();
+function normalizeStockProductCode(value) {
+  return parseStockProductCode(value)?.exactKey || "";
 }
 
-function getStockProductsForCode(value) {
-  return stockProductsByCode.get(normalizeStockProductCode(value)) || [];
+function sortStockProducts(products) {
+  products.sort((a, b) => {
+    const aParsed = parseStockProductCode(a.productCode);
+    const bParsed = parseStockProductCode(b.productCode);
+    const childCompare =
+      Number(aParsed?.childNumber || a.setChildIndex || 0) -
+      Number(bParsed?.childNumber || b.setChildIndex || 0);
+
+    if (childCompare !== 0) return childCompare;
+    return String(a.recordId || "").localeCompare(
+      String(b.recordId || ""),
+      "zh-Hant",
+      { numeric: true }
+    );
+  });
+}
+
+function buildStockProductIndexes(stockProducts) {
+  const exactIndex = new Map();
+  const baseIndex = new Map();
+  const unparseableCodes = [];
+
+  stockProducts.forEach(product => {
+    if (!product.autoFillEnabled || product.needsReview) return;
+
+    const parsed = parseStockProductCode(product.productCode);
+    if (!parsed) {
+      unparseableCodes.push(product.productCode || "");
+      console.warn("無法解析商品型號：", product);
+      return;
+    }
+
+    if (!exactIndex.has(parsed.exactKey)) exactIndex.set(parsed.exactKey, []);
+    exactIndex.get(parsed.exactKey).push(product);
+
+    if (parsed.hasChildNumber && !product.isSetProduct) {
+      if (!baseIndex.has(parsed.baseKey)) baseIndex.set(parsed.baseKey, []);
+      baseIndex.get(parsed.baseKey).push(product);
+    }
+  });
+
+  exactIndex.forEach(sortStockProducts);
+  baseIndex.forEach(sortStockProducts);
+  return { exactIndex, baseIndex, unparseableCodes };
+}
+
+function getStockProductLookup(value) {
+  const parsed = parseStockProductCode(value);
+  if (!parsed) return { parsed: null, exactMatches: [], variantMatches: [] };
+
+  const exactMatches = stockProductsByExactCode.get(parsed.exactKey) || [];
+  const variantMatches = !parsed.hasChildNumber && !exactMatches.length
+    ? stockProductsByBaseCode.get(parsed.baseKey) || []
+    : [];
+
+  return { parsed, exactMatches, variantMatches };
 }
 
 function setStockAutoPreviewState(className, content) {
@@ -2059,11 +2202,14 @@ function renderStockAutoPreview() {
     return;
   }
 
-  const products = getStockProductsForCode(model);
+  const { parsed, exactMatches, variantMatches } = getStockProductLookup(model);
+  const products = exactMatches.length ? exactMatches : variantMatches;
   if (!products.length) {
     setStockAutoPreviewState(
       "is-missing",
-      `找不到「${escapeHtml(formatEnteredStockProductCode(model))}」的原裝資料，請確認型號或切換為手動輸入。`
+      parsed
+        ? `找不到「${escapeHtml(parsed.canonical)}」的原裝資料，請確認型號或切換為手動輸入。`
+        : "商品型號格式不正確，請確認型號或切換為手動輸入。"
     );
     return;
   }
@@ -2074,11 +2220,20 @@ function renderStockAutoPreview() {
       <span>${escapeHtml(formatStockProductParts(product))}</span>
     </div>
   `).join("");
-  const setNote = products.length > 1
-    ? `<div>此型號有 ${products.length} 顆可選，新增時可選其中一顆或全部加入。</div>`
-    : "";
+  const addAllAsSet = exactMatches.length > 1 && exactMatches.every(product =>
+    product.isSetProduct === true || product.autoFillBehavior === "add_all_set_children"
+  );
+  let lookupNote = "";
 
-  setStockAutoPreviewState("is-found", `${items}${setNote}`);
+  if (addAllAsSet) {
+    lookupNote = `<div>${escapeHtml(parsed.canonical)} 為雙陀螺套組，新增時會整組加入。</div>`;
+  } else if (variantMatches.length > 1) {
+    lookupNote = `<div>${escapeHtml(parsed.baseCode)} 有 ${variantMatches.length} 種原裝配置，按「加入原裝收藏」後選擇你擁有的陀螺。</div>`;
+  } else if (exactMatches.length > 1) {
+    lookupNote = `<div>此型號有 ${exactMatches.length} 顆可選，新增時可選其中一顆或全部加入。</div>`;
+  }
+
+  setStockAutoPreviewState("is-found", `${items}${lookupNote}`);
 }
 
 async function loadStockProducts() {
@@ -2094,24 +2249,12 @@ async function loadStockProducts() {
         throw new Error("stockProducts 格式不正確");
       }
 
-      const byCode = new Map();
-      data.stockProducts.forEach(product => {
-        if (!product.autoFillEnabled || product.needsReview) return;
-
-        const code = normalizeStockProductCode(product.productCode);
-        if (!code) return;
-        if (!byCode.has(code)) byCode.set(code, []);
-        byCode.get(code).push(product);
-      });
-
-      byCode.forEach(products => {
-        products.sort((a, b) => Number(a.setChildIndex || 0) - Number(b.setChildIndex || 0));
-      });
-
-      stockProductsByCode = byCode;
+      const { exactIndex, baseIndex, unparseableCodes } = buildStockProductIndexes(data.stockProducts);
+      stockProductsByExactCode = exactIndex;
+      stockProductsByBaseCode = baseIndex;
       stockProductsLoaded = true;
       renderStockAutoPreview();
-      return byCode;
+      return { exactIndex, baseIndex, unparseableCodes };
     })
     .catch(error => {
       console.error("原裝配置資料載入失敗：", error);
@@ -2208,7 +2351,11 @@ function addAutoFilledStockProducts(products) {
 
 function closeStockProductChoice(selectedProducts = null) {
   const dialog = document.getElementById("stockChoiceDialog");
+  const list = document.getElementById("stockChoiceList");
+  const addAllButton = document.getElementById("addAllStockChoicesBtn");
   if (dialog) dialog.hidden = true;
+  list?.querySelectorAll("button").forEach(button => { button.disabled = true; });
+  if (addAllButton) addAllButton.disabled = true;
   document.body.classList.remove("stock-choice-open");
 
   const resolve = stockChoiceResolve;
@@ -2229,8 +2376,9 @@ function openStockProductChoice(products, productCode) {
 
   if (stockChoiceResolve) closeStockProductChoice(null);
   stockChoiceProducts = [...products];
-  description.textContent = `${productCode} 查到 ${products.length} 顆，請選擇一顆或全部加入。`;
+  description.textContent = `${productCode} 查到 ${products.length} 顆原裝配置，請選擇你擁有的陀螺。`;
   addAllButton.textContent = `全部加入（${products.length} 顆）`;
+  addAllButton.disabled = false;
   list.innerHTML = products.map((product, index) => `
     <button type="button" class="stock-choice-option" data-stock-choice-index="${index}">
       <strong>${escapeHtml(product.recordId)} ${escapeHtml(product.displayNameZh)}</strong>
@@ -2742,7 +2890,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (stockChoiceList) {
     stockChoiceList.addEventListener("click", event => {
       const button = event.target.closest("[data-stock-choice-index]");
-      if (!button) return;
+      if (!button || button.disabled || !stockChoiceResolve) return;
 
       const product = stockChoiceProducts[Number(button.dataset.stockChoiceIndex)];
       if (product) closeStockProductChoice([product]);
@@ -2751,6 +2899,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (addAllStockChoicesBtn) {
     addAllStockChoicesBtn.addEventListener("click", () => {
+      if (addAllStockChoicesBtn.disabled || !stockChoiceResolve) return;
       closeStockProductChoice([...stockChoiceProducts]);
     });
   }

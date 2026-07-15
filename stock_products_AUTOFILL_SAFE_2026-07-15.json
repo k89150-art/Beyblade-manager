@@ -32,7 +32,7 @@
       "BX-00-03",
       "BX-00-04"
     ],
-    "setAutoFillRule": "When one product code has multiple Beyblades, let the user choose one or add all.",
+    "setAutoFillRule": "Typing BX-00-01 through BX-00-04 adds both Beyblades from that set.",
     "dataset": "AUTOFILL_SAFE",
     "note": "All 213 records are confirmed or otherwise marked safe for original-combo autofill."
   },
@@ -65,7 +65,7 @@
       "setChildIndex": 1,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -97,7 +97,7 @@
       "setChildIndex": 2,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -129,7 +129,7 @@
       "setChildIndex": 1,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -161,7 +161,7 @@
       "setChildIndex": 2,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -193,7 +193,7 @@
       "setChildIndex": 1,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -225,7 +225,7 @@
       "setChildIndex": 2,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -257,7 +257,7 @@
       "setChildIndex": 1,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -289,7 +289,7 @@
       "setChildIndex": 2,
       "setSize": 2,
       "isSetProduct": true,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15"
     },
@@ -4863,7 +4863,7 @@
     {
       "productCode": "BX-00-01",
       "setSize": 2,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "children": [
         {
           "recordId": "BX-00-01-01",
@@ -4882,7 +4882,7 @@
     {
       "productCode": "BX-00-02",
       "setSize": 2,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "children": [
         {
           "recordId": "BX-00-02-01",
@@ -4901,7 +4901,7 @@
     {
       "productCode": "BX-00-03",
       "setSize": 2,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "children": [
         {
           "recordId": "BX-00-03-01",
@@ -4920,7 +4920,7 @@
     {
       "productCode": "BX-00-04",
       "setSize": 2,
-      "autoFillBehavior": "choose_one_or_all",
+      "autoFillBehavior": "add_all_set_children",
       "children": [
         {
           "recordId": "BX-00-04-01",
