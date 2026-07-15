@@ -43,6 +43,7 @@ let isApplyingRemoteData = false;
 let isSavingCloudData = false;
 let hasPendingCloudSave = false;
 let lastLocalWriteUpdatedAt = 0;
+let lastAppliedRemoteUpdatedAt = 0;
 
 const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260716-3";
 let stockInputMode = "auto";
@@ -1393,6 +1394,7 @@ async function saveData() {
       const data = collectCurrentData();
       data.updatedAt = Math.max(Number(data.updatedAt) || 0, lastLocalWriteUpdatedAt + 1);
       lastLocalWriteUpdatedAt = data.updatedAt;
+      lastAppliedRemoteUpdatedAt = data.updatedAt;
       await setDoc(userDocRef, data);
     }
 
@@ -1404,6 +1406,9 @@ async function saveData() {
     setSyncStatus("儲存失敗", "error");
   } finally {
     isSavingCloudData = false;
+
+    // A click can arrive after the final loop check but before this write ends.
+    if (hasPendingCloudSave) void saveData();
   }
 }
 
@@ -1479,47 +1484,44 @@ function clearAllTables() {
 
 function applyDataToTables(data) {
   isApplyingRemoteData = true;
+  try {
+    clearAllTables();
 
-  clearAllTables();
+    if (!data) {
+      refreshSelectors();
+      return;
+    }
 
-  if (!data) {
-    refreshSelectors();
-    isApplyingRemoteData = false;
-    return;
-  }
+    if (data.beybladeTable) {
+      data.beybladeTable.forEach(item => {
+        createBeybladeRow(item.cells, item.mainStockName, item);
+      });
+    }
 
-  if (data.beybladeTable) {
-    data.beybladeTable.forEach(item => {
-      createBeybladeRow(item.cells, item.mainStockName, item);
-    });
-  }
+    if (data.partTable) {
+      data.partTable.forEach(item => {
+        createPartRow(item.cells);
+      });
+    }
 
-  if (data.partTable) {
-    data.partTable.forEach(item => {
-      createPartRow(item.cells);
-    });
-  }
     if (data.historyTable) {
-    data.historyTable.forEach(item => {
-      createHistoryRow(item);
-    });
-  }
+      data.historyTable.forEach(item => {
+        createHistoryRow(item);
+      });
+    }
 
-  if (data.configTable) {
-    data.configTable.forEach(item => {
-      createConfigRow(item.cells, item.mainStockName);
-    });
-  }
+    if (data.configTable) {
+      data.configTable.forEach(item => {
+        createConfigRow(item.cells, item.mainStockName);
+      });
+    }
 
-  const changedByNormalize = normalizeAllModelCells();
-
-  sortBeybladeTable();
-  refreshSelectors();
-
-  isApplyingRemoteData = false;
-
-  if (changedByNormalize) {
-    saveData();
+    // Remote data normalization is display-only. Never write from a snapshot.
+    normalizeAllModelCells();
+    sortBeybladeTable();
+    refreshSelectors();
+  } finally {
+    isApplyingRemoteData = false;
   }
 }
 
@@ -1532,6 +1534,8 @@ function startCloudListener() {
     unsubscribeCloudData();
     unsubscribeCloudData = null;
   }
+
+  lastAppliedRemoteUpdatedAt = 0;
 
   unsubscribeCloudData = onSnapshot(
     userDocRef,
@@ -1546,11 +1550,14 @@ function startCloudListener() {
       }
 
       const snapshotData = snapshot.data();
-      if (Number(snapshotData.updatedAt) === lastLocalWriteUpdatedAt) {
+      const remoteUpdatedAt = Number(snapshotData.updatedAt) || 0;
+
+      if (remoteUpdatedAt && remoteUpdatedAt <= lastAppliedRemoteUpdatedAt) {
         if (!isSavingCloudData) setSyncStatus("已儲存", "saved");
         return;
       }
 
+      lastAppliedRemoteUpdatedAt = remoteUpdatedAt;
       applyDataToTables(snapshotData);
       setSyncStatus("資料已同步", "saved");
     },
