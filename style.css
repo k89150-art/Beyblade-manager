@@ -684,7 +684,7 @@ td select {
 
   #configTable tbody {
     display: grid;
-    grid-template-columns: repeat(2, 270px);
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     align-items: start;
     justify-content: start;
     gap: 15px;
@@ -1057,7 +1057,7 @@ td select {
 
   /* Approved setup-card hierarchy: badge, title, summary, tags, actions. */
   #configTable tbody tr:not(.editing-row) {
-    width: 270px;
+    width: 100%;
     min-height: 230px;
     position: relative;
     display: flex;
@@ -1135,15 +1135,19 @@ td select {
   }
 
   #configTable .config-card-tags span {
+    height: 22px;
     min-height: 22px;
-    padding: 3px 7px;
+    padding: 0 7px;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     border-radius: 5px;
     color: #9facb9;
     background: rgba(34,45,57,.82);
     font-size: 9px;
     font-weight: 800;
+    line-height: 1;
+    vertical-align: middle;
   }
 
   #configTable tbody tr:not(.editing-row) td:last-child button {
@@ -1161,10 +1165,6 @@ td select {
 }
 
 @media (min-width: 821px) and (max-width: 1040px) {
-  #configTable tbody {
-    grid-template-columns: 1fr;
-  }
-
   #historyTable tbody tr {
     grid-template-columns: 90px repeat(4, minmax(0, 1fr)) 132px;
   }
