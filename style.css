@@ -481,6 +481,141 @@ td select {
   text-align: left;
 }
 
+/* Desktop record cards keep the existing table data and editing behavior. */
+@media (min-width: 821px) {
+  .record-card-wrap {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #beybladeTable,
+  #configTable,
+  #historyTable {
+    min-width: 0;
+    display: block;
+    background: transparent;
+  }
+
+  #beybladeTable thead,
+  #configTable thead,
+  #historyTable thead {
+    display: none;
+  }
+
+  #beybladeTable tbody,
+  #configTable tbody {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    align-items: start;
+    gap: 12px;
+  }
+
+  #historyTable tbody {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 12px;
+  }
+
+  #beybladeTable tbody tr,
+  #configTable tbody tr,
+  #historyTable tbody tr {
+    min-width: 0;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 0 12px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: linear-gradient(145deg, rgba(21,29,38,.98), rgba(13,19,26,.98));
+    box-shadow: 0 10px 26px rgba(0,0,0,.2);
+  }
+
+  #beybladeTable td,
+  #configTable td,
+  #historyTable td {
+    min-width: 0;
+    min-height: 34px;
+    padding: 6px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 0;
+    border-bottom: 1px solid rgba(38,49,61,.72);
+    white-space: normal;
+    text-align: right;
+    word-break: break-word;
+  }
+
+  #beybladeTable td::before,
+  #configTable td::before,
+  #historyTable td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    color: #778594;
+    font-size: 10px;
+    font-weight: 900;
+    text-align: left;
+  }
+
+  #beybladeTable td:nth-child(1),
+  #beybladeTable td:nth-child(2),
+  #beybladeTable td:last-child,
+  #configTable td:nth-child(1),
+  #configTable td:nth-child(2),
+  #configTable td:last-child,
+  #historyTable td:nth-child(1),
+  #historyTable td:nth-child(2),
+  #historyTable td:nth-child(5),
+  #historyTable td:nth-child(6),
+  #historyTable td:last-child {
+    grid-column: 1 / -1;
+  }
+
+  #beybladeTable td:nth-child(1),
+  #configTable td:nth-child(1),
+  #historyTable td:nth-child(1) {
+    min-height: 40px;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 900;
+  }
+
+  #beybladeTable td:last-child,
+  #configTable td:last-child,
+  #historyTable td:last-child {
+    padding-top: 10px;
+    justify-content: stretch;
+    gap: 7px;
+    border-bottom: 0;
+  }
+
+  #beybladeTable td:last-child::before,
+  #configTable td:last-child::before,
+  #historyTable td:last-child::before {
+    display: none;
+  }
+
+  #beybladeTable td:last-child button,
+  #configTable td:last-child button,
+  #historyTable td:last-child button {
+    min-width: 0;
+    margin: 0;
+    flex: 1;
+  }
+
+  #beybladeTable td.empty-value-cell,
+  #configTable td.empty-value-cell,
+  #historyTable td.empty-value-cell {
+    display: none;
+  }
+}
+
 /* Shared content cards used by information and feature pages */
 .info-card,
 .feature-card,
@@ -612,17 +747,17 @@ td select {
   #configTable tbody,
   #historyTable tbody {
     display: grid;
-    gap: 10px;
+    gap: 8px;
   }
 
   #beybladeTable tbody tr,
   #partTable tbody tr,
   #configTable tbody tr,
   #historyTable tbody tr {
-    padding: 14px;
+    padding: 10px 12px;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 12px;
+    gap: 0 10px;
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -635,8 +770,8 @@ td select {
   #configTable td,
   #historyTable td {
     min-width: 0;
-    min-height: 39px;
-    padding: 8px 0;
+    min-height: 34px;
+    padding: 6px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -707,9 +842,15 @@ td select {
   #configTable td:last-child button,
   #historyTable td:last-child button {
     min-width: 0;
-    min-height: 40px;
+    min-height: 36px;
     margin: 0;
     flex: 1;
+  }
+
+  #beybladeTable td.empty-value-cell,
+  #configTable td.empty-value-cell,
+  #historyTable td.empty-value-cell {
+    display: none;
   }
 
   #beybladeTable td:nth-child(1)::before,
@@ -835,15 +976,4 @@ td select {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  #beybladeTable tbody tr,
-  #configTable tbody tr,
-  #historyTable tbody tr {
-    grid-template-columns: 1fr;
-  }
-
-  #beybladeTable td,
-  #configTable td,
-  #historyTable td {
-    grid-column: 1 / -1;
-  }
 }

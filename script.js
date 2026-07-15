@@ -1733,16 +1733,48 @@ function updateUiSummaries() {
   setUiSummaryValue("historyCount", historyRows.length);
 }
 
+function updateResponsiveTableCells() {
+  ["beybladeTable", "configTable", "historyTable"].forEach(tableId => {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    const labels = Array.from(table.querySelectorAll("thead th"), th => th.textContent.trim());
+
+    table.querySelectorAll("tbody tr").forEach(row => {
+      const cells = Array.from(row.cells);
+
+      cells.forEach((cell, index) => {
+        cell.dataset.label = labels[index] || "";
+
+        const isOperationCell = index === cells.length - 1;
+        const hasEditor = Boolean(cell.querySelector("input, select, textarea"));
+        const value = cell.textContent.trim();
+        const isEmptyValue = !isOperationCell
+          && !hasEditor
+          && !cell.hasAttribute("colspan")
+          && (!value || value === "-");
+
+        cell.classList.toggle("empty-value-cell", isEmptyValue);
+      });
+    });
+  });
+}
+
 function installUiSummaryObservers() {
+  const refreshUi = () => {
+    updateUiSummaries();
+    updateResponsiveTableCells();
+  };
+
   ["beybladeTable", "partTable", "configTable", "historyTable"].forEach(tableId => {
     const tbody = document.querySelector(`#${tableId} tbody`);
     if (!tbody) return;
 
-    const observer = new MutationObserver(updateUiSummaries);
+    const observer = new MutationObserver(refreshUi);
     observer.observe(tbody, { childList: true, subtree: true, characterData: true });
   });
 
-  updateUiSummaries();
+  refreshUi();
 }
 
 function updateNoRatchetConfigOption() {

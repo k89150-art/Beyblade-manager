@@ -424,8 +424,8 @@ function renderRoundRow(tournamentId, matchId, round, isFinished) {
       <td>${escapeHtml(scoreInfo.label)}</td>
       <td>${escapeHtml(round.point || scoreInfo.point || "-")}</td>
       <td>${escapeHtml(round.note || "-")}</td>
-      <td>
-        ${!isFinished ? `<button type="button" onclick="deleteRound('${escapeHtml(tournamentId)}', '${escapeHtml(matchId)}', '${escapeHtml(round.id)}')" class="danger-btn">刪除</button>` : "-"}
+      <td class="${isFinished ? "round-action-empty" : ""}">
+        ${!isFinished ? `<button type="button" onclick="deleteRound('${escapeHtml(tournamentId)}', '${escapeHtml(matchId)}', '${escapeHtml(round.id)}')" class="danger-btn">刪除</button>` : ""}
       </td>
     </tr>
   `;

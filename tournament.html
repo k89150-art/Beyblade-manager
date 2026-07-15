@@ -14,7 +14,7 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>參賽紀錄｜戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20260715-ui1" />
+  <link rel="stylesheet" href="style.css?v=20260716-ui2" />
   <link rel="stylesheet" href="site-menu.css?v=20260715-ui1" />
   <style>
     .side-menu-button { position: fixed; left: 14px; top: 14px; z-index: 1200; width: 44px; height: 44px; border-radius: 12px; background: #242424; color: #ffffff; border: 1px solid #444; font-size: 22px; font-weight: 700; line-height: 1; box-shadow: 0 8px 22px rgba(0,0,0,0.35); }
@@ -63,7 +63,52 @@
     .progress-text { color: #ffcc66; }
     .empty-state { background: #181818; border: 1px solid #333; border-radius: 10px; padding: 12px; color: #bdbdbd; font-size: 14px; line-height: 1.5; }
     @media (max-width: 900px) { .tournament-form { grid-template-columns: repeat(2, 1fr); } .round-form { grid-template-columns: repeat(2, 1fr); } .tournament-summary, .match-header { flex-direction: column; } .tournament-actions, .match-actions { width: 100%; justify-content: flex-start; } }
-    @media (max-width: 600px) { .side-menu-button { left: 10px; top: 10px; width: 42px; height: 42px; } .auth-card { margin-top: 56px; } .page-nav { flex-direction: column; } .nav-link { width: 100%; } .tournament-form, .match-form, .round-form { display: flex; flex-direction: column; gap: 8px; } .deck-input-group { display: flex; flex-direction: column; align-items: stretch; gap: 6px; } .tournament-actions button, .match-actions button { width: 100%; min-height: 40px; } .tournament-card, .match-card { border-radius: 10px; } }
+    @media (max-width: 600px) { .side-menu-button { left: 10px; top: 10px; width: 42px; height: 42px; } .auth-card { margin-top: 56px; } .page-nav { flex-direction: column; } .nav-link { width: 100%; } .tournament-form, .match-form, .round-form { display: flex; flex-direction: column; gap: 8px; } .deck-input-group { display: flex; flex-direction: column; align-items: stretch; gap: 6px; } .tournament-actions button, .match-actions button { min-height: 38px; } .tournament-card, .match-card { border-radius: 8px; } }
+    @media (max-width: 700px) {
+      .tournament-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .match-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tournament-actions button, .match-actions button { width: auto; min-width: 0; margin: 0; }
+      .round-table-wrap { overflow: visible; border: 0; background: transparent; box-shadow: none; }
+      .round-table { min-width: 0; display: block; background: transparent; }
+      .round-table thead { display: none; }
+      .round-table tbody { display: grid; gap: 8px; }
+      .round-table tbody tr {
+        padding: 10px 12px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0 12px;
+        border: 1px solid #303a45;
+        border-radius: 8px;
+        background: #10161d;
+      }
+      .round-table td {
+        min-width: 0;
+        min-height: 32px;
+        padding: 6px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        border: 0;
+        border-bottom: 1px solid #26313d;
+        white-space: normal;
+        text-align: right;
+        word-break: break-word;
+      }
+      .round-table td::before { flex: 0 0 auto; color: #778594; font-size: 10px; font-weight: 900; }
+      .round-table td:nth-child(1)::before { content: "回合"; }
+      .round-table td:nth-child(2)::before { content: "使用陀螺"; }
+      .round-table td:nth-child(3)::before { content: "結果"; }
+      .round-table td:nth-child(4)::before { content: "得分方式"; }
+      .round-table td:nth-child(5)::before { content: "分數"; }
+      .round-table td:nth-child(6)::before { content: "備註"; }
+      .round-table td:nth-child(7)::before { content: "操作"; }
+      .round-table td:nth-child(2), .round-table td:nth-child(6), .round-table td:nth-child(7), .round-table td[colspan] { grid-column: 1 / -1; }
+      .round-table td:last-child { border-bottom: 0; }
+      .round-table td[colspan] { justify-content: center; text-align: center; }
+      .round-table td[colspan]::before, .round-table td.round-action-empty { display: none; }
+      .round-table td button { width: 100%; margin: 0; }
+    }
   </style>
 </head>
 <body>
@@ -144,7 +189,7 @@
       document.body.classList.remove("side-menu-open");
     }
   </script>
-  <script type="module" src="tournament.js?v=20260626-admin-menu1"></script>
+  <script type="module" src="tournament.js?v=20260716-ui2"></script>
   <script src="site-menu.js?v=20260715-ui1"></script>
 </body>
 </html>
