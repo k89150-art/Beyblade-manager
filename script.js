@@ -1752,29 +1752,42 @@ function updateResponsiveTableCells() {
       if (tableId === "configTable") {
         const layer = cells[1]?.textContent.trim() || "";
         const values = cells.slice(1, 9).map(cell => cell.textContent.trim());
-        const summary = cells
-          .slice(1, 9)
-          .map(cell => cell.textContent.trim())
-          .filter(value => value && value !== "-")
-          .join(" · ");
+        const [layerValue, lockValue, mainValue, transcendValue, metalValue, auxValue, fixValue, axisValue] = values;
+        const hasValue = value => value && value !== "-";
+        const cxCoreValue = hasValue(metalValue) ? metalValue : mainValue;
+        const titleLayer = series === "CX"
+          ? [lockValue, cxCoreValue].filter(hasValue).join("")
+          : layer;
+        const summaryValues = series === "CX"
+          ? [
+              lockValue,
+              hasValue(mainValue) && !hasValue(metalValue) ? mainValue : "",
+              metalValue,
+              transcendValue,
+              auxValue,
+              fixValue,
+              axisValue
+            ]
+          : values;
+        const summary = summaryValues
+          .filter(hasValue)
+          .join(" ・ ");
 
         if (cells[0]) {
-          cells[0].dataset.cardTitle = [model, layer !== "-" ? layer : ""]
+          cells[0].dataset.cardTitle = [model, titleLayer !== "-" ? titleLayer : ""]
             .filter(Boolean)
             .join(" ");
         }
         if (cells[1]) cells[1].dataset.cardSummary = summary || "-";
 
         if (!row.classList.contains("editing-row")) {
-          const [layerValue, lockValue, mainValue, transcendValue, metalValue, auxValue, fixValue, axisValue] = values;
-          const hasValue = value => value && value !== "-";
           const tags = [];
 
           if (series === "CX") {
             if (hasValue(lockValue)) tags.push("紋章鎖");
             if (hasValue(mainValue)) tags.push("主要戰刃");
             if (hasValue(transcendValue) && hasValue(metalValue)) {
-              tags.push("金屬＋超越");
+              tags.push("金屬+超越");
             } else {
               if (hasValue(transcendValue)) tags.push("超越戰刃");
               if (hasValue(metalValue)) tags.push("金屬戰刃");
@@ -1782,8 +1795,8 @@ function updateResponsiveTableCells() {
             if (hasValue(auxValue)) tags.push("輔助");
           } else {
             if (hasValue(layerValue)) tags.push("上蓋");
-            if (hasValue(fixValue)) tags.push("固鎖");
-            if (hasValue(axisValue)) tags.push("軸心");
+            if (hasValue(fixValue)) tags.push(fixValue);
+            if (hasValue(axisValue)) tags.push(axisValue);
           }
 
           const operationCell = cells[cells.length - 1];
