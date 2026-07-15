@@ -16,6 +16,10 @@ on:
         required: true
         type: boolean
         default: false
+      backup_id:
+        description: Existing private recovery document to restore (optional)
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -30,6 +34,7 @@ jobs:
           TARGET_UID: ${{ inputs.uid }}
           SCAN_MINUTES: ${{ inputs.scan_minutes }}
           RESTORE_TO_MAIN: ${{ inputs.restore_to_main }}
+          BACKUP_ID: ${{ inputs.backup_id }}
         run: |
           python3 -m pip install --quiet google-auth requests
           python3 - <<'PY'
@@ -58,55 +63,76 @@ jobs:
           headers = {"Authorization": f"Bearer {token}"}
           now = datetime.datetime.now(datetime.timezone.utc)
           found = None
+          existing_backup_id = os.environ.get("BACKUP_ID", "").strip()
 
-          for seconds_back in range(30, scan_minutes * 60 + 1, 30):
-              read_time = (now - datetime.timedelta(seconds=seconds_back)).isoformat(
-                  timespec="microseconds"
-              ).replace("+00:00", "Z")
-              url = source_url + "?" + urllib.parse.urlencode({"readTime": read_time})
-              request = urllib.request.Request(url, headers=headers)
-              try:
-                  with urllib.request.urlopen(request) as response:
-                      document = json.load(response)
-              except urllib.error.HTTPError as error:
-                  if error.code == 404:
-                      continue
-                  raise
-
-              field = document.get("fields", {}).get("tournamentRecords")
+          if existing_backup_id:
+              backup_url = f"{base}/users/{uid}/recovery/{existing_backup_id}"
+              request = urllib.request.Request(backup_url, headers=headers)
+              with urllib.request.urlopen(request) as response:
+                  backup_document = json.load(response)
+              field = backup_document.get("fields", {}).get("tournamentRecords")
               values = (field or {}).get("arrayValue", {}).get("values", [])
               if values:
-                  found = (read_time, field, len(values))
-                  break
+                  recovered_from = backup_document.get("fields", {}).get(
+                      "recoveredFrom", {}
+                  ).get("timestampValue", "private backup")
+                  found = (recovered_from, field, len(values))
+          else:
+              for seconds_back in range(30, scan_minutes * 60 + 1, 30):
+                  read_time = (now - datetime.timedelta(seconds=seconds_back)).isoformat(
+                      timespec="microseconds"
+                  ).replace("+00:00", "Z")
+                  url = source_url + "?" + urllib.parse.urlencode({"readTime": read_time})
+                  request = urllib.request.Request(url, headers=headers)
+                  try:
+                      with urllib.request.urlopen(request) as response:
+                          document = json.load(response)
+                  except urllib.error.HTTPError as error:
+                      if error.code == 404:
+                          continue
+                      raise
+
+                  field = document.get("fields", {}).get("tournamentRecords")
+                  values = (field or {}).get("arrayValue", {}).get("values", [])
+                  if values:
+                      found = (read_time, field, len(values))
+                      break
 
           if not found:
-              print(f"No retained tournament records found in the last {scan_minutes} minutes.")
+              if existing_backup_id:
+                  print(f"Private backup {existing_backup_id} has no tournament records.")
+              else:
+                  print(f"No retained tournament records found in the last {scan_minutes} minutes.")
               raise SystemExit(0)
 
           read_time, tournament_field, record_count = found
-          backup_id = "tournament-" + now.strftime("%Y%m%d-%H%M%S")
-          backup_url = f"{base}/users/{uid}/recovery/{backup_id}"
-          body = {
-              "fields": {
-                  "tournamentRecords": tournament_field,
-                  "recoveredFrom": {"timestampValue": read_time},
-                  "recoveredAt": {
-                      "timestampValue": now.isoformat(timespec="microseconds").replace("+00:00", "Z")
-                  },
-                  "sourceDocument": {"stringValue": source_path},
-              }
-          }
-          request = urllib.request.Request(
-              backup_url,
-              data=json.dumps(body).encode("utf-8"),
-              headers={**headers, "Content-Type": "application/json"},
-              method="PATCH",
-          )
-          with urllib.request.urlopen(request) as response:
-              json.load(response)
 
-          print(f"Preserved {record_count} tournament record(s) in private backup {backup_id}.")
-          print(f"Recovered source timestamp: {read_time}")
+          if existing_backup_id:
+              backup_id = existing_backup_id
+              print(f"Loaded {record_count} tournament record(s) from private backup {backup_id}.")
+          else:
+              backup_id = "tournament-" + now.strftime("%Y%m%d-%H%M%S")
+              backup_url = f"{base}/users/{uid}/recovery/{backup_id}"
+              body = {
+                  "fields": {
+                      "tournamentRecords": tournament_field,
+                      "recoveredFrom": {"timestampValue": read_time},
+                      "recoveredAt": {
+                          "timestampValue": now.isoformat(timespec="microseconds").replace("+00:00", "Z")
+                      },
+                      "sourceDocument": {"stringValue": source_path},
+                  }
+              }
+              request = urllib.request.Request(
+                  backup_url,
+                  data=json.dumps(body).encode("utf-8"),
+                  headers={**headers, "Content-Type": "application/json"},
+                  method="PATCH",
+              )
+              with urllib.request.urlopen(request) as response:
+                  json.load(response)
+              print(f"Preserved {record_count} tournament record(s) in private backup {backup_id}.")
+              print(f"Recovered source timestamp: {read_time}")
 
           if os.environ.get("RESTORE_TO_MAIN", "false").lower() == "true":
               restore_url = source_url + "?" + urllib.parse.urlencode(
