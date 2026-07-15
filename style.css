@@ -1099,12 +1099,26 @@ td select {
   #configTable tbody tr:not(.editing-row) td:nth-child(2) {
     width: 100%;
     min-height: 31px;
-    padding: 0 0 10px;
+    position: relative;
+    display: block;
+    padding: 0 0 10px !important;
   }
 
   #configTable tbody tr:not(.editing-row) td:nth-child(2)::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: block;
     color: #909ca8;
     font-size: 13px;
+    text-align: left;
+  }
+
+  #configTable tbody tr:not(.editing-row) td:nth-child(2)::before {
+    content: none;
   }
 
   #configTable tbody tr:not(.editing-row) td:nth-child(n+3):nth-child(-n+9) {

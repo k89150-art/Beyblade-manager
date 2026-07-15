@@ -1734,6 +1734,14 @@ function updateUiSummaries() {
 }
 
 function updateResponsiveTableCells() {
+  const collectionLayersByModel = new Map(
+    Array.from(document.querySelectorAll("#beybladeTable tbody tr"), row => {
+      const model = row.cells[0]?.textContent.trim().replace(/\s+/g, " ").toUpperCase() || "";
+      const layer = row.cells[1]?.textContent.trim() || "";
+      return [model, layer];
+    }).filter(([model, layer]) => model && layer && layer !== "-")
+  );
+
   ["beybladeTable", "configTable", "historyTable"].forEach(tableId => {
     const table = document.getElementById(tableId);
     if (!table) return;
@@ -1751,23 +1759,30 @@ function updateResponsiveTableCells() {
 
       if (tableId === "configTable") {
         const layer = cells[1]?.textContent.trim() || "";
+        const collectionLayer = collectionLayersByModel.get(model.replace(/\s+/g, " ").toUpperCase()) || "";
+        const resolvedLayer = layer && layer !== "-" ? layer : collectionLayer;
         const values = cells.slice(1, 9).map(cell => cell.textContent.trim());
         const [layerValue, lockValue, mainValue, transcendValue, metalValue, auxValue, fixValue, axisValue] = values;
         const hasValue = value => value && value !== "-";
+        const hasCxParts = [lockValue, mainValue, transcendValue, metalValue, auxValue].some(hasValue);
         const cxCoreValue = hasValue(metalValue) ? metalValue : mainValue;
         const titleLayer = series === "CX"
-          ? [lockValue, cxCoreValue].filter(hasValue).join("")
-          : layer;
+          ? hasCxParts
+            ? [lockValue, cxCoreValue].filter(hasValue).join("")
+            : resolvedLayer
+          : resolvedLayer;
         const summaryValues = series === "CX"
-          ? [
-              lockValue,
-              hasValue(mainValue) && !hasValue(metalValue) ? mainValue : "",
-              metalValue,
-              transcendValue,
-              auxValue,
-              fixValue,
-              axisValue
-            ]
+          ? hasCxParts
+            ? [
+                lockValue,
+                hasValue(mainValue) && !hasValue(metalValue) ? mainValue : "",
+                metalValue,
+                transcendValue,
+                auxValue,
+                fixValue,
+                axisValue
+              ]
+            : [resolvedLayer, fixValue, axisValue]
           : values;
         const summary = summaryValues
           .filter(hasValue)
@@ -1784,15 +1799,21 @@ function updateResponsiveTableCells() {
           const tags = [];
 
           if (series === "CX") {
-            if (hasValue(lockValue)) tags.push("紋章鎖");
-            if (hasValue(mainValue)) tags.push("主要戰刃");
-            if (hasValue(transcendValue) && hasValue(metalValue)) {
-              tags.push("金屬+超越");
+            if (hasCxParts) {
+              if (hasValue(lockValue)) tags.push("紋章鎖");
+              if (hasValue(mainValue)) tags.push("主要戰刃");
+              if (hasValue(transcendValue) && hasValue(metalValue)) {
+                tags.push("金屬+超越");
+              } else {
+                if (hasValue(transcendValue)) tags.push("超越戰刃");
+                if (hasValue(metalValue)) tags.push("金屬戰刃");
+              }
+              if (hasValue(auxValue)) tags.push("輔助");
             } else {
-              if (hasValue(transcendValue)) tags.push("超越戰刃");
-              if (hasValue(metalValue)) tags.push("金屬戰刃");
+              if (hasValue(resolvedLayer)) tags.push("上蓋");
+              if (hasValue(fixValue)) tags.push(fixValue);
+              if (hasValue(axisValue)) tags.push(axisValue);
             }
-            if (hasValue(auxValue)) tags.push("輔助");
           } else {
             if (hasValue(layerValue)) tags.push("上蓋");
             if (hasValue(fixValue)) tags.push(fixValue);
