@@ -1,5 +1,6 @@
 :root {
   --nav-width: 228px;
+  --nav-collapsed-width: 76px;
   --nav-bg: #0b0f14;
   --nav-line: #27313c;
   --nav-text: #aeb9c5;
@@ -8,6 +9,7 @@
 
 body.site-shell-ready {
   padding-left: var(--nav-width);
+  transition: padding-left .2s ease;
 }
 
 body.site-shell-ready .analysis-page,
@@ -42,7 +44,27 @@ body .side-menu {
   border: 0;
   border-right: 1px solid var(--nav-line);
   box-shadow: 16px 0 42px rgba(0,0,0,.22);
-  transition: transform .2s ease;
+  transition: width .2s ease, transform .2s ease, padding .2s ease;
+}
+
+body .side-menu-collapse {
+  position: fixed;
+  z-index: 910;
+  top: 26px;
+  left: calc(var(--nav-width) - 16px);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid #3a4857;
+  border-radius: 7px;
+  color: #dce5ee;
+  background: #141c25;
+  box-shadow: 0 7px 18px rgba(0,0,0,.3);
+  font-size: 19px;
+  line-height: 1;
+  transition: left .2s ease, transform .2s ease;
 }
 
 body .side-menu-title {
@@ -153,10 +175,56 @@ body.is-admin .side-menu a[href="admin.html"] {
   display: none;
 }
 
+@media (min-width: 821px) {
+  body.site-shell-ready.desktop-nav-collapsed {
+    padding-left: var(--nav-collapsed-width);
+  }
+
+  body.desktop-nav-collapsed .side-menu {
+    width: var(--nav-collapsed-width);
+    padding-inline: 9px;
+    overflow-x: hidden;
+  }
+
+  body.desktop-nav-collapsed .side-menu-collapse {
+    left: calc(var(--nav-collapsed-width) - 16px);
+  }
+
+  body.desktop-nav-collapsed .side-menu-title {
+    min-height: 54px;
+    padding: 0;
+    color: transparent;
+    font-size: 0;
+  }
+
+  body.desktop-nav-collapsed .side-menu-title::before {
+    left: 6px;
+  }
+
+  body.desktop-nav-collapsed .side-menu-subtitle,
+  body.desktop-nav-collapsed .side-menu-section,
+  body.desktop-nav-collapsed .side-menu-link > span:last-child {
+    display: none;
+  }
+
+  body.desktop-nav-collapsed .side-menu-link {
+    padding-inline: 12px;
+    justify-content: center;
+  }
+
+  body.desktop-nav-collapsed .side-menu-link.active {
+    box-shadow: inset 3px 0 0 var(--nav-active), 0 0 0 3px rgba(75,145,255,.08);
+  }
+}
+
 @media (max-width: 820px) {
   body.site-shell-ready {
     padding-left: 0;
     padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+
+  body .side-menu-collapse {
+    display: none;
   }
 
   body.site-shell-ready .auth-card,

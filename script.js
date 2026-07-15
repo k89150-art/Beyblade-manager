@@ -1751,6 +1751,7 @@ function updateResponsiveTableCells() {
 
       if (tableId === "configTable") {
         const layer = cells[1]?.textContent.trim() || "";
+        const values = cells.slice(1, 9).map(cell => cell.textContent.trim());
         const summary = cells
           .slice(1, 9)
           .map(cell => cell.textContent.trim())
@@ -1763,6 +1764,46 @@ function updateResponsiveTableCells() {
             .join(" ");
         }
         if (cells[1]) cells[1].dataset.cardSummary = summary || "-";
+
+        if (!row.classList.contains("editing-row")) {
+          const [layerValue, lockValue, mainValue, transcendValue, metalValue, auxValue, fixValue, axisValue] = values;
+          const hasValue = value => value && value !== "-";
+          const tags = [];
+
+          if (series === "CX") {
+            if (hasValue(lockValue)) tags.push("紋章鎖");
+            if (hasValue(mainValue)) tags.push("主要戰刃");
+            if (hasValue(transcendValue) && hasValue(metalValue)) {
+              tags.push("金屬＋超越");
+            } else {
+              if (hasValue(transcendValue)) tags.push("超越戰刃");
+              if (hasValue(metalValue)) tags.push("金屬戰刃");
+            }
+            if (hasValue(auxValue)) tags.push("輔助");
+          } else {
+            if (hasValue(layerValue)) tags.push("上蓋");
+            if (hasValue(fixValue)) tags.push("固鎖");
+            if (hasValue(axisValue)) tags.push("軸心");
+          }
+
+          const operationCell = cells[cells.length - 1];
+          if (operationCell) {
+            let tagList = operationCell.querySelector(".config-card-tags");
+            if (!tagList) {
+              tagList = document.createElement("div");
+              tagList.className = "config-card-tags";
+              operationCell.prepend(tagList);
+            }
+
+            const tagKey = tags.join("|");
+            if (tagList.dataset.tagKey !== tagKey) {
+              tagList.dataset.tagKey = tagKey;
+              tagList.innerHTML = tags
+                .map(tag => `<span>${escapeHtml(tag)}</span>`)
+                .join("");
+            }
+          }
+        }
       }
 
       if (tableId === "historyTable") {

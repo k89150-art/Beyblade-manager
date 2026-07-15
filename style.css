@@ -481,6 +481,10 @@ td select {
   text-align: left;
 }
 
+#configTable .config-card-tags {
+  display: none;
+}
+
 /* Desktop record cards keep the existing table data and editing behavior. */
 @media (min-width: 821px) {
   .record-card-wrap {
@@ -881,6 +885,112 @@ td select {
     width: 100%;
     min-height: 36px;
     flex: 0 0 auto;
+  }
+
+  /* Approved setup-card hierarchy: badge, title, summary, tags, actions. */
+  #configTable tbody tr:not(.editing-row) {
+    min-height: 246px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 18px;
+  }
+
+  #configTable tbody tr:not(.editing-row)::after {
+    content: "•••";
+    position: absolute;
+    top: 17px;
+    right: 17px;
+    width: 39px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #394553;
+    border-radius: 7px;
+    color: #dfe7ef;
+    background: rgba(17,24,32,.9);
+    font-size: 12px;
+    letter-spacing: 3px;
+  }
+
+  #configTable tbody tr:not(.editing-row) td:nth-child(1) {
+    width: 100%;
+    min-height: 92px;
+    padding-right: 56px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 13px;
+  }
+
+  #configTable tbody tr:not(.editing-row) td:nth-child(1)::before {
+    min-width: 36px;
+    min-height: 27px;
+    align-self: flex-start;
+  }
+
+  #configTable tbody tr:not(.editing-row) td:nth-child(1)::after {
+    font-size: 19px;
+    line-height: 1.35;
+  }
+
+  #configTable tbody tr:not(.editing-row) td:nth-child(2) {
+    width: 100%;
+    min-height: 33px;
+    padding: 0 0 12px;
+  }
+
+  #configTable tbody tr:not(.editing-row) td:nth-child(2)::after {
+    color: #909ca8;
+    font-size: 13px;
+  }
+
+  #configTable tbody tr:not(.editing-row) td:nth-child(n+3):nth-child(-n+9) {
+    display: none;
+  }
+
+  #configTable tbody tr:not(.editing-row) td:last-child {
+    width: 100%;
+    min-height: 0;
+    margin-top: auto;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  #configTable .config-card-tags {
+    width: 100%;
+    min-height: 39px;
+    padding: 0 0 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    border-bottom: 1px solid rgba(50,63,76,.76);
+  }
+
+  #configTable .config-card-tags span {
+    min-height: 25px;
+    padding: 4px 8px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 5px;
+    color: #9facb9;
+    background: rgba(34,45,57,.82);
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  #configTable tbody tr:not(.editing-row) td:last-child button {
+    min-height: 41px;
+    flex: 1 1 0;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  #configTable tbody tr.editing-row .config-card-tags {
+    display: none;
   }
 }
 

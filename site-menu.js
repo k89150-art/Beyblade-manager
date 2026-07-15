@@ -23,12 +23,46 @@ const SIDE_MENU_ITEMS = [
   { href: "admin.html", label: "管理員後台", group: "管理", adminOnly: true }
 ];
 
+const DESKTOP_NAV_STATE_KEY = "beybladeDesktopNavCollapsed";
+
 function openSideMenu() {
   document.body.classList.add("side-menu-open");
 }
 
 function closeSideMenu() {
   document.body.classList.remove("side-menu-open");
+}
+
+function setDesktopNavCollapsed(collapsed, persist = true) {
+  document.body.classList.toggle("desktop-nav-collapsed", collapsed);
+
+  const button = document.querySelector(".side-menu-collapse");
+  if (button) {
+    button.textContent = collapsed ? "›" : "‹";
+    button.title = collapsed ? "展開左側欄" : "收合左側欄";
+    button.setAttribute("aria-label", button.title);
+    button.setAttribute("aria-expanded", String(!collapsed));
+  }
+
+  if (persist) {
+    try {
+      localStorage.setItem(DESKTOP_NAV_STATE_KEY, collapsed ? "1" : "0");
+    } catch (error) {
+      console.warn("無法儲存側欄顯示狀態：", error);
+    }
+  }
+}
+
+function toggleDesktopNav() {
+  setDesktopNavCollapsed(!document.body.classList.contains("desktop-nav-collapsed"));
+}
+
+function restoreDesktopNavState() {
+  try {
+    setDesktopNavCollapsed(localStorage.getItem(DESKTOP_NAV_STATE_KEY) === "1", false);
+  } catch (error) {
+    setDesktopNavCollapsed(false, false);
+  }
 }
 
 function currentPageName() {
@@ -88,6 +122,13 @@ function ensureSideMenuShell() {
     document.body.insertAdjacentHTML("afterbegin", `<div class="side-menu-backdrop" onclick="closeSideMenu()"></div>`);
   }
 
+  if (!document.querySelector(".side-menu-collapse")) {
+    document.body.insertAdjacentHTML(
+      "afterbegin",
+      `<button type="button" class="side-menu-collapse" onclick="toggleDesktopNav()" aria-label="收合左側欄" aria-expanded="true" title="收合左側欄">‹</button>`
+    );
+  }
+
   let menu = document.querySelector(".side-menu");
   if (!menu) {
     document.body.insertAdjacentHTML("afterbegin", `<nav class="side-menu" aria-label="主選單"></nav>`);
@@ -103,6 +144,7 @@ function ensureBottomNavShell() {
     document.body.insertAdjacentHTML("beforeend", '<nav class="bottom-nav" aria-label="手機版主要導覽"></nav>');
     nav = document.querySelector(".bottom-nav");
   }
+
   return nav;
 }
 
@@ -199,9 +241,11 @@ function installAdminMenuGuard() {
 (function initSideMenu() {
   document.body.classList.add("site-shell-ready");
   renderSideMenu();
+  restoreDesktopNavState();
   installToolSectionTracking();
   installAdminMenuGuard();
 })();
 
 window.openSideMenu = openSideMenu;
 window.closeSideMenu = closeSideMenu;
+window.toggleDesktopNav = toggleDesktopNav;
