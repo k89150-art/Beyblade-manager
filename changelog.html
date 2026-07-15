@@ -23,6 +23,12 @@
     .change-tag { display:inline-block; color:#dbe7ff; background:rgba(61,126,255,.18); border:1px solid rgba(61,126,255,.38); border-radius:999px; padding:1px 8px; margin-right:6px; font-size:12px; font-weight:700; }
     .update-list { margin:0; padding-left:20px; }
     .update-list li { margin-bottom:6px; }
+    .version-archive { margin-top:16px; }
+    .version-archive > summary { cursor:pointer; list-style:none; padding:15px 18px; border:1px solid #333; border-radius:8px; color:#e8eef5; background:#151a20; font-weight:800; }
+    .version-archive > summary::-webkit-details-marker { display:none; }
+    .version-archive > summary::after { content:"＋"; float:right; color:#7eb0ff; }
+    .version-archive[open] > summary { margin-bottom:16px; }
+    .version-archive[open] > summary::after { content:"－"; }
     @media (max-width:600px){ .site-nav{flex-direction:column;} .site-nav a{width:100%; box-sizing:border-box;} }
   </style>
 </head>
@@ -42,41 +48,19 @@
       <div class="version-title">v1.8.0｜全站介面更新與卡片優化</div>
       <div class="version-meta">2026-07-15～2026-07-16</div>
       <ul class="update-list">
-        <li><span class="change-tag">選擇</span>同一商品型號對應多顆陀螺時，新增前會開啟選擇視窗，可加入其中一顆或全部加入。</li>
-        <li><span class="change-tag">輸入</span>商品型號查詢支援省略連字號或改用空白，例如 UX-01、UX 01、UX01 均可自動辨識；雙陀螺套組亦適用。</li>
-        <li><span class="change-tag">修正</span>新增完整型號與主型號雙索引；輸入 UX-18、BX-14、CX-17、UX-12、BXG-12 等主型號時，可選擇對應子型號。</li>
-        <li><span class="change-tag">同步</span>雲端儲存改為依序寫入並忽略本機 pending snapshot，修正新增後立即刪除會被補回，以及同步狀態反覆跳動。</li>
-        <li><span class="change-tag">修正</span>遠端資料套用與型號整理不再觸發回存，並忽略重複快照，避免卡片被持續重建而無法點擊。</li>
-        <li><span class="change-tag">名稱</span>原裝收藏資料修正為 UX-01 蒼龍爆刃、UX-02 惡魔重錘，固鎖與軸心資料維持原值。</li>
-        <li><span class="change-tag">新增</span>原裝資料新增 UX-20 榮耀戰神，採戰刃一體式固鎖與 LF 軸，並同步加入無固鎖防呆。</li>
-        <li><span class="change-tag">收藏</span>新增原裝商品型號自動帶入，預設查詢 2026-07-15 確認版資料，並保留可自行切換的手動輸入模式。</li>
-        <li><span class="change-tag">套組</span>BX-00-01～BX-00-04 輸入一次會加入同組兩顆陀螺，刪除時也會依該次加入的套組成對處理。</li>
-        <li><span class="change-tag">原裝</span>收藏區不再提供修改按鈕，避免原裝資料被當成改裝配置；自由組裝仍集中在配置區操作。</li>
-        <li><span class="change-tag">相容</span>新增的商品來源與套組識別會隨雲端資料保存；既有收藏缺少這些欄位時仍照原格式載入，不需清除或轉換。</li>
-        <li><span class="change-tag">介面</span>重新設計為手機優先的收藏與配置管理介面，使用較大的操作區、清楚的資訊層級與一致的科技競技風格。</li>
-        <li><span class="change-tag">導覽</span>桌面版改用固定左側功能欄，手機版新增收藏、庫存、配置、分析與賽事底部導覽。</li>
-        <li><span class="change-tag">手機</span>收藏、額外零件、配置與歷史紀錄在手機上改為卡片顯示，不再需要橫向拖曳才能查看全部欄位。</li>
-        <li><span class="change-tag">精簡</span>收藏與配置卡片只顯示實際有輸入的欄位，BX、UX 與 CX 都不再以空白欄位撐高卡片。</li>
-        <li><span class="change-tag">桌面</span>收藏、配置與歷史紀錄改用卡片網格呈現，保留原有表格資料與編輯流程。</li>
-        <li><span class="change-tag">配置</span>桌面配置卡改為試作稿的緊湊資訊卡，集中顯示系列、型號、組合摘要與操作按鈕。</li>
-        <li><span class="change-tag">卡片</span>配置卡重新套用確認過的試作層級：系列徽章、型號名稱、完整配置摘要、結構標籤與底部操作列。</li>
-        <li><span class="change-tag">對齊</span>統一配置卡標題、摘要與結構標籤的左側基準線，並移除沒有功能的省略號圖示。</li>
-        <li><span class="change-tag">排列</span>桌面配置卡改為自動欄數，依可用寬度顯示 2、3 或 4 張，減少右側空白。</li>
-        <li><span class="change-tag">CX</span>分體式 CX 的完整零件保留在摘要列，下一列以「紋章鎖、金屬+超越、輔助」標籤清楚標示結構。</li>
-        <li><span class="change-tag">名稱</span>CX 收藏與配置顯示改為依實際分件判斷；分體式名稱優先使用金屬戰刃，沒有 CX 分件的商品則沿用上蓋、固鎖與軸心結構。</li>
-        <li><span class="change-tag">相容</span>舊版 CX 整合上蓋資料會從配置列或相同型號收藏資料補回名稱與標籤，不再只顯示固鎖、軸心。</li>
-        <li><span class="change-tag">標籤</span>BX／UX 與舊式 CX 卡片統一顯示上蓋、固鎖、軸心；分體式 CX 則顯示紋章鎖、金屬+超越、輔助。</li>
-        <li><span class="change-tag">新增</span>建立配置改為按需開啟的快速編輯面板，桌面由右側滑入、手機使用全螢幕表單，不再長期占用配置頁上方空間。</li>
-        <li><span class="change-tag">導覽</span>電腦版左側欄可收合成圖示列，並會記住本機瀏覽器的收合狀態。</li>
-        <li><span class="change-tag">歷史</span>桌面歷史測試改為橫向紀錄卡，日期、結果、備註與還原操作更容易掃讀。</li>
-        <li><span class="change-tag">分析</span>展開單筆庫存建議時，不再連帶拉高同列的其他建議卡片。</li>
-        <li><span class="change-tag">賽事</span>手機版回合紀錄改為緊湊卡片，修正表格寬度造成的內容偏移與橫向裁切。</li>
-        <li><span class="change-tag">庫存</span>額外零件庫存區只顯示使用者自行新增的零件，並新增種類、持有、使用中與可用數量摘要。</li>
-        <li><span class="change-tag">保留</span>Google 登入、Firestore 資料、CX 規則、數量防呆、配置修改刪除與歷史還原流程全部沿用原有邏輯。</li>
-        <li><span class="change-tag">備份</span>更新前版本已保存於 <strong>backup/pre-ui-redesign-20260715</strong> 分支，可隨時回復。</li>
+        <li><span class="change-tag">收藏</span>新增原裝型號自動帶入、彈性格式辨識與子型號選擇；雙陀螺套組支援整組新增與刪除，並保留手動輸入。</li>
+        <li><span class="change-tag">資料</span>修正 UX-01、UX-02 名稱並新增 UX-20 榮耀戰神及其一體式固鎖規則。</li>
+        <li><span class="change-tag">介面</span>全站改為手機優先的卡片式設計；桌面支援多欄卡片與可收合側欄，手機改用底部導覽。</li>
+        <li><span class="change-tag">配置</span>新增按需開啟的快速編輯面板，卡片集中顯示型號、配置摘要、CX 結構標籤與操作按鈕。</li>
+        <li><span class="change-tag">優化</span>精簡收藏、庫存、歷史與賽事畫面，修正手機裁切、卡片高度及建議卡互相拉長等問題。</li>
+        <li><span class="change-tag">同步</span>修正新增後立即刪除被補回、同步狀態反覆切換及卡片持續重建而無法點擊。</li>
+        <li><span class="change-tag">相容</span>保留既有資料、Google 登入、Firestore、CX 規則、庫存防呆與配置／歷史操作流程。</li>
+        <li><span class="change-tag">備份</span>更新前版本保留於 <strong>backup/pre-ui-redesign-20260715</strong> 分支。</li>
       </ul>
     </div>
 
+    <details class="version-archive">
+      <summary>查看歷史版本（v1.2.0～v1.7.0）</summary>
     <div class="info-card">
       <div class="version-title">v1.7.0｜2026-07-11 資料庫與分析規則更新</div>
       <div class="version-meta">2026-07-11</div>
@@ -224,6 +208,7 @@
         <li>支援手機與電腦雲端同步。</li>
       </ul>
     </div>
+    </details>
   </div>
   <script src="site-menu.js?v=20260716-ui2"></script>
 </body>
