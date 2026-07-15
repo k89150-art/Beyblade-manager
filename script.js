@@ -51,6 +51,7 @@ let stockProductsLoadPromise = null;
 let stockProductsLoaded = false;
 let stockProductsByExactCode = new Map();
 let stockProductsByBaseCode = new Map();
+let stockProductsByRecordId = new Map();
 let stockChoiceResolve = null;
 let stockChoiceProducts = [];
 
@@ -1484,6 +1485,7 @@ function clearAllTables() {
 }
 
 function applyDataToTables(data) {
+  let upgradedStockCount = 0;
   isApplyingRemoteData = true;
   try {
     clearAllTables();
@@ -1495,7 +1497,9 @@ function applyDataToTables(data) {
 
     if (data.beybladeTable) {
       data.beybladeTable.forEach(item => {
-        createBeybladeRow(item.cells, item.mainStockName, item);
+        const upgraded = stockProductsLoaded ? upgradeStoredStockItem(item) : { item, changed: false };
+        if (upgraded.changed) upgradedStockCount += 1;
+        createBeybladeRow(upgraded.item.cells, upgraded.item.mainStockName, upgraded.item);
       });
     }
 
@@ -1524,6 +1528,8 @@ function applyDataToTables(data) {
   } finally {
     isApplyingRemoteData = false;
   }
+
+  return upgradedStockCount;
 }
 
 function startCloudListener() {
@@ -1559,8 +1565,12 @@ function startCloudListener() {
       }
 
       lastAppliedRemoteUpdatedAt = remoteUpdatedAt;
-      applyDataToTables(snapshotData);
+      const upgradedStockCount = applyDataToTables(snapshotData);
       setSyncStatus("資料已同步", "saved");
+
+      if (upgradedStockCount > 0 && !viewingUserId) {
+        void saveData();
+      }
     },
     error => {
       console.error("Firestore 讀取失敗：", error);
@@ -2289,6 +2299,11 @@ async function loadStockProducts() {
       const { exactIndex, baseIndex, unparseableCodes } = buildStockProductIndexes(data.stockProducts);
       stockProductsByExactCode = exactIndex;
       stockProductsByBaseCode = baseIndex;
+      stockProductsByRecordId = new Map(
+        data.stockProducts
+          .filter(product => product.autoFillEnabled && !product.needsReview && product.recordId)
+          .map(product => [String(product.recordId).trim(), product])
+      );
       stockProductsLoaded = true;
       renderStockAutoPreview();
       return { exactIndex, baseIndex, unparseableCodes };
@@ -2366,6 +2381,62 @@ function getStockProductRowData(product) {
       stockRatchetMode: product.ratchetMode || ""
     }
   };
+}
+
+function chooseStockProductForStoredItem(item) {
+  const recordId = String(item?.stockRecordId || "").trim();
+  if (recordId && stockProductsByRecordId.has(recordId)) {
+    return stockProductsByRecordId.get(recordId);
+  }
+
+  const cells = Array.isArray(item?.cells) ? item.cells : [];
+  const storedCode = item?.stockProductCode || cells[0] || "";
+  const { exactMatches, variantMatches } = getStockProductLookup(storedCode);
+  const candidates = exactMatches.length ? exactMatches : variantMatches;
+  if (candidates.length === 1) return candidates[0];
+  if (!candidates.length) return null;
+
+  const currentModel = String(cells[0] || "").trim();
+  const currentLayer = String(cells[1] || "").trim();
+  const matched = candidates.filter(product => {
+    const rowData = getStockProductRowData(product);
+    return String(product.recordId || "").trim() === currentModel ||
+      String(product.displayNameZh || "").trim() === currentLayer ||
+      String(rowData.cells[1] || "").trim() === currentLayer;
+  });
+
+  return matched.length === 1 ? matched[0] : null;
+}
+
+function upgradeStoredStockItem(item) {
+  const product = chooseStockProductForStoredItem(item);
+  if (!product) return { item, changed: false };
+
+  const rowData = getStockProductRowData(product);
+  const upgraded = {
+    ...item,
+    cells: rowData.cells,
+    mainStockName: rowData.mainStockName,
+    ...rowData.metadata
+  };
+
+  if (item.stockSetInstanceId) {
+    upgraded.stockSetInstanceId = item.stockSetInstanceId;
+  }
+
+  const metadataKeys = [
+    "stockAutoFilled",
+    "stockRecordId",
+    "stockProductCode",
+    "stockSetId",
+    "stockAssemblySystem",
+    "stockRatchetMode"
+  ];
+  const changed = JSON.stringify(item.cells || []) !== JSON.stringify(upgraded.cells) ||
+    String(item.mainStockName || "") !== String(upgraded.mainStockName || "") ||
+    metadataKeys.some(key => String(item[key] || "") !== String(upgraded[key] || ""));
+
+  return { item: upgraded, changed };
 }
 
 function createStockSetInstanceId(productCode) {
@@ -2995,7 +3066,7 @@ document.addEventListener("DOMContentLoaded", function () {
   setSyncStatus("請先使用 Google 登入", "muted");
   installConfigSort();
 
-  onAuthStateChanged(auth, user => {
+  onAuthStateChanged(auth, async user => {
     currentUser = user;
     updateAuthUI(user);
 
@@ -3006,6 +3077,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (user) {
       setSyncStatus("已登入，正在載入雲端資料...", "login");
+      await loadStockProducts().catch(() => {});
+      if (currentUser !== user) return;
       startCloudListener();
     } else {
       clearAllTables();

@@ -24,6 +24,7 @@ const firebaseConfig = {
 };
 
 const ADMIN_UID = "SesDhvXG6MUT38YhqGl0N6lVgMz1";
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260716-3";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -31,6 +32,10 @@ const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
 let currentUser = null;
+let stockCatalogPromise = null;
+let stockCatalogByExactCode = new Map();
+let stockCatalogByBaseCode = new Map();
+let stockCatalogByRecordId = new Map();
 
 function getTargetUid() {
   return new URLSearchParams(location.search).get("uid") || "";
@@ -46,6 +51,138 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
+}
+
+function parseStockProductCode(value) {
+  const normalized = String(value ?? "")
+    .replace(/[！-～]/g, character => String.fromCharCode(character.charCodeAt(0) - 0xFEE0))
+    .replace(/　/g, " ")
+    .trim()
+    .toUpperCase()
+    .replace(/[＿_‐‑‒–—―−﹘﹣－]/g, "-")
+    .replace(/\s+/g, " ");
+  if (!normalized) return null;
+
+  const separated = normalized.match(/^(BXG|BXH|BX|UX|CX)[ -]*(\d{1,2})(?:[ -]+(\d{1,2}))?$/);
+  let series;
+  let mainNumber;
+  let childNumber;
+
+  if (separated) {
+    series = separated[1];
+    mainNumber = separated[2];
+    childNumber = separated[3] || null;
+  } else {
+    const compact = normalized.replace(/[ -]/g, "");
+    const matched = compact.match(/^(BXG|BXH|BX|UX|CX)(\d{1,4})$/);
+    if (!matched) return null;
+    series = matched[1];
+    const digits = matched[2];
+    mainNumber = digits.length <= 2 ? digits : digits.slice(0, 2);
+    childNumber = digits.length <= 2 ? null : digits.slice(2);
+  }
+
+  mainNumber = mainNumber.padStart(2, "0");
+  childNumber = childNumber ? childNumber.padStart(2, "0") : null;
+  return {
+    exactKey: `${series}${mainNumber}${childNumber || ""}`,
+    baseKey: `${series}${mainNumber}`,
+    hasChildNumber: Boolean(childNumber)
+  };
+}
+
+function addCatalogEntry(map, key, product) {
+  if (!map.has(key)) map.set(key, []);
+  map.get(key).push(product);
+}
+
+async function loadStockCatalog() {
+  if (stockCatalogPromise) return stockCatalogPromise;
+
+  stockCatalogPromise = fetch(STOCK_PRODUCTS_URL)
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    })
+    .then(data => {
+      const products = Array.isArray(data.stockProducts)
+        ? data.stockProducts.filter(product => product.autoFillEnabled && !product.needsReview)
+        : [];
+
+      stockCatalogByExactCode = new Map();
+      stockCatalogByBaseCode = new Map();
+      stockCatalogByRecordId = new Map();
+      products.forEach(product => {
+        const parsed = parseStockProductCode(product.productCode);
+        if (!parsed) return;
+        addCatalogEntry(stockCatalogByExactCode, parsed.exactKey, product);
+        if (parsed.hasChildNumber && !product.isSetProduct) {
+          addCatalogEntry(stockCatalogByBaseCode, parsed.baseKey, product);
+        }
+        if (product.recordId) stockCatalogByRecordId.set(String(product.recordId).trim(), product);
+      });
+    })
+    .catch(error => {
+      console.warn("原裝配置資料載入失敗，將顯示使用者原始資料：", error);
+    });
+
+  return stockCatalogPromise;
+}
+
+function getCatalogRowData(product) {
+  const parts = product?.parts || {};
+  const valueOrDash = value => value || "-";
+  const hasSplitBlade = Boolean(parts.metalBlade && parts.overBlade);
+  let layer = parts.blade || "-";
+
+  if (!parts.blade && parts.lockChip) {
+    layer = hasSplitBlade
+      ? [parts.lockChip, parts.metalBlade, parts.overBlade, parts.assistBlade].filter(Boolean).join("")
+      : [parts.lockChip, parts.mainBlade, parts.assistBlade].filter(Boolean).join("");
+  }
+
+  return [
+    product.isSetProduct ? product.recordId : product.productCode,
+    layer,
+    valueOrDash(parts.lockChip),
+    hasSplitBlade ? `${parts.overBlade}/${parts.metalBlade}` : valueOrDash(parts.mainBlade),
+    valueOrDash(parts.overBlade),
+    valueOrDash(parts.metalBlade),
+    valueOrDash(parts.assistBlade),
+    valueOrDash(parts.ratchet),
+    valueOrDash(parts.bit)
+  ];
+}
+
+function enrichOriginalStockItem(item) {
+  const cells = Array.isArray(item?.cells) ? item.cells : [];
+  const recordId = String(item?.stockRecordId || "").trim();
+  let product = recordId ? stockCatalogByRecordId.get(recordId) : null;
+
+  if (!product) {
+    const parsed = parseStockProductCode(item?.stockProductCode || cells[0]);
+    if (!parsed) return item;
+    const exact = stockCatalogByExactCode.get(parsed.exactKey) || [];
+    const candidates = exact.length
+      ? exact
+      : (!parsed.hasChildNumber ? stockCatalogByBaseCode.get(parsed.baseKey) || [] : []);
+
+    if (candidates.length === 1) {
+      product = candidates[0];
+    } else if (candidates.length > 1) {
+      const currentModel = String(cells[0] || "").trim();
+      const currentLayer = String(cells[1] || "").trim();
+      const matched = candidates.filter(candidate => {
+        const catalogCells = getCatalogRowData(candidate);
+        return String(candidate.recordId || "").trim() === currentModel ||
+          String(candidate.displayNameZh || "").trim() === currentLayer ||
+          String(catalogCells[1] || "").trim() === currentLayer;
+      });
+      if (matched.length === 1) product = matched[0];
+    }
+  }
+
+  return product ? { ...item, cells: getCatalogRowData(product) } : item;
 }
 
 function setSyncStatus(text, type = "muted") {
@@ -247,6 +384,7 @@ async function loadTargetUserData() {
 
   try {
     setSyncStatus("讀取使用者資料中...", "saving");
+    await loadStockCatalog();
     const ref = doc(db, "users", targetUid, "appData", "main");
     const snapshot = await getDoc(ref);
 
@@ -257,7 +395,10 @@ async function loadTargetUserData() {
 
     const data = snapshot.data() || {};
 
-    renderConfigCards("beybladeBox", data.beybladeTable || []);
+    renderConfigCards(
+      "beybladeBox",
+      (data.beybladeTable || []).map(enrichOriginalStockItem)
+    );
 
     renderTable(
       "partBox",
