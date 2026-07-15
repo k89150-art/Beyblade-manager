@@ -1891,9 +1891,74 @@ function updateNoRatchetConfigOption() {
   if (fixSelect.value === "-") fixSelect.value = "";
 }
 
+function setConfigEditorMode(mode, clearOpposite = false) {
+  const normalizedMode = mode === "cx" ? "cx" : "bxux";
+
+  document.querySelectorAll("[data-config-mode]").forEach(button => {
+    const active = button.dataset.configMode === normalizedMode;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+
+  document.querySelectorAll("[data-config-field]").forEach(field => {
+    field.hidden = field.dataset.configField !== normalizedMode;
+  });
+
+  if (clearOpposite) {
+    const idsToClear = normalizedMode === "cx"
+      ? ["sel上蓋"]
+      : ["sel紋章鎖", "sel主要戰刃", "sel超越戰刃", "sel金屬戰刃", "sel輔助戰刃"];
+    idsToClear.forEach(id => {
+      const field = document.getElementById(id);
+      if (field) field.value = "";
+    });
+  }
+}
+
+function syncConfigEditorModeFromModel() {
+  const model = document.getElementById("confModel")?.value.trim().toUpperCase() || "";
+  if (model.startsWith("CX")) {
+    setConfigEditorMode("cx", true);
+  } else if (model.startsWith("BX") || model.startsWith("UX")) {
+    setConfigEditorMode("bxux", true);
+  }
+}
+
+function openConfigQuickEditor() {
+  const editor = document.getElementById("configQuickEditor");
+  if (!editor) return;
+
+  refreshSelectors();
+  const model = document.getElementById("confModel")?.value.trim().toUpperCase() || "";
+  setConfigEditorMode(model.startsWith("CX") ? "cx" : "bxux");
+  editor.hidden = false;
+  document.body.classList.add("config-editor-open");
+
+  requestAnimationFrame(() => document.getElementById("confModel")?.focus());
+}
+
+function closeConfigQuickEditor() {
+  const editor = document.getElementById("configQuickEditor");
+  if (!editor) return;
+
+  editor.hidden = true;
+  document.body.classList.remove("config-editor-open");
+  document.getElementById("openConfigEditorBtn")?.focus();
+}
+
 window.refreshSelectors = function () {
   const total = getTotalParts();
   const used = getUsedParts();
+  const selectorPlaceholders = {
+    "上蓋": "從持有零件選擇",
+    "紋章鎖": "從持有零件選擇",
+    "主要戰刃": "依系列選擇可用零件",
+    "超越戰刃": "依系列選擇可用零件",
+    "金屬戰刃": "依系列選擇可用零件",
+    "輔助戰刃": "依系列選擇可用零件",
+    "固鎖": "選擇固鎖",
+    "軸心": "選擇軸心"
+  };
 
   partTypes.forEach(type => {
     const selectId = selectorMap[type];
@@ -1903,7 +1968,7 @@ window.refreshSelectors = function () {
 
     const currentValue = sel.value;
 
-    sel.innerHTML = `<option value="">選擇${type}</option>`;
+    sel.innerHTML = `<option value="">${selectorPlaceholders[type] || `選擇${type}`}</option>`;
 
     Object.keys(total[type]).forEach(name => {
       const totalCount = total[type][name] || 0;
@@ -2115,6 +2180,7 @@ window.addConfig = function () {
 
   refreshSelectors();
   saveData();
+  closeConfigQuickEditor();
 };
 
 /* ====== 登入狀態顯示 ====== */
@@ -2241,6 +2307,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const partCountInput = document.getElementById("partCount");
   const configModelInput = document.getElementById("confModel");
   const configAxisSelect = document.getElementById(selectorMap["軸心"]);
+  const openConfigEditorBtn = document.getElementById("openConfigEditorBtn");
+  const closeConfigEditorBtn = document.getElementById("closeConfigEditorBtn");
+  const cancelConfigEditorBtn = document.getElementById("cancelConfigEditorBtn");
+  const configEditorBackdrop = document.getElementById("configEditorBackdrop");
 
   if (partCountInput) {
     preventInvalidPartCountInput(partCountInput);
@@ -2249,11 +2319,30 @@ document.addEventListener("DOMContentLoaded", function () {
   if (configModelInput) {
     configModelInput.addEventListener("input", updateNoRatchetConfigOption);
     configModelInput.addEventListener("change", updateNoRatchetConfigOption);
+    configModelInput.addEventListener("input", syncConfigEditorModeFromModel);
   }
 
   if (configAxisSelect) {
     configAxisSelect.addEventListener("change", updateNoRatchetConfigOption);
   }
+
+  if (openConfigEditorBtn) {
+    openConfigEditorBtn.addEventListener("click", openConfigQuickEditor);
+  }
+
+  [closeConfigEditorBtn, cancelConfigEditorBtn, configEditorBackdrop].forEach(button => {
+    if (button) button.addEventListener("click", closeConfigQuickEditor);
+  });
+
+  document.querySelectorAll("[data-config-mode]").forEach(button => {
+    button.addEventListener("click", () => setConfigEditorMode(button.dataset.configMode, true));
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !document.getElementById("configQuickEditor")?.hidden) {
+      closeConfigQuickEditor();
+    }
+  });
 
   if (googleLoginBtn) {
     googleLoginBtn.addEventListener("click", loginWithGoogle);

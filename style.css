@@ -131,6 +131,12 @@ h3 {
   gap: 16px;
 }
 
+.section-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
 .count-pill {
   min-width: 58px;
   padding: 6px 10px;
@@ -326,6 +332,167 @@ button:active {
 .part-input-row select,
 .part-input-row button {
   width: 100%;
+}
+
+/* Configuration quick editor */
+.quick-editor-shell {
+  position: fixed;
+  z-index: 1500;
+  inset: 0;
+}
+
+.quick-editor-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: rgba(2,6,10,.72);
+  backdrop-filter: blur(3px);
+}
+
+.quick-editor-backdrop:hover {
+  border: 0;
+  background: rgba(2,6,10,.72);
+}
+
+.quick-editor-panel {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(500px, 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid #31404f;
+  background:
+    linear-gradient(rgba(255,255,255,.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.014) 1px, transparent 1px),
+    #0d141b;
+  background-size: 32px 32px;
+  box-shadow: -22px 0 55px rgba(0,0,0,.5);
+}
+
+.quick-editor-header {
+  min-height: 132px;
+  padding: 31px 28px 25px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.quick-editor-header h2 {
+  margin-top: 5px;
+  font-size: 29px;
+}
+
+.quick-editor-close {
+  width: 54px;
+  height: 54px;
+  min-height: 54px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  font-size: 29px;
+  line-height: 1;
+}
+
+.config-mode-switch {
+  margin: 20px 28px 8px;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(9,14,20,.7);
+}
+
+.config-mode-btn {
+  min-height: 52px;
+  border-color: transparent;
+  color: #9ba8b5;
+  background: transparent;
+  font-size: 15px;
+}
+
+.config-mode-btn.active {
+  border-color: #4a93ff;
+  color: #ffffff;
+  background: var(--blue);
+  box-shadow: 0 6px 16px rgba(63,134,247,.22);
+}
+
+.quick-editor-panel #config-selector {
+  min-height: 0;
+  margin: 0;
+  padding: 18px 28px 28px;
+  display: block;
+  flex: 1;
+  overflow-y: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.quick-editor-field {
+  margin-bottom: 18px;
+  display: grid;
+  gap: 8px;
+  color: #d7dfe7;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.quick-editor-field input,
+.quick-editor-field select {
+  min-height: 58px;
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.quick-editor-cx-fields {
+  display: block;
+}
+
+.quick-editor-split-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.quick-editor-note {
+  margin-top: 4px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--cyan);
+  color: #9ba9b6;
+  background: rgba(53,193,202,.06);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.quick-editor-actions {
+  padding: 15px 28px calc(15px + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  background: rgba(10,16,22,.97);
+}
+
+.quick-editor-actions button {
+  min-height: 52px;
+  font-size: 15px;
+}
+
+body.config-editor-open {
+  overflow: hidden;
 }
 
 .summary-strip {
@@ -900,29 +1067,12 @@ td select {
     background: linear-gradient(145deg, #11181f, #0d1319);
   }
 
-  #configTable tbody tr:not(.editing-row)::after {
-    content: "•••";
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 34px;
-    height: 34px;
-    display: grid;
-    place-items: center;
-    border: 1px solid #394553;
-    border-radius: 7px;
-    color: #dfe7ef;
-    background: rgba(17,24,32,.9);
-    font-size: 12px;
-    letter-spacing: 3px;
-  }
-
   #configTable tbody tr:not(.editing-row) td:nth-child(1) {
     width: 100%;
     min-height: 66px;
     position: relative;
     display: block;
-    padding-right: 50px;
+    padding-right: 0;
   }
 
   #configTable tbody tr:not(.editing-row) td:nth-child(1)::before {
@@ -968,6 +1118,7 @@ td select {
     padding: 0;
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
     gap: 8px;
   }
 
@@ -977,6 +1128,8 @@ td select {
     padding: 0 0 10px;
     display: flex;
     align-items: flex-start;
+    justify-content: flex-start;
+    margin-left: 0;
     gap: 7px;
     border-bottom: 1px solid rgba(50,63,76,.76);
   }
@@ -1092,6 +1245,56 @@ td select {
 
   .section-heading {
     align-items: center;
+  }
+
+  .section-heading-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  #openConfigEditorBtn {
+    min-height: 38px;
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+
+  .quick-editor-panel {
+    width: 100%;
+    border-left: 0;
+  }
+
+  .quick-editor-header {
+    min-height: 104px;
+    padding: calc(20px + env(safe-area-inset-top)) 18px 18px;
+  }
+
+  .quick-editor-header h2 {
+    font-size: 25px;
+  }
+
+  .quick-editor-close {
+    width: 46px;
+    height: 46px;
+    min-height: 46px;
+    font-size: 25px;
+  }
+
+  .config-mode-switch {
+    margin: 14px 16px 4px;
+  }
+
+  .quick-editor-panel #config-selector {
+    padding: 15px 16px 22px;
+  }
+
+  .quick-editor-split-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .quick-editor-actions {
+    padding-inline: 16px;
+    grid-template-columns: minmax(100px, .75fr) minmax(0, 1.25fr);
   }
 
   .input-row,

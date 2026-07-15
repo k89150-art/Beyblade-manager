@@ -14,7 +14,7 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20260716-ui5" />
+  <link rel="stylesheet" href="style.css?v=20260716-ui6" />
   <link rel="stylesheet" href="site-menu.css?v=20260716-ui2" />
   <style>
 
@@ -359,47 +359,12 @@
     <section id="configSection" class="tool-section">
       <div class="section-heading">
         <div><span class="eyebrow">BUILD SETUPS</span><h2>配置紀錄</h2></div>
-        <span class="count-pill"><strong id="configCount">0</strong> 組</span>
+        <div class="section-heading-actions">
+          <span class="count-pill"><strong id="configCount">0</strong> 組</span>
+          <button id="openConfigEditorBtn" type="button" class="primary-btn">＋ 建立配置</button>
+        </div>
       </div>
       <p class="section-note">從收藏與額外庫存挑選零件。已用完的零件仍會由既有數量防呆阻擋。</p>
-
-    <div id="config-selector" class="entry-panel">
-      <input type="text" id="confModel" placeholder="輸入陀螺型號">
-
-      <select id="sel上蓋">
-        <option value="">選擇上蓋</option>
-      </select>
-
-      <select id="sel紋章鎖">
-        <option value="">選擇紋章鎖</option>
-      </select>
-
-      <select id="sel主要戰刃">
-        <option value="">選擇主要戰刃</option>
-      </select>
-
-      <select id="sel超越戰刃">
-        <option value="">選擇超越戰刃</option>
-      </select>
-
-      <select id="sel金屬戰刃">
-        <option value="">選擇金屬戰刃</option>
-      </select>
-
-      <select id="sel輔助戰刃">
-        <option value="">選擇輔助戰刃</option>
-      </select>
-
-      <select id="sel固鎖">
-        <option value="">選擇固鎖</option>
-      </select>
-
-      <select id="sel軸心">
-        <option value="">選擇軸心</option>
-      </select>
-
-      <button onclick="addConfig()">加入配置表</button>
-    </div>
 
     <div class="table-wrap record-card-wrap config-card-wrap">
       <table id="configTable">
@@ -451,6 +416,94 @@
     </div>
     </section>
   </main>
+
+  <div id="configQuickEditor" class="quick-editor-shell" hidden>
+    <button id="configEditorBackdrop" type="button" class="quick-editor-backdrop" aria-label="關閉建立配置面板"></button>
+    <section class="quick-editor-panel" role="dialog" aria-modal="true" aria-labelledby="configEditorTitle">
+      <header class="quick-editor-header">
+        <div>
+          <span class="eyebrow">QUICK EDITOR</span>
+          <h2 id="configEditorTitle">建立配置</h2>
+        </div>
+        <button id="closeConfigEditorBtn" type="button" class="quick-editor-close" aria-label="關閉建立配置面板">×</button>
+      </header>
+
+      <div class="config-mode-switch" role="group" aria-label="選擇配置系列">
+        <button type="button" class="config-mode-btn active" data-config-mode="bxux" aria-pressed="true">BX / UX</button>
+        <button type="button" class="config-mode-btn" data-config-mode="cx" aria-pressed="false">CX</button>
+      </div>
+
+      <div id="config-selector" class="quick-editor-form">
+        <label class="quick-editor-field">
+          <span>型號</span>
+          <input type="text" id="confModel" placeholder="例如 UX-03 或 CX-14">
+        </label>
+
+        <label class="quick-editor-field" data-config-field="bxux">
+          <span>上蓋</span>
+          <select id="sel上蓋">
+            <option value="">從持有零件選擇</option>
+          </select>
+        </label>
+
+        <div class="quick-editor-cx-fields" data-config-field="cx" hidden>
+          <label class="quick-editor-field">
+            <span>紋章鎖</span>
+            <select id="sel紋章鎖">
+              <option value="">選擇紋章鎖</option>
+            </select>
+          </label>
+          <label class="quick-editor-field">
+            <span>主要戰刃</span>
+            <select id="sel主要戰刃">
+              <option value="">選擇主要戰刃</option>
+            </select>
+          </label>
+          <div class="quick-editor-split-row">
+            <label class="quick-editor-field">
+              <span>金屬戰刃</span>
+              <select id="sel金屬戰刃">
+                <option value="">選擇金屬戰刃</option>
+              </select>
+            </label>
+            <label class="quick-editor-field">
+              <span>超越戰刃</span>
+              <select id="sel超越戰刃">
+                <option value="">選擇超越戰刃</option>
+              </select>
+            </label>
+          </div>
+          <label class="quick-editor-field">
+            <span>輔助戰刃</span>
+            <select id="sel輔助戰刃">
+              <option value="">選擇輔助戰刃</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="quick-editor-field">
+          <span>固鎖</span>
+          <select id="sel固鎖">
+            <option value="">選擇固鎖</option>
+          </select>
+        </label>
+
+        <label class="quick-editor-field">
+          <span>軸心</span>
+          <select id="sel軸心">
+            <option value="">選擇軸心</option>
+          </select>
+        </label>
+
+        <div class="quick-editor-note">保留庫存耗盡、Tr、UX-19、UX-16 與 CX 二選一防呆。</div>
+      </div>
+
+      <footer class="quick-editor-actions">
+        <button id="cancelConfigEditorBtn" type="button" class="secondary-btn">取消</button>
+        <button id="saveConfigEditorBtn" type="button" class="primary-btn" onclick="addConfig()">儲存</button>
+      </footer>
+    </section>
+  </div>
 
   <!-- 刪除配置原因對話框 -->
   <div id="deleteConfigModal" style="display:none;">
@@ -589,7 +642,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20260716-ui5"></script>
+  <script type="module" src="script.js?v=20260716-ui6"></script>
   <script src="site-menu.js?v=20260716-ui2"></script>
 </body>
 </html>
