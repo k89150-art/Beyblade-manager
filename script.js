@@ -1765,6 +1765,7 @@ function updateResponsiveTableCells() {
         const [layerValue, lockValue, mainValue, transcendValue, metalValue, auxValue, fixValue, axisValue] = values;
         const hasValue = value => value && value !== "-";
         const hasCxParts = [lockValue, mainValue, transcendValue, metalValue, auxValue].some(hasValue);
+        const usesSplitCxBladeLabels = /^CX-(?:13|14|15|16|17|18)(?:\s|$)/.test(model.toUpperCase());
         const cxCoreValue = hasValue(metalValue) ? metalValue : mainValue;
         const titleLayer = series === "CX"
           ? hasCxParts
@@ -1775,7 +1776,7 @@ function updateResponsiveTableCells() {
           ? hasCxParts
             ? [
                 lockValue,
-                hasValue(mainValue) && !hasValue(metalValue) ? mainValue : "",
+                hasValue(mainValue) && !hasValue(metalValue) && !usesSplitCxBladeLabels ? mainValue : "",
                 metalValue,
                 transcendValue,
                 auxValue,
@@ -1801,8 +1802,11 @@ function updateResponsiveTableCells() {
           if (series === "CX") {
             if (hasCxParts) {
               if (hasValue(lockValue)) tags.push("紋章鎖");
-              if (hasValue(mainValue)) tags.push("主要戰刃");
-              if (hasValue(transcendValue) && hasValue(metalValue)) {
+              if (hasValue(mainValue) && !usesSplitCxBladeLabels) tags.push("主要戰刃");
+              if (usesSplitCxBladeLabels) {
+                if (hasValue(metalValue)) tags.push("金屬戰刃");
+                if (hasValue(transcendValue)) tags.push("超越戰刃");
+              } else if (hasValue(transcendValue) && hasValue(metalValue)) {
                 tags.push("金屬+超越");
               } else {
                 if (hasValue(transcendValue)) tags.push("超越戰刃");
@@ -1815,9 +1819,9 @@ function updateResponsiveTableCells() {
               if (hasValue(axisValue)) tags.push(axisValue);
             }
           } else {
-            if (hasValue(layerValue)) tags.push("上蓋");
-            if (hasValue(fixValue)) tags.push(fixValue);
-            if (hasValue(axisValue)) tags.push(axisValue);
+            if (hasValue(resolvedLayer)) tags.push("上蓋");
+            if (hasValue(fixValue)) tags.push("固鎖");
+            if (hasValue(axisValue)) tags.push("軸心");
           }
 
           const operationCell = cells[cells.length - 1];
