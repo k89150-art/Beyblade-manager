@@ -648,8 +648,34 @@ td select {
   text-align: left;
 }
 
-#configTable .config-card-tags {
+#configTable .config-card-tags,
+#configTable .config-card-groups {
   display: none;
+}
+
+#beybladeTable tr:not(.editing-row).has-collection-card-title td:nth-child(1) {
+  font-size: 0;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+#beybladeTable tr:not(.editing-row).has-collection-card-title td:nth-child(1)::after {
+  content: attr(data-card-title);
+  color: #ffffff;
+  width: 100%;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.4;
+  text-align: left;
+}
+
+#beybladeTable tr:not(.editing-row).has-collection-card-title td:nth-child(1)::before {
+  display: none;
+}
+
+#beybladeTable tr:not(.editing-row) td.card-display-suppressed,
+#configTable tr:not(.editing-row) td.card-display-suppressed {
+  display: none !important;
 }
 
 /* Desktop record cards keep the existing table data and editing behavior. */
@@ -1136,19 +1162,54 @@ td select {
     gap: 8px;
   }
 
-  #configTable .config-card-tags {
+  #configTable tbody tr:not(.editing-row).has-config-card-groups td:nth-child(2) {
+    display: none;
+  }
+
+  #configTable tbody tr:not(.editing-row).has-config-card-groups td:last-child {
+    margin-top: 0;
+    display: grid;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: auto minmax(8px, 1fr) 36px;
+    align-content: stretch;
+  }
+
+  #configTable .config-card-groups {
     width: 100%;
-    min-height: 38px;
-    padding: 0 0 10px;
+    min-width: 0;
+    min-height: 53px;
+    padding: 0 0 11px;
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
-    margin-left: 0;
-    gap: 7px;
+    grid-column: 1 / -1;
+    grid-row: 1;
+    gap: 8px;
+    overflow: hidden;
     border-bottom: 1px solid rgba(50,63,76,.76);
   }
 
-  #configTable .config-card-tags span {
+  #configTable .config-card-group {
+    min-width: 0;
+    display: grid;
+    flex: 0 1 auto;
+    gap: 6px;
+    justify-items: start;
+  }
+
+  #configTable .config-card-group strong {
+    max-width: 100%;
+    overflow: hidden;
+    color: #aab5c0;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #configTable .config-card-group small {
     height: 22px;
     min-height: 22px;
     padding: 0 7px;
@@ -1161,7 +1222,23 @@ td select {
     font-size: 9px;
     font-weight: 800;
     line-height: 1;
-    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  #configTable tbody tr:not(.editing-row).has-config-card-groups td:last-child button {
+    grid-row: 3;
+  }
+
+  #configTable tbody tr:not(.editing-row).has-config-card-groups td:last-child button:nth-of-type(1) {
+    grid-column: 1;
+  }
+
+  #configTable tbody tr:not(.editing-row).has-config-card-groups td:last-child button:nth-of-type(2) {
+    grid-column: 2;
+  }
+
+  #configTable tbody tr:not(.editing-row).has-config-card-groups td:last-child button:nth-of-type(3) {
+    grid-column: 3;
   }
 
   #configTable tbody tr:not(.editing-row) td:last-child button {
@@ -1173,7 +1250,8 @@ td select {
     font-weight: 900;
   }
 
-  #configTable tbody tr.editing-row .config-card-tags {
+  #configTable tbody tr.editing-row .config-card-tags,
+  #configTable tbody tr.editing-row .config-card-groups {
     display: none;
   }
 }

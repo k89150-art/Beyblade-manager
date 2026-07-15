@@ -1757,6 +1757,25 @@ function updateResponsiveTableCells() {
       row.dataset.series = series;
       if (cells[0]) cells[0].dataset.series = series;
 
+      if (tableId === "beybladeTable") {
+        const values = cells.slice(1, 9).map(cell => cell.textContent.trim());
+        const [layerValue, lockValue, mainValue, transcendValue, metalValue, auxValue] = values;
+        const hasValue = value => value && value !== "-";
+        const hasCxParts = [lockValue, mainValue, transcendValue, metalValue, auxValue].some(hasValue);
+        const usesSplitCxBlade = hasValue(metalValue) || hasValue(transcendValue);
+        const cxCoreValue = hasValue(metalValue) ? metalValue : mainValue;
+
+        row.classList.toggle("has-collection-card-title", series === "CX" && hasCxParts);
+        if (cells[0]) {
+          cells[0].dataset.cardTitle = series === "CX" && hasCxParts
+            ? [model, [lockValue, cxCoreValue].filter(hasValue).join("")].filter(Boolean).join(" ")
+            : model;
+        }
+
+        cells[1]?.classList.toggle("card-display-suppressed", series === "CX" && hasCxParts);
+        cells[3]?.classList.toggle("card-display-suppressed", series === "CX" && usesSplitCxBlade);
+      }
+
       if (tableId === "configTable") {
         const layer = cells[1]?.textContent.trim() || "";
         const collectionLayer = collectionLayersByModel.get(model.replace(/\s+/g, " ").toUpperCase()) || "";
@@ -1765,8 +1784,8 @@ function updateResponsiveTableCells() {
         const [layerValue, lockValue, mainValue, transcendValue, metalValue, auxValue, fixValue, axisValue] = values;
         const hasValue = value => value && value !== "-";
         const hasCxParts = [lockValue, mainValue, transcendValue, metalValue, auxValue].some(hasValue);
-        const usesSplitCxBladeLabels = /^CX-(?:13|14|15|16|17|18)(?:\s|$)/.test(model.toUpperCase());
         const cxCoreValue = hasValue(metalValue) ? metalValue : mainValue;
+        cells[3]?.classList.toggle("card-display-suppressed", series === "CX" && hasValue(metalValue));
         const titleLayer = series === "CX"
           ? hasCxParts
             ? [lockValue, cxCoreValue].filter(hasValue).join("")
@@ -1776,7 +1795,7 @@ function updateResponsiveTableCells() {
           ? hasCxParts
             ? [
                 lockValue,
-                hasValue(mainValue) && !hasValue(metalValue) && !usesSplitCxBladeLabels ? mainValue : "",
+                hasValue(mainValue) && !hasValue(metalValue) ? mainValue : "",
                 metalValue,
                 transcendValue,
                 auxValue,
@@ -1797,47 +1816,52 @@ function updateResponsiveTableCells() {
         if (cells[1]) cells[1].dataset.cardSummary = summary || "-";
 
         if (!row.classList.contains("editing-row")) {
-          const tags = [];
+          const cardGroups = [];
+          const addCardGroup = (value, label) => {
+            if (hasValue(value)) cardGroups.push({ value, label });
+          };
 
           if (series === "CX") {
             if (hasCxParts) {
-              if (hasValue(lockValue)) tags.push("紋章鎖");
-              if (hasValue(mainValue) && !usesSplitCxBladeLabels) tags.push("主要戰刃");
-              if (usesSplitCxBladeLabels) {
-                if (hasValue(metalValue)) tags.push("金屬戰刃");
-                if (hasValue(transcendValue)) tags.push("超越戰刃");
-              } else if (hasValue(transcendValue) && hasValue(metalValue)) {
-                tags.push("金屬+超越");
+              addCardGroup(lockValue, "紋章鎖");
+              if (hasValue(transcendValue) && hasValue(metalValue)) {
+                addCardGroup(`${metalValue} ・ ${transcendValue}`, "金屬+超越");
               } else {
-                if (hasValue(transcendValue)) tags.push("超越戰刃");
-                if (hasValue(metalValue)) tags.push("金屬戰刃");
+                addCardGroup(mainValue, "主要戰刃");
+                addCardGroup(metalValue, "金屬戰刃");
+                addCardGroup(transcendValue, "超越戰刃");
               }
-              if (hasValue(auxValue)) tags.push("輔助");
+              addCardGroup(auxValue, "輔助");
             } else {
-              if (hasValue(resolvedLayer)) tags.push("上蓋");
-              if (hasValue(fixValue)) tags.push(fixValue);
-              if (hasValue(axisValue)) tags.push(axisValue);
+              addCardGroup(resolvedLayer, "上蓋");
             }
           } else {
-            if (hasValue(resolvedLayer)) tags.push("上蓋");
-            if (hasValue(fixValue)) tags.push("固鎖");
-            if (hasValue(axisValue)) tags.push("軸心");
+            addCardGroup(resolvedLayer, "上蓋");
           }
+
+          addCardGroup(fixValue, "固鎖");
+          addCardGroup(axisValue, "軸心");
 
           const operationCell = cells[cells.length - 1];
           if (operationCell) {
-            let tagList = operationCell.querySelector(".config-card-tags");
-            if (!tagList) {
-              tagList = document.createElement("div");
-              tagList.className = "config-card-tags";
-              operationCell.prepend(tagList);
+            let groupList = operationCell.querySelector(".config-card-groups, .config-card-tags");
+            if (!groupList) {
+              groupList = document.createElement("div");
+              operationCell.prepend(groupList);
             }
+            groupList.className = "config-card-groups";
+            row.classList.toggle("has-config-card-groups", cardGroups.length > 0);
 
-            const tagKey = tags.join("|");
-            if (tagList.dataset.tagKey !== tagKey) {
-              tagList.dataset.tagKey = tagKey;
-              tagList.innerHTML = tags
-                .map(tag => `<span>${escapeHtml(tag)}</span>`)
+            const groupKey = cardGroups.map(group => `${group.value}:${group.label}`).join("|");
+            if (groupList.dataset.groupKey !== groupKey) {
+              groupList.dataset.groupKey = groupKey;
+              groupList.innerHTML = cardGroups
+                .map(group => `
+                  <span class="config-card-group">
+                    <strong>${escapeHtml(group.value)}</strong>
+                    <small>${escapeHtml(group.label)}</small>
+                  </span>
+                `)
                 .join("");
             }
           }
