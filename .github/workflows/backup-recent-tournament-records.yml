@@ -11,6 +11,11 @@ on:
         description: Number of recent minutes to scan (maximum 59)
         required: true
         default: "59"
+      restore_to_main:
+        description: Restore the recovered tournamentRecords field to the live document
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -24,6 +29,7 @@ jobs:
           SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_K89150_WEB_LOGIN }}
           TARGET_UID: ${{ inputs.uid }}
           SCAN_MINUTES: ${{ inputs.scan_minutes }}
+          RESTORE_TO_MAIN: ${{ inputs.restore_to_main }}
         run: |
           python3 -m pip install --quiet google-auth requests
           python3 - <<'PY'
@@ -101,4 +107,19 @@ jobs:
 
           print(f"Preserved {record_count} tournament record(s) in private backup {backup_id}.")
           print(f"Recovered source timestamp: {read_time}")
+
+          if os.environ.get("RESTORE_TO_MAIN", "false").lower() == "true":
+              restore_url = source_url + "?" + urllib.parse.urlencode(
+                  [("updateMask.fieldPaths", "tournamentRecords")]
+              )
+              restore_body = {"fields": {"tournamentRecords": tournament_field}}
+              request = urllib.request.Request(
+                  restore_url,
+                  data=json.dumps(restore_body).encode("utf-8"),
+                  headers={**headers, "Content-Type": "application/json"},
+                  method="PATCH",
+              )
+              with urllib.request.urlopen(request) as response:
+                  json.load(response)
+              print(f"Restored {record_count} tournament record(s) to the live document.")
           PY
