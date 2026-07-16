@@ -1957,21 +1957,71 @@ function updateResponsiveTableCells() {
 
       if (tableId === "beybladeTable") {
         const values = cells.slice(1, 9).map(cell => cell.textContent.trim());
-        const [layerValue, lockValue, mainValue, transcendValue, metalValue, auxValue] = values;
+        const [layerValue, lockValue, mainValue, transcendValue, metalValue, auxValue, fixValue, axisValue] = values;
         const hasValue = value => value && value !== "-";
         const hasCxParts = [lockValue, mainValue, transcendValue, metalValue, auxValue].some(hasValue);
-        const usesSplitCxBlade = hasValue(metalValue) || hasValue(transcendValue);
         const cxCoreValue = hasValue(metalValue) ? metalValue : mainValue;
+        const titleLayer = series === "CX" && hasCxParts
+          ? [lockValue, cxCoreValue].filter(hasValue).join("")
+          : layerValue;
+        const summaryValues = series === "CX" && hasCxParts
+          ? [
+              lockValue,
+              hasValue(mainValue) && !hasValue(metalValue) ? mainValue : "",
+              metalValue,
+              transcendValue,
+              auxValue,
+              fixValue,
+              axisValue
+            ]
+          : [layerValue, fixValue, axisValue];
+        const cardTags = [];
+        const addCardTag = (value, label) => {
+          if (hasValue(value)) cardTags.push(label);
+        };
 
         row.classList.toggle("has-collection-card-title", series === "CX" && hasCxParts);
         if (cells[0]) {
-          cells[0].dataset.cardTitle = series === "CX" && hasCxParts
-            ? [model, [lockValue, cxCoreValue].filter(hasValue).join("")].filter(Boolean).join(" ")
-            : model;
+          cells[0].dataset.cardTitle = [model, titleLayer].filter(hasValue).join(" ") || model;
+        }
+        if (cells[1]) {
+          cells[1].dataset.cardSummary = summaryValues.filter(hasValue).join(" ・ ") || "-";
         }
 
-        cells[1]?.classList.toggle("card-display-suppressed", series === "CX" && hasCxParts);
-        cells[3]?.classList.toggle("card-display-suppressed", series === "CX" && usesSplitCxBlade);
+        if (series === "CX" && hasCxParts) {
+          addCardTag(lockValue, "紋章鎖");
+          if (hasValue(transcendValue) && hasValue(metalValue)) {
+            cardTags.push("金屬+超越");
+          } else if (hasValue(mainValue)) {
+            cardTags.push("主要戰刃");
+          } else {
+            addCardTag(metalValue, "金屬戰刃");
+            addCardTag(transcendValue, "超越戰刃");
+          }
+          addCardTag(auxValue, "輔助");
+        } else {
+          addCardTag(layerValue, "上蓋");
+          addCardTag(fixValue, "固鎖");
+          addCardTag(axisValue, "軸心");
+        }
+
+        const operationCell = cells[cells.length - 1];
+        if (operationCell && !row.classList.contains("editing-row")) {
+          let tagList = operationCell.querySelector(".collection-card-tags");
+          if (!tagList) {
+            tagList = document.createElement("div");
+            tagList.className = "record-card-tags collection-card-tags";
+            operationCell.prepend(tagList);
+          }
+          const tagKey = cardTags.join("|");
+          if (tagList.dataset.tagKey !== tagKey) {
+            tagList.dataset.tagKey = tagKey;
+            tagList.innerHTML = cardTags.map(tag => `<span>${escapeHtml(tag)}</span>`).join("");
+          }
+        }
+
+        cells[1]?.classList.remove("card-display-suppressed");
+        cells[3]?.classList.remove("card-display-suppressed");
       }
 
       if (tableId === "configTable") {
@@ -2043,7 +2093,7 @@ function updateResponsiveTableCells() {
               tagList = document.createElement("div");
               operationCell.prepend(tagList);
             }
-            tagList.className = "config-card-tags";
+            tagList.className = "record-card-tags config-card-tags";
             row.classList.remove("has-config-card-groups");
 
             const tagKey = cardTags.join("|");
