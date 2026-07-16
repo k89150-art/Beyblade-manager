@@ -2195,8 +2195,23 @@ textarea:disabled {
 
 #beybladeTable tbody tr:not(.editing-row) td:last-child button:last-child,
 #configTable tbody tr:not(.editing-row) td:last-child button:last-child {
-  border-color: rgba(240, 109, 118, .4);
-  color: #ff969d;
+  min-inline-size: max-content;
+  max-inline-size: 100%;
+  margin-left: auto;
+  padding-inline: clamp(12px, 1.5vw, 18px);
+  flex: 0 1 auto;
+  border-color: rgba(240, 109, 118, .28);
+  color: #ed858c;
+  background: transparent;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+#beybladeTable tbody tr:not(.editing-row) td:last-child button:last-child:hover,
+#configTable tbody tr:not(.editing-row) td:last-child button:last-child:hover {
+  border-color: rgba(240, 109, 118, .48);
+  color: #ff9ca2;
   background: rgba(240, 109, 118, .07);
 }
 
