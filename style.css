@@ -2193,8 +2193,7 @@ textarea:disabled {
   font-size: 13px;
 }
 
-#beybladeTable tbody tr:not(.editing-row) td:last-child button:last-child,
-#configTable tbody tr:not(.editing-row) td:last-child button:last-child {
+#beybladeTable tbody tr:not(.editing-row) td:last-child button:last-child {
   min-inline-size: max-content;
   max-inline-size: 100%;
   margin-left: auto;
@@ -2208,11 +2207,21 @@ textarea:disabled {
   font-weight: 800;
 }
 
-#beybladeTable tbody tr:not(.editing-row) td:last-child button:last-child:hover,
-#configTable tbody tr:not(.editing-row) td:last-child button:last-child:hover {
+#beybladeTable tbody tr:not(.editing-row) td:last-child button:last-child:hover {
   border-color: rgba(240, 109, 118, .48);
   color: #ff9ca2;
   background: rgba(240, 109, 118, .07);
+}
+
+#configTable tbody tr:not(.editing-row) td:last-child button:last-child {
+  border-color: rgba(240, 109, 118, .4);
+  color: #ff969d;
+  background: rgba(240, 109, 118, .07);
+}
+
+#configTable tbody tr:not(.editing-row) td:last-child button:last-child:hover {
+  border-color: rgba(240, 109, 118, .52);
+  background: rgba(240, 109, 118, .12);
 }
 
 #partTable tbody tr,
@@ -2336,4 +2345,30 @@ body .modal-actions {
   body .modal-actions button {
     min-height: 48px;
   }
+}
+
+/* Collection cards keep tags and the lone delete action on one compact row. */
+#beybladeTable tbody tr:not(.editing-row) {
+  min-height: auto;
+}
+
+#beybladeTable tbody tr:not(.editing-row) td:last-child {
+  margin-top: var(--space-2);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+#beybladeTable .record-card-tags {
+  width: auto;
+  min-height: 0;
+  padding: 0;
+  align-items: center;
+  border-bottom: 0;
+}
+
+#beybladeTable tbody tr:not(.editing-row) td:last-child button:last-child {
+  grid-column: 2;
+  grid-row: 1;
 }
