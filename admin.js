@@ -215,10 +215,11 @@ window.loadAdminData = async function () {
           configCount: countArray(data, "configTable"),
           historyCount: countArray(data, "historyTable"),
           tournamentCount: countArray(data, "tournamentRecords"),
+          updatedAt: Number(data.updatedAt) || 0,
           updatedAtText: formatTime(data.updatedAt)
         };
       })
-      .sort((a, b) => String(b.updatedAtText).localeCompare(String(a.updatedAtText)));
+      .sort((a, b) => b.updatedAt - a.updatedAt);
 
     renderSummary();
     renderTable();

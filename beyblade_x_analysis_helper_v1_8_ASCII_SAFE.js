@@ -26,8 +26,16 @@ function allNames(item = {}) {
     item.referenceNameEn,
     item.model,
     item.combo,
-    item.updateId
+    item.updateId,
+    ...(Array.isArray(item.aliases) ? item.aliases : [])
   ]);
+}
+function partDataPriority(item = {}) {
+  return (item.updateId ? 1000 : 0)
+    + (Array.isArray(item.routes) ? item.routes.length * 20 : 0)
+    + (Array.isArray(item.primaryRoles) ? item.primaryRoles.length * 5 : 0)
+    + (Array.isArray(item.trueConflictBits) ? item.trueConflictBits.length : 0)
+    + (item.displayNameZh ? 2 : 0);
 }
 function buildAliasRecords(database = {}) {
   return database.aliases || [];
@@ -62,7 +70,13 @@ export function findPart(database, section, matcher) {
   if (typeof matcher === "string") {
     const canonical = section === "bits" ? aliasCanonicalBit(database, matcher) : aliasCanonical(database, section === "blades" ? "blade" : section, matcher);
     const n = normalize(canonical);
-    return arr.find(x => allNames(x).some(name => normalize(name) === n));
+    return arr
+      .filter(x => allNames(x).some(name => normalize(name) === n))
+      .reduce((best, candidate) => (
+        !best || partDataPriority(candidate) > partDataPriority(best)
+          ? candidate
+          : best
+      ), null);
   }
   return arr.find(matcher);
 }

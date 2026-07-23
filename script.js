@@ -416,6 +416,35 @@ function getStockNameFromCell(cell) {
   return cell.innerText.trim();
 }
 
+function getPersistedRowCells(row) {
+  if (row?.dataset.editing === "true") {
+    try {
+      const originalCells = JSON.parse(row.dataset.originalCells || "[]");
+      if (Array.isArray(originalCells) && originalCells.length === row.cells.length - 1) {
+        return originalCells;
+      }
+    } catch (error) {
+      console.warn("編輯列原始資料格式錯誤，改用目前儲存值。", error);
+    }
+  }
+
+  return Array.from(row?.cells || [])
+    .slice(0, -1)
+    .map(cell => cell.innerText.trim());
+}
+
+function getPersistedStockName(row, cellIndex) {
+  if (row?.dataset.editing === "true") {
+    if (cellIndex === 3 && row.dataset.originalMainStockName !== undefined) {
+      return row.dataset.originalMainStockName;
+    }
+
+    return getPersistedRowCells(row)[cellIndex] || "";
+  }
+
+  return getStockNameFromCell(row?.cells[cellIndex]);
+}
+
 function escapeHtml(text) {
   return String(text)
     .replaceAll("&", "&amp;")
@@ -1136,8 +1165,7 @@ function getUsedPartsExceptRow(excludedRow) {
 
     partTypes.forEach(type => {
       const cellIndex = configCellMap[type];
-      const cell = row.cells[cellIndex];
-      const name = getStockNameFromCell(cell);
+      const name = getPersistedStockName(row, cellIndex);
 
       addStock(used, type, name, 1);
     });
@@ -1298,17 +1326,16 @@ function getTableData(tableId, hasStockName = false) {
   const data = [];
 
   rows.forEach(row => {
-    const cells = Array.from(row.cells).map(cell => cell.innerText.trim());
+    const cells = getPersistedRowCells(row);
 
     const item = {
-      cells: cells.slice(0, -1)
+      cells
     };
 
     if (hasStockName) {
-      item.mainStockName =
-        row.cells[3]?.dataset.stockName ??
-        row.cells[3]?.innerText.trim() ??
-        "";
+      item.mainStockName = row.dataset.editing === "true"
+        ? row.dataset.originalMainStockName ?? cells[3] ?? ""
+        : row.cells[3]?.dataset.stockName ?? row.cells[3]?.innerText.trim() ?? "";
     }
 
     if (tableId === "beybladeTable") {
@@ -1834,14 +1861,14 @@ function getTotalParts() {
   const beybladeRows = document.querySelectorAll("#beybladeTable tbody tr");
 
   beybladeRows.forEach(row => {
-    const model = row.cells[0].innerText.trim();
+    const persistedCells = getPersistedRowCells(row);
+    const model = persistedCells[0] || "";
     const series = getSeriesFromModel(model);
     const cxAssembly = String(row.dataset.stockAssemblySystem || "").startsWith("CX_");
 
     partTypes.forEach(type => {
       const cellIndex = beybladeCellMap[type];
-      const cell = row.cells[cellIndex];
-      const name = getStockNameFromCell(cell);
+      const name = getPersistedStockName(row, cellIndex);
 
       if (type === "上蓋"
           && (cxAssembly || (series === "CX" && !isRandomBooster(model)))) {
@@ -1855,9 +1882,10 @@ function getTotalParts() {
   const partRows = document.querySelectorAll("#partTable tbody tr");
 
   partRows.forEach(row => {
-    const type = row.cells[0].innerText.trim();
-    const name = row.cells[1].innerText.trim();
-    const count = Number(row.cells[2].innerText.trim() || 0);
+    const persistedCells = getPersistedRowCells(row);
+    const type = persistedCells[0] || "";
+    const name = persistedCells[1] || "";
+    const count = Number(persistedCells[2] || 0);
 
     if (partTypes.includes(type)) {
       addStock(total, type, name, count);
@@ -1879,8 +1907,7 @@ function getUsedParts() {
   configRows.forEach(row => {
     partTypes.forEach(type => {
       const cellIndex = configCellMap[type];
-      const cell = row.cells[cellIndex];
-      const name = getStockNameFromCell(cell);
+      const name = getPersistedStockName(row, cellIndex);
 
       addStock(used, type, name, 1);
     });

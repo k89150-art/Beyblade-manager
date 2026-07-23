@@ -1510,9 +1510,13 @@
       "diameter_mm": null
     },
     {
-      "id": "赫爾之錘",
+      "id": "惡魔重錘",
       "model": "UX-02",
-      "name": "赫爾之錘",
+      "name": "惡魔重錘",
+      "name_en": "Hells Hammer",
+      "aliases": [
+        "赫爾之錘"
+      ],
       "series": "UX",
       "roleTags": [
         "攻擊",
@@ -1574,9 +1578,12 @@
       "diameter_mm": null
     },
     {
-      "id": "光榮女武神",
+      "id": "榮耀戰神",
       "model": "UX-20",
-      "name": "光榮女武神",
+      "name": "榮耀戰神",
+      "aliases": [
+        "光榮女武神"
+      ],
       "series": "UX",
       "roleTags": [
         "待驗證"
@@ -4110,10 +4117,13 @@
         "O",
         "FB"
       ],
-      "model": "Dran Buster",
+      "model": "UX-01",
       "name": "蒼龍爆刃",
       "name_en": "Dran Buster",
-      "series": "BX/UX/CX",
+      "aliases": [
+        "Dran Buster"
+      ],
+      "series": "UX",
       "roleTags": [
         "攻擊"
       ],

@@ -1,5 +1,5 @@
 import { analyzeCombo as analyzeLegacyCombo } from "./beyblade_x_analysis_engine_v1_zhTW.js?v=20260630-v11-contextual1";
-import { analyzeCombo as analyzeV18Combo } from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260711-v19-delta1";
+import { analyzeCombo as analyzeV18Combo } from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260723-audit1";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -31,7 +31,7 @@ onAuthStateChanged(auth, user => {
 });
 
 const INTEGRATED_BITS = new Set(["OP", "TR"]);
-const NO_RATCHET_MODELS = new Set(["UX-19"]);
+const NO_RATCHET_MODELS = new Set(["UX-19", "UX-20"]);
 const UX16_MODELS = new Set(["UX-16"]);
 const BURST_BITS = new Set(["I", "IMPACT", "GF", "A", "V"]);
 const CONTROL_ATTACK_BITS = new Set(["R", "LR"]);
@@ -70,6 +70,14 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
+}
+
+function partDataPriority(item = {}) {
+  return (item.updateId ? 1000 : 0)
+    + (Array.isArray(item.routes) ? item.routes.length * 20 : 0)
+    + (Array.isArray(item.primaryRoles) ? item.primaryRoles.length * 5 : 0)
+    + (Array.isArray(item.trueConflictBits) ? item.trueConflictBits.length : 0)
+    + (item.displayNameZh ? 2 : 0);
 }
 
 async function loadJson(url) {
@@ -137,7 +145,7 @@ async function loadData() {
   if (database && rules) return;
 
   [database, rules] = await Promise.all([
-    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260711-v19-delta1"),
+    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260723-audit1"),
     loadJson("./beyblade_x_analysis_rules_v1_zhTW.json?v=20260630-engine2")
   ]);
 
@@ -163,7 +171,12 @@ function optionLabel(item) {
 function addIndex(index, item, keys) {
   keys.forEach(key => {
     const normalized = normalizeText(key);
-    if (normalized && !index.has(normalized)) index.set(normalized, item);
+    if (!normalized) return;
+
+    const existing = index.get(normalized);
+    if (!existing || partDataPriority(item) > partDataPriority(existing)) {
+      index.set(normalized, item);
+    }
   });
 }
 
@@ -180,7 +193,8 @@ function buildPartIndex(items = []) {
       optionLabel(item),
       item.model && item.name ? `${item.model}${item.name}` : "",
       item.name && item.name_en ? `${item.name}${item.name_en}` : "",
-      item.code && item.name_en ? `${item.code}${item.name_en}` : ""
+      item.code && item.name_en ? `${item.code}${item.name_en}` : "",
+      ...(Array.isArray(item.aliases) ? item.aliases : [])
     ].filter(Boolean));
   });
   return index;
@@ -203,7 +217,19 @@ function fillDatalist(id, items = []) {
   const list = document.getElementById(id);
   if (!list) return;
 
-  list.innerHTML = items
+  const preferredItems = new Map();
+  items.forEach(item => {
+    const value = item.id || item.name || item.code;
+    const key = normalizeText(value);
+    if (!key) return;
+
+    const existing = preferredItems.get(key);
+    if (!existing || partDataPriority(item) > partDataPriority(existing)) {
+      preferredItems.set(key, item);
+    }
+  });
+
+  list.innerHTML = [...preferredItems.values()]
     .map(item => `<option value="${escapeHtml(item.id || item.name || item.code)}" label="${escapeHtml(optionLabel(item))}"></option>`)
     .join("");
 }
@@ -506,8 +532,12 @@ function validateConfig(config) {
 
   if (!noRatchetSelected && !parts.ratchet) fatal.push(`固鎖「${config.ratchetInput}」不在目前資料庫中。`);
   if (integratedBit && !noRatchetSelected) fatal.push("Op / Tr 軸無法使用固鎖。");
-  if (noRatchetBlade && !noRatchetSelected) fatal.push("UX-19 無法使用固鎖。");
-  if (!integratedBit && !noRatchetBlade && noRatchetSelected) fatal.push("一般配置需要選擇固鎖；只有 UX-19 或 Op / Tr 軸可以無固鎖。");
+  if (noRatchetBlade && !noRatchetSelected) {
+    fatal.push(`${modelCodeOf(parts.blade)} 無法使用固鎖。`);
+  }
+  if (!integratedBit && !noRatchetBlade && noRatchetSelected) {
+    fatal.push("一般配置需要選擇固鎖；只有 UX-19、UX-20 或 Op / Tr 軸可以無固鎖。");
+  }
   if (isUx16Blade(parts.blade) && parts.ratchet && !isSimpleRatchet(parts.ratchet)) fatal.push("時鐘幻象只能使用簡易固鎖。");
 
   if (config.cxType === "main") {
