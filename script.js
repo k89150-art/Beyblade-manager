@@ -45,7 +45,7 @@ let hasPendingCloudSave = false;
 let lastLocalWriteUpdatedAt = 0;
 let lastAppliedRemoteUpdatedAt = 0;
 
-const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260716-3";
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260724-meta1";
 let stockInputMode = "auto";
 let stockProductsLoadPromise = null;
 let stockProductsLoaded = false;

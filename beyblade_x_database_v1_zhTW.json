@@ -10,8 +10,14 @@
       "分析與推薦僅供理論參考，不保證實戰結果。",
       "保留舊版相容欄位，避免既有配置分析頁失效。"
     ],
-    "updated": "2026-07-11",
-    "updatePackage": "2026.07.11-delta1"
+    "updated": "2026-07-24",
+    "updatePackage": "2026.07.24-meta-routes",
+    "appliedUpdates": [
+      "2026.07.11-delta1",
+      "2026.07.15-g-bit",
+      "2026.07.23-multi-model-index",
+      "2026.07.24-meta-routes"
+    ]
   },
   "enums": {
     "metaTier": [
@@ -1575,7 +1581,12 @@
       "confidence": "low",
       "notes": "",
       "weight_g": null,
-      "diameter_mm": null
+      "diameter_mm": null,
+      "systemType": "UX_EXPAND",
+      "ratchetMode": "integrated",
+      "ratchetSelectable": false,
+      "bitCode": "H",
+      "bitSelectable": true
     },
     {
       "id": "榮耀戰神",
@@ -5367,53 +5378,6 @@
       "recommendedBlades": []
     },
     {
-      "id": "8-60",
-      "code": "8-60",
-      "name": "8-60",
-      "height": 60,
-      "gearCount": 8,
-      "roleTags": [
-        "平衡"
-      ],
-      "role": "穩定觀察",
-      "metaTier": "B",
-      "confidence": "medium-high",
-      "strengths": [
-        "可測穩定"
-      ],
-      "weaknesses": [
-        "資料不足"
-      ],
-      "recommendedBits": [
-        "P",
-        "H"
-      ],
-      "recommendedBlades": []
-    },
-    {
-      "id": "8-80",
-      "code": "8-80",
-      "name": "8-80",
-      "height": 80,
-      "gearCount": 8,
-      "roleTags": [
-        "特化"
-      ],
-      "role": "高身位特化",
-      "metaTier": "C",
-      "confidence": "medium-high",
-      "strengths": [
-        "特殊高度"
-      ],
-      "weaknesses": [
-        "高風險"
-      ],
-      "recommendedBits": [
-        "P"
-      ],
-      "recommendedBlades": []
-    },
-    {
       "id": "9-80",
       "code": "9-80",
       "name": "9-80",
@@ -6557,6 +6521,36 @@
         "刮地"
       ],
       "deprecatedReferenceNames": []
+    },
+    {
+      "id": "G",
+      "code": "G",
+      "name": "滑翔",
+      "name_en": "Glide",
+      "roleTags": [
+        "持久",
+        "平衡"
+      ],
+      "role": "滑翔持久 / 穩定續轉",
+      "metaTier": "B",
+      "confidence": "medium-high",
+      "strengths": [
+        "持久取向，移動較溫和",
+        "傾斜後仍可保留一定續轉能力"
+      ],
+      "weaknesses": [
+        "主動得分能力低",
+        "面對高壓攻擊時仍需要上蓋與固鎖補強"
+      ],
+      "bestWith": [
+        "Phoenix Rudder",
+        "Dran Dagger",
+        "持久 / 防守 Blade"
+      ],
+      "releaseExamples": [
+        "UX-07 Phoenix Rudder 9-70G",
+        "UX-18-05 Dran Dagger 7-55G"
+      ]
     }
   ],
   "cx": {
@@ -12426,43 +12420,6 @@
         ]
       },
       {
-        "code": "8-60",
-        "tier": "B-",
-        "role": "穩定觀察",
-        "tags": [
-          "balance"
-        ],
-        "recommendedBits": [
-          "P",
-          "H"
-        ],
-        "recommendedBlades": [],
-        "advantages": [
-          "可測穩定"
-        ],
-        "risks": [
-          "資料不足"
-        ]
-      },
-      {
-        "code": "8-80",
-        "tier": "C",
-        "role": "高身位特化",
-        "tags": [
-          "high_risk"
-        ],
-        "recommendedBits": [
-          "P"
-        ],
-        "recommendedBlades": [],
-        "advantages": [
-          "特殊高度"
-        ],
-        "risks": [
-          "高風險"
-        ]
-      },
-      {
         "code": "9-80",
         "tier": "C",
         "role": "高身位持久特化",
@@ -14958,5 +14915,853 @@
       "packageVersion": "2026.07.11-delta1",
       "appliedAt": "2026-07-10T18:53:59.402Z"
     }
-  ]
+  ],
+  "metaSnapshots": [
+    {
+      "id": "meta_snapshot_2026-07-24_broad_top20",
+      "updated": "2026-07-24",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "scope": "常見主流配置與第 11～20 名、次主流、冷門但有前段名次紀錄的配置",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking",
+      "sources": [
+        {
+          "name": "Beywatch",
+          "type": "reported_top_cut_appearance",
+          "note": "前段名次與完整配置出現次數；不是逐場對戰勝率。"
+        },
+        {
+          "name": "BBXHub",
+          "type": "monthly_tier_ranking",
+          "note": "月榜排名與分級；與 Beywatch 的統計期間不一定完全相同。"
+        }
+      ],
+      "warnings": [
+        "前段名次出現次數不是逐場勝率。",
+        "排名與完整配置樣本應分開解讀。",
+        "低樣本但第一名比例高的配置不可直接視為主流。",
+        "固鎖可替換時，應把核心軸心或路線視為主體，不要只鎖定單一完整配置。",
+        "本資料整理自 2026-07-24 對話中已搜集的公開賽事與社群統計摘要；交給 Codex 前仍建議比對最新網站。"
+      ]
+    }
+  ],
+  "metaCommonRoutes": [
+    {
+      "blade": "Wizard Rod",
+      "displayNameZh": "魔導神杖",
+      "rankingBand": "top5",
+      "evidenceClass": "mainstream",
+      "reportedTopCuts": 96,
+      "firstPlaceRate": 0.344,
+      "ratchet": "1-60",
+      "bit": "H",
+      "role": "防守持久核心",
+      "notes": [
+        "2026 年 7 月最重複出現的完整配置之一。"
+      ],
+      "id": "route_20260724_001",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Wizard Rod",
+      "displayNameZh": "魔導神杖",
+      "rankingBand": "top5",
+      "evidenceClass": "established_secondary",
+      "reportedTopCuts": 34,
+      "ratchet": "1-60",
+      "bit": "FB",
+      "role": "純持久末段",
+      "notes": [
+        "Wizard Rod 的第二主要路線之一。"
+      ],
+      "id": "route_20260724_002",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Shark Scale",
+      "displayNameZh": "鯊魚鱗刃",
+      "rankingBand": "top5",
+      "evidenceClass": "mainstream",
+      "usageRate": 0.655,
+      "ratchet": "1-70",
+      "bit": "LR",
+      "role": "主流攻擊核心／複合終結",
+      "notes": [
+        "7 月前段牌組中 Shark Scale 使用率約 65.5%；1-70・LR 多次出現在冠軍或前段牌組。"
+      ],
+      "id": "route_20260724_003",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Aero Pegasus",
+      "displayNameZh": "飛翼天馬",
+      "rankingBand": "top5",
+      "evidenceClass": "mainstream",
+      "reportedTopCuts": 127,
+      "firstPlaceRate": 0.394,
+      "ratchet": "7-60",
+      "bit": "R",
+      "role": "重型可控攻擊",
+      "notes": [
+        "代表路線應以 7-60・R 為主，不應只寫成 1-60・R。"
+      ],
+      "id": "route_20260724_004",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Aero Pegasus",
+      "displayNameZh": "飛翼天馬",
+      "rankingBand": "top5",
+      "evidenceClass": "established_secondary",
+      "ratchetOptions": [
+        "1-60",
+        "1-50"
+      ],
+      "bitOptions": [
+        "R",
+        "K"
+      ],
+      "role": "低高度可控攻擊／重型攻擊",
+      "notes": [
+        "1-60・R、1-50・R、1-60・K 為常見替代路線。"
+      ],
+      "id": "route_20260724_005",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Cobalt Dragoon",
+      "displayNameZh": "蒼穹龍騎士",
+      "rankingBand": "top5",
+      "evidenceClass": "mainstream",
+      "reportedTopCuts": 49,
+      "ratchetOptions": [
+        "9-60",
+        "5-60",
+        "3-60"
+      ],
+      "bit": "E",
+      "role": "左迴旋末段／反旋",
+      "notes": [
+        "E 是核心，3-60、5-60、9-60 皆有實戰依據。"
+      ],
+      "id": "route_20260724_006",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Meteor Dragoon",
+      "displayNameZh": "隕星龍騎士",
+      "rankingBand": "top5",
+      "evidenceClass": "mainstream",
+      "usageTrend": "2026-07 使用率由約 16.3% 上升至 17.4%",
+      "ratchetOptions": [
+        "7-60",
+        "7-70"
+      ],
+      "bit": "L",
+      "role": "左迴旋移動持久",
+      "notes": [
+        "7-60・L、7-70・L 皆有近期前三名紀錄。"
+      ],
+      "id": "route_20260724_007",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Silver Wolf",
+      "displayNameZh": "銀狼",
+      "rankingBand": "top10",
+      "evidenceClass": "established_secondary",
+      "reportedTopCuts": 100,
+      "firstPlaceRate": 0.3,
+      "ratchet": "9-60",
+      "bit": "LO",
+      "role": "防守持久／控場",
+      "notes": [
+        "9-60・LO 是較具代表性的路線。"
+      ],
+      "id": "route_20260724_008",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Orochi Cluster",
+      "displayNameZh": "大蛇星叢",
+      "rankingBand": "6-20",
+      "evidenceClass": "established_secondary",
+      "reportedTopCuts": 46,
+      "commonRoutes": [
+        {
+          "ratchet": "7-60",
+          "bit": "K",
+          "reportedTopCuts": 9,
+          "role": "控制攻擊／反打"
+        },
+        {
+          "ratchet": "7-60",
+          "bit": "L",
+          "reportedTopCuts": 4,
+          "role": "移動持久／反打"
+        },
+        {
+          "ratchet": "9-60",
+          "bit": "K",
+          "role": "控制攻擊／反打"
+        },
+        {
+          "ratchet": "7-60",
+          "bit": "R",
+          "role": "可控攻擊"
+        }
+      ],
+      "role": "次主流可控攻擊／反打",
+      "id": "route_20260724_009",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Optimus Primal",
+      "displayNameZh": "Optimus Primal",
+      "rankingBand": "rogue",
+      "evidenceClass": "successful_rogue",
+      "usageRate": 0.004,
+      "commonRoutes": [
+        {
+          "ratchet": "1-60",
+          "bit": "LF",
+          "reportedTopCuts": 3
+        },
+        {
+          "ratchet": "3-60",
+          "bit": "F",
+          "reportedTopCuts": 3
+        },
+        {
+          "ratchet": "1-60",
+          "bit": "LR",
+          "reportedTopCuts": 2
+        },
+        {
+          "ratchet": "5-60",
+          "bit": "LF",
+          "reportedTopCuts": 2
+        }
+      ],
+      "role": "冷門攻擊型",
+      "notes": [
+        "樣本少，不鎖定單一路線。"
+      ],
+      "id": "route_20260724_010",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Knife Shinobi",
+      "displayNameZh": "忍者小刀",
+      "rankingBand": "rogue",
+      "evidenceClass": "emerging",
+      "commonRoutes": [
+        {
+          "ratchet": "7-70",
+          "bit": "L",
+          "reportedTopCuts": 3
+        },
+        {
+          "ratchet": "3-60",
+          "bit": "L",
+          "reportedTopCuts": 3
+        }
+      ],
+      "role": "冷門移動持久／反打測試",
+      "id": "route_20260724_011",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Sphinx Cowl",
+      "displayNameZh": "獅身人面罩",
+      "rankingBand": "rogue",
+      "evidenceClass": "emerging",
+      "reportedTopCuts": 9,
+      "commonRoutes": [
+        {
+          "ratchet": "5-60",
+          "bit": "R"
+        },
+        {
+          "ratchet": "7-70",
+          "bit": "U"
+        },
+        {
+          "ratchet": "2-80",
+          "bit": "BS"
+        },
+        {
+          "ratchet": "5-60",
+          "bit": "FB"
+        },
+        {
+          "ratchet": "5-60",
+          "bit": "LO"
+        }
+      ],
+      "role": "已有實戰案例但路線尚未收斂",
+      "sampleWarning": true,
+      "id": "route_20260724_012",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Black Shell",
+      "displayNameZh": "黑殼",
+      "rankingBand": "rogue",
+      "evidenceClass": "successful_rogue",
+      "commonRoutes": [
+        {
+          "ratchet": "7-60",
+          "bit": "L"
+        },
+        {
+          "ratchet": "7-60",
+          "bit": "P"
+        },
+        {
+          "ratchet": "9-60",
+          "bit": "LR"
+        },
+        {
+          "ratchet": "7-60",
+          "bit": "LO"
+        },
+        {
+          "ratchet": "7-60",
+          "bit": "H"
+        }
+      ],
+      "role": "防守／反打／低高度測試",
+      "sampleWarning": true,
+      "id": "route_20260724_013",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Tyranno Beat",
+      "displayNameZh": "暴龍節拍",
+      "rankingBand": "11-20",
+      "monthlyTier": "B",
+      "evidenceClass": "established_secondary",
+      "commonRoutes": [
+        {
+          "ratchet": "7-60",
+          "bit": "P",
+          "reportedTopCuts": 17,
+          "firstPlaceRate": 0.294,
+          "role": "重型平衡攻擊"
+        },
+        {
+          "ratchet": "7-70",
+          "bit": "R",
+          "reportedTopCuts": 17,
+          "firstPlaceRate": 0.412,
+          "role": "可控碰撞攻擊"
+        },
+        {
+          "ratchet": "7-70",
+          "bit": "K",
+          "reportedTopCuts": 15,
+          "firstPlaceRate": 0.267,
+          "role": "控制攻擊／反打"
+        },
+        {
+          "ratchet": "3-60",
+          "bit": "LR",
+          "reportedTopCuts": 15,
+          "firstPlaceRate": 0.267,
+          "role": "低高度攻擊"
+        },
+        {
+          "ratchet": "3-70",
+          "bit": "P",
+          "reportedTopCuts": 13,
+          "firstPlaceRate": 0.154,
+          "role": "平衡攻擊"
+        }
+      ],
+      "role": "重型平衡攻擊／可控碰撞",
+      "notes": [
+        "配置不集中於單一路線，應建立多條 R／P／K／LR 路線。"
+      ],
+      "id": "route_20260724_014",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Mummy Curse",
+      "displayNameZh": "木乃伊詛咒",
+      "rankingBand": "11-20",
+      "monthlyTier": "B",
+      "evidenceClass": "emerging",
+      "usageTrend": "2026-07 使用率由約 3.1% 上升至 4.2%",
+      "commonRoutes": [
+        {
+          "ratchet": "1-60",
+          "bit": "W",
+          "reportedTopCuts": 9,
+          "firstPlaceRate": 0.111,
+          "role": "防守接觸／抗攻擊"
+        },
+        {
+          "ratchet": "7-60",
+          "bit": "LO",
+          "reportedTopCuts": 7,
+          "firstPlaceRate": 0.286,
+          "role": "防守持久／中心控場"
+        },
+        {
+          "ratchet": "1-50",
+          "bit": "H",
+          "reportedTopCuts": 4,
+          "firstPlaceRate": 0.25,
+          "role": "防守持久／抗攻擊"
+        }
+      ],
+      "role": "防守持久／抗攻擊",
+      "notes": [
+        "成長中，但完整配置尚未高度集中。"
+      ],
+      "id": "route_20260724_015",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Clock Mirage",
+      "displayNameZh": "時鐘幻象",
+      "rankingBand": "11-20",
+      "monthlyTier": "B",
+      "evidenceClass": "established_secondary",
+      "structureRule": "simple_ratchet_only",
+      "commonRoutes": [
+        {
+          "ratchet": "4-55",
+          "bit": "LO",
+          "reportedTopCuts": 65,
+          "firstPlaceRate": 0.323,
+          "role": "防守持久核心"
+        },
+        {
+          "ratchet": "7-55",
+          "bit": "LO",
+          "reportedTopCuts": 32,
+          "firstPlaceRate": 0.219,
+          "role": "防守持久核心"
+        },
+        {
+          "ratchet": "7-55",
+          "bit": "FB",
+          "reportedTopCuts": 28,
+          "firstPlaceRate": 0.214,
+          "role": "防守持久／末段"
+        },
+        {
+          "ratchet": "7-55",
+          "bit": "UN",
+          "reportedTopCuts": 17,
+          "firstPlaceRate": 0.294,
+          "role": "防守持久／控場"
+        }
+      ],
+      "role": "防守持久核心",
+      "notes": [
+        "雖約排第 13 名，但配置非常成熟。"
+      ],
+      "id": "route_20260724_016",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Knight Mail",
+      "displayNameZh": "騎士圓甲",
+      "rankingBand": "11-20",
+      "monthlyTier": "B",
+      "evidenceClass": "established_secondary",
+      "commonRoutes": [
+        {
+          "ratchet": "1-60",
+          "bit": "H",
+          "reportedTopCuts": 27,
+          "firstPlaceRate": 0.296,
+          "role": "厚型防守"
+        },
+        {
+          "ratchet": "1-60",
+          "bit": "L",
+          "reportedTopCuts": 14,
+          "firstPlaceRate": 0.357,
+          "role": "移動反打"
+        },
+        {
+          "ratchet": "7-60",
+          "bit": "H",
+          "reportedTopCuts": 13,
+          "firstPlaceRate": 0.231,
+          "role": "厚型防守"
+        },
+        {
+          "ratchet": "3-60",
+          "bit": "LR",
+          "reportedTopCuts": 13,
+          "firstPlaceRate": 0.231,
+          "role": "移動反打"
+        },
+        {
+          "ratchet": "5-60",
+          "bit": "P",
+          "reportedTopCuts": 8,
+          "firstPlaceRate": 0.625,
+          "role": "平衡反打",
+          "sampleWarning": true
+        },
+        {
+          "ratchet": "1-60",
+          "bit": "J",
+          "reportedTopCuts": 4,
+          "firstPlaceRate": 0.25,
+          "role": "移動反打",
+          "sampleWarning": true
+        }
+      ],
+      "role": "厚型防守／移動反打",
+      "id": "route_20260724_017",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Samurai Calibur",
+      "displayNameZh": "武士聖劍",
+      "rankingBand": "11-20",
+      "monthlyTier": "B",
+      "evidenceClass": "emerging",
+      "stockCombo": "6-70・M",
+      "role": "平衡反打／anti-attack",
+      "notes": [
+        "目前尚未形成清楚且重複的完整配置，不急著鎖定 commonRoutes。"
+      ],
+      "id": "route_20260724_018",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "cx": {
+        "lockChip": "Unicorn",
+        "mainBlade": "Delta",
+        "overBlade": "Peak",
+        "assistBlade": "Heavy"
+      },
+      "displayNameZh": "Unicorn Delta Peak Heavy",
+      "rankingBand": "11-20",
+      "monthlyTier": "B",
+      "evidenceClass": "emerging",
+      "role": "CX 平衡／模式型",
+      "notes": [
+        "不可把 Unicorn Blast Heavy 的成績誤算到 Unicorn Delta Peak Heavy。"
+      ],
+      "id": "route_20260724_019",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "cx": {
+        "lockChip": "Emperor",
+        "mainBlade": "Blast",
+        "assistBlade": "Heavy"
+      },
+      "displayNameZh": "Emperor Blast Heavy",
+      "rankingBand": "11-20",
+      "monthlyTier": "C",
+      "evidenceClass": "established_secondary",
+      "commonRoutes": [
+        {
+          "ratchet": "3-60",
+          "bit": "LR",
+          "reportedTopCuts": 14,
+          "firstPlaceRate": 0.214,
+          "role": "CX 重型控制攻擊"
+        },
+        {
+          "ratchet": "3-60",
+          "bit": "K",
+          "reportedTopCuts": 11,
+          "firstPlaceRate": 0.545,
+          "role": "CX 控制攻擊"
+        },
+        {
+          "ratchet": "7-60",
+          "bit": "K",
+          "reportedTopCuts": 6,
+          "firstPlaceRate": 0.5,
+          "role": "CX 控制攻擊"
+        },
+        {
+          "ratchet": "6-60",
+          "bit": "K",
+          "reportedTopCuts": 4,
+          "firstPlaceRate": 0.5,
+          "role": "CX 控制攻擊",
+          "sampleWarning": true
+        },
+        {
+          "ratchet": "9-60",
+          "bit": "K",
+          "role": "CX 控制攻擊",
+          "sampleWarning": true
+        }
+      ],
+      "role": "CX 重型控制攻擊",
+      "notes": [
+        "第 11～20 名中證據最完整的 CX 骨架之一。"
+      ],
+      "id": "route_20260724_020",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Scorpio Spear",
+      "displayNameZh": "天蠍長矛",
+      "rankingBand": "11-20",
+      "monthlyTier": "C",
+      "evidenceClass": "emerging",
+      "commonRoutes": [
+        {
+          "ratchet": "9-60",
+          "bit": "FB",
+          "role": "持久／中心控場"
+        },
+        {
+          "ratchet": "5-60",
+          "bit": "FB",
+          "role": "持久／中心控場"
+        },
+        {
+          "ratchet": "1-60",
+          "bit": "LR",
+          "role": "移動反打"
+        },
+        {
+          "ratchet": "7-60",
+          "bit": "LR",
+          "role": "移動反打"
+        },
+        {
+          "ratchet": "9-60",
+          "bit": "R",
+          "role": "平衡攻擊"
+        },
+        {
+          "ratchet": "3-60",
+          "bit": "LO",
+          "role": "持久控場"
+        },
+        {
+          "ratchet": "3-60",
+          "bit": "O",
+          "role": "中心控場"
+        },
+        {
+          "ratchet": "3-60",
+          "bit": "T",
+          "role": "平衡攻擊"
+        },
+        {
+          "ratchet": "0-70",
+          "bit": "Z",
+          "role": "原裝或特殊路線",
+          "sampleWarning": true
+        }
+      ],
+      "role": "路線分散的持久／反打／平衡測試",
+      "id": "route_20260724_021",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Dran Buster",
+      "displayNameZh": "蒼龍爆刃",
+      "rankingBand": "11-20",
+      "monthlyTier": "C",
+      "evidenceClass": "established_secondary",
+      "commonRoutes": [
+        {
+          "ratchet": "1-60",
+          "bit": "R",
+          "reportedTopCuts": 57,
+          "firstPlaceRate": 0.386,
+          "role": "低高度爆發攻擊"
+        },
+        {
+          "ratchet": "1-60",
+          "bit": "LR",
+          "role": "低高度爆發攻擊／可控攻擊"
+        }
+      ],
+      "role": "低高度爆發攻擊",
+      "notes": [
+        "月榜排名較低，但長期成熟度高。"
+      ],
+      "id": "route_20260724_022",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Dran Sword",
+      "displayNameZh": "蒼龍神劍",
+      "rankingBand": "11-20",
+      "monthlyTier": "C",
+      "evidenceClass": "emerging",
+      "stockCombo": "3-60・F",
+      "commonRoutes": [
+        {
+          "ratchet": "3-60",
+          "bit": "T",
+          "reportedTopCuts": 9,
+          "firstPlaceRate": 0.222,
+          "role": "經典可控攻擊"
+        }
+      ],
+      "role": "經典可控攻擊",
+      "id": "route_20260724_023",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Shark Scale",
+      "displayNameZh": "鯊魚鱗刃",
+      "rankingBand": "top5",
+      "evidenceClass": "emerging",
+      "reportedTopCuts": 14,
+      "firstPlaceRate": 0.357,
+      "ratchet": "1-60",
+      "bit": "W",
+      "role": "移動反打／特殊穩定路線",
+      "sampleWarning": true,
+      "id": "route_20260724_024",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Aero Pegasus",
+      "displayNameZh": "飛翼天馬",
+      "rankingBand": "top5",
+      "evidenceClass": "emerging",
+      "reportedTopCuts": 5,
+      "firstPlaceRate": 0.4,
+      "ratchet": "1-50",
+      "bit": "L",
+      "role": "低高度可控攻擊",
+      "sampleWarning": true,
+      "id": "route_20260724_025",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Mummy Curse",
+      "displayNameZh": "木乃伊詛咒",
+      "rankingBand": "11-20",
+      "evidenceClass": "emerging",
+      "reportedTopCuts": 13,
+      "firstPlaceRate": 0.308,
+      "ratchet": "1-60",
+      "bit": "H",
+      "role": "防守持久／抗攻擊",
+      "sampleWarning": true,
+      "id": "route_20260724_026",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "blade": "Wizard Rod",
+      "displayNameZh": "魔導神杖",
+      "rankingBand": "top5",
+      "evidenceClass": "successful_rogue",
+      "reportedTopCuts": 8,
+      "firstPlaceRate": 0.625,
+      "ratchet": "1-60",
+      "bit": "U",
+      "role": "低樣本特殊平衡持久",
+      "sampleWarning": true,
+      "notes": [
+        "樣本集中在 2026 年 4～5 月，不視為 7 月主流。"
+      ],
+      "id": "route_20260724_027",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "bit": "Y",
+      "displayNameZh": "Y／Yielding",
+      "rankingBand": "new_part_low_sample",
+      "evidenceClass": "experimental",
+      "usageRate": 0.002,
+      "role": "持久／特殊左迴旋測試",
+      "notes": [
+        "不可直接視為 E 的替代主流。"
+      ],
+      "id": "route_20260724_028",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "ratchet": "0-70",
+      "displayNameZh": "0-70",
+      "rankingBand": "new_part_low_sample",
+      "evidenceClass": "experimental",
+      "usageRate": 0.006,
+      "role": "低樣本固鎖；不給予額外 meta 加成",
+      "notes": [
+        "Silver Wolf 0-70・H 約 8 次前段名次，但整體仍低樣本。"
+      ],
+      "id": "route_20260724_029",
+      "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
+      "sourceWindow": "2026-07-01/2026-07-24",
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    }
+  ],
+  "metaEvidencePolicy": {
+    "mainstream": "當月前段名次或高使用率主流；可作為分析推薦主要路線。",
+    "established_secondary": "次主流或非前五但多次重複出現；可作為推薦路線，但不壓過主流核心。",
+    "emerging": "5～19 次或近期成長中；呈現為可測試方向，分析分數只可小幅加權或不加權。",
+    "successful_rogue": "冷門但有成功案例；顯示為特殊路線並加樣本警示。",
+    "experimental": "低樣本或新零件；只記錄案例，不增加 meta 分數。"
+  }
 }

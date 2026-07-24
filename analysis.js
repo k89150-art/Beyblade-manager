@@ -1,5 +1,8 @@
 import { analyzeCombo as analyzeLegacyCombo } from "./beyblade_x_analysis_engine_v1_zhTW.js?v=20260630-v11-contextual1";
-import { analyzeCombo as analyzeV18Combo } from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260723-audit1";
+import {
+  analyzeCombo as analyzeV18Combo,
+  getMetaEvidence
+} from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260724-meta1";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -126,7 +129,54 @@ function adaptV18Analysis(raw) {
           ? "抗攻擊位 / 防守反打位"
           : "平衡測試位 / 依隊伍缺口調整",
     confidence: confidenceScore >= 2 ? "高" : confidenceScore >= 1 ? "中" : "待驗證",
-    notes: raw?.notes || []
+    notes: raw?.notes || [],
+    metaEvidence: raw?.metaEvidence || null
+  };
+}
+
+function withMetaEvidence(analysis, input, db) {
+  const evidence = getMetaEvidence(input, db);
+  if (!evidence) return analysis;
+
+  const scores = { ...(analysis.scores || {}) };
+  scores.metaConfidence = Math.round(
+    ((Number(scores.metaConfidence) || 0) + evidence.scoreDelta) * 10
+  ) / 10;
+  const strengths = [...(analysis.strengths || [])];
+  const warnings = [...(analysis.warnings || [])];
+  const recommendations = [...(analysis.recommendations || [])];
+  const notes = [...(analysis.notes || [])];
+  const evidenceSummary = [
+    evidence.label,
+    evidence.role,
+    evidence.metricText
+  ].filter(Boolean).join("：");
+
+  if (evidence.scoreDelta > 0) {
+    strengths.push(`此 CX 組合命中${evidenceSummary}。`);
+  } else if (evidence.evidenceClass === "emerging") {
+    recommendations.push(`${evidenceSummary}；可列為測試方向，但不列為強推薦。`);
+  } else if (evidence.evidenceClass === "successful_rogue") {
+    recommendations.push(`${evidenceSummary}；屬冷門成功案例，不列為主要推薦。`);
+  } else if (evidence.evidenceClass === "experimental") {
+    recommendations.push(`${evidenceSummary}；有案例但樣本少，不增加 Meta 分數。`);
+  }
+  if (evidence.sampleWarning) {
+    warnings.push("此實戰路線樣本偏少，名次占比不可直接解讀為穩定勝率。");
+  }
+  notes.push(evidence.disclaimer, ...(evidence.notes || []));
+
+  return {
+    ...analysis,
+    primaryRole: evidence.scoreDelta > 0 && evidence.specificity >= 12 && evidence.role
+      ? evidence.role
+      : analysis.primaryRole,
+    scores,
+    strengths: uniqueItems(strengths),
+    warnings: uniqueItems(warnings),
+    recommendations: uniqueItems(recommendations),
+    notes: uniqueItems(notes),
+    metaEvidence: evidence
   };
 }
 
@@ -139,13 +189,13 @@ function analyzeCombo(input, db, options = {}) {
     }
   }
 
-  return analyzeLegacyCombo(input, db, options);
+  return withMetaEvidence(analyzeLegacyCombo(input, db, options), input, db);
 }
 async function loadData() {
   if (database && rules) return;
 
   [database, rules] = await Promise.all([
-    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260723-audit1"),
+    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260724-meta1"),
     loadJson("./beyblade_x_analysis_rules_v1_zhTW.json?v=20260630-engine2")
   ]);
 
@@ -660,6 +710,11 @@ function classifyBuild(config, analysis) {
   const ratchet = config.parts.ratchet;
   const profile = weightedProfile(config);
   const code = bitCode(bit);
+  const metaEvidence = analysis.metaEvidence;
+
+  if (metaEvidence?.scoreDelta > 0 && metaEvidence.specificity >= 6 && metaEvidence.role) {
+    return metaEvidence.role;
+  }
 
   if (isHeavyAttackBlade(blade) && BURST_BITS.has(code)) return "低身位重攻擊 / 一擊爆發型";
   if (isHeavyAttackBlade(blade) && CONTROL_ATTACK_BITS.has(code)) return "可控重攻擊型";
@@ -691,7 +746,8 @@ function buildSummary(config, analysis, role) {
 }
 
 function buildStrengths(config, analysis) {
-  const strengths = [];
+  const strongMeta = analysis.metaEvidence?.scoreDelta > 0;
+  const strengths = strongMeta ? [...(analysis.strengths || [])] : [];
   const blade = primaryBladePart(config);
   const bit = config.parts.bit;
   const ratchet = config.parts.ratchet;
@@ -702,12 +758,12 @@ function buildStrengths(config, analysis) {
   const height = ratchetHeight(ratchet);
   const gear = ratchetGear(ratchet);
 
-  if (isAttackBlade(blade) && isAttackBit(bit)) strengths.push(`${bName} 本身偏攻擊，搭配 ${bitName} 能提高主動接觸與得分壓力。`);
-  if (isHeavyAttackBlade(blade) && BURST_BITS.has(code)) strengths.push(`${bName} 偏重攻擊，搭配 ${bitName} 可以提高瞬間衝擊與一擊爆發。`);
-  if (isHeavyAttackBlade(blade) && CONTROL_ATTACK_BITS.has(code)) strengths.push(`${bitName} 能讓 ${bName} 的攻擊路線比較可控，不會只押一波爆發。`);
-  if (isStaminaBlade(blade) && STAMINA_BITS.has(code)) strengths.push(`${bName} 的持久定位搭配 ${bitName}，方向清楚，適合拖長局。`);
-  if (isLeftSpinBlade(blade) && code === "E") strengths.push(`${bName} 搭配 ${bitName} 可強化反旋末段與中後段維持。`);
-  if (isDefenseBlade(blade) && DEFENSE_BITS.has(code)) strengths.push(`${bName} 搭配 ${bitName} 可往 anti-attack 或防守反打方向發展。`);
+  if (!strongMeta && isAttackBlade(blade) && isAttackBit(bit)) strengths.push(`${bName} 本身偏攻擊，搭配 ${bitName} 能提高主動接觸與得分壓力。`);
+  if (!strongMeta && isHeavyAttackBlade(blade) && BURST_BITS.has(code)) strengths.push(`${bName} 偏重攻擊，搭配 ${bitName} 可以提高瞬間衝擊與一擊爆發。`);
+  if (!strongMeta && isHeavyAttackBlade(blade) && CONTROL_ATTACK_BITS.has(code)) strengths.push(`${bitName} 能讓 ${bName} 的攻擊路線比較可控，不會只押一波爆發。`);
+  if (!strongMeta && isStaminaBlade(blade) && STAMINA_BITS.has(code)) strengths.push(`${bName} 的持久定位搭配 ${bitName}，方向清楚，適合拖長局。`);
+  if (!strongMeta && isLeftSpinBlade(blade) && code === "E") strengths.push(`${bName} 搭配 ${bitName} 可強化反旋末段與中後段維持。`);
+  if (!strongMeta && isDefenseBlade(blade) && DEFENSE_BITS.has(code)) strengths.push(`${bName} 搭配 ${bitName} 可往 anti-attack 或防守反打方向發展。`);
   if (height === 60) strengths.push(`${rName} 的 60 高度能讓 ${bName} 保持較穩定重心，並降低被打固鎖風險。`);
   if (height <= 55 && height > 0) strengths.push(`${rName} 的低高度能讓 ${bName} 更容易集中打點。`);
   if ([5, 7, 9].includes(gear)) strengths.push(`${gear} 系固鎖比 1 系更穩，能替 ${bitName} 補一點穩定性。`);
@@ -726,11 +782,12 @@ function buildWarnings(config, analysis, baseWarnings) {
   const rName = partSentenceName(ratchet) || "此固鎖";
   const code = bitCode(bit);
   const height = ratchetHeight(ratchet);
+  const strongMeta = analysis.metaEvidence?.scoreDelta > 0;
 
-  if (isAttackBlade(blade) && isStaminaBit(bit)) warnings.push(`${bName} 搭持久軸心 ${bitName} 可能降低主動得分，路線會偏混合或衝突。`);
-  if (isStaminaBlade(blade) && isAttackBit(bit)) warnings.push(`${bName} 搭攻擊軸心 ${bitName} 屬於反打或特化玩法，不能只用純攻擊角度評估。`);
-  if (isHeavyAttackBlade(blade) && BURST_BITS.has(code)) warnings.push(`${bitName} 屬於一擊型軸心，續航與控場風險偏高。`);
-  if (isAttackBlade(blade) && !isStaminaBit(bit)) warnings.push(`若第一波沒有讓 ${bName} 打出有效接觸，後段可能會因 ${bitName} 的續航不足而失速。`);
+  if (!strongMeta && isAttackBlade(blade) && isStaminaBit(bit)) warnings.push(`${bName} 搭持久軸心 ${bitName} 可能降低主動得分，路線會偏混合或衝突。`);
+  if (!strongMeta && isStaminaBlade(blade) && isAttackBit(bit)) warnings.push(`${bName} 搭攻擊軸心 ${bitName} 屬於反打或特化玩法，不能只用純攻擊角度評估。`);
+  if (!strongMeta && isHeavyAttackBlade(blade) && BURST_BITS.has(code)) warnings.push(`${bitName} 屬於一擊型軸心，續航與控場風險偏高。`);
+  if (!strongMeta && isAttackBlade(blade) && !isStaminaBit(bit)) warnings.push(`若第一波沒有讓 ${bName} 打出有效接觸，後段可能會因 ${bitName} 的續航不足而失速。`);
   if (height >= 70) warnings.push(`${rName} 高度偏高，可能提高重心與被攻擊打到固鎖的機率。`);
   if (height === 60 && isHeavyAttackBlade(blade) && BURST_BITS.has(code)) warnings.push(`${rName} 雖然穩，但不如 1-60 / 3-60 這類配置更直接強化攻擊對位。`);
   if ((analysis.scores?.metaConfidence ?? 0) <= 0) warnings.push("資料信心偏低，建議先少量實戰測試再決定是否放入主力牌組。");
@@ -749,6 +806,22 @@ function buildRecommendations(config, analysis) {
   const ratchet = config.parts.ratchet;
   const code = bitCode(bit);
   const height = ratchetHeight(ratchet);
+  const strongMetaRole = analysis.metaEvidence?.scoreDelta > 0
+    ? analysis.metaEvidence.role
+    : "";
+
+  if (strongMetaRole) {
+    if (/攻擊|壓制|終結/.test(strongMetaRole)) {
+      recommendations.push("此路線已有前段名次紀錄，可先保留核心，再依自爆或續航表現微調軸心。");
+    }
+    if (/持久|末段|反旋/.test(strongMetaRole)) {
+      recommendations.push("此路線偏中後段，可優先實測抗擊飛、末段姿態與不同發射角度。");
+    }
+    if (/防守|反打|anti/.test(strongMetaRole)) {
+      recommendations.push("此路線偏防守反打，建議優先測試面對高爆發攻擊型的抗壓能力。");
+    }
+    return uniqueItems(recommendations.map(item => item.trim()));
+  }
 
   if (isHeavyAttackBlade(blade) && BURST_BITS.has(code)) {
     recommendations.push("若想提高穩定攻擊，可改 R 或 LR。");
@@ -776,6 +849,11 @@ function buildDeckRole(config, role, analysis) {
   const bit = config.parts.bit;
   const code = bitCode(bit);
 
+  if (analysis.metaEvidence?.scoreDelta > 0) {
+    if (/攻擊|壓制|終結/.test(role)) return "3G 前段攻擊位 / 5G 主動得分位。";
+    if (/持久|末段|反旋/.test(role)) return "3G 後段持久位 / 5G 穩定收尾位。";
+    if (/防守|反打|anti/.test(role)) return "3G 中後段防守位 / 5G 抗攻擊消耗位。";
+  }
   if (isHeavyAttackBlade(blade) && BURST_BITS.has(code)) return "奇襲攻擊位，不建議當保底持久位。";
   if (isAttackBlade(blade) && CONTROL_ATTACK_BITS.has(code)) return "3G 前段攻擊位 / 5G 主動得分位。";
   if (isStaminaBlade(blade) && isStaminaBit(bit)) return "3G 後段持久位 / 5G 穩定收尾位。";
@@ -1081,6 +1159,24 @@ async function renderStockSuggestionsFromCloud() {
   }
 }
 
+function renderMetaEvidence(evidence) {
+  if (!evidence) return "";
+  const details = [
+    evidence.role,
+    evidence.metricText,
+    ...(evidence.notes || [])
+  ].filter(Boolean);
+  return `
+    <div class="section-title">實戰路線參考</div>
+    <div class="result-card">
+      <div><strong>${escapeHtml(evidence.label)}</strong></div>
+      ${details.length ? `<ul class="status-list">${renderList(details)}</ul>` : ""}
+      ${evidence.sampleWarning ? '<div class="status-warn">此路線樣本偏少，請先自行實測。</div>' : ""}
+      <div class="analysis-note">${escapeHtml(evidence.disclaimer)}</div>
+    </div>
+  `;
+}
+
 function renderAnalysis() {
   const result = document.getElementById("analysisResult");
   const config = collectConfig();
@@ -1131,13 +1227,14 @@ function renderAnalysis() {
     <ul class="status-list">${renderList(detailParts)}</ul>
     <div class="section-title">優點</div>
     <ul class="status-list">${renderList(strengths, "status-good")}</ul>
+    ${renderMetaEvidence(analysis.metaEvidence)}
     <div class="section-title">風險提醒</div>
     <ul class="status-list">${renderList(warnings, "status-warn")}</ul>
     <div class="section-title">改裝建議</div>
     <ul class="status-list">${renderList(recommendations)}</ul>
     <div class="section-title">3G / 5G 建議位置</div>
     <div class="result-card">${escapeHtml(deckRole)}</div>
-    <div class="analysis-note">分析使用零件權重與相性規則輔助判斷。這是理論輔助，不等於實戰勝率保證。</div>
+    <div class="analysis-note">分析使用零件權重、相性規則與前段名次紀錄輔助判斷。這是理論輔助，前段名次不等於逐場勝率，也不保證實戰結果。</div>
   `;
 }
 

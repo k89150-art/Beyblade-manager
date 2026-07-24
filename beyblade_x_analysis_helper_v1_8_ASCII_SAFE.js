@@ -120,6 +120,204 @@ function routeFor(blade, bit, ratchet) {
   return (blade?.routes || []).find(route => (route.bits || []).map(codeOf).includes(codeOf(code)) && (!(route.ratchets || []).length || (route.ratchets || []).includes(rCode)))
     || (blade?.routes || []).find(route => (route.bits || []).map(codeOf).includes(codeOf(code)));
 }
+const META_EVIDENCE_SETTINGS = {
+  mainstream: { label: "主流實戰路線", scoreDelta: 1.5, priority: 5 },
+  established_secondary: { label: "次主流實戰路線", scoreDelta: 1, priority: 4 },
+  emerging: { label: "新興可測試路線", scoreDelta: 0, priority: 3 },
+  successful_rogue: { label: "冷門成功案例", scoreDelta: 0, priority: 2 },
+  experimental: { label: "低樣本實驗案例", scoreDelta: 0, priority: 1 }
+};
+const CX_META_VALUE_ALIASES = {
+  lockChips: {
+    emperor: ["帝王"],
+    unicorn: ["獨角"]
+  },
+  overBlades: {
+    peak: ["P"]
+  }
+};
+function metaOptions(route, key) {
+  return uniq([
+    route?.[key],
+    ...(route?.[`${key}Options`] || [])
+  ]).map(codeOf);
+}
+function partMatchesMetaValue(database, section, actual, expected) {
+  if (!expected) return true;
+  if (!actual) return false;
+  const expectedPart = findPart(database, section, expected);
+  if (expectedPart && expectedPart === actual) return true;
+  const expectedNames = new Set(
+    (expectedPart ? allNames(expectedPart) : [expected]).map(normalize)
+  );
+  return allNames(actual).some(name => expectedNames.has(normalize(name)));
+}
+function cxItems(database, section) {
+  return database?.cx?.[section] || [];
+}
+function cxValueTokens(database, section, value) {
+  const tokens = new Set([normalize(value)]);
+  const aliases = CX_META_VALUE_ALIASES[section]?.[normalize(value)] || [];
+  aliases.forEach(alias => tokens.add(normalize(alias)));
+
+  for (const alias of database.aliases || []) {
+    const aliasNames = [
+      alias.canonicalZh,
+      alias.canonicalCode,
+      alias.referenceEn,
+      ...(alias.aliases || []),
+      ...(alias.deprecatedAliases || [])
+    ].filter(Boolean);
+    if (aliasNames.some(name => tokens.has(normalize(name)))) {
+      aliasNames.forEach(name => tokens.add(normalize(name)));
+    }
+  }
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const item of cxItems(database, section)) {
+      const names = allNames(item).map(normalize);
+      if (!names.some(name => tokens.has(name))) continue;
+      for (const name of names) {
+        if (!tokens.has(name)) {
+          tokens.add(name);
+          changed = true;
+        }
+      }
+    }
+  }
+  return tokens;
+}
+function cxValueMatches(database, section, actual, expected) {
+  if (!expected) return true;
+  if (!actual) return false;
+  const actualTokens = cxValueTokens(database, section, actual);
+  const expectedTokens = cxValueTokens(database, section, expected);
+  return [...actualTokens].some(token => expectedTokens.has(token));
+}
+function routeMatchesStandard(database, route, blade, ratchet, bit) {
+  if (route.cx) return null;
+  if (route.blade) {
+    const bladeNames = [route.blade, route.displayNameZh].filter(Boolean);
+    if (!bladeNames.some(name => partMatchesMetaValue(database, "blades", blade, name))) {
+      return null;
+    }
+  }
+
+  const ratchetOptions = metaOptions(route, "ratchet");
+  const bitOptions = metaOptions(route, "bit");
+  const ratchetCode = codeOf(ratchet?.code || ratchet?.id);
+  const selectedBit = codeOf(bitCode(bit));
+  if (ratchetOptions.length && !ratchetOptions.includes(ratchetCode)) return null;
+  if (bitOptions.length && !bitOptions.includes(selectedBit)) return null;
+
+  const specificity = (route.blade ? 4 : 0)
+    + (ratchetOptions.length ? 2 : 0)
+    + (bitOptions.length ? 2 : 0);
+  return { route, specificity };
+}
+function routeMatchesCx(database, route, input) {
+  if (!route.cx) return null;
+  const cx = route.cx;
+  if (!cxValueMatches(database, "lockChips", input.lockChipName, cx.lockChip)) return null;
+
+  const bladeMatches = cxValueMatches(database, "mainBlades", input.mainBladeName, cx.mainBlade)
+    || cxValueMatches(database, "metalBlades", input.metalBladeName, cx.mainBlade);
+  if (cx.mainBlade && !bladeMatches) return null;
+  if (!cxValueMatches(database, "overBlades", input.overBladeCode, cx.overBlade)) return null;
+  if (!cxValueMatches(database, "assistBlades", input.assistBladeCode, cx.assistBlade)) return null;
+
+  let matchedRoute = route;
+  let specificity = 8;
+  const ratchetCode = codeOf(input.ratchetCode || input.ratchet);
+  const selectedBit = codeOf(input.bitCode || input.bit);
+  const nested = (route.commonRoutes || []).find(item => (
+    (!item.ratchet || codeOf(item.ratchet) === ratchetCode)
+    && (!item.bit || codeOf(item.bit) === selectedBit)
+  ));
+  if (nested) {
+    matchedRoute = { ...route, ...nested, parentRouteId: route.id };
+    specificity += 4;
+  }
+  return { route: matchedRoute, specificity };
+}
+function metaMetricText(route) {
+  const metrics = [];
+  if (route.reportedTopCuts !== null && route.reportedTopCuts !== undefined
+      && Number.isFinite(Number(route.reportedTopCuts))) {
+    metrics.push(`${Number(route.reportedTopCuts)} 次前段名次紀錄`);
+  }
+  if (route.usageRate !== null && route.usageRate !== undefined
+      && Number.isFinite(Number(route.usageRate))) {
+    metrics.push(`使用率摘要 ${Math.round(Number(route.usageRate) * 1000) / 10}%`);
+  }
+  if (route.firstPlaceRate !== null && route.firstPlaceRate !== undefined
+      && Number.isFinite(Number(route.firstPlaceRate))) {
+    metrics.push(`第一名占比 ${Math.round(Number(route.firstPlaceRate) * 1000) / 10}%（非勝率）`);
+  }
+  return metrics.join("、");
+}
+export function getMetaEvidence(input, database) {
+  const routes = database.metaCommonRoutes || [];
+  const hasCxInput = Boolean(
+    input?.lockChipName
+    || input?.mainBladeName
+    || input?.metalBladeName
+    || input?.overBladeCode
+    || input?.assistBladeCode
+  );
+  const blade = hasCxInput ? null : getBlade(database, input?.blade || input?.bladeIdOrName || "");
+  const ratchet = hasCxInput ? null : getRatchet(database, input?.ratchet || input?.ratchetCode || "");
+  const bit = hasCxInput ? null : getBit(database, input?.bit || input?.bitCode || "");
+
+  const matches = routes
+    .map(route => (
+      hasCxInput
+        ? (route.cx
+          ? routeMatchesCx(database, route, input)
+          : routeMatchesStandard(database, route, null, getRatchet(database, input?.ratchetCode || input?.ratchet || ""), getBit(database, input?.bitCode || input?.bit || "")))
+        : routeMatchesStandard(database, route, blade, ratchet, bit)
+    ))
+    .filter(Boolean)
+    .sort((a, b) => (
+      b.specificity - a.specificity
+      || (META_EVIDENCE_SETTINGS[b.route.evidenceClass]?.priority || 0)
+        - (META_EVIDENCE_SETTINGS[a.route.evidenceClass]?.priority || 0)
+    ));
+  if (!matches.length) return null;
+
+  const { route, specificity } = matches[0];
+  const settings = META_EVIDENCE_SETTINGS[route.evidenceClass] || {
+    label: "實戰案例",
+    scoreDelta: 0,
+    priority: 0
+  };
+  const reportedTopCuts = Number(route.reportedTopCuts);
+  const firstPlaceRate = Number(route.firstPlaceRate);
+  const sampleWarning = Boolean(
+    route.sampleWarning
+    || route.evidenceClass === "successful_rogue"
+    || route.evidenceClass === "experimental"
+    || (Number.isFinite(reportedTopCuts) && reportedTopCuts < 10
+      && Number.isFinite(firstPlaceRate) && firstPlaceRate >= 0.3)
+  );
+  const metricText = metaMetricText(route);
+
+  return {
+    id: route.parentRouteId || route.id,
+    evidenceClass: route.evidenceClass,
+    label: settings.label,
+    role: route.role || "",
+    specificity,
+    scoreDelta: settings.scoreDelta,
+    sampleWarning,
+    metricText,
+    sourceWindow: route.sourceWindow || "",
+    notes: route.notes || [],
+    disclaimer: "前段名次紀錄，不等於逐場勝率。"
+  };
+}
 function cxName(input, key) { return input?.[key] || ""; }
 function priorityMatchesValue(actual, expected) {
   if (!expected) return true;
@@ -177,11 +375,34 @@ export function analyzeCombo(input, database) {
   if (ratchet) { addScore(scores, "burstSafety", 1); if (/60|55|50/.test(ratchet.code || ratchet.id || "")) addScore(scores, "control", 0.7); notes.push(`${ratchet.code || ratchet.id}：${ratchet.role || ""}`); }
   if (bit) { applyPartScores(scores, bit, 1.2); notes.push(`${bitCode(bit)}：${bit.role || ""}`); }
   const route = routeFor(blade, bit, ratchet);
+  const metaEvidence = getMetaEvidence(input, database);
   if (route) {
     role = route.role;
     advantages.push(`${bladeZh(blade)} 搭配 ${bitCode(bit)} 命中「${route.role}」路線。`);
-    if (["mainstream", "established_secondary"].includes(route.evidenceClass)) addScore(scores, "metaConfidence", 1.5);
+    if (!(metaEvidence?.scoreDelta > 0) && ["mainstream", "established_secondary"].includes(route.evidenceClass)) addScore(scores, "metaConfidence", 1.5);
     if (["successful_rogue", "single_sample"].includes(route.evidenceClass)) suggestions.push("此路線屬於特殊成功或單筆樣本，適合測試但不列為主要推薦。 ");
+  }
+  if (metaEvidence) {
+    const evidenceSummary = [
+      metaEvidence.label,
+      metaEvidence.role,
+      metaEvidence.metricText
+    ].filter(Boolean).join("：");
+    if (metaEvidence.scoreDelta > 0) {
+      addScore(scores, "metaConfidence", metaEvidence.scoreDelta);
+      advantages.push(`${bladeZh(blade)} 命中${evidenceSummary}。`);
+      if (metaEvidence.specificity >= 6 && metaEvidence.role) role = metaEvidence.role;
+    } else if (metaEvidence.evidenceClass === "emerging") {
+      suggestions.push(`${evidenceSummary}；可列為測試方向，但不列為強推薦。`);
+    } else if (metaEvidence.evidenceClass === "successful_rogue") {
+      suggestions.push(`${evidenceSummary}；屬冷門成功案例，不列為主要推薦。`);
+    } else if (metaEvidence.evidenceClass === "experimental") {
+      suggestions.push(`${evidenceSummary}；有案例但樣本少，不增加 Meta 分數。`);
+    }
+    if (metaEvidence.sampleWarning) {
+      risks.push("此實戰路線樣本偏少，名次占比不可直接解讀為穩定勝率。");
+    }
+    notes.push(metaEvidence.disclaimer, ...metaEvidence.notes);
   }
   const bName = bladeZh(blade);
   const bCode = bitCode(bit);
@@ -220,5 +441,5 @@ export function analyzeCombo(input, database) {
   if (!risks.length) risks.push(database.analysisRules?.emptyResultText?.risks || "目前沒有重大結構性風險，建議先實測發射穩定性。 ");
   if (!suggestions.length) suggestions.push(database.analysisRules?.emptyResultText?.suggestions || "此配置方向明確，可先保留核心零件測試，再依實戰結果微調。 ");
   const mainScore = Object.keys(scores).reduce((a,b)=>scores[a] >= scores[b] ? a : b);
-  return { role, roleLocked, scores, mainScore, advantages: uniq(advantages), risks: uniq(risks), suggestions: uniq(suggestions), notes: uniq(notes), flags: uniq(flags), confidence: scores.metaConfidence >= 2 ? "高" : scores.metaConfidence >= 1 ? "中" : "待驗證" };
+  return { role, roleLocked, scores, mainScore, advantages: uniq(advantages), risks: uniq(risks), suggestions: uniq(suggestions), notes: uniq(notes), flags: uniq(flags), metaEvidence, confidence: scores.metaConfidence >= 2 ? "高" : scores.metaConfidence >= 1 ? "中" : "待驗證" };
 }

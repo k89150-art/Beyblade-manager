@@ -14,8 +14,8 @@
       "不得只用型號前綴判斷組裝系統；CX 隨機包內可能是一般 BX/UX 結構。",
       "autoFillEnabled=false 的資料不得自動帶入。"
     ],
-    "version": "2026.07.16-confirmed",
-    "updated": "2026-07-16",
+    "version": "2026.07.24-multi-model-index",
+    "updated": "2026-07-24",
     "totalRecords": 213,
     "autoFillSafeRecords": 213,
     "reviewNeededRecords": 0,
@@ -34,7 +34,13 @@
     ],
     "setAutoFillRule": "Typing BX-00-01 through BX-00-04 adds both Beyblades from that set.",
     "dataset": "AUTOFILL_SAFE",
-    "note": "All 213 records are confirmed or otherwise marked safe for original-combo autofill."
+    "note": "All 213 records are confirmed or otherwise marked safe for original-combo autofill.",
+    "multiModelLookupEnabled": true,
+    "lookupStrategy": "exactKey first, then baseKey for selectable variants",
+    "exactIndexCount": 209,
+    "baseVariantGroupCount": 39,
+    "parsedRecordCount": 213,
+    "unparsedRecordCount": 0
   },
   "stockProducts": [
     {
@@ -67,7 +73,18 @@
       "isSetProduct": true,
       "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
-      "confirmationDate": "2026-07-15"
+      "confirmationDate": "2026-07-15",
+      "canonicalProductCode": "BX-00-01",
+      "exactKey": "BX0001",
+      "baseProductCode": "BX-00",
+      "baseKey": "BX00",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 2
     },
     {
       "productCode": "BX-00-01",
@@ -99,7 +116,18 @@
       "isSetProduct": true,
       "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
-      "confirmationDate": "2026-07-15"
+      "confirmationDate": "2026-07-15",
+      "canonicalProductCode": "BX-00-01",
+      "exactKey": "BX0001",
+      "baseProductCode": "BX-00",
+      "baseKey": "BX00",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 2
     },
     {
       "productCode": "BX-00-02",
@@ -131,7 +159,18 @@
       "isSetProduct": true,
       "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
-      "confirmationDate": "2026-07-15"
+      "confirmationDate": "2026-07-15",
+      "canonicalProductCode": "BX-00-02",
+      "exactKey": "BX0002",
+      "baseProductCode": "BX-00",
+      "baseKey": "BX00",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 2
     },
     {
       "productCode": "BX-00-02",
@@ -163,7 +202,18 @@
       "isSetProduct": true,
       "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
-      "confirmationDate": "2026-07-15"
+      "confirmationDate": "2026-07-15",
+      "canonicalProductCode": "BX-00-02",
+      "exactKey": "BX0002",
+      "baseProductCode": "BX-00",
+      "baseKey": "BX00",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 2
     },
     {
       "productCode": "BX-00-03",
@@ -195,7 +245,18 @@
       "isSetProduct": true,
       "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
-      "confirmationDate": "2026-07-15"
+      "confirmationDate": "2026-07-15",
+      "canonicalProductCode": "BX-00-03",
+      "exactKey": "BX0003",
+      "baseProductCode": "BX-00",
+      "baseKey": "BX00",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 2
     },
     {
       "productCode": "BX-00-03",
@@ -227,7 +288,18 @@
       "isSetProduct": true,
       "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
-      "confirmationDate": "2026-07-15"
+      "confirmationDate": "2026-07-15",
+      "canonicalProductCode": "BX-00-03",
+      "exactKey": "BX0003",
+      "baseProductCode": "BX-00",
+      "baseKey": "BX00",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 2
     },
     {
       "productCode": "BX-00-04",
@@ -259,7 +331,18 @@
       "isSetProduct": true,
       "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
-      "confirmationDate": "2026-07-15"
+      "confirmationDate": "2026-07-15",
+      "canonicalProductCode": "BX-00-04",
+      "exactKey": "BX0004",
+      "baseProductCode": "BX-00",
+      "baseKey": "BX00",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 2
     },
     {
       "productCode": "BX-00-04",
@@ -291,7 +374,18 @@
       "isSetProduct": true,
       "autoFillBehavior": "add_all_set_children",
       "confirmationStatus": "user_confirmed",
-      "confirmationDate": "2026-07-15"
+      "confirmationDate": "2026-07-15",
+      "canonicalProductCode": "BX-00-04",
+      "exactKey": "BX0004",
+      "baseProductCode": "BX-00",
+      "baseKey": "BX00",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 2
     },
     {
       "productCode": "BX-01",
@@ -313,7 +407,18 @@
         "bit": "F"
       },
       "recordId": "BX-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-01",
+      "exactKey": "BX01",
+      "baseProductCode": "BX-01",
+      "baseKey": "BX01",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-02",
@@ -335,7 +440,18 @@
         "bit": "T"
       },
       "recordId": "BX-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-02",
+      "exactKey": "BX02",
+      "baseProductCode": "BX-02",
+      "baseKey": "BX02",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-03",
@@ -357,7 +473,18 @@
         "bit": "B"
       },
       "recordId": "BX-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-03",
+      "exactKey": "BX03",
+      "baseProductCode": "BX-03",
+      "baseKey": "BX03",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-04",
@@ -379,7 +506,18 @@
         "bit": "N"
       },
       "recordId": "BX-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-04",
+      "exactKey": "BX04",
+      "baseProductCode": "BX-04",
+      "baseKey": "BX04",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-05",
@@ -401,7 +539,18 @@
         "bit": "B"
       },
       "recordId": "BX-05",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-05",
+      "exactKey": "BX05",
+      "baseProductCode": "BX-05",
+      "baseKey": "BX05",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-06",
@@ -423,7 +572,18 @@
         "bit": "N"
       },
       "recordId": "BX-06",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-06",
+      "exactKey": "BX06",
+      "baseProductCode": "BX-06",
+      "baseKey": "BX06",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-07",
@@ -445,7 +605,18 @@
         "bit": "F"
       },
       "recordId": "BX-07",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-07",
+      "exactKey": "BX07",
+      "baseProductCode": "BX-07",
+      "baseKey": "BX07",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-08-01",
@@ -467,7 +638,18 @@
         "bit": "B"
       },
       "recordId": "BX-08-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-08-01",
+      "exactKey": "BX0801",
+      "baseProductCode": "BX-08",
+      "baseKey": "BX08",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "BX-08-02",
@@ -489,7 +671,18 @@
         "bit": "T"
       },
       "recordId": "BX-08-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-08-02",
+      "exactKey": "BX0802",
+      "baseProductCode": "BX-08",
+      "baseKey": "BX08",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "BX-08-03",
@@ -511,7 +704,18 @@
         "bit": "N"
       },
       "recordId": "BX-08-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-08-03",
+      "exactKey": "BX0803",
+      "baseProductCode": "BX-08",
+      "baseKey": "BX08",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "BX-13",
@@ -533,7 +737,18 @@
         "bit": "HN"
       },
       "recordId": "BX-13",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-13",
+      "exactKey": "BX13",
+      "baseProductCode": "BX-13",
+      "baseKey": "BX13",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-14-01",
@@ -555,7 +770,18 @@
         "bit": "LF"
       },
       "recordId": "BX-14-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-14-01",
+      "exactKey": "BX1401",
+      "baseProductCode": "BX-14",
+      "baseKey": "BX14",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 6
     },
     {
       "productCode": "BX-14-02",
@@ -577,7 +803,18 @@
         "bit": "N"
       },
       "recordId": "BX-14-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-14-02",
+      "exactKey": "BX1402",
+      "baseProductCode": "BX-14",
+      "baseKey": "BX14",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 6
     },
     {
       "productCode": "BX-14-03",
@@ -599,7 +836,18 @@
         "bit": "B"
       },
       "recordId": "BX-14-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-14-03",
+      "exactKey": "BX1403",
+      "baseProductCode": "BX-14",
+      "baseKey": "BX14",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 6
     },
     {
       "productCode": "BX-14-04",
@@ -621,7 +869,18 @@
         "bit": "LF"
       },
       "recordId": "BX-14-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-14-04",
+      "exactKey": "BX1404",
+      "baseProductCode": "BX-14",
+      "baseKey": "BX14",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 4,
+      "variantCount": 6
     },
     {
       "productCode": "BX-14-05",
@@ -643,7 +902,18 @@
         "bit": "LF"
       },
       "recordId": "BX-14-05",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-14-05",
+      "exactKey": "BX1405",
+      "baseProductCode": "BX-14",
+      "baseKey": "BX14",
+      "hasChildNumber": true,
+      "childNumber": "05",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 5,
+      "variantCount": 6
     },
     {
       "productCode": "BX-14-06",
@@ -665,7 +935,18 @@
         "bit": "T"
       },
       "recordId": "BX-14-06",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-14-06",
+      "exactKey": "BX1406",
+      "baseProductCode": "BX-14",
+      "baseKey": "BX14",
+      "hasChildNumber": true,
+      "childNumber": "06",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 6,
+      "variantCount": 6
     },
     {
       "productCode": "BX-15",
@@ -687,7 +968,18 @@
         "bit": "P"
       },
       "recordId": "BX-15",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-15",
+      "exactKey": "BX15",
+      "baseProductCode": "BX-15",
+      "baseKey": "BX15",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-16-01",
@@ -709,7 +1001,18 @@
         "bit": "O"
       },
       "recordId": "BX-16-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-16-01",
+      "exactKey": "BX1601",
+      "baseProductCode": "BX-16",
+      "baseKey": "BX16",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "BX-16-02",
@@ -731,7 +1034,18 @@
         "bit": "F"
       },
       "recordId": "BX-16-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-16-02",
+      "exactKey": "BX1602",
+      "baseProductCode": "BX-16",
+      "baseKey": "BX16",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "BX-16-03",
@@ -753,7 +1067,18 @@
         "bit": "HN"
       },
       "recordId": "BX-16-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-16-03",
+      "exactKey": "BX1603",
+      "baseProductCode": "BX-16",
+      "baseKey": "BX16",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "BX-17-01",
@@ -775,7 +1100,18 @@
         "bit": "F"
       },
       "recordId": "BX-17-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-17-01",
+      "exactKey": "BX1701",
+      "baseProductCode": "BX-17",
+      "baseKey": "BX17",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "BX-17-02",
@@ -797,7 +1133,18 @@
         "bit": "B"
       },
       "recordId": "BX-17-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-17-02",
+      "exactKey": "BX1702",
+      "baseProductCode": "BX-17",
+      "baseKey": "BX17",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "BX-19",
@@ -821,7 +1168,18 @@
       "recordId": "BX-19",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-19",
+      "exactKey": "BX19",
+      "baseProductCode": "BX-19",
+      "baseKey": "BX19",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-20-01",
@@ -843,7 +1201,18 @@
         "bit": "R"
       },
       "recordId": "BX-20-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-20-01",
+      "exactKey": "BX2001",
+      "baseProductCode": "BX-20",
+      "baseKey": "BX20",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "BX-20-02",
@@ -865,7 +1234,18 @@
         "bit": "F"
       },
       "recordId": "BX-20-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-20-02",
+      "exactKey": "BX2002",
+      "baseProductCode": "BX-20",
+      "baseKey": "BX20",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "BX-20-03",
@@ -887,7 +1267,18 @@
         "bit": "T"
       },
       "recordId": "BX-20-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-20-03",
+      "exactKey": "BX2003",
+      "baseProductCode": "BX-20",
+      "baseKey": "BX20",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "BX-21-01",
@@ -909,7 +1300,18 @@
         "bit": "HT"
       },
       "recordId": "BX-21-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-21-01",
+      "exactKey": "BX2101",
+      "baseProductCode": "BX-21",
+      "baseKey": "BX21",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "BX-21-02",
@@ -931,7 +1333,18 @@
         "bit": "LF"
       },
       "recordId": "BX-21-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-21-02",
+      "exactKey": "BX2102",
+      "baseProductCode": "BX-21",
+      "baseKey": "BX21",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "BX-21-03",
@@ -953,7 +1366,18 @@
         "bit": "N"
       },
       "recordId": "BX-21-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-21-03",
+      "exactKey": "BX2103",
+      "baseProductCode": "BX-21",
+      "baseKey": "BX21",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "BX-22",
@@ -975,7 +1399,18 @@
         "bit": "F"
       },
       "recordId": "BX-22",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-22",
+      "exactKey": "BX22",
+      "baseProductCode": "BX-22",
+      "baseKey": "BX22",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-23",
@@ -997,7 +1432,18 @@
         "bit": "GF"
       },
       "recordId": "BX-23",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-23",
+      "exactKey": "BX23",
+      "baseProductCode": "BX-23",
+      "baseKey": "BX23",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-24-01",
@@ -1019,7 +1465,18 @@
         "bit": "GB"
       },
       "recordId": "BX-24-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-24-01",
+      "exactKey": "BX2401",
+      "baseProductCode": "BX-24",
+      "baseKey": "BX24",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 6
     },
     {
       "productCode": "BX-24-02",
@@ -1041,7 +1498,18 @@
         "bit": "T"
       },
       "recordId": "BX-24-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-24-02",
+      "exactKey": "BX2402",
+      "baseProductCode": "BX-24",
+      "baseKey": "BX24",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 6
     },
     {
       "productCode": "BX-24-03",
@@ -1063,7 +1531,18 @@
         "bit": "GB"
       },
       "recordId": "BX-24-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-24-03",
+      "exactKey": "BX2403",
+      "baseProductCode": "BX-24",
+      "baseKey": "BX24",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 6
     },
     {
       "productCode": "BX-24-04",
@@ -1085,7 +1564,18 @@
         "bit": "F"
       },
       "recordId": "BX-24-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-24-04",
+      "exactKey": "BX2404",
+      "baseProductCode": "BX-24",
+      "baseKey": "BX24",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 4,
+      "variantCount": 6
     },
     {
       "productCode": "BX-24-05",
@@ -1107,7 +1597,18 @@
         "bit": "HN"
       },
       "recordId": "BX-24-05",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-24-05",
+      "exactKey": "BX2405",
+      "baseProductCode": "BX-24",
+      "baseKey": "BX24",
+      "hasChildNumber": true,
+      "childNumber": "05",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 5,
+      "variantCount": 6
     },
     {
       "productCode": "BX-24-06",
@@ -1129,7 +1630,18 @@
         "bit": "GB"
       },
       "recordId": "BX-24-06",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-24-06",
+      "exactKey": "BX2406",
+      "baseProductCode": "BX-24",
+      "baseKey": "BX24",
+      "hasChildNumber": true,
+      "childNumber": "06",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 6,
+      "variantCount": 6
     },
     {
       "productCode": "BX-26",
@@ -1151,7 +1663,18 @@
         "bit": "GP"
       },
       "recordId": "BX-26",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-26",
+      "exactKey": "BX26",
+      "baseProductCode": "BX-26",
+      "baseKey": "BX26",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-27-01",
@@ -1173,7 +1696,18 @@
         "bit": "GN"
       },
       "recordId": "BX-27-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-27-01",
+      "exactKey": "BX2701",
+      "baseProductCode": "BX-27",
+      "baseKey": "BX27",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "BX-27-02",
@@ -1195,7 +1729,18 @@
         "bit": "HT"
       },
       "recordId": "BX-27-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-27-02",
+      "exactKey": "BX2702",
+      "baseProductCode": "BX-27",
+      "baseKey": "BX27",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "BX-27-03",
@@ -1217,7 +1762,18 @@
         "bit": "O"
       },
       "recordId": "BX-27-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-27-03",
+      "exactKey": "BX2703",
+      "baseProductCode": "BX-27",
+      "baseKey": "BX27",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "BX-31-01",
@@ -1239,7 +1795,18 @@
         "bit": "Q"
       },
       "recordId": "BX-31-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-31-01",
+      "exactKey": "BX3101",
+      "baseProductCode": "BX-31",
+      "baseKey": "BX31",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 6
     },
     {
       "productCode": "BX-31-02",
@@ -1261,7 +1828,18 @@
         "bit": "S"
       },
       "recordId": "BX-31-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-31-02",
+      "exactKey": "BX3102",
+      "baseProductCode": "BX-31",
+      "baseKey": "BX31",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 6
     },
     {
       "productCode": "BX-31-03",
@@ -1283,7 +1861,18 @@
         "bit": "O"
       },
       "recordId": "BX-31-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-31-03",
+      "exactKey": "BX3103",
+      "baseProductCode": "BX-31",
+      "baseKey": "BX31",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 6
     },
     {
       "productCode": "BX-31-04",
@@ -1305,7 +1894,18 @@
         "bit": "P"
       },
       "recordId": "BX-31-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-31-04",
+      "exactKey": "BX3104",
+      "baseProductCode": "BX-31",
+      "baseKey": "BX31",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 4,
+      "variantCount": 6
     },
     {
       "productCode": "BX-31-05",
@@ -1327,7 +1927,18 @@
         "bit": "Q"
       },
       "recordId": "BX-31-05",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-31-05",
+      "exactKey": "BX3105",
+      "baseProductCode": "BX-31",
+      "baseKey": "BX31",
+      "hasChildNumber": true,
+      "childNumber": "05",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 5,
+      "variantCount": 6
     },
     {
       "productCode": "BX-31-06",
@@ -1349,7 +1960,18 @@
         "bit": "Q"
       },
       "recordId": "BX-31-06",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-31-06",
+      "exactKey": "BX3106",
+      "baseProductCode": "BX-31",
+      "baseKey": "BX31",
+      "hasChildNumber": true,
+      "childNumber": "06",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 6,
+      "variantCount": 6
     },
     {
       "productCode": "BX-33",
@@ -1371,7 +1993,18 @@
         "bit": "U"
       },
       "recordId": "BX-33",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-33",
+      "exactKey": "BX33",
+      "baseProductCode": "BX-33",
+      "baseKey": "BX33",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-34",
@@ -1393,7 +2026,18 @@
         "bit": "C"
       },
       "recordId": "BX-34",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-34",
+      "exactKey": "BX34",
+      "baseProductCode": "BX-34",
+      "baseKey": "BX34",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-35-01",
@@ -1415,7 +2059,18 @@
         "bit": "D"
       },
       "recordId": "BX-35-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-35-01",
+      "exactKey": "BX3501",
+      "baseProductCode": "BX-35",
+      "baseKey": "BX35",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 6
     },
     {
       "productCode": "BX-35-02",
@@ -1437,7 +2092,18 @@
         "bit": "B"
       },
       "recordId": "BX-35-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-35-02",
+      "exactKey": "BX3502",
+      "baseProductCode": "BX-35",
+      "baseKey": "BX35",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 6
     },
     {
       "productCode": "BX-35-03",
@@ -1459,7 +2125,18 @@
         "bit": "D"
       },
       "recordId": "BX-35-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-35-03",
+      "exactKey": "BX3503",
+      "baseProductCode": "BX-35",
+      "baseKey": "BX35",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 6
     },
     {
       "productCode": "BX-35-04",
@@ -1481,7 +2158,18 @@
         "bit": "R"
       },
       "recordId": "BX-35-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-35-04",
+      "exactKey": "BX3504",
+      "baseProductCode": "BX-35",
+      "baseKey": "BX35",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 4,
+      "variantCount": 6
     },
     {
       "productCode": "BX-35-05",
@@ -1503,7 +2191,18 @@
         "bit": "H"
       },
       "recordId": "BX-35-05",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-35-05",
+      "exactKey": "BX3505",
+      "baseProductCode": "BX-35",
+      "baseKey": "BX35",
+      "hasChildNumber": true,
+      "childNumber": "05",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 5,
+      "variantCount": 6
     },
     {
       "productCode": "BX-35-06",
@@ -1525,7 +2224,18 @@
         "bit": "D"
       },
       "recordId": "BX-35-06",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-35-06",
+      "exactKey": "BX3506",
+      "baseProductCode": "BX-35",
+      "baseKey": "BX35",
+      "hasChildNumber": true,
+      "childNumber": "06",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 6,
+      "variantCount": 6
     },
     {
       "productCode": "BX-36-01",
@@ -1547,7 +2257,18 @@
         "bit": "E"
       },
       "recordId": "BX-36-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-36-01",
+      "exactKey": "BX3601",
+      "baseProductCode": "BX-36",
+      "baseKey": "BX36",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "BX-36-02",
@@ -1569,7 +2290,18 @@
         "bit": "HN"
       },
       "recordId": "BX-36-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-36-02",
+      "exactKey": "BX3602",
+      "baseProductCode": "BX-36",
+      "baseKey": "BX36",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "BX-36-03",
@@ -1591,7 +2323,18 @@
         "bit": "GB"
       },
       "recordId": "BX-36-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-36-03",
+      "exactKey": "BX3603",
+      "baseProductCode": "BX-36",
+      "baseKey": "BX36",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "BX-37",
@@ -1613,7 +2356,18 @@
         "bit": "F"
       },
       "recordId": "BX-37",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-37",
+      "exactKey": "BX37",
+      "baseProductCode": "BX-37",
+      "baseKey": "BX37",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-39-01",
@@ -1635,7 +2389,18 @@
         "bit": "GP"
       },
       "recordId": "BX-39-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-39-01",
+      "exactKey": "BX3901",
+      "baseProductCode": "BX-39",
+      "baseKey": "BX39",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "BX-39-02",
@@ -1657,7 +2422,18 @@
         "bit": "O"
       },
       "recordId": "BX-39-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-39-02",
+      "exactKey": "BX3902",
+      "baseProductCode": "BX-39",
+      "baseKey": "BX39",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "BX-39-03",
@@ -1679,7 +2455,18 @@
         "bit": "D"
       },
       "recordId": "BX-39-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-39-03",
+      "exactKey": "BX3903",
+      "baseProductCode": "BX-39",
+      "baseKey": "BX39",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "BX-44",
@@ -1701,7 +2488,18 @@
         "bit": "BS"
       },
       "recordId": "BX-44",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-44",
+      "exactKey": "BX44",
+      "baseProductCode": "BX-44",
+      "baseKey": "BX44",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-45",
@@ -1723,7 +2521,18 @@
         "bit": "M"
       },
       "recordId": "BX-45",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-45",
+      "exactKey": "BX45",
+      "baseProductCode": "BX-45",
+      "baseKey": "BX45",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BX-46-01",
@@ -1745,7 +2554,18 @@
         "bit": "R"
       },
       "recordId": "BX-46-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-46-01",
+      "exactKey": "BX4601",
+      "baseProductCode": "BX-46",
+      "baseKey": "BX46",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "BX-46-02",
@@ -1767,7 +2587,18 @@
         "bit": "T"
       },
       "recordId": "BX-46-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-46-02",
+      "exactKey": "BX4602",
+      "baseProductCode": "BX-46",
+      "baseKey": "BX46",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "BX-48-01",
@@ -1789,7 +2620,18 @@
         "bit": "F"
       },
       "recordId": "BX-48-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-48-01",
+      "exactKey": "BX4801",
+      "baseProductCode": "BX-48",
+      "baseKey": "BX48",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 5
     },
     {
       "productCode": "BX-48-02",
@@ -1811,7 +2653,18 @@
         "bit": "E"
       },
       "recordId": "BX-48-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-48-02",
+      "exactKey": "BX4802",
+      "baseProductCode": "BX-48",
+      "baseKey": "BX48",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 5
     },
     {
       "productCode": "BX-48-03",
@@ -1833,7 +2686,18 @@
         "bit": "S"
       },
       "recordId": "BX-48-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-48-03",
+      "exactKey": "BX4803",
+      "baseProductCode": "BX-48",
+      "baseKey": "BX48",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 5
     },
     {
       "productCode": "BX-48-04",
@@ -1855,7 +2719,18 @@
         "bit": "GB"
       },
       "recordId": "BX-48-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-48-04",
+      "exactKey": "BX4804",
+      "baseProductCode": "BX-48",
+      "baseKey": "BX48",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 4,
+      "variantCount": 5
     },
     {
       "productCode": "BX-48-05",
@@ -1877,7 +2752,18 @@
         "bit": "Q"
       },
       "recordId": "BX-48-05",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-48-05",
+      "exactKey": "BX4805",
+      "baseProductCode": "BX-48",
+      "baseKey": "BX48",
+      "hasChildNumber": true,
+      "childNumber": "05",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 5,
+      "variantCount": 5
     },
     {
       "productCode": "BX-49",
@@ -1899,7 +2785,18 @@
         "bit": "FF"
       },
       "recordId": "BX-49",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BX-49",
+      "exactKey": "BX49",
+      "baseProductCode": "BX-49",
+      "baseKey": "BX49",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-01",
@@ -1921,7 +2818,18 @@
         "bit": "T"
       },
       "recordId": "BXG-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-01",
+      "exactKey": "BXG01",
+      "baseProductCode": "BXG-01",
+      "baseKey": "BXG01",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-04",
@@ -1943,7 +2851,18 @@
         "bit": "P"
       },
       "recordId": "BXG-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-04",
+      "exactKey": "BXG04",
+      "baseProductCode": "BXG-04",
+      "baseKey": "BXG04",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-07",
@@ -1965,7 +2884,18 @@
         "bit": "F"
       },
       "recordId": "BXG-07",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-07",
+      "exactKey": "BXG07",
+      "baseProductCode": "BXG-07",
+      "baseKey": "BXG07",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-09",
@@ -1987,7 +2917,18 @@
         "bit": "C"
       },
       "recordId": "BXG-09",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-09",
+      "exactKey": "BXG09",
+      "baseProductCode": "BXG-09",
+      "baseKey": "BXG09",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-11",
@@ -2009,7 +2950,18 @@
         "bit": "D"
       },
       "recordId": "BXG-11",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-11",
+      "exactKey": "BXG11",
+      "baseProductCode": "BXG-11",
+      "baseKey": "BXG11",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-12-01",
@@ -2031,7 +2983,18 @@
         "bit": "RA"
       },
       "recordId": "BXG-12-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-12-01",
+      "exactKey": "BXG1201",
+      "baseProductCode": "BXG-12",
+      "baseKey": "BXG12",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 4
     },
     {
       "productCode": "BXG-12-02",
@@ -2053,7 +3016,18 @@
         "bit": "RA"
       },
       "recordId": "BXG-12-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-12-02",
+      "exactKey": "BXG1202",
+      "baseProductCode": "BXG-12",
+      "baseKey": "BXG12",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 4
     },
     {
       "productCode": "BXG-12-03",
@@ -2075,7 +3049,18 @@
         "bit": "RA"
       },
       "recordId": "BXG-12-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-12-03",
+      "exactKey": "BXG1203",
+      "baseProductCode": "BXG-12",
+      "baseKey": "BXG12",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 4
     },
     {
       "productCode": "BXG-12-04",
@@ -2097,7 +3082,18 @@
         "bit": "F"
       },
       "recordId": "BXG-12-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-12-04",
+      "exactKey": "BXG1204",
+      "baseProductCode": "BXG-12",
+      "baseKey": "BXG12",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 4,
+      "variantCount": 4
     },
     {
       "productCode": "BXG-13",
@@ -2119,7 +3115,18 @@
         "bit": "GF"
       },
       "recordId": "BXG-13",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-13",
+      "exactKey": "BXG13",
+      "baseProductCode": "BXG-13",
+      "baseKey": "BXG13",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-14",
@@ -2141,7 +3148,18 @@
         "bit": "GP"
       },
       "recordId": "BXG-14",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-14",
+      "exactKey": "BXG14",
+      "baseProductCode": "BXG-14",
+      "baseKey": "BXG14",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-15",
@@ -2163,7 +3181,18 @@
         "bit": "T"
       },
       "recordId": "BXG-15",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-15",
+      "exactKey": "BXG15",
+      "baseProductCode": "BXG-15",
+      "baseKey": "BXG15",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-16",
@@ -2185,7 +3214,18 @@
         "bit": "LF"
       },
       "recordId": "BXG-16",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-16",
+      "exactKey": "BXG16",
+      "baseProductCode": "BXG-16",
+      "baseKey": "BXG16",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-20",
@@ -2207,7 +3247,18 @@
         "bit": "GN"
       },
       "recordId": "BXG-20",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-20",
+      "exactKey": "BXG20",
+      "baseProductCode": "BXG-20",
+      "baseKey": "BXG20",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-21",
@@ -2229,7 +3280,18 @@
         "bit": "M"
       },
       "recordId": "BXG-21",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-21",
+      "exactKey": "BXG21",
+      "baseProductCode": "BXG-21",
+      "baseKey": "BXG21",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-22",
@@ -2251,7 +3313,18 @@
         "bit": "RA"
       },
       "recordId": "BXG-22",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-22",
+      "exactKey": "BXG22",
+      "baseProductCode": "BXG-22",
+      "baseKey": "BXG22",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-24",
@@ -2273,7 +3346,18 @@
         "bit": "A"
       },
       "recordId": "BXG-24",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-24",
+      "exactKey": "BXG24",
+      "baseProductCode": "BXG-24",
+      "baseKey": "BXG24",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-29-01",
@@ -2295,7 +3379,18 @@
         "bit": "F"
       },
       "recordId": "BXG-29-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-29-01",
+      "exactKey": "BXG2901",
+      "baseProductCode": "BXG-29",
+      "baseKey": "BXG29",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-29-02",
@@ -2317,7 +3412,18 @@
         "bit": "N"
       },
       "recordId": "BXG-29-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-29-02",
+      "exactKey": "BXG2902",
+      "baseProductCode": "BXG-29",
+      "baseKey": "BXG29",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-30-01",
@@ -2339,7 +3445,18 @@
         "bit": "B"
       },
       "recordId": "BXG-30-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-30-01",
+      "exactKey": "BXG3001",
+      "baseProductCode": "BXG-30",
+      "baseKey": "BXG30",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-30-02",
@@ -2361,7 +3478,18 @@
         "bit": "P"
       },
       "recordId": "BXG-30-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-30-02",
+      "exactKey": "BXG3002",
+      "baseProductCode": "BXG-30",
+      "baseKey": "BXG30",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-32",
@@ -2383,7 +3511,18 @@
         "bit": "E"
       },
       "recordId": "BXG-32",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-32",
+      "exactKey": "BXG32",
+      "baseProductCode": "BXG-32",
+      "baseKey": "BXG32",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-33-01",
@@ -2405,7 +3544,18 @@
         "bit": "B"
       },
       "recordId": "BXG-33-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-33-01",
+      "exactKey": "BXG3301",
+      "baseProductCode": "BXG-33",
+      "baseKey": "BXG33",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-33-02",
@@ -2427,7 +3577,18 @@
         "bit": "P"
       },
       "recordId": "BXG-33-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-33-02",
+      "exactKey": "BXG3302",
+      "baseProductCode": "BXG-33",
+      "baseKey": "BXG33",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-34-01",
@@ -2449,7 +3610,18 @@
         "bit": "F"
       },
       "recordId": "BXG-34-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-34-01",
+      "exactKey": "BXG3401",
+      "baseProductCode": "BXG-34",
+      "baseKey": "BXG34",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-34-02",
@@ -2471,7 +3643,18 @@
         "bit": "N"
       },
       "recordId": "BXG-34-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-34-02",
+      "exactKey": "BXG3402",
+      "baseProductCode": "BXG-34",
+      "baseKey": "BXG34",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-36-01",
@@ -2493,7 +3676,18 @@
         "bit": "P"
       },
       "recordId": "BXG-36-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-36-01",
+      "exactKey": "BXG3601",
+      "baseProductCode": "BXG-36",
+      "baseKey": "BXG36",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-36-02",
@@ -2515,7 +3709,18 @@
         "bit": "B"
       },
       "recordId": "BXG-36-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-36-02",
+      "exactKey": "BXG3602",
+      "baseProductCode": "BXG-36",
+      "baseKey": "BXG36",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-37-01",
@@ -2537,7 +3742,18 @@
         "bit": "F"
       },
       "recordId": "BXG-37-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-37-01",
+      "exactKey": "BXG3701",
+      "baseProductCode": "BXG-37",
+      "baseKey": "BXG37",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-37-02",
@@ -2559,7 +3775,18 @@
         "bit": "N"
       },
       "recordId": "BXG-37-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-37-02",
+      "exactKey": "BXG3702",
+      "baseProductCode": "BXG-37",
+      "baseKey": "BXG37",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-38",
@@ -2582,7 +3809,18 @@
       },
       "compositionSource": "獠牙/T",
       "recordId": "BXG-38",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-38",
+      "exactKey": "BXG38",
+      "baseProductCode": "BXG-38",
+      "baseKey": "BXG38",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-40-01",
@@ -2604,7 +3842,18 @@
         "bit": "GB"
       },
       "recordId": "BXG-40-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-40-01",
+      "exactKey": "BXG4001",
+      "baseProductCode": "BXG-40",
+      "baseKey": "BXG40",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-40-02",
@@ -2626,7 +3875,18 @@
         "bit": "U"
       },
       "recordId": "BXG-40-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-40-02",
+      "exactKey": "BXG4002",
+      "baseProductCode": "BXG-40",
+      "baseKey": "BXG40",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-41-01",
@@ -2648,7 +3908,18 @@
         "bit": "A"
       },
       "recordId": "BXG-41-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-41-01",
+      "exactKey": "BXG4101",
+      "baseProductCode": "BXG-41",
+      "baseKey": "BXG41",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-41-02",
@@ -2670,7 +3941,18 @@
         "bit": "D"
       },
       "recordId": "BXG-41-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-41-02",
+      "exactKey": "BXG4102",
+      "baseProductCode": "BXG-41",
+      "baseKey": "BXG41",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "BXG-42",
@@ -2692,7 +3974,18 @@
         "bit": "BS"
       },
       "recordId": "BXG-42",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-42",
+      "exactKey": "BXG42",
+      "baseProductCode": "BXG-42",
+      "baseKey": "BXG42",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-43",
@@ -2715,7 +4008,18 @@
       },
       "compositionSource": "至尊/R",
       "recordId": "BXG-43",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-43",
+      "exactKey": "BXG43",
+      "baseProductCode": "BXG-43",
+      "baseKey": "BXG43",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-45",
@@ -2739,7 +4043,18 @@
       "compositionSource": "爆擊/A",
       "integratedRatchetBit": "Tr",
       "recordId": "BXG-45",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-45",
+      "exactKey": "BXG45",
+      "baseProductCode": "BXG-45",
+      "baseKey": "BXG45",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-51",
@@ -2762,7 +4077,18 @@
       },
       "compositionSource": "勇氣/S",
       "recordId": "BXG-51",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-51",
+      "exactKey": "BXG51",
+      "baseProductCode": "BXG-51",
+      "baseKey": "BXG51",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-52",
@@ -2784,7 +4110,18 @@
         "bit": "V"
       },
       "recordId": "BXG-52",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-52",
+      "exactKey": "BXG52",
+      "baseProductCode": "BXG-52",
+      "baseKey": "BXG52",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-53",
@@ -2806,7 +4143,18 @@
         "bit": "F"
       },
       "recordId": "BXG-53",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-53",
+      "exactKey": "BXG53",
+      "baseProductCode": "BXG-53",
+      "baseKey": "BXG53",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-54",
@@ -2831,7 +4179,18 @@
         "來源表跨行：金屬塗層武士藍／足球日本國家代表隊版"
       ],
       "recordId": "BXG-54",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-54",
+      "exactKey": "BXG54",
+      "baseProductCode": "BXG-54",
+      "baseKey": "BXG54",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-55",
@@ -2853,7 +4212,18 @@
         "bit": "GP"
       },
       "recordId": "BXG-55",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-55",
+      "exactKey": "BXG55",
+      "baseProductCode": "BXG-55",
+      "baseKey": "BXG55",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-56",
@@ -2875,7 +4245,18 @@
         "bit": "GF"
       },
       "recordId": "BXG-56",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-56",
+      "exactKey": "BXG56",
+      "baseProductCode": "BXG-56",
+      "baseKey": "BXG56",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXG-57-01",
@@ -2898,7 +4279,18 @@
       },
       "compositionSource": "至尊/B",
       "recordId": "BXG-57-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-57-01",
+      "exactKey": "BXG5701",
+      "baseProductCode": "BXG-57",
+      "baseKey": "BXG57",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "BXG-57-02",
@@ -2921,7 +4313,18 @@
       },
       "compositionSource": "勇氣/A",
       "recordId": "BXG-57-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-57-02",
+      "exactKey": "BXG5702",
+      "baseProductCode": "BXG-57",
+      "baseKey": "BXG57",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "BXG-57-03",
@@ -2944,7 +4347,18 @@
       },
       "compositionSource": "九尾/T",
       "recordId": "BXG-57-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-57-03",
+      "exactKey": "BXG5703",
+      "baseProductCode": "BXG-57",
+      "baseKey": "BXG57",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "BXG-61",
@@ -2966,7 +4380,18 @@
         "bit": "Z"
       },
       "recordId": "BXG-61",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXG-61",
+      "exactKey": "BXG61",
+      "baseProductCode": "BXG-61",
+      "baseKey": "BXG61",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXH-10",
@@ -2988,7 +4413,18 @@
         "bit": "A"
       },
       "recordId": "BXH-10",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXH-10",
+      "exactKey": "BXH10",
+      "baseProductCode": "BXH-10",
+      "baseKey": "BXH10",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "BXH-14",
@@ -3011,7 +4447,18 @@
       },
       "compositionSource": "伏特/S",
       "recordId": "BXH-14",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "BXH-14",
+      "exactKey": "BXH14",
+      "baseProductCode": "BXH-14",
+      "baseKey": "BXH14",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-01",
@@ -3034,7 +4481,18 @@
       },
       "compositionSource": "勇氣/S",
       "recordId": "CX-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-01",
+      "exactKey": "CX01",
+      "baseProductCode": "CX-01",
+      "baseKey": "CX01",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-02",
@@ -3057,7 +4515,18 @@
       },
       "compositionSource": "至尊/R",
       "recordId": "CX-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-02",
+      "exactKey": "CX02",
+      "baseProductCode": "CX-02",
+      "baseKey": "CX02",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-03",
@@ -3080,7 +4549,18 @@
       },
       "compositionSource": "幽冥/B",
       "recordId": "CX-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-03",
+      "exactKey": "CX03",
+      "baseProductCode": "CX-03",
+      "baseKey": "CX03",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-04-01",
@@ -3103,7 +4583,18 @@
       },
       "compositionSource": "勇氣/S",
       "recordId": "CX-04-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-04-01",
+      "exactKey": "CX0401",
+      "baseProductCode": "CX-04",
+      "baseKey": "CX04",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "CX-04-02",
@@ -3126,7 +4617,18 @@
       },
       "compositionSource": "幽冥/B",
       "recordId": "CX-04-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-04-02",
+      "exactKey": "CX0402",
+      "baseProductCode": "CX-04",
+      "baseKey": "CX04",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "CX-05-01",
@@ -3149,7 +4651,18 @@
       },
       "compositionSource": "獵魂/T",
       "recordId": "CX-05-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-05-01",
+      "exactKey": "CX0501",
+      "baseProductCode": "CX-05",
+      "baseKey": "CX05",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 6
     },
     {
       "productCode": "CX-05-02",
@@ -3172,7 +4685,18 @@
       },
       "compositionSource": "獵魂/C",
       "recordId": "CX-05-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-05-02",
+      "exactKey": "CX0502",
+      "baseProductCode": "CX-05",
+      "baseKey": "CX05",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 6
     },
     {
       "productCode": "CX-05-03",
@@ -3195,7 +4719,18 @@
       },
       "compositionSource": "至尊/T",
       "recordId": "CX-05-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-05-03",
+      "exactKey": "CX0503",
+      "baseProductCode": "CX-05",
+      "baseKey": "CX05",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 6
     },
     {
       "productCode": "CX-05-04",
@@ -3217,7 +4752,18 @@
         "bit": "K"
       },
       "recordId": "CX-05-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-05-04",
+      "exactKey": "CX0504",
+      "baseProductCode": "CX-05",
+      "baseKey": "CX05",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 4,
+      "variantCount": 6
     },
     {
       "productCode": "CX-05-05",
@@ -3239,7 +4785,18 @@
         "bit": "LF"
       },
       "recordId": "CX-05-05",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-05-05",
+      "exactKey": "CX0505",
+      "baseProductCode": "CX-05",
+      "baseKey": "CX05",
+      "hasChildNumber": true,
+      "childNumber": "05",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 5,
+      "variantCount": 6
     },
     {
       "productCode": "CX-05-06",
@@ -3261,7 +4818,18 @@
         "bit": "K"
       },
       "recordId": "CX-05-06",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-05-06",
+      "exactKey": "CX0506",
+      "baseProductCode": "CX-05",
+      "baseKey": "CX05",
+      "hasChildNumber": true,
+      "childNumber": "06",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 6,
+      "variantCount": 6
     },
     {
       "productCode": "CX-06-01",
@@ -3284,7 +4852,18 @@
       },
       "compositionSource": "九尾/J",
       "recordId": "CX-06-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-06-01",
+      "exactKey": "CX0601",
+      "baseProductCode": "CX-06",
+      "baseKey": "CX06",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "CX-06-02",
@@ -3307,7 +4886,18 @@
       },
       "compositionSource": "九尾/J",
       "recordId": "CX-06-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-06-02",
+      "exactKey": "CX0602",
+      "baseProductCode": "CX-06",
+      "baseKey": "CX06",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "CX-06-03",
@@ -3330,7 +4920,18 @@
       },
       "compositionSource": "九尾/J",
       "recordId": "CX-06-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-06-03",
+      "exactKey": "CX0603",
+      "baseProductCode": "CX-06",
+      "baseKey": "CX06",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "CX-07",
@@ -3354,7 +4955,18 @@
       "compositionSource": "爆擊/A",
       "integratedRatchetBit": "Tr",
       "recordId": "CX-07",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-07",
+      "exactKey": "CX07",
+      "baseProductCode": "CX-07",
+      "baseKey": "CX07",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-08-01",
@@ -3377,7 +4989,18 @@
       },
       "compositionSource": "烈焰/W",
       "recordId": "CX-08-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-08-01",
+      "exactKey": "CX0801",
+      "baseProductCode": "CX-08",
+      "baseKey": "CX08",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 6
     },
     {
       "productCode": "CX-08-02",
@@ -3400,7 +5023,18 @@
       },
       "compositionSource": "烈焰/M",
       "recordId": "CX-08-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-08-02",
+      "exactKey": "CX0802",
+      "baseProductCode": "CX-08",
+      "baseKey": "CX08",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 6
     },
     {
       "productCode": "CX-08-03",
@@ -3423,7 +5057,18 @@
       },
       "compositionSource": "幽冥/W",
       "recordId": "CX-08-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-08-03",
+      "exactKey": "CX0803",
+      "baseProductCode": "CX-08",
+      "baseKey": "CX08",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 6
     },
     {
       "productCode": "CX-08-04",
@@ -3445,7 +5090,18 @@
         "bit": "MN"
       },
       "recordId": "CX-08-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-08-04",
+      "exactKey": "CX0804",
+      "baseProductCode": "CX-08",
+      "baseKey": "CX08",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 4,
+      "variantCount": 6
     },
     {
       "productCode": "CX-08-05",
@@ -3467,7 +5123,18 @@
         "bit": "WB"
       },
       "recordId": "CX-08-05",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-08-05",
+      "exactKey": "CX0805",
+      "baseProductCode": "CX-08",
+      "baseKey": "CX08",
+      "hasChildNumber": true,
+      "childNumber": "05",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 5,
+      "variantCount": 6
     },
     {
       "productCode": "CX-08-06",
@@ -3489,7 +5156,18 @@
         "bit": "WB"
       },
       "recordId": "CX-08-06",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-08-06",
+      "exactKey": "CX0806",
+      "baseProductCode": "CX-08",
+      "baseKey": "CX08",
+      "hasChildNumber": true,
+      "childNumber": "06",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 6,
+      "variantCount": 6
     },
     {
       "productCode": "CX-09",
@@ -3512,7 +5190,18 @@
       },
       "compositionSource": "滅世/D",
       "recordId": "CX-09",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-09",
+      "exactKey": "CX09",
+      "baseProductCode": "CX-09",
+      "baseKey": "CX09",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-10",
@@ -3535,7 +5224,18 @@
       },
       "compositionSource": "狩獵/F",
       "recordId": "CX-10",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-10",
+      "exactKey": "CX10",
+      "baseProductCode": "CX-10",
+      "baseKey": "CX10",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-11-01",
@@ -3559,7 +5259,18 @@
       "compositionSource": "威能/H",
       "integratedRatchetBit": "Op",
       "recordId": "CX-11-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-11-01",
+      "exactKey": "CX1101",
+      "baseProductCode": "CX-11",
+      "baseKey": "CX11",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "CX-11-02",
@@ -3581,7 +5292,18 @@
         "bit": "HN"
       },
       "recordId": "CX-11-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-11-02",
+      "exactKey": "CX1102",
+      "baseProductCode": "CX-11",
+      "baseKey": "CX11",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "CX-11-03",
@@ -3603,7 +5325,18 @@
         "bit": "FB"
       },
       "recordId": "CX-11-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-11-03",
+      "exactKey": "CX1103",
+      "baseProductCode": "CX-11",
+      "baseKey": "CX11",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "CX-12",
@@ -3626,7 +5359,18 @@
       },
       "compositionSource": "閃焰/Z",
       "recordId": "CX-12",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-12",
+      "exactKey": "CX12",
+      "baseProductCode": "CX-12",
+      "baseKey": "CX12",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-13",
@@ -3649,7 +5393,18 @@
       },
       "compositionSource": "B/閃擊/K",
       "recordId": "CX-13",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-13",
+      "exactKey": "CX13",
+      "baseProductCode": "CX-13",
+      "baseKey": "CX13",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-14",
@@ -3672,7 +5427,18 @@
       },
       "compositionSource": "G/堡壘/V",
       "recordId": "CX-14",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-14",
+      "exactKey": "CX14",
+      "baseProductCode": "CX-14",
+      "baseKey": "CX14",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-15",
@@ -3695,7 +5461,18 @@
       },
       "compositionSource": "F/狂怒/E",
       "recordId": "CX-15",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-15",
+      "exactKey": "CX15",
+      "baseProductCode": "CX-15",
+      "baseKey": "CX15",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-16",
@@ -3718,7 +5495,18 @@
       },
       "compositionSource": "B/閃擊/K",
       "recordId": "CX-16",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-16",
+      "exactKey": "CX16",
+      "baseProductCode": "CX-16",
+      "baseKey": "CX16",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "CX-17-01",
@@ -3741,7 +5529,18 @@
       },
       "compositionSource": "P/極變/O",
       "recordId": "CX-17-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-17-01",
+      "exactKey": "CX1701",
+      "baseProductCode": "CX-17",
+      "baseKey": "CX17",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 6
     },
     {
       "productCode": "CX-17-02",
@@ -3764,7 +5563,18 @@
       },
       "compositionSource": "P/極變/O",
       "recordId": "CX-17-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-17-02",
+      "exactKey": "CX1702",
+      "baseProductCode": "CX-17",
+      "baseKey": "CX17",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 6
     },
     {
       "productCode": "CX-17-03",
@@ -3786,7 +5596,18 @@
         "bit": "LO"
       },
       "recordId": "CX-17-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-17-03",
+      "exactKey": "CX1703",
+      "baseProductCode": "CX-17",
+      "baseKey": "CX17",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 6
     },
     {
       "productCode": "CX-17-04",
@@ -3808,7 +5629,18 @@
         "bit": "GU"
       },
       "recordId": "CX-17-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-17-04",
+      "exactKey": "CX1704",
+      "baseProductCode": "CX-17",
+      "baseKey": "CX17",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 4,
+      "variantCount": 6
     },
     {
       "productCode": "CX-17-05",
@@ -3830,7 +5662,18 @@
         "bit": "N"
       },
       "recordId": "CX-17-05",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-17-05",
+      "exactKey": "CX1705",
+      "baseProductCode": "CX-17",
+      "baseKey": "CX17",
+      "hasChildNumber": true,
+      "childNumber": "05",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 5,
+      "variantCount": 6
     },
     {
       "productCode": "CX-17-06",
@@ -3852,7 +5695,18 @@
         "bit": "GU"
       },
       "recordId": "CX-17-06",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-17-06",
+      "exactKey": "CX1706",
+      "baseProductCode": "CX-17",
+      "baseKey": "CX17",
+      "hasChildNumber": true,
+      "childNumber": "06",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 6,
+      "variantCount": 6
     },
     {
       "productCode": "CX-18-01",
@@ -3875,7 +5729,18 @@
       },
       "compositionSource": "O/W",
       "recordId": "CX-18-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-18-01",
+      "exactKey": "CX1801",
+      "baseProductCode": "CX-18",
+      "baseKey": "CX18",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "CX-18-02",
@@ -3898,7 +5763,18 @@
       },
       "compositionSource": "O/W",
       "recordId": "CX-18-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-18-02",
+      "exactKey": "CX1802",
+      "baseProductCode": "CX-18",
+      "baseKey": "CX18",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "CX-18-03",
@@ -3921,7 +5797,18 @@
       },
       "compositionSource": "O/W",
       "recordId": "CX-18-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "CX-18-03",
+      "exactKey": "CX1803",
+      "baseProductCode": "CX-18",
+      "baseKey": "CX18",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "UX-00",
@@ -3943,7 +5830,18 @@
         "bit": "A"
       },
       "recordId": "UX-00",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-00",
+      "exactKey": "UX00",
+      "baseProductCode": "UX-00",
+      "baseKey": "UX00",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-01",
@@ -3965,7 +5863,18 @@
         "bit": "A"
       },
       "recordId": "UX-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-01",
+      "exactKey": "UX01",
+      "baseProductCode": "UX-01",
+      "baseKey": "UX01",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-02",
@@ -3987,7 +5896,18 @@
         "bit": "H"
       },
       "recordId": "UX-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-02",
+      "exactKey": "UX02",
+      "baseProductCode": "UX-02",
+      "baseKey": "UX02",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-03",
@@ -4009,7 +5929,18 @@
         "bit": "DB"
       },
       "recordId": "UX-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-03",
+      "exactKey": "UX03",
+      "baseProductCode": "UX-03",
+      "baseKey": "UX03",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-04-01",
@@ -4031,7 +5962,18 @@
         "bit": "A"
       },
       "recordId": "UX-04-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-04-01",
+      "exactKey": "UX0401",
+      "baseProductCode": "UX-04",
+      "baseKey": "UX04",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 2
     },
     {
       "productCode": "UX-04-02",
@@ -4053,7 +5995,18 @@
         "bit": "DB"
       },
       "recordId": "UX-04-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-04-02",
+      "exactKey": "UX0402",
+      "baseProductCode": "UX-04",
+      "baseKey": "UX04",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 2
     },
     {
       "productCode": "UX-05-01",
@@ -4075,7 +6028,18 @@
         "bit": "MN"
       },
       "recordId": "UX-05-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-05-01",
+      "exactKey": "UX0501",
+      "baseProductCode": "UX-05",
+      "baseKey": "UX05",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "UX-05-02",
@@ -4097,7 +6061,18 @@
         "bit": "LF"
       },
       "recordId": "UX-05-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-05-02",
+      "exactKey": "UX0502",
+      "baseProductCode": "UX-05",
+      "baseKey": "UX05",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "UX-05-03",
@@ -4119,7 +6094,18 @@
         "bit": "GP"
       },
       "recordId": "UX-05-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-05-03",
+      "exactKey": "UX0503",
+      "baseProductCode": "UX-05",
+      "baseKey": "UX05",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "UX-06",
@@ -4141,7 +6127,18 @@
         "bit": "GN"
       },
       "recordId": "UX-06",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-06",
+      "exactKey": "UX06",
+      "baseProductCode": "UX-06",
+      "baseKey": "UX06",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-07-01",
@@ -4163,7 +6160,18 @@
         "bit": "G"
       },
       "recordId": "UX-07-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-07-01",
+      "exactKey": "UX0701",
+      "baseProductCode": "UX-07",
+      "baseKey": "UX07",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "UX-07-02",
@@ -4185,7 +6193,18 @@
         "bit": "S"
       },
       "recordId": "UX-07-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-07-02",
+      "exactKey": "UX0702",
+      "baseProductCode": "UX-07",
+      "baseKey": "UX07",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "UX-07-03",
@@ -4207,7 +6226,18 @@
         "bit": "GF"
       },
       "recordId": "UX-07-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-07-03",
+      "exactKey": "UX0703",
+      "baseProductCode": "UX-07",
+      "baseKey": "UX07",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "UX-08",
@@ -4229,7 +6259,18 @@
         "bit": "FB"
       },
       "recordId": "UX-08",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-08",
+      "exactKey": "UX08",
+      "baseProductCode": "UX-08",
+      "baseKey": "UX08",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-09",
@@ -4251,7 +6292,18 @@
         "bit": "L"
       },
       "recordId": "UX-09",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-09",
+      "exactKey": "UX09",
+      "baseProductCode": "UX-09",
+      "baseKey": "UX09",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-10-01",
@@ -4273,7 +6325,18 @@
         "bit": "BS"
       },
       "recordId": "UX-10-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-10-01",
+      "exactKey": "UX1001",
+      "baseProductCode": "UX-10",
+      "baseKey": "UX10",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "UX-10-02",
@@ -4295,7 +6358,18 @@
         "bit": "RA"
       },
       "recordId": "UX-10-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-10-02",
+      "exactKey": "UX1002",
+      "baseProductCode": "UX-10",
+      "baseKey": "UX10",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "UX-10-03",
@@ -4319,7 +6393,18 @@
       "recordId": "UX-10-03",
       "confirmationStatus": "user_confirmed",
       "confirmationDate": "2026-07-15",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-10-03",
+      "exactKey": "UX1003",
+      "baseProductCode": "UX-10",
+      "baseKey": "UX10",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "UX-11",
@@ -4341,7 +6426,18 @@
         "bit": "LR"
       },
       "recordId": "UX-11",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-11",
+      "exactKey": "UX11",
+      "baseProductCode": "UX-11",
+      "baseKey": "UX11",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-12-01",
@@ -4363,7 +6459,18 @@
         "bit": "GB"
       },
       "recordId": "UX-12-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-12-01",
+      "exactKey": "UX1201",
+      "baseProductCode": "UX-12",
+      "baseKey": "UX12",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 6
     },
     {
       "productCode": "UX-12-02",
@@ -4385,7 +6492,18 @@
         "bit": "H"
       },
       "recordId": "UX-12-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-12-02",
+      "exactKey": "UX1202",
+      "baseProductCode": "UX-12",
+      "baseKey": "UX12",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 6
     },
     {
       "productCode": "UX-12-03",
@@ -4407,7 +6525,18 @@
         "bit": "F"
       },
       "recordId": "UX-12-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-12-03",
+      "exactKey": "UX1203",
+      "baseProductCode": "UX-12",
+      "baseKey": "UX12",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 6
     },
     {
       "productCode": "UX-12-04",
@@ -4429,7 +6558,18 @@
         "bit": "E"
       },
       "recordId": "UX-12-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-12-04",
+      "exactKey": "UX1204",
+      "baseProductCode": "UX-12",
+      "baseKey": "UX12",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 4,
+      "variantCount": 6
     },
     {
       "productCode": "UX-12-05",
@@ -4451,7 +6591,18 @@
         "bit": "N"
       },
       "recordId": "UX-12-05",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-12-05",
+      "exactKey": "UX1205",
+      "baseProductCode": "UX-12",
+      "baseKey": "UX12",
+      "hasChildNumber": true,
+      "childNumber": "05",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 5,
+      "variantCount": 6
     },
     {
       "productCode": "UX-12-06",
@@ -4473,7 +6624,18 @@
         "bit": "C"
       },
       "recordId": "UX-12-06",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-12-06",
+      "exactKey": "UX1206",
+      "baseProductCode": "UX-12",
+      "baseKey": "UX12",
+      "hasChildNumber": true,
+      "childNumber": "06",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 6,
+      "variantCount": 6
     },
     {
       "productCode": "UX-13",
@@ -4495,7 +6657,18 @@
         "bit": "UN"
       },
       "recordId": "UX-13",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-13",
+      "exactKey": "UX13",
+      "baseProductCode": "UX-13",
+      "baseKey": "UX13",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-14",
@@ -4517,7 +6690,18 @@
         "bit": "Z"
       },
       "recordId": "UX-14",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-14",
+      "exactKey": "UX14",
+      "baseProductCode": "UX-14",
+      "baseKey": "UX14",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-15-01",
@@ -4539,7 +6723,18 @@
         "bit": "UF"
       },
       "recordId": "UX-15-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-15-01",
+      "exactKey": "UX1501",
+      "baseProductCode": "UX-15",
+      "baseKey": "UX15",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "UX-15-02",
@@ -4561,7 +6756,18 @@
         "bit": "L"
       },
       "recordId": "UX-15-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-15-02",
+      "exactKey": "UX1502",
+      "baseProductCode": "UX-15",
+      "baseKey": "UX15",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "UX-15-03",
@@ -4584,7 +6790,18 @@
       },
       "compositionSource": "勇氣/J",
       "recordId": "UX-15-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-15-03",
+      "exactKey": "UX1503",
+      "baseProductCode": "UX-15",
+      "baseKey": "UX15",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "UX-16-01",
@@ -4606,7 +6823,18 @@
         "bit": "B"
       },
       "recordId": "UX-16-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-16-01",
+      "exactKey": "UX1601",
+      "baseProductCode": "UX-16",
+      "baseKey": "UX16",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3
     },
     {
       "productCode": "UX-16-02",
@@ -4628,7 +6856,18 @@
         "bit": "B"
       },
       "recordId": "UX-16-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-16-02",
+      "exactKey": "UX1602",
+      "baseProductCode": "UX-16",
+      "baseKey": "UX16",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3
     },
     {
       "productCode": "UX-16-03",
@@ -4650,7 +6889,18 @@
         "bit": "B"
       },
       "recordId": "UX-16-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-16-03",
+      "exactKey": "UX1603",
+      "baseProductCode": "UX-16",
+      "baseKey": "UX16",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3
     },
     {
       "productCode": "UX-17",
@@ -4672,7 +6922,18 @@
         "bit": "J"
       },
       "recordId": "UX-17",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-17",
+      "exactKey": "UX17",
+      "baseProductCode": "UX-17",
+      "baseKey": "UX17",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-18-01",
@@ -4694,7 +6955,18 @@
         "bit": "W"
       },
       "recordId": "UX-18-01",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-18-01",
+      "exactKey": "UX1801",
+      "baseProductCode": "UX-18",
+      "baseKey": "UX18",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 6
     },
     {
       "productCode": "UX-18-02",
@@ -4716,7 +6988,18 @@
         "bit": "C"
       },
       "recordId": "UX-18-02",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-18-02",
+      "exactKey": "UX1802",
+      "baseProductCode": "UX-18",
+      "baseKey": "UX18",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 6
     },
     {
       "productCode": "UX-18-03",
@@ -4739,7 +7022,18 @@
       },
       "compositionSource": "九尾/M",
       "recordId": "UX-18-03",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-18-03",
+      "exactKey": "UX1803",
+      "baseProductCode": "UX-18",
+      "baseKey": "UX18",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 6
     },
     {
       "productCode": "UX-18-04",
@@ -4762,7 +7056,18 @@
       },
       "compositionSource": "勇氣/C",
       "recordId": "UX-18-04",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-18-04",
+      "exactKey": "UX1804",
+      "baseProductCode": "UX-18",
+      "baseKey": "UX18",
+      "hasChildNumber": true,
+      "childNumber": "04",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 4,
+      "variantCount": 6
     },
     {
       "productCode": "UX-18-05",
@@ -4784,7 +7089,18 @@
         "bit": "G"
       },
       "recordId": "UX-18-05",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-18-05",
+      "exactKey": "UX1805",
+      "baseProductCode": "UX-18",
+      "baseKey": "UX18",
+      "hasChildNumber": true,
+      "childNumber": "05",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 5,
+      "variantCount": 6
     },
     {
       "productCode": "UX-18-06",
@@ -4806,7 +7122,18 @@
         "bit": "LR"
       },
       "recordId": "UX-18-06",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-18-06",
+      "exactKey": "UX1806",
+      "baseProductCode": "UX-18",
+      "baseKey": "UX18",
+      "hasChildNumber": true,
+      "childNumber": "06",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 6,
+      "variantCount": 6
     },
     {
       "productCode": "UX-19",
@@ -4830,7 +7157,18 @@
       "ratchetSelectable": false,
       "bitSelectable": true,
       "recordId": "UX-19",
-      "isSetProduct": false
+      "isSetProduct": false,
+      "canonicalProductCode": "UX-19",
+      "exactKey": "UX19",
+      "baseProductCode": "UX-19",
+      "baseKey": "UX19",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     },
     {
       "productCode": "UX-20",
@@ -4856,7 +7194,18 @@
       "recordId": "UX-20",
       "isSetProduct": false,
       "confirmationStatus": "user_confirmed",
-      "confirmationDate": "2026-07-16"
+      "confirmationDate": "2026-07-16",
+      "canonicalProductCode": "UX-20",
+      "exactKey": "UX20",
+      "baseProductCode": "UX-20",
+      "baseKey": "UX20",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1
     }
   ],
   "stockProductSets": [
@@ -4936,5 +7285,855 @@
         }
       ]
     }
-  ]
+  ],
+  "lookupIndexes": {
+    "exactByCode": {
+      "BX0001": [
+        "BX-00-01-01",
+        "BX-00-01-02"
+      ],
+      "BX0002": [
+        "BX-00-02-01",
+        "BX-00-02-02"
+      ],
+      "BX0003": [
+        "BX-00-03-01",
+        "BX-00-03-02"
+      ],
+      "BX0004": [
+        "BX-00-04-01",
+        "BX-00-04-02"
+      ],
+      "BX01": [
+        "BX-01"
+      ],
+      "BX02": [
+        "BX-02"
+      ],
+      "BX03": [
+        "BX-03"
+      ],
+      "BX04": [
+        "BX-04"
+      ],
+      "BX05": [
+        "BX-05"
+      ],
+      "BX06": [
+        "BX-06"
+      ],
+      "BX07": [
+        "BX-07"
+      ],
+      "BX0801": [
+        "BX-08-01"
+      ],
+      "BX0802": [
+        "BX-08-02"
+      ],
+      "BX0803": [
+        "BX-08-03"
+      ],
+      "BX13": [
+        "BX-13"
+      ],
+      "BX1401": [
+        "BX-14-01"
+      ],
+      "BX1402": [
+        "BX-14-02"
+      ],
+      "BX1403": [
+        "BX-14-03"
+      ],
+      "BX1404": [
+        "BX-14-04"
+      ],
+      "BX1405": [
+        "BX-14-05"
+      ],
+      "BX1406": [
+        "BX-14-06"
+      ],
+      "BX15": [
+        "BX-15"
+      ],
+      "BX1601": [
+        "BX-16-01"
+      ],
+      "BX1602": [
+        "BX-16-02"
+      ],
+      "BX1603": [
+        "BX-16-03"
+      ],
+      "BX1701": [
+        "BX-17-01"
+      ],
+      "BX1702": [
+        "BX-17-02"
+      ],
+      "BX19": [
+        "BX-19"
+      ],
+      "BX2001": [
+        "BX-20-01"
+      ],
+      "BX2002": [
+        "BX-20-02"
+      ],
+      "BX2003": [
+        "BX-20-03"
+      ],
+      "BX2101": [
+        "BX-21-01"
+      ],
+      "BX2102": [
+        "BX-21-02"
+      ],
+      "BX2103": [
+        "BX-21-03"
+      ],
+      "BX22": [
+        "BX-22"
+      ],
+      "BX23": [
+        "BX-23"
+      ],
+      "BX2401": [
+        "BX-24-01"
+      ],
+      "BX2402": [
+        "BX-24-02"
+      ],
+      "BX2403": [
+        "BX-24-03"
+      ],
+      "BX2404": [
+        "BX-24-04"
+      ],
+      "BX2405": [
+        "BX-24-05"
+      ],
+      "BX2406": [
+        "BX-24-06"
+      ],
+      "BX26": [
+        "BX-26"
+      ],
+      "BX2701": [
+        "BX-27-01"
+      ],
+      "BX2702": [
+        "BX-27-02"
+      ],
+      "BX2703": [
+        "BX-27-03"
+      ],
+      "BX3101": [
+        "BX-31-01"
+      ],
+      "BX3102": [
+        "BX-31-02"
+      ],
+      "BX3103": [
+        "BX-31-03"
+      ],
+      "BX3104": [
+        "BX-31-04"
+      ],
+      "BX3105": [
+        "BX-31-05"
+      ],
+      "BX3106": [
+        "BX-31-06"
+      ],
+      "BX33": [
+        "BX-33"
+      ],
+      "BX34": [
+        "BX-34"
+      ],
+      "BX3501": [
+        "BX-35-01"
+      ],
+      "BX3502": [
+        "BX-35-02"
+      ],
+      "BX3503": [
+        "BX-35-03"
+      ],
+      "BX3504": [
+        "BX-35-04"
+      ],
+      "BX3505": [
+        "BX-35-05"
+      ],
+      "BX3506": [
+        "BX-35-06"
+      ],
+      "BX3601": [
+        "BX-36-01"
+      ],
+      "BX3602": [
+        "BX-36-02"
+      ],
+      "BX3603": [
+        "BX-36-03"
+      ],
+      "BX37": [
+        "BX-37"
+      ],
+      "BX3901": [
+        "BX-39-01"
+      ],
+      "BX3902": [
+        "BX-39-02"
+      ],
+      "BX3903": [
+        "BX-39-03"
+      ],
+      "BX44": [
+        "BX-44"
+      ],
+      "BX45": [
+        "BX-45"
+      ],
+      "BX4601": [
+        "BX-46-01"
+      ],
+      "BX4602": [
+        "BX-46-02"
+      ],
+      "BX4801": [
+        "BX-48-01"
+      ],
+      "BX4802": [
+        "BX-48-02"
+      ],
+      "BX4803": [
+        "BX-48-03"
+      ],
+      "BX4804": [
+        "BX-48-04"
+      ],
+      "BX4805": [
+        "BX-48-05"
+      ],
+      "BX49": [
+        "BX-49"
+      ],
+      "BXG01": [
+        "BXG-01"
+      ],
+      "BXG04": [
+        "BXG-04"
+      ],
+      "BXG07": [
+        "BXG-07"
+      ],
+      "BXG09": [
+        "BXG-09"
+      ],
+      "BXG11": [
+        "BXG-11"
+      ],
+      "BXG1201": [
+        "BXG-12-01"
+      ],
+      "BXG1202": [
+        "BXG-12-02"
+      ],
+      "BXG1203": [
+        "BXG-12-03"
+      ],
+      "BXG1204": [
+        "BXG-12-04"
+      ],
+      "BXG13": [
+        "BXG-13"
+      ],
+      "BXG14": [
+        "BXG-14"
+      ],
+      "BXG15": [
+        "BXG-15"
+      ],
+      "BXG16": [
+        "BXG-16"
+      ],
+      "BXG20": [
+        "BXG-20"
+      ],
+      "BXG21": [
+        "BXG-21"
+      ],
+      "BXG22": [
+        "BXG-22"
+      ],
+      "BXG24": [
+        "BXG-24"
+      ],
+      "BXG2901": [
+        "BXG-29-01"
+      ],
+      "BXG2902": [
+        "BXG-29-02"
+      ],
+      "BXG3001": [
+        "BXG-30-01"
+      ],
+      "BXG3002": [
+        "BXG-30-02"
+      ],
+      "BXG32": [
+        "BXG-32"
+      ],
+      "BXG3301": [
+        "BXG-33-01"
+      ],
+      "BXG3302": [
+        "BXG-33-02"
+      ],
+      "BXG3401": [
+        "BXG-34-01"
+      ],
+      "BXG3402": [
+        "BXG-34-02"
+      ],
+      "BXG3601": [
+        "BXG-36-01"
+      ],
+      "BXG3602": [
+        "BXG-36-02"
+      ],
+      "BXG3701": [
+        "BXG-37-01"
+      ],
+      "BXG3702": [
+        "BXG-37-02"
+      ],
+      "BXG38": [
+        "BXG-38"
+      ],
+      "BXG4001": [
+        "BXG-40-01"
+      ],
+      "BXG4002": [
+        "BXG-40-02"
+      ],
+      "BXG4101": [
+        "BXG-41-01"
+      ],
+      "BXG4102": [
+        "BXG-41-02"
+      ],
+      "BXG42": [
+        "BXG-42"
+      ],
+      "BXG43": [
+        "BXG-43"
+      ],
+      "BXG45": [
+        "BXG-45"
+      ],
+      "BXG51": [
+        "BXG-51"
+      ],
+      "BXG52": [
+        "BXG-52"
+      ],
+      "BXG53": [
+        "BXG-53"
+      ],
+      "BXG54": [
+        "BXG-54"
+      ],
+      "BXG55": [
+        "BXG-55"
+      ],
+      "BXG56": [
+        "BXG-56"
+      ],
+      "BXG5701": [
+        "BXG-57-01"
+      ],
+      "BXG5702": [
+        "BXG-57-02"
+      ],
+      "BXG5703": [
+        "BXG-57-03"
+      ],
+      "BXG61": [
+        "BXG-61"
+      ],
+      "BXH10": [
+        "BXH-10"
+      ],
+      "BXH14": [
+        "BXH-14"
+      ],
+      "CX01": [
+        "CX-01"
+      ],
+      "CX02": [
+        "CX-02"
+      ],
+      "CX03": [
+        "CX-03"
+      ],
+      "CX0401": [
+        "CX-04-01"
+      ],
+      "CX0402": [
+        "CX-04-02"
+      ],
+      "CX0501": [
+        "CX-05-01"
+      ],
+      "CX0502": [
+        "CX-05-02"
+      ],
+      "CX0503": [
+        "CX-05-03"
+      ],
+      "CX0504": [
+        "CX-05-04"
+      ],
+      "CX0505": [
+        "CX-05-05"
+      ],
+      "CX0506": [
+        "CX-05-06"
+      ],
+      "CX0601": [
+        "CX-06-01"
+      ],
+      "CX0602": [
+        "CX-06-02"
+      ],
+      "CX0603": [
+        "CX-06-03"
+      ],
+      "CX07": [
+        "CX-07"
+      ],
+      "CX0801": [
+        "CX-08-01"
+      ],
+      "CX0802": [
+        "CX-08-02"
+      ],
+      "CX0803": [
+        "CX-08-03"
+      ],
+      "CX0804": [
+        "CX-08-04"
+      ],
+      "CX0805": [
+        "CX-08-05"
+      ],
+      "CX0806": [
+        "CX-08-06"
+      ],
+      "CX09": [
+        "CX-09"
+      ],
+      "CX10": [
+        "CX-10"
+      ],
+      "CX1101": [
+        "CX-11-01"
+      ],
+      "CX1102": [
+        "CX-11-02"
+      ],
+      "CX1103": [
+        "CX-11-03"
+      ],
+      "CX12": [
+        "CX-12"
+      ],
+      "CX13": [
+        "CX-13"
+      ],
+      "CX14": [
+        "CX-14"
+      ],
+      "CX15": [
+        "CX-15"
+      ],
+      "CX16": [
+        "CX-16"
+      ],
+      "CX1701": [
+        "CX-17-01"
+      ],
+      "CX1702": [
+        "CX-17-02"
+      ],
+      "CX1703": [
+        "CX-17-03"
+      ],
+      "CX1704": [
+        "CX-17-04"
+      ],
+      "CX1705": [
+        "CX-17-05"
+      ],
+      "CX1706": [
+        "CX-17-06"
+      ],
+      "CX1801": [
+        "CX-18-01"
+      ],
+      "CX1802": [
+        "CX-18-02"
+      ],
+      "CX1803": [
+        "CX-18-03"
+      ],
+      "UX00": [
+        "UX-00"
+      ],
+      "UX01": [
+        "UX-01"
+      ],
+      "UX02": [
+        "UX-02"
+      ],
+      "UX03": [
+        "UX-03"
+      ],
+      "UX0401": [
+        "UX-04-01"
+      ],
+      "UX0402": [
+        "UX-04-02"
+      ],
+      "UX0501": [
+        "UX-05-01"
+      ],
+      "UX0502": [
+        "UX-05-02"
+      ],
+      "UX0503": [
+        "UX-05-03"
+      ],
+      "UX06": [
+        "UX-06"
+      ],
+      "UX0701": [
+        "UX-07-01"
+      ],
+      "UX0702": [
+        "UX-07-02"
+      ],
+      "UX0703": [
+        "UX-07-03"
+      ],
+      "UX08": [
+        "UX-08"
+      ],
+      "UX09": [
+        "UX-09"
+      ],
+      "UX1001": [
+        "UX-10-01"
+      ],
+      "UX1002": [
+        "UX-10-02"
+      ],
+      "UX1003": [
+        "UX-10-03"
+      ],
+      "UX11": [
+        "UX-11"
+      ],
+      "UX1201": [
+        "UX-12-01"
+      ],
+      "UX1202": [
+        "UX-12-02"
+      ],
+      "UX1203": [
+        "UX-12-03"
+      ],
+      "UX1204": [
+        "UX-12-04"
+      ],
+      "UX1205": [
+        "UX-12-05"
+      ],
+      "UX1206": [
+        "UX-12-06"
+      ],
+      "UX13": [
+        "UX-13"
+      ],
+      "UX14": [
+        "UX-14"
+      ],
+      "UX1501": [
+        "UX-15-01"
+      ],
+      "UX1502": [
+        "UX-15-02"
+      ],
+      "UX1503": [
+        "UX-15-03"
+      ],
+      "UX1601": [
+        "UX-16-01"
+      ],
+      "UX1602": [
+        "UX-16-02"
+      ],
+      "UX1603": [
+        "UX-16-03"
+      ],
+      "UX17": [
+        "UX-17"
+      ],
+      "UX1801": [
+        "UX-18-01"
+      ],
+      "UX1802": [
+        "UX-18-02"
+      ],
+      "UX1803": [
+        "UX-18-03"
+      ],
+      "UX1804": [
+        "UX-18-04"
+      ],
+      "UX1805": [
+        "UX-18-05"
+      ],
+      "UX1806": [
+        "UX-18-06"
+      ],
+      "UX19": [
+        "UX-19"
+      ],
+      "UX20": [
+        "UX-20"
+      ]
+    },
+    "variantsByBaseCode": {
+      "BX08": [
+        "BX-08-01",
+        "BX-08-02",
+        "BX-08-03"
+      ],
+      "BX14": [
+        "BX-14-01",
+        "BX-14-02",
+        "BX-14-03",
+        "BX-14-04",
+        "BX-14-05",
+        "BX-14-06"
+      ],
+      "BX16": [
+        "BX-16-01",
+        "BX-16-02",
+        "BX-16-03"
+      ],
+      "BX17": [
+        "BX-17-01",
+        "BX-17-02"
+      ],
+      "BX20": [
+        "BX-20-01",
+        "BX-20-02",
+        "BX-20-03"
+      ],
+      "BX21": [
+        "BX-21-01",
+        "BX-21-02",
+        "BX-21-03"
+      ],
+      "BX24": [
+        "BX-24-01",
+        "BX-24-02",
+        "BX-24-03",
+        "BX-24-04",
+        "BX-24-05",
+        "BX-24-06"
+      ],
+      "BX27": [
+        "BX-27-01",
+        "BX-27-02",
+        "BX-27-03"
+      ],
+      "BX31": [
+        "BX-31-01",
+        "BX-31-02",
+        "BX-31-03",
+        "BX-31-04",
+        "BX-31-05",
+        "BX-31-06"
+      ],
+      "BX35": [
+        "BX-35-01",
+        "BX-35-02",
+        "BX-35-03",
+        "BX-35-04",
+        "BX-35-05",
+        "BX-35-06"
+      ],
+      "BX36": [
+        "BX-36-01",
+        "BX-36-02",
+        "BX-36-03"
+      ],
+      "BX39": [
+        "BX-39-01",
+        "BX-39-02",
+        "BX-39-03"
+      ],
+      "BX46": [
+        "BX-46-01",
+        "BX-46-02"
+      ],
+      "BX48": [
+        "BX-48-01",
+        "BX-48-02",
+        "BX-48-03",
+        "BX-48-04",
+        "BX-48-05"
+      ],
+      "BXG12": [
+        "BXG-12-01",
+        "BXG-12-02",
+        "BXG-12-03",
+        "BXG-12-04"
+      ],
+      "BXG29": [
+        "BXG-29-01",
+        "BXG-29-02"
+      ],
+      "BXG30": [
+        "BXG-30-01",
+        "BXG-30-02"
+      ],
+      "BXG33": [
+        "BXG-33-01",
+        "BXG-33-02"
+      ],
+      "BXG34": [
+        "BXG-34-01",
+        "BXG-34-02"
+      ],
+      "BXG36": [
+        "BXG-36-01",
+        "BXG-36-02"
+      ],
+      "BXG37": [
+        "BXG-37-01",
+        "BXG-37-02"
+      ],
+      "BXG40": [
+        "BXG-40-01",
+        "BXG-40-02"
+      ],
+      "BXG41": [
+        "BXG-41-01",
+        "BXG-41-02"
+      ],
+      "BXG57": [
+        "BXG-57-01",
+        "BXG-57-02",
+        "BXG-57-03"
+      ],
+      "CX04": [
+        "CX-04-01",
+        "CX-04-02"
+      ],
+      "CX05": [
+        "CX-05-01",
+        "CX-05-02",
+        "CX-05-03",
+        "CX-05-04",
+        "CX-05-05",
+        "CX-05-06"
+      ],
+      "CX06": [
+        "CX-06-01",
+        "CX-06-02",
+        "CX-06-03"
+      ],
+      "CX08": [
+        "CX-08-01",
+        "CX-08-02",
+        "CX-08-03",
+        "CX-08-04",
+        "CX-08-05",
+        "CX-08-06"
+      ],
+      "CX11": [
+        "CX-11-01",
+        "CX-11-02",
+        "CX-11-03"
+      ],
+      "CX17": [
+        "CX-17-01",
+        "CX-17-02",
+        "CX-17-03",
+        "CX-17-04",
+        "CX-17-05",
+        "CX-17-06"
+      ],
+      "CX18": [
+        "CX-18-01",
+        "CX-18-02",
+        "CX-18-03"
+      ],
+      "UX04": [
+        "UX-04-01",
+        "UX-04-02"
+      ],
+      "UX05": [
+        "UX-05-01",
+        "UX-05-02",
+        "UX-05-03"
+      ],
+      "UX07": [
+        "UX-07-01",
+        "UX-07-02",
+        "UX-07-03"
+      ],
+      "UX10": [
+        "UX-10-01",
+        "UX-10-02",
+        "UX-10-03"
+      ],
+      "UX12": [
+        "UX-12-01",
+        "UX-12-02",
+        "UX-12-03",
+        "UX-12-04",
+        "UX-12-05",
+        "UX-12-06"
+      ],
+      "UX15": [
+        "UX-15-01",
+        "UX-15-02",
+        "UX-15-03"
+      ],
+      "UX16": [
+        "UX-16-01",
+        "UX-16-02",
+        "UX-16-03"
+      ],
+      "UX18": [
+        "UX-18-01",
+        "UX-18-02",
+        "UX-18-03",
+        "UX-18-04",
+        "UX-18-05",
+        "UX-18-06"
+      ]
+    }
+  }
 }
