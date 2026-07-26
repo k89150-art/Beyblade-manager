@@ -1,8 +1,10 @@
 import { analyzeCombo as analyzeLegacyCombo } from "./beyblade_x_analysis_engine_v1_zhTW.js?v=20260630-v11-contextual1";
 import {
   analyzeCombo as analyzeV18Combo,
+  getMetaCoachInsight,
+  getMetaCoachPartStatus,
   getMetaEvidence
-} from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260724-meta1";
+} from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260726-coach1";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -130,45 +132,49 @@ function adaptV18Analysis(raw) {
           : "平衡測試位 / 依隊伍缺口調整",
     confidence: confidenceScore >= 2 ? "高" : confidenceScore >= 1 ? "中" : "待驗證",
     notes: raw?.notes || [],
-    metaEvidence: raw?.metaEvidence || null
+    metaEvidence: raw?.metaEvidence || null,
+    metaCoach: raw?.metaCoach || null
   };
 }
 
 function withMetaEvidence(analysis, input, db) {
   const evidence = getMetaEvidence(input, db);
-  if (!evidence) return analysis;
+  const metaCoach = getMetaCoachInsight(input, db);
+  if (!evidence && !metaCoach) return analysis;
 
   const scores = { ...(analysis.scores || {}) };
-  scores.metaConfidence = Math.round(
-    ((Number(scores.metaConfidence) || 0) + evidence.scoreDelta) * 10
-  ) / 10;
   const strengths = [...(analysis.strengths || [])];
   const warnings = [...(analysis.warnings || [])];
   const recommendations = [...(analysis.recommendations || [])];
   const notes = [...(analysis.notes || [])];
-  const evidenceSummary = [
-    evidence.label,
-    evidence.role,
-    evidence.metricText
-  ].filter(Boolean).join("：");
+  if (evidence) {
+    scores.metaConfidence = Math.round(
+      ((Number(scores.metaConfidence) || 0) + evidence.scoreDelta) * 10
+    ) / 10;
+    const evidenceSummary = [
+      evidence.label,
+      evidence.role,
+      evidence.metricText
+    ].filter(Boolean).join("：");
 
-  if (evidence.scoreDelta > 0) {
-    strengths.push(`此 CX 組合命中${evidenceSummary}。`);
-  } else if (evidence.evidenceClass === "emerging") {
-    recommendations.push(`${evidenceSummary}；可列為測試方向，但不列為強推薦。`);
-  } else if (evidence.evidenceClass === "successful_rogue") {
-    recommendations.push(`${evidenceSummary}；屬冷門成功案例，不列為主要推薦。`);
-  } else if (evidence.evidenceClass === "experimental") {
-    recommendations.push(`${evidenceSummary}；有案例但樣本少，不增加 Meta 分數。`);
+    if (evidence.scoreDelta > 0) {
+      strengths.push(`此 CX 組合命中${evidenceSummary}。`);
+    } else if (evidence.evidenceClass === "emerging") {
+      recommendations.push(`${evidenceSummary}；可列為測試方向，但不列為強推薦。`);
+    } else if (evidence.evidenceClass === "successful_rogue") {
+      recommendations.push(`${evidenceSummary}；屬冷門成功案例，不列為主要推薦。`);
+    } else if (evidence.evidenceClass === "experimental") {
+      recommendations.push(`${evidenceSummary}；有案例但樣本少，不增加 Meta 分數。`);
+    }
+    if (evidence.sampleWarning) {
+      warnings.push("此實戰路線樣本偏少，名次占比不可直接解讀為穩定勝率。");
+    }
+    notes.push(evidence.disclaimer, ...(evidence.notes || []));
   }
-  if (evidence.sampleWarning) {
-    warnings.push("此實戰路線樣本偏少，名次占比不可直接解讀為穩定勝率。");
-  }
-  notes.push(evidence.disclaimer, ...(evidence.notes || []));
 
   return {
     ...analysis,
-    primaryRole: evidence.scoreDelta > 0 && evidence.specificity >= 12 && evidence.role
+    primaryRole: evidence?.scoreDelta > 0 && evidence.specificity >= 12 && evidence.role
       ? evidence.role
       : analysis.primaryRole,
     scores,
@@ -176,7 +182,8 @@ function withMetaEvidence(analysis, input, db) {
     warnings: uniqueItems(warnings),
     recommendations: uniqueItems(recommendations),
     notes: uniqueItems(notes),
-    metaEvidence: evidence
+    metaEvidence: evidence || analysis.metaEvidence || null,
+    metaCoach: metaCoach || analysis.metaCoach || null
   };
 }
 
@@ -195,7 +202,7 @@ async function loadData() {
   if (database && rules) return;
 
   [database, rules] = await Promise.all([
-    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260724-meta1"),
+    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260726-coach1"),
     loadJson("./beyblade_x_analysis_rules_v1_zhTW.json?v=20260630-engine2")
   ]);
 
@@ -864,7 +871,12 @@ function buildDeckRole(config, role, analysis) {
 
 function detailLine(part) {
   if (!part) return "";
-  const tier = part.metaTier ? `Tier ${part.metaTier}` : "未標 Tier";
+  const coachStatus = getMetaCoachPartStatus(part, database);
+  const tier = coachStatus?.label
+    ? `Meta ${coachStatus.label}`
+    : part.metaTier
+      ? `Tier ${part.metaTier}`
+      : "未標 Tier";
   const role = part.role ? `，${part.role}` : "";
   return `${partTitle(part)}，${tier}${role}`;
 }
@@ -1019,6 +1031,7 @@ function makeStandardSuggestion(blade, ratchet, bit, target) {
     role,
     analysis,
     value: analysisScoreValue(analysis, target),
+    recommendationMomentum: Number(analysis.metaCoach?.recommendationMomentum) || 0,
     strengths: buildStrengths(config, analysis).slice(0, 2),
     warnings: buildWarnings(config, analysis, analysis.warnings || []).slice(0, 2),
     recommendations: buildRecommendations(config, analysis).slice(0, 2),
@@ -1058,7 +1071,9 @@ function pickTopSuggestions(suggestions) {
     const seen = new Set();
     return suggestions
       .filter(item => item.target === target)
-      .sort((a, b) => b.value - a.value)
+      .sort((a, b) => (
+        (b.value + b.recommendationMomentum) - (a.value + a.recommendationMomentum)
+      ))
       .filter(item => {
         const key = normalizeText(item.label);
         if (seen.has(key)) return false;
@@ -1092,6 +1107,7 @@ function renderStockSuggestions(items, owned, fromCache = false) {
           <summary class="suggestion-summary">
             <span>
               <span class="analysis-pill">${escapeHtml(item.targetLabel)}</span>
+              ${item.recommendationMomentum > 0 ? '<span class="analysis-pill">近期上升</span>' : ""}
               <span class="suggestion-title">${escapeHtml(item.label)}</span>
             </span>
             <span class="suggestion-score">${escapeHtml(item.value)}</span>
@@ -1157,6 +1173,34 @@ async function renderStockSuggestionsFromCloud() {
     result.style.display = "block";
     result.innerHTML = `<div class="status-bad">庫存推薦產生失敗：${escapeHtml(error.message)}</div>`;
   }
+}
+
+function renderMetaCoach(metaCoach) {
+  if (!metaCoach) return "";
+  const statusLabels = {
+    momentum: "近期上升",
+    unchanged: "維持不變",
+    mature_core: "成熟核心",
+    established_secondary: "可信次選",
+    emerging: "emerging／樣本少"
+  };
+  const items = (metaCoach.items || []).map(item => `
+    <li class="${item.sampleWarning ? "status-warn" : ""}">
+      <strong>${escapeHtml(item.label)}｜${escapeHtml(statusLabels[item.status] || item.status)}</strong>
+      <div>${escapeHtml(item.explanation)}</div>
+      ${item.evidenceText ? `<div>${escapeHtml(item.evidenceText)}</div>` : ""}
+    </li>
+  `).join("");
+
+  return `
+    <div class="section-title">Meta 教練</div>
+    <div class="result-card">
+      <div><strong>${escapeHtml(metaCoach.headline)}</strong></div>
+      ${items ? `<ul class="status-list">${items}</ul>` : ""}
+      ${metaCoach.sampleWarning ? '<div class="status-warn">此路線樣本仍少，請先自行實測，不列為強推薦。</div>' : ""}
+      <div class="analysis-note">${escapeHtml(metaCoach.disclaimer)}</div>
+    </div>
+  `;
 }
 
 function renderMetaEvidence(evidence) {
@@ -1225,6 +1269,7 @@ function renderAnalysis() {
     <div class="score-card-grid">${renderScores(analysis.scores)}</div>
     <div class="section-title">已辨識零件</div>
     <ul class="status-list">${renderList(detailParts)}</ul>
+    ${renderMetaCoach(analysis.metaCoach)}
     <div class="section-title">優點</div>
     <ul class="status-list">${renderList(strengths, "status-good")}</ul>
     ${renderMetaEvidence(analysis.metaEvidence)}

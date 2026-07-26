@@ -10,13 +10,14 @@
       "分析與推薦僅供理論參考，不保證實戰結果。",
       "保留舊版相容欄位，避免既有配置分析頁失效。"
     ],
-    "updated": "2026-07-24",
-    "updatePackage": "2026.07.24-meta-routes",
+    "updated": "2026-07-26",
+    "updatePackage": "2026.07.26-meta-coach",
     "appliedUpdates": [
       "2026.07.11-delta1",
       "2026.07.15-g-bit",
       "2026.07.23-multi-model-index",
-      "2026.07.24-meta-routes"
+      "2026.07.24-meta-routes",
+      "2026.07.26-meta-coach"
     ]
   },
   "enums": {
@@ -15763,5 +15764,137 @@
     "emerging": "5～19 次或近期成長中；呈現為可測試方向，分析分數只可小幅加權或不加權。",
     "successful_rogue": "冷門但有成功案例；顯示為特殊路線並加樣本警示。",
     "experimental": "低樣本或新零件；只記錄案例，不增加 meta 分數。"
-  }
+  },
+  "metaCoachUpdates": [
+    {
+      "metadata": {
+        "id": "meta_coach_update_2026-07-26",
+        "version": "1.0.1",
+        "updated": "2026-07-26",
+        "scope": "weekly_integrated_meta_delta",
+        "baseline": "2026-07-24 integrated meta v2",
+        "applyMode": "merge_only",
+        "summary": "BX/UX top tier remains stable; meaningful delta is concentrated in CX part diversity and Silver Wolf's recent placement rise."
+      },
+      "sourceWindow": {
+        "global": {
+          "bbxhub": "2026-07-16 to 2026-07-23; site updated 2026-07-24",
+          "beywatch": "2026-07-01 to 2026-07-22; last updated 2026-07-23"
+        },
+        "japan": {
+          "status": "No sufficiently complete new open-format deck dataset found after the prior integrated review.",
+          "handling": "Do not infer a Japan-wide shift from event schedules or CX-restricted event announcements."
+        }
+      },
+      "changes": [
+        {
+          "subjectType": "blade",
+          "subject": "Silver Wolf",
+          "changeType": "recent_ranking_rise",
+          "previousAssessment": "A- mature secondary",
+          "newAssessment": "A- mature secondary, upward momentum",
+          "evidence": {
+            "ranking": 4,
+            "top4ComboCount": 20,
+            "period": "2026-07-16 to 2026-07-23"
+          },
+          "coachEvaluation": "Recent placements rose enough to watch, but the evidence does not yet justify promotion to A or replacing Wizard Rod as the primary defensive-stamina recommendation.",
+          "recommendationImpact": "small_priority_increase",
+          "scoreImpact": 0,
+          "confidence": "medium_high"
+        },
+        {
+          "subjectType": "cx_ecosystem",
+          "subject": "CX Lock Chips",
+          "changeType": "diversification",
+          "evidence": {
+            "Emperor": 5,
+            "Pegasus": 2,
+            "Valkyrie": 2,
+            "Wolf": 1,
+            "Hells": 1
+          },
+          "coachEvaluation": "Emperor remains the only clearly leading Lock Chip, but Valkyrie, Wolf and Hells now have recent winning-placement presence. This is an expansion of viable CX shells, not proof that the gap to BX/UX top tiers has closed.",
+          "recommendationImpact": "show_more_experimental_options",
+          "scoreImpact": 0,
+          "confidence": "medium"
+        },
+        {
+          "subjectType": "cx_main_blade",
+          "subject": "Blast",
+          "changeType": "continued_dominance",
+          "evidence": {
+            "Blast": 9,
+            "Flare": 1,
+            "Brave": 1
+          },
+          "coachEvaluation": "Blast remains the mature CX Main/Over Blade route. Flare and Brave have entered recent placement data, but one appearance each is only an emerging signal.",
+          "recommendationImpact": "keep_blast_primary",
+          "scoreImpact": 0,
+          "confidence": "medium_high"
+        },
+        {
+          "subjectType": "cx_assist_blade",
+          "subject": "Heavy",
+          "changeType": "still_primary_with_new_alternatives",
+          "evidence": {
+            "Heavy": 6,
+            "Wheel": 3,
+            "Round": 2
+          },
+          "coachEvaluation": "Heavy remains the safest default Assist Blade. Wheel is a credible alternative and Round has crossed from isolated theory into early evidence, but neither should replace Heavy as the default recommendation yet.",
+          "recommendationImpact": "add_round_as_emerging",
+          "scoreImpact": 0,
+          "confidence": "medium"
+        }
+      ],
+      "stableCore": [
+        {
+          "subject": "Shark Scale",
+          "status": "unchanged_S",
+          "coachEvaluation": "Still the strongest cross-source attack recommendation."
+        },
+        {
+          "subject": "Wizard Rod",
+          "status": "unchanged_S",
+          "coachEvaluation": "Still the most mature defensive-stamina full-build platform."
+        },
+        {
+          "subject": "Aero Pegasus",
+          "status": "unchanged_A_plus",
+          "coachEvaluation": "Still a high-quality heavy attack option; no new evidence forces a route change."
+        },
+        {
+          "subject": "Meteor Dragoon",
+          "status": "unchanged_S_minus",
+          "coachEvaluation": "Upward trend remains valid, but this run adds no stronger cross-region evidence than the prior review."
+        }
+      ],
+      "metaCoachRules": {
+        "display": [
+          "Explain why a recommendation changed or stayed unchanged.",
+          "Separate recent placement momentum from long-term maturity.",
+          "Mark one- or two-result CX parts as emerging, not mainstream.",
+          "Do not convert top-four placement counts into match win rates."
+        ],
+        "scoring": {
+          "SilverWolf": "No base score change; only a small recommendation-order boost.",
+          "CX_new_parts": "No score increase for Valkyrie, Wolf, Hells, Flare, Brave or Round based on this window alone.",
+          "Blast_Heavy": "Retain primary CX default status."
+        }
+      },
+      "codexAction": {
+        "required": true,
+        "scope": "meta database and meta coach explanation layer only",
+        "doNotTouch": [
+          "collection autofill",
+          "Firestore data",
+          "localStorage",
+          "stock product database",
+          "core compatibility rules",
+          "base performance scoring"
+        ]
+      }
+    }
+  ]
 }

@@ -318,6 +318,221 @@ export function getMetaEvidence(input, database) {
     disclaimer: "前段名次紀錄，不等於逐場勝率。"
   };
 }
+const META_COACH_STABLE_EXPLANATIONS = {
+  "Shark Scale": "仍是跨來源最強的攻擊推薦，本週沒有足以改變其定位的新證據。",
+  "Wizard Rod": "仍是最成熟的防守持久完整配置平台，本週沒有足以取代它的資料。",
+  "Aero Pegasus": "仍是高品質重攻擊選項，本週沒有新證據需要改變既有路線。",
+  "Meteor Dragoon": "上升趨勢仍成立，但本週沒有比前次檢視更強的跨區域證據。"
+};
+const META_COACH_CX_ALIASES = {
+  lockChips: {
+    Emperor: ["Emperor", "帝王"],
+    Valkyrie: ["Valkyrie", "女武神"],
+    Wolf: ["Wolf", "銀狼"],
+    Hells: ["Hells"]
+  },
+  mainBlades: {
+    Blast: ["Blast", "爆擊"],
+    Flare: ["Flare"],
+    Brave: ["Brave", "勇氣"]
+  },
+  assistBlades: {
+    Heavy: ["Heavy", "H"],
+    Wheel: ["Wheel", "W"],
+    Round: ["Round", "R"]
+  }
+};
+function latestMetaCoachUpdate(database) {
+  return [...(database.metaCoachUpdates || [])]
+    .sort((a, b) => String(b?.metadata?.updated || "").localeCompare(String(a?.metadata?.updated || "")))[0]
+    || null;
+}
+function coachCxTokens(database, section, value) {
+  const tokens = new Set([normalize(value)]);
+  const selected = cxItems(database, section).find(item => (
+    allNames(item).some(name => normalize(name) === normalize(value))
+  ));
+  allNames(selected || {}).forEach(name => tokens.add(normalize(name)));
+  return tokens;
+}
+function coachCxMatches(database, section, value, subject) {
+  if (!value) return false;
+  const tokens = coachCxTokens(database, section, value);
+  return (META_COACH_CX_ALIASES[section]?.[subject] || [subject])
+    .some(alias => tokens.has(normalize(alias)));
+}
+function coachEvidenceText(label, count) {
+  return Number.isFinite(Number(count))
+    ? `${label} ${Number(count)} 次前四名次紀錄（非勝率）`
+    : "";
+}
+function makeCoachItem(label, status, explanation, evidenceText = "", sampleWarning = false) {
+  return { label, status, explanation, evidenceText, sampleWarning };
+}
+export function getMetaCoachPartStatus(part, database) {
+  const update = latestMetaCoachUpdate(database);
+  if (!update || !part) return null;
+  const silverChange = (update.changes || []).find(change => (
+    change.subjectType === "blade"
+    && change.subject === "Silver Wolf"
+    && allNames(part).some(name => normalize(name) === normalize(change.subject))
+  ));
+  if (!silverChange) return null;
+  return {
+    label: "A-／近期上升",
+    recommendationMomentum: 0.05,
+    scoreImpact: 0
+  };
+}
+export function getMetaCoachInsight(input, database) {
+  const update = latestMetaCoachUpdate(database);
+  if (!update) return null;
+
+  const items = [];
+  let headline = "";
+  let partStatus = null;
+  let recommendationMomentum = 0;
+  const bladeInput = input?.blade || input?.bladeIdOrName || "";
+  const blade = bladeInput ? getBlade(database, bladeInput) : null;
+
+  if (blade) {
+    const change = (update.changes || []).find(item => (
+      item.subjectType === "blade"
+      && partMatchesMetaValue(database, "blades", blade, item.subject)
+    ));
+    if (change?.subject === "Silver Wolf") {
+      const ranking = change.evidence?.ranking;
+      const top4Count = change.evidence?.top4ComboCount;
+      headline = `${bladeZh(blade)}：A-／近期上升`;
+      partStatus = "A-／近期上升";
+      recommendationMomentum = 0.05;
+      items.push(makeCoachItem(
+        "近期排名上升",
+        "momentum",
+        "近期前段名次增加，因此只小幅提高推薦排序；證據仍不足以升為 A，也不取代 Wizard Rod 的主要防守持久推薦。",
+        [
+          Number.isFinite(Number(ranking)) ? `近期排名第 ${Number(ranking)}` : "",
+          coachEvidenceText("", top4Count).trim()
+        ].filter(Boolean).join("、")
+      ));
+    } else {
+      const stable = (update.stableCore || []).find(item => (
+        partMatchesMetaValue(database, "blades", blade, item.subject)
+      ));
+      if (stable) {
+        headline = `${bladeZh(blade)}：Meta 評價維持不變`;
+        items.push(makeCoachItem(
+          "核心定位維持",
+          "unchanged",
+          META_COACH_STABLE_EXPLANATIONS[stable.subject] || stable.coachEvaluation
+        ));
+      }
+    }
+  }
+
+  const selectedCx = {
+    Emperor: coachCxMatches(database, "lockChips", input?.lockChipName, "Emperor"),
+    Valkyrie: coachCxMatches(database, "lockChips", input?.lockChipName, "Valkyrie"),
+    Wolf: coachCxMatches(database, "lockChips", input?.lockChipName, "Wolf"),
+    Hells: coachCxMatches(database, "lockChips", input?.lockChipName, "Hells"),
+    Blast: coachCxMatches(database, "mainBlades", input?.mainBladeName, "Blast"),
+    Flare: coachCxMatches(database, "mainBlades", input?.mainBladeName, "Flare"),
+    Brave: coachCxMatches(database, "mainBlades", input?.mainBladeName, "Brave"),
+    Heavy: coachCxMatches(database, "assistBlades", input?.assistBladeCode, "Heavy"),
+    Wheel: coachCxMatches(database, "assistBlades", input?.assistBladeCode, "Wheel"),
+    Round: coachCxMatches(database, "assistBlades", input?.assistBladeCode, "Round")
+  };
+  const cxChanges = Object.fromEntries(
+    (update.changes || [])
+      .filter(change => String(change.subjectType || "").startsWith("cx_"))
+      .map(change => [change.subjectType, change])
+  );
+
+  if (selectedCx.Emperor && selectedCx.Blast && selectedCx.Heavy) {
+    headline = "CX Meta 教練：成熟核心維持";
+    items.push(makeCoachItem(
+      "Emperor + Blast + Heavy",
+      "mature_core",
+      "Emperor、Blast、Heavy 仍是目前 CX 預設成熟核心；本週的新案例擴大了可測替代件，但尚未改變預設推薦。",
+      [
+        coachEvidenceText("Emperor", cxChanges.cx_ecosystem?.evidence?.Emperor),
+        coachEvidenceText("Blast", cxChanges.cx_main_blade?.evidence?.Blast),
+        coachEvidenceText("Heavy", cxChanges.cx_assist_blade?.evidence?.Heavy)
+      ].filter(Boolean).join("、")
+    ));
+  } else {
+    if (selectedCx.Emperor) {
+      items.push(makeCoachItem(
+        "Emperor",
+        "mature_core",
+        "仍是目前唯一明確領先的 Lock Chip，本週維持 CX 預設核心。",
+        coachEvidenceText("Emperor", cxChanges.cx_ecosystem?.evidence?.Emperor)
+      ));
+    }
+    if (selectedCx.Blast) {
+      items.push(makeCoachItem(
+        "Blast",
+        "mature_core",
+        "仍是成熟的 CX Main／Over Blade 路線，Flare 與 Brave 的新案例尚不足以取代它。",
+        coachEvidenceText("Blast", cxChanges.cx_main_blade?.evidence?.Blast)
+      ));
+    }
+    if (selectedCx.Heavy) {
+      items.push(makeCoachItem(
+        "Heavy",
+        "mature_core",
+        "仍是最安全的 Assist Blade 預設選擇；Wheel 是可信次選，Round 則仍在新興階段。",
+        coachEvidenceText("Heavy", cxChanges.cx_assist_blade?.evidence?.Heavy)
+      ));
+    }
+  }
+
+  const emergingCx = [
+    ["Valkyrie", "Valkyrie Lock Chip", cxChanges.cx_ecosystem?.evidence?.Valkyrie],
+    ["Wolf", "Wolf Lock Chip", cxChanges.cx_ecosystem?.evidence?.Wolf],
+    ["Hells", "Hells Lock Chip", cxChanges.cx_ecosystem?.evidence?.Hells],
+    ["Flare", "Flare", cxChanges.cx_main_blade?.evidence?.Flare],
+    ["Brave", "Brave", cxChanges.cx_main_blade?.evidence?.Brave],
+    ["Round", "Round", cxChanges.cx_assist_blade?.evidence?.Round]
+  ];
+  emergingCx.forEach(([key, label, count]) => {
+    if (!selectedCx[key]) return;
+    items.push(makeCoachItem(
+      label,
+      "emerging",
+      "已有近期前段配置紀錄，但樣本仍少；只列為 emerging 測試方向，不增加 Meta 或基礎性能分數。",
+      coachEvidenceText(label, count),
+      true
+    ));
+  });
+  if (selectedCx.Wheel) {
+    items.push(makeCoachItem(
+      "Wheel",
+      "established_secondary",
+      "已有可信的次選地位，但目前仍不取代 Heavy 的預設推薦。",
+      coachEvidenceText("Wheel", cxChanges.cx_assist_blade?.evidence?.Wheel)
+    ));
+  }
+
+  if (!items.length) return null;
+  if (!headline) {
+    headline = items.some(item => item.status === "emerging")
+      ? "CX Meta 教練：新興路線，樣本仍少"
+      : "CX Meta 教練：本週評價";
+  }
+
+  return {
+    updateId: update.metadata?.id || "",
+    updated: update.metadata?.updated || "",
+    headline,
+    partStatus,
+    recommendationMomentum,
+    scoreImpact: 0,
+    items: uniq(items.map(item => JSON.stringify(item))).map(item => JSON.parse(item)),
+    sampleWarning: items.some(item => item.sampleWarning),
+    disclaimer: "前四名次出現次數不是逐場勝率；近期 momentum 與長期成熟度分開判讀。"
+  };
+}
 function cxName(input, key) { return input?.[key] || ""; }
 function priorityMatchesValue(actual, expected) {
   if (!expected) return true;
@@ -360,7 +575,8 @@ function analyzeCx(input, database) {
   if (!advantages.length) advantages.push("此 CX 配置可先依戰刃與軸心方向實測。");
   if (!risks.length) risks.push("目前沒有重大結構性風險，建議先確認發射穩定性。");
   const mainScore = Object.keys(scores).reduce((a,b)=>scores[a] >= scores[b] ? a : b);
-  return { role, roleLocked, scores, mainScore, advantages, risks, suggestions, notes, flags, requiresOrientationWarning: flags.includes("requiresOrientation") };
+  const metaCoach = getMetaCoachInsight(input, database);
+  return { role, roleLocked, scores, mainScore, advantages, risks, suggestions, notes, flags, metaCoach, requiresOrientationWarning: flags.includes("requiresOrientation") };
 }
 export function analyzeCombo(input, database) {
   if (input?.lockChipName || input?.mainBladeName || input?.metalBladeName || input?.overBladeCode || input?.assistBladeCode) return analyzeCx(input, database);
@@ -441,5 +657,6 @@ export function analyzeCombo(input, database) {
   if (!risks.length) risks.push(database.analysisRules?.emptyResultText?.risks || "目前沒有重大結構性風險，建議先實測發射穩定性。 ");
   if (!suggestions.length) suggestions.push(database.analysisRules?.emptyResultText?.suggestions || "此配置方向明確，可先保留核心零件測試，再依實戰結果微調。 ");
   const mainScore = Object.keys(scores).reduce((a,b)=>scores[a] >= scores[b] ? a : b);
-  return { role, roleLocked, scores, mainScore, advantages: uniq(advantages), risks: uniq(risks), suggestions: uniq(suggestions), notes: uniq(notes), flags: uniq(flags), metaEvidence, confidence: scores.metaConfidence >= 2 ? "高" : scores.metaConfidence >= 1 ? "中" : "待驗證" };
+  const metaCoach = getMetaCoachInsight(input, database);
+  return { role, roleLocked, scores, mainScore, advantages: uniq(advantages), risks: uniq(risks), suggestions: uniq(suggestions), notes: uniq(notes), flags: uniq(flags), metaEvidence, metaCoach, confidence: scores.metaConfidence >= 2 ? "高" : scores.metaConfidence >= 1 ? "中" : "待驗證" };
 }
