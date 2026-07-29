@@ -142,7 +142,9 @@ function getCatalogRowData(product) {
   }
 
   return [
-    product.isSetProduct ? product.recordId : product.productCode,
+    product.isSetProduct && !product.selectionRequired
+      ? product.recordId
+      : product.productCode,
     layer,
     valueOrDash(parts.lockChip),
     hasSplitBlade ? `${parts.overBlade}/${parts.metalBlade}` : valueOrDash(parts.mainBlade),

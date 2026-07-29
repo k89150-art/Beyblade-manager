@@ -2321,6 +2321,13 @@ function formatStockProductParts(product) {
   return labels.join(" ・ ");
 }
 
+function getStockProductDisplayCode(product) {
+  if (product?.selectionRequired && product.productCode) {
+    return product.productCode;
+  }
+  return product?.recordId || product?.productCode || "";
+}
+
 function renderStockAutoPreview() {
   if (stockInputMode !== "auto") return;
 
@@ -2349,7 +2356,7 @@ function renderStockAutoPreview() {
 
   const items = products.map(product => `
     <div class="stock-preview-item">
-      <strong>${escapeHtml(product.recordId)} ${escapeHtml(product.displayNameZh)}</strong>
+      <strong>${escapeHtml(getStockProductDisplayCode(product))} ${escapeHtml(product.displayNameZh)}</strong>
       <span>${escapeHtml(formatStockProductParts(product))}</span>
     </div>
   `).join("");
@@ -2447,7 +2454,9 @@ function getStockProductRowData(product) {
 
   return {
     cells: [
-      product.isSetProduct ? product.recordId : product.productCode,
+      product.isSetProduct && !product.selectionRequired
+        ? product.recordId
+        : product.productCode,
       layer,
       valueOrDash(parts.lockChip),
       mainPart,
@@ -2575,7 +2584,7 @@ function openStockProductChoice(products, productCode) {
   addAllButton.disabled = false;
   list.innerHTML = products.map((product, index) => `
     <button type="button" class="stock-choice-option" data-stock-choice-index="${index}">
-      <strong>${escapeHtml(product.recordId)} ${escapeHtml(product.displayNameZh)}</strong>
+      <strong>${escapeHtml(getStockProductDisplayCode(product))} ${escapeHtml(product.displayNameZh)}</strong>
       <span>${escapeHtml(formatStockProductParts(product))}</span>
     </button>
   `).join("");
