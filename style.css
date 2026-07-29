@@ -913,9 +913,9 @@ td select {
   content: attr(data-card-title);
   color: #ffffff;
   width: 100%;
-  font-size: 15px;
+  font-size: 19px;
   font-weight: 900;
-  line-height: 1.4;
+  line-height: 1.35;
   text-align: left;
 }
 
