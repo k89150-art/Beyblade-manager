@@ -45,7 +45,7 @@ let hasPendingCloudSave = false;
 let lastLocalWriteUpdatedAt = 0;
 let lastAppliedRemoteUpdatedAt = 0;
 
-const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29.json?v=20260729-stock1";
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260729-stock3";
 let stockInputMode = "auto";
 let stockProductsLoadPromise = null;
 let stockProductsLoaded = false;
@@ -2228,8 +2228,8 @@ function sortStockProducts(products) {
     const aParsed = parseStockProductCode(a.productCode);
     const bParsed = parseStockProductCode(b.productCode);
     const childCompare =
-      Number(aParsed?.childNumber || a.setChildIndex || 0) -
-      Number(bParsed?.childNumber || b.setChildIndex || 0);
+      Number(a.variantIndex || aParsed?.childNumber || a.setChildIndex || 0) -
+      Number(b.variantIndex || bParsed?.childNumber || b.setChildIndex || 0);
 
     if (childCompare !== 0) return childCompare;
     return String(a.recordId || "").localeCompare(
@@ -2359,7 +2359,7 @@ function renderStockAutoPreview() {
   let lookupNote = "";
 
   if (addAllAsSet) {
-    lookupNote = `<div>${escapeHtml(parsed.canonical)} 為雙陀螺套組，新增時會整組加入。</div>`;
+    lookupNote = `<div>${escapeHtml(parsed.canonical)} 為 ${exactMatches.length} 顆套組，新增時會整組加入。</div>`;
   } else if (variantMatches.length > 1) {
     lookupNote = `<div>${escapeHtml(parsed.baseCode)} 有 ${variantMatches.length} 種原裝配置，按「加入原裝收藏」後選擇你擁有的陀螺。</div>`;
   } else if (exactMatches.length > 1) {
