@@ -2245,6 +2245,12 @@ function buildStockProductIndexes(stockProducts) {
   const baseIndex = new Map();
   const unparseableCodes = [];
 
+  const addUniqueIndexEntry = (index, key, product) => {
+    if (!index.has(key)) index.set(key, []);
+    const products = index.get(key);
+    if (!products.includes(product)) products.push(product);
+  };
+
   stockProducts.forEach(product => {
     if (!product.autoFillEnabled || product.needsReview) return;
 
@@ -2255,12 +2261,15 @@ function buildStockProductIndexes(stockProducts) {
       return;
     }
 
-    if (!exactIndex.has(parsed.exactKey)) exactIndex.set(parsed.exactKey, []);
-    exactIndex.get(parsed.exactKey).push(product);
+    addUniqueIndexEntry(exactIndex, parsed.exactKey, product);
 
     if (parsed.hasChildNumber && !product.isSetProduct) {
-      if (!baseIndex.has(parsed.baseKey)) baseIndex.set(parsed.baseKey, []);
-      baseIndex.get(parsed.baseKey).push(product);
+      addUniqueIndexEntry(baseIndex, parsed.baseKey, product);
+    }
+
+    const officialCode = parseStockProductCode(product.officialProductCode);
+    if (officialCode && !officialCode.hasChildNumber) {
+      addUniqueIndexEntry(baseIndex, officialCode.exactKey, product);
     }
   });
 
