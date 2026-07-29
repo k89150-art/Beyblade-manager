@@ -163,13 +163,14 @@ used only for the desktop navigation collapsed preference.
 
 ### 5.2 Static product and stock data
 
-`stock_products_AUTOFILL_SAFE_2026-07-15.json` contains:
+`stock_products_AUTOFILL_SAFE_2026-07-29.json` contains:
 
-- 213 stock-product records.
-- 213 unique `recordId` values.
-- 209 unique product codes.
-- Four intentional duplicate product-code groups: `BX-00-01` through
-  `BX-00-04`, each representing a confirmed two-Bey set.
+- 220 stock-product records.
+- 220 unique `recordId` values.
+- 212 unique product codes.
+- Six intentional duplicate product-code groups: `BX-00-01` through
+  `BX-00-04` are confirmed two-Bey sets; `UX-21` and `CX-00-01` are
+  confirmed three-Bey sets.
 - Exact-code and base-model lookup indexes.
 - Standard, CX three-piece, CX four-piece, integrated-ratchet, and expansion
   assembly modes.

@@ -24,7 +24,7 @@ const firebaseConfig = {
 };
 
 const ADMIN_UID = "SesDhvXG6MUT38YhqGl0N6lVgMz1";
-const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260716-3";
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29.json?v=20260729-stock1";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

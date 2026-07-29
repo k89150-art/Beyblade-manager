@@ -2,11 +2,11 @@
   "metadata": {
     "name": "Beyblade X 原裝配置起始資料",
     "source": "使用者提供：戰鬥陀螺X商品型號整理-更新至20260515.pdf",
-    "sourceUpdatedThrough": "2026-07-16",
+    "sourceUpdatedThrough": "2026-07-29",
     "createdAt": "2026-07-15",
     "purpose": "收藏區輸入商品型號後，自動帶出原裝零件；不供配置區修改或性能評分。",
-    "recordCount": 213,
-    "autoFillSafeCount": 213,
+    "recordCount": 220,
+    "autoFillSafeCount": 220,
     "needsReviewCount": 0,
     "importantRules": [
       "原裝配置只用於收藏登錄，不改變性能評分。",
@@ -14,10 +14,10 @@
       "不得只用型號前綴判斷組裝系統；CX 隨機包內可能是一般 BX/UX 結構。",
       "autoFillEnabled=false 的資料不得自動帶入。"
     ],
-    "version": "2026.07.24-multi-model-index",
-    "updated": "2026-07-24",
-    "totalRecords": 213,
-    "autoFillSafeRecords": 213,
+    "version": "2026.07.29-official-latest",
+    "updated": "2026-07-29",
+    "totalRecords": 220,
+    "autoFillSafeRecords": 220,
     "reviewNeededRecords": 0,
     "confirmedCorrections": {
       "UX-10-03": "翼龍神翼 7-70 B",
@@ -32,15 +32,45 @@
       "BX-00-03",
       "BX-00-04"
     ],
-    "setAutoFillRule": "Typing BX-00-01 through BX-00-04 adds both Beyblades from that set.",
+    "setAutoFillRule": "Typing a multi-Bey set alias adds all child Beyblades from that set.",
     "dataset": "AUTOFILL_SAFE",
-    "note": "All 213 records are confirmed or otherwise marked safe for original-combo autofill.",
+    "note": "All 220 records are confirmed or otherwise marked safe for original-combo autofill.",
     "multiModelLookupEnabled": true,
     "lookupStrategy": "exactKey first, then baseKey for selectable variants",
-    "exactIndexCount": 209,
+    "exactIndexCount": 212,
     "baseVariantGroupCount": 39,
-    "parsedRecordCount": 213,
-    "unparsedRecordCount": 0
+    "parsedRecordCount": 220,
+    "unparsedRecordCount": 0,
+    "latestOfficialCheck": {
+      "checkedAt": "2026-07-29",
+      "officialLineupThrough": "CX-00 ティガレイジFT3-60T（2026-09-12発売予定）",
+      "addedRecordIds": [
+        "UX-21-01",
+        "UX-21-02",
+        "UX-21-03",
+        "CX-00-EVA-01",
+        "CX-00-EVA-02",
+        "CX-00-EVA-03",
+        "CX-00-TIGA"
+      ],
+      "localAliases": {
+        "CX-00-01": "CX-00 エヴァンゲリオンデッキセット",
+        "CX-00-02": "CX-00 ティガレイジFT3-60T"
+      },
+      "confirmedButNotDuplicated": [
+        "BX-00 ドランソード3-60F バージョン2.0（既存 BX-01 と同一原裝配置）",
+        "UX-00 グローリーワルキューレLF メタルコート:ブルー（既存 UX-20 と同一原裝配置）"
+      ],
+      "officialSources": [
+        "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/ux21.html",
+        "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx00-eva.html",
+        "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx00-tiga.html"
+      ]
+    },
+    "confirmedMultiBeySets": [
+      "UX-21",
+      "CX-00-01"
+    ]
   },
   "stockProducts": [
     {
@@ -7206,6 +7236,335 @@
       "variantSelectable": false,
       "variantIndex": null,
       "variantCount": 1
+    },
+    {
+      "productCode": "UX-21",
+      "officialProductCode": "UX-21",
+      "displayNameZh": "惡魔冥界",
+      "series": "UX",
+      "assemblySystem": "UX_EXPAND",
+      "ratchetMode": "integrated_blade_ratchet",
+      "autoFillEnabled": true,
+      "needsReview": false,
+      "sourceLine": null,
+      "parts": {
+        "blade": "惡魔冥界",
+        "lockChip": null,
+        "mainBlade": null,
+        "metalBlade": null,
+        "overBlade": null,
+        "assistBlade": null,
+        "ratchet": null,
+        "bit": "Z"
+      },
+      "ratchetSelectable": false,
+      "bitSelectable": true,
+      "recordId": "UX-21-01",
+      "isSetProduct": true,
+      "setId": "UX-21",
+      "setChildIndex": 1,
+      "setSize": 3,
+      "autoFillBehavior": "add_all_set_children",
+      "ambiguousCode": true,
+      "confirmationStatus": "official_confirmed",
+      "confirmationDate": "2026-07-29",
+      "canonicalProductCode": "UX-21",
+      "exactKey": "UX21",
+      "baseProductCode": "UX-21",
+      "baseKey": "UX21",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 3,
+      "sourceType": "official",
+      "sourcePublisher": "TAKARA TOMY",
+      "sourceCheckedAt": "2026-07-29",
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/ux21.html"
+    },
+    {
+      "productCode": "UX-21",
+      "officialProductCode": "UX-21",
+      "displayNameZh": "霜輝銀狼",
+      "series": "UX",
+      "assemblySystem": "STANDARD",
+      "ratchetMode": "standard",
+      "autoFillEnabled": true,
+      "needsReview": false,
+      "sourceLine": null,
+      "parts": {
+        "blade": "霜輝銀狼",
+        "lockChip": null,
+        "mainBlade": null,
+        "metalBlade": null,
+        "overBlade": null,
+        "assistBlade": null,
+        "ratchet": "9-70",
+        "bit": "R"
+      },
+      "recordId": "UX-21-02",
+      "isSetProduct": true,
+      "setId": "UX-21",
+      "setChildIndex": 2,
+      "setSize": 3,
+      "autoFillBehavior": "add_all_set_children",
+      "ambiguousCode": true,
+      "confirmationStatus": "official_confirmed",
+      "confirmationDate": "2026-07-29",
+      "canonicalProductCode": "UX-21",
+      "exactKey": "UX21",
+      "baseProductCode": "UX-21",
+      "baseKey": "UX21",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 3,
+      "sourceType": "official",
+      "sourcePublisher": "TAKARA TOMY",
+      "sourceCheckedAt": "2026-07-29",
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/ux21.html"
+    },
+    {
+      "productCode": "UX-21",
+      "officialProductCode": "UX-21",
+      "displayNameZh": "飛龍旋翼",
+      "series": "UX",
+      "assemblySystem": "STANDARD",
+      "ratchetMode": "standard",
+      "autoFillEnabled": true,
+      "needsReview": false,
+      "sourceLine": null,
+      "parts": {
+        "blade": "飛龍旋翼",
+        "lockChip": null,
+        "mainBlade": null,
+        "metalBlade": null,
+        "overBlade": null,
+        "assistBlade": null,
+        "ratchet": "8-80",
+        "bit": "B"
+      },
+      "recordId": "UX-21-03",
+      "isSetProduct": true,
+      "setId": "UX-21",
+      "setChildIndex": 3,
+      "setSize": 3,
+      "autoFillBehavior": "add_all_set_children",
+      "ambiguousCode": true,
+      "confirmationStatus": "official_confirmed",
+      "confirmationDate": "2026-07-29",
+      "canonicalProductCode": "UX-21",
+      "exactKey": "UX21",
+      "baseProductCode": "UX-21",
+      "baseKey": "UX21",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 3,
+      "sourceType": "official",
+      "sourcePublisher": "TAKARA TOMY",
+      "sourceCheckedAt": "2026-07-29",
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/ux21.html"
+    },
+    {
+      "productCode": "CX-00-01",
+      "officialProductCode": "CX-00",
+      "displayNameZh": "EVA至尊",
+      "series": "CX",
+      "assemblySystem": "CX_3P",
+      "ratchetMode": "standard",
+      "autoFillEnabled": true,
+      "needsReview": false,
+      "sourceLine": null,
+      "parts": {
+        "blade": null,
+        "lockChip": "EVA",
+        "mainBlade": "至尊",
+        "metalBlade": null,
+        "overBlade": null,
+        "assistBlade": "B",
+        "ratchet": "0-70",
+        "bit": "E"
+      },
+      "recordId": "CX-00-EVA-01",
+      "isSetProduct": true,
+      "setId": "CX-00-01",
+      "setChildIndex": 1,
+      "setSize": 3,
+      "autoFillBehavior": "add_all_set_children",
+      "ambiguousCode": true,
+      "confirmationStatus": "official_confirmed",
+      "confirmationDate": "2026-07-29",
+      "canonicalProductCode": "CX-00-01",
+      "exactKey": "CX0001",
+      "baseProductCode": "CX-00-01",
+      "baseKey": "CX0001",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 3,
+      "sourceType": "official",
+      "sourcePublisher": "TAKARA TOMY",
+      "sourceCheckedAt": "2026-07-29",
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx00-eva.html",
+      "notes": [
+        "網站唯一輸入別名 CX-00-01；官方商品型號為 CX-00。"
+      ],
+      "compositionSource": "至尊/B"
+    },
+    {
+      "productCode": "CX-00-01",
+      "officialProductCode": "CX-00",
+      "displayNameZh": "EVA勇氣",
+      "series": "CX",
+      "assemblySystem": "CX_3P",
+      "ratchetMode": "standard",
+      "autoFillEnabled": true,
+      "needsReview": false,
+      "sourceLine": null,
+      "parts": {
+        "blade": null,
+        "lockChip": "EVA",
+        "mainBlade": "勇氣",
+        "metalBlade": null,
+        "overBlade": null,
+        "assistBlade": "A",
+        "ratchet": "1-70",
+        "bit": "V"
+      },
+      "recordId": "CX-00-EVA-02",
+      "isSetProduct": true,
+      "setId": "CX-00-01",
+      "setChildIndex": 2,
+      "setSize": 3,
+      "autoFillBehavior": "add_all_set_children",
+      "ambiguousCode": true,
+      "confirmationStatus": "official_confirmed",
+      "confirmationDate": "2026-07-29",
+      "canonicalProductCode": "CX-00-01",
+      "exactKey": "CX0001",
+      "baseProductCode": "CX-00-01",
+      "baseKey": "CX0001",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 3,
+      "sourceType": "official",
+      "sourcePublisher": "TAKARA TOMY",
+      "sourceCheckedAt": "2026-07-29",
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx00-eva.html",
+      "notes": [
+        "網站唯一輸入別名 CX-00-01；官方商品型號為 CX-00。"
+      ],
+      "compositionSource": "勇氣/A"
+    },
+    {
+      "productCode": "CX-00-01",
+      "officialProductCode": "CX-00",
+      "displayNameZh": "EVA鞭擊",
+      "series": "CX",
+      "assemblySystem": "CX_3P",
+      "ratchetMode": "standard",
+      "autoFillEnabled": true,
+      "needsReview": false,
+      "sourceLine": null,
+      "parts": {
+        "blade": null,
+        "lockChip": "EVA",
+        "mainBlade": "鞭擊",
+        "metalBlade": null,
+        "overBlade": null,
+        "assistBlade": "T",
+        "ratchet": "2-70",
+        "bit": "A"
+      },
+      "recordId": "CX-00-EVA-03",
+      "isSetProduct": true,
+      "setId": "CX-00-01",
+      "setChildIndex": 3,
+      "setSize": 3,
+      "autoFillBehavior": "add_all_set_children",
+      "ambiguousCode": true,
+      "confirmationStatus": "official_confirmed",
+      "confirmationDate": "2026-07-29",
+      "canonicalProductCode": "CX-00-01",
+      "exactKey": "CX0001",
+      "baseProductCode": "CX-00-01",
+      "baseKey": "CX0001",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_set",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 3,
+      "sourceType": "official",
+      "sourcePublisher": "TAKARA TOMY",
+      "sourceCheckedAt": "2026-07-29",
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx00-eva.html",
+      "notes": [
+        "網站唯一輸入別名 CX-00-01；官方商品型號為 CX-00。"
+      ],
+      "compositionSource": "鞭擊/T"
+    },
+    {
+      "productCode": "CX-00-02",
+      "officialProductCode": "CX-00",
+      "displayNameZh": "迪迦狂怒",
+      "series": "CX",
+      "assemblySystem": "CX_4P",
+      "ratchetMode": "standard",
+      "autoFillEnabled": true,
+      "needsReview": false,
+      "sourceLine": null,
+      "parts": {
+        "blade": null,
+        "lockChip": "迪迦",
+        "mainBlade": null,
+        "metalBlade": "狂怒",
+        "overBlade": "F",
+        "assistBlade": "T",
+        "ratchet": "3-60",
+        "bit": "T"
+      },
+      "recordId": "CX-00-TIGA",
+      "isSetProduct": false,
+      "confirmationStatus": "official_confirmed",
+      "confirmationDate": "2026-07-29",
+      "canonicalProductCode": "CX-00-02",
+      "exactKey": "CX0002",
+      "baseProductCode": "CX-00-02",
+      "baseKey": "CX0002",
+      "hasChildNumber": false,
+      "childNumber": null,
+      "codeParsingStatus": "parsed",
+      "lookupMode": "exact_single",
+      "variantSelectable": false,
+      "variantIndex": null,
+      "variantCount": 1,
+      "sourceType": "official",
+      "sourcePublisher": "TAKARA TOMY",
+      "sourceCheckedAt": "2026-07-29",
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx00-tiga.html",
+      "notes": [
+        "網站唯一輸入別名 CX-00-02；官方商品型號為 CX-00。",
+        "FT 為 F（Over Blade）＋狂怒（Metal Blade）＋T（Assist Blade）的四層 CX 結構。"
+      ],
+      "compositionSource": "F/狂怒/T"
     }
   ],
   "stockProductSets": [
@@ -7282,6 +7641,58 @@
           "displayNameZh": "綠惡魔",
           "ratchet": "9-80",
           "bit": "HT"
+        }
+      ]
+    },
+    {
+      "productCode": "UX-21",
+      "officialProductCode": "UX-21",
+      "setSize": 3,
+      "autoFillBehavior": "add_all_set_children",
+      "children": [
+        {
+          "recordId": "UX-21-01",
+          "displayNameZh": "惡魔冥界",
+          "ratchet": null,
+          "bit": "Z"
+        },
+        {
+          "recordId": "UX-21-02",
+          "displayNameZh": "霜輝銀狼",
+          "ratchet": "9-70",
+          "bit": "R"
+        },
+        {
+          "recordId": "UX-21-03",
+          "displayNameZh": "飛龍旋翼",
+          "ratchet": "8-80",
+          "bit": "B"
+        }
+      ]
+    },
+    {
+      "productCode": "CX-00-01",
+      "officialProductCode": "CX-00",
+      "setSize": 3,
+      "autoFillBehavior": "add_all_set_children",
+      "children": [
+        {
+          "recordId": "CX-00-EVA-01",
+          "displayNameZh": "EVA至尊",
+          "ratchet": "0-70",
+          "bit": "E"
+        },
+        {
+          "recordId": "CX-00-EVA-02",
+          "displayNameZh": "EVA勇氣",
+          "ratchet": "1-70",
+          "bit": "V"
+        },
+        {
+          "recordId": "CX-00-EVA-03",
+          "displayNameZh": "EVA鞭擊",
+          "ratchet": "2-70",
+          "bit": "A"
         }
       ]
     }
@@ -7918,6 +8329,19 @@
       ],
       "UX20": [
         "UX-20"
+      ],
+      "UX21": [
+        "UX-21-01",
+        "UX-21-02",
+        "UX-21-03"
+      ],
+      "CX0001": [
+        "CX-00-EVA-01",
+        "CX-00-EVA-02",
+        "CX-00-EVA-03"
+      ],
+      "CX0002": [
+        "CX-00-TIGA"
       ]
     },
     "variantsByBaseCode": {
