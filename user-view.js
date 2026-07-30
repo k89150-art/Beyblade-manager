@@ -24,7 +24,7 @@ const firebaseConfig = {
 };
 
 const ADMIN_UID = "SesDhvXG6MUT38YhqGl0N6lVgMz1";
-const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260729-stock3";
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260716-3";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -142,9 +142,7 @@ function getCatalogRowData(product) {
   }
 
   return [
-    product.isSetProduct && !product.selectionRequired
-      ? product.recordId
-      : product.productCode,
+    product.isSetProduct ? product.recordId : product.productCode,
     layer,
     valueOrDash(parts.lockChip),
     hasSplitBlade ? `${parts.overBlade}/${parts.metalBlade}` : valueOrDash(parts.mainBlade),
