@@ -45,7 +45,7 @@ let hasPendingCloudSave = false;
 let lastLocalWriteUpdatedAt = 0;
 let lastAppliedRemoteUpdatedAt = 0;
 
-const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-15.json?v=20260724-meta1";
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260729-stock3";
 let stockInputMode = "auto";
 let stockProductsLoadPromise = null;
 let stockProductsLoaded = false;
@@ -2228,8 +2228,8 @@ function sortStockProducts(products) {
     const aParsed = parseStockProductCode(a.productCode);
     const bParsed = parseStockProductCode(b.productCode);
     const childCompare =
-      Number(aParsed?.childNumber || a.setChildIndex || 0) -
-      Number(bParsed?.childNumber || b.setChildIndex || 0);
+      Number(a.variantIndex || aParsed?.childNumber || a.setChildIndex || 0) -
+      Number(b.variantIndex || bParsed?.childNumber || b.setChildIndex || 0);
 
     if (childCompare !== 0) return childCompare;
     return String(a.recordId || "").localeCompare(
@@ -2245,6 +2245,12 @@ function buildStockProductIndexes(stockProducts) {
   const baseIndex = new Map();
   const unparseableCodes = [];
 
+  const addUniqueIndexEntry = (index, key, product) => {
+    if (!index.has(key)) index.set(key, []);
+    const products = index.get(key);
+    if (!products.includes(product)) products.push(product);
+  };
+
   stockProducts.forEach(product => {
     if (!product.autoFillEnabled || product.needsReview) return;
 
@@ -2255,12 +2261,15 @@ function buildStockProductIndexes(stockProducts) {
       return;
     }
 
-    if (!exactIndex.has(parsed.exactKey)) exactIndex.set(parsed.exactKey, []);
-    exactIndex.get(parsed.exactKey).push(product);
+    addUniqueIndexEntry(exactIndex, parsed.exactKey, product);
 
     if (parsed.hasChildNumber && !product.isSetProduct) {
-      if (!baseIndex.has(parsed.baseKey)) baseIndex.set(parsed.baseKey, []);
-      baseIndex.get(parsed.baseKey).push(product);
+      addUniqueIndexEntry(baseIndex, parsed.baseKey, product);
+    }
+
+    const officialCode = parseStockProductCode(product.officialProductCode);
+    if (officialCode && !officialCode.hasChildNumber) {
+      addUniqueIndexEntry(baseIndex, officialCode.exactKey, product);
     }
   });
 
@@ -2312,6 +2321,13 @@ function formatStockProductParts(product) {
   return labels.join(" ・ ");
 }
 
+function getStockProductDisplayCode(product) {
+  if (product?.selectionRequired && product.productCode) {
+    return product.productCode;
+  }
+  return product?.recordId || product?.productCode || "";
+}
+
 function renderStockAutoPreview() {
   if (stockInputMode !== "auto") return;
 
@@ -2340,7 +2356,7 @@ function renderStockAutoPreview() {
 
   const items = products.map(product => `
     <div class="stock-preview-item">
-      <strong>${escapeHtml(product.recordId)} ${escapeHtml(product.displayNameZh)}</strong>
+      <strong>${escapeHtml(getStockProductDisplayCode(product))} ${escapeHtml(product.displayNameZh)}</strong>
       <span>${escapeHtml(formatStockProductParts(product))}</span>
     </div>
   `).join("");
@@ -2350,7 +2366,7 @@ function renderStockAutoPreview() {
   let lookupNote = "";
 
   if (addAllAsSet) {
-    lookupNote = `<div>${escapeHtml(parsed.canonical)} 為雙陀螺套組，新增時會整組加入。</div>`;
+    lookupNote = `<div>${escapeHtml(parsed.canonical)} 為 ${exactMatches.length} 顆套組，新增時會整組加入。</div>`;
   } else if (variantMatches.length > 1) {
     lookupNote = `<div>${escapeHtml(parsed.baseCode)} 有 ${variantMatches.length} 種原裝配置，按「加入原裝收藏」後選擇你擁有的陀螺。</div>`;
   } else if (exactMatches.length > 1) {
@@ -2438,7 +2454,9 @@ function getStockProductRowData(product) {
 
   return {
     cells: [
-      product.isSetProduct ? product.recordId : product.productCode,
+      product.isSetProduct && !product.selectionRequired
+        ? product.recordId
+        : product.productCode,
       layer,
       valueOrDash(parts.lockChip),
       mainPart,
@@ -2566,7 +2584,7 @@ function openStockProductChoice(products, productCode) {
   addAllButton.disabled = false;
   list.innerHTML = products.map((product, index) => `
     <button type="button" class="stock-choice-option" data-stock-choice-index="${index}">
-      <strong>${escapeHtml(product.recordId)} ${escapeHtml(product.displayNameZh)}</strong>
+      <strong>${escapeHtml(getStockProductDisplayCode(product))} ${escapeHtml(product.displayNameZh)}</strong>
       <span>${escapeHtml(formatStockProductParts(product))}</span>
     </button>
   `).join("");
