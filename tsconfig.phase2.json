@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src/meta",
+    "outDir": "dist/meta",
+    "declaration": true,
+    "declarationMap": false,
+    "sourceMap": false,
+    "noEmit": false
+  },
+  "include": [
+    "src/meta/**/*.ts"
+  ],
+  "exclude": [
+    "tests"
+  ]
+}

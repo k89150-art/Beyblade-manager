@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d12">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="戰鬥陀螺管理器">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Meta 分析｜戰鬥陀螺管理器</title>
+  <link rel="manifest" href="manifest.json?v=20260715-ui1">
+  <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css?v=20260716-design2">
+  <link rel="stylesheet" href="site-menu.css?v=20260730-meta1">
+  <link rel="stylesheet" href="meta.css?v=20260730-meta1">
+</head>
+<body>
+  <main class="container meta-page">
+    <header class="page-heading meta-heading">
+      <div>
+        <span class="eyebrow">META PLATFORM</span>
+        <h1>Meta 分析</h1>
+        <p>以 Evidence 為基礎，依序計算可信度、趨勢、成熟度、風險與建議。</p>
+      </div>
+      <span id="metaModeBadge" class="meta-mode-badge">載入資料模式</span>
+    </header>
+
+    <div id="metaModeNotice" class="meta-mode-notice" role="status"></div>
+    <div class="meta-auth-bar" aria-live="polite">
+      <span id="metaAuthStatus">確認登入狀態中</span>
+      <div class="meta-auth-actions">
+        <button id="metaRetryBtn" type="button" class="secondary-btn">重試</button>
+        <button id="metaSignInBtn" type="button" class="secondary-btn" hidden>Google 登入</button>
+        <button id="metaSignOutBtn" type="button" class="secondary-btn" hidden>登出</button>
+      </div>
+    </div>
+
+    <section class="meta-control-panel" aria-labelledby="metaControlTitle">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">ANALYSIS TARGET</span>
+          <h2 id="metaControlTitle">選擇分析項目</h2>
+        </div>
+        <span id="metaPipelineStatus" class="meta-status-pill">尚未執行</span>
+      </div>
+      <div class="meta-controls">
+        <label class="meta-search-field">
+          搜尋
+          <input id="metaEntitySearch" type="search" placeholder="中文名稱、英文名稱、型號或類別">
+        </label>
+        <label class="meta-entity-field">
+          Entity
+          <select id="metaEntitySelect">
+            <option value="">請選擇分析項目</option>
+          </select>
+        </label>
+        <label>
+          Analysis Date
+          <input id="metaAnalysisDate" type="date" required>
+        </label>
+        <button id="runMetaAnalysisBtn" type="button" class="primary-btn">執行完整分析</button>
+      </div>
+      <div class="meta-version-row">
+        <span>模型版本：Confidence / Trend / Maturity / Risk / Recommendation / Coach 1.0.0</span>
+        <span id="metaPersistenceStatus" data-status="not-calculated">尚未執行分析</span>
+        <span id="metaCalculatedAt">尚未計算</span>
+      </div>
+    </section>
+
+    <div id="metaErrors" class="meta-error-box" role="alert" hidden></div>
+
+    <section id="metaEntitySummary" class="meta-summary-card" aria-live="polite">
+      <div class="meta-empty-state">
+        <strong>尚未選擇 Entity</strong>
+        <span>可搜尋上蓋、固鎖、軸心與 CX 分件。</span>
+      </div>
+    </section>
+
+    <section class="meta-section" aria-labelledby="evidenceSummaryTitle">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">EVIDENCE SUMMARY</span>
+          <h2 id="evidenceSummaryTitle">Evidence</h2>
+        </div>
+        <button id="toggleEvidenceFormBtn" type="button" class="secondary-btn">新增 Evidence</button>
+      </div>
+      <p id="metaReadOnlyNotice" class="meta-read-only-notice" hidden>
+        目前為唯讀模式。只有已授權管理員可新增 Evidence 或保存分析結果。
+      </p>
+      <div id="metaEvidenceSummary" class="meta-metric-grid"></div>
+
+      <div id="metaEvidenceFormPanel" class="meta-evidence-form-panel" hidden>
+        <div class="meta-subheading">
+          <div>
+            <h3>新增 Evidence</h3>
+            <p>正式模式會寫入 Firebase；開發模式使用獨立的本機儲存區。送出前請確認資料來源與日期。</p>
+          </div>
+          <button id="closeEvidenceFormBtn" type="button" class="meta-icon-button" aria-label="關閉新增 Evidence">×</button>
+        </div>
+        <form id="metaEvidenceForm">
+          <div class="meta-form-grid">
+            <label>Evidence ID<input name="id" placeholder="留空自動產生"></label>
+            <label>Evidence Type<input name="evidenceType" value="tournament_result" required></label>
+            <label>Event Date<input name="eventDate" type="date" required></label>
+            <label>Source ID<input name="sourceId" value="manual-source" required></label>
+            <label>Source Name<input name="sourceName" value="Manual Evidence" required></label>
+            <label>Region<input name="region" value="TW" required></label>
+            <label>Status
+              <select name="status">
+                <option value="verified">verified</option>
+                <option value="pending">pending</option>
+                <option value="rejected">rejected</option>
+                <option value="superseded">superseded</option>
+              </select>
+            </label>
+            <label>Grade
+              <select name="grade">
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C" selected>C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+              </select>
+            </label>
+          </div>
+          <fieldset class="meta-score-fieldset">
+            <legend>六維分數（0–100，留空為未知）</legend>
+            <div class="meta-score-grid">
+              <label>來源品質<input name="source_quality" type="number" min="0" max="100" value="70"></label>
+              <label>樣本量<input name="sample_size" type="number" min="0" max="100" value="50"></label>
+              <label>區域多樣性<input name="regional_diversity" type="number" min="0" max="100" value="40"></label>
+              <label>時間一致性<input name="time_consistency" type="number" min="0" max="100" value="60"></label>
+              <label>配置一致性<input name="configuration_consistency" type="number" min="0" max="100" value="65"></label>
+              <label>獨立來源確認<input name="independent_confirmation" type="number" min="0" max="100" value="45"></label>
+            </div>
+          </fieldset>
+          <div class="meta-form-actions">
+            <button type="button" id="cancelEvidenceBtn" class="secondary-btn">取消</button>
+            <button type="submit" class="primary-btn">建立 Evidence</button>
+          </div>
+        </form>
+      </div>
+
+      <p id="metaEvidenceEmpty" class="meta-empty-inline">選擇 Entity 後顯示 Evidence。</p>
+      <div class="table-wrap meta-evidence-table-wrap">
+        <table class="meta-evidence-table">
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>Evidence</th>
+              <th>來源</th>
+              <th>狀態</th>
+              <th>六維摘要</th>
+            </tr>
+          </thead>
+          <tbody id="metaEvidenceTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="metaAnalysisResults" class="meta-analysis-results" aria-live="polite">
+      <div class="meta-empty-state meta-analysis-placeholder">
+        <strong>分析結果尚未建立</strong>
+        <span>選擇 Entity 與日期後，按下「執行完整分析」。</span>
+      </div>
+    </section>
+
+    <details id="metaTechnicalDetails" class="meta-technical-details">
+      <summary>技術資訊與 Trace References</summary>
+      <div id="metaTechnicalContent">完整分析後顯示。</div>
+    </details>
+  </main>
+
+  <script src="firebase-meta-config.js?v=20260730-firebase1"></script>
+  <script src="firebase-meta-bridge.js?v=20260730-firebase1"></script>
+  <script src="site-menu.js?v=20260730-meta1"></script>
+  <script type="module" src="dist/meta/integration/meta-page.js?v=20260730-firebase1"></script>
+</body>
+</html>

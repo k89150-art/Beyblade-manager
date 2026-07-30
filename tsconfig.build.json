@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src/meta/domain",
+    "outDir": "dist/meta-domain",
+    "declaration": true,
+    "declarationMap": false,
+    "sourceMap": false,
+    "noEmit": false
+  },
+  "include": [
+    "src/meta/domain/**/*.ts"
+  ],
+  "exclude": [
+    "tests"
+  ]
+}

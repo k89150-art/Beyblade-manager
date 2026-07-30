@@ -1,0 +1,28 @@
+{
+  "name": "beyblade-manager",
+  "version": "2.0.0-rc.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint \"src/meta/**/*.ts\" \"tests/meta-domain/**/*.ts\" \"tests/meta-evidence/**/*.ts\" \"tests/meta-confidence/**/*.ts\" \"tests/meta-trend-maturity/**/*.ts\" \"tests/meta-full-analysis/**/*.ts\" \"tests/meta-integration/**/*.ts\" \"tests/meta-firebase/**/*.ts\"",
+    "build:test": "tsc -p tsconfig.test.json",
+    "test": "npm run build:test && node --test .phase1-test/tests/meta-domain/domain-validation.test.js .phase1-test/tests/meta-evidence/evidence-mvp.test.js .phase1-test/tests/meta-confidence/confidence-mvp.test.js .phase1-test/tests/meta-trend-maturity/trend-maturity-mvp.test.js .phase1-test/tests/meta-full-analysis/full-analysis-mvp.test.js .phase1-test/tests/meta-integration/production-integration.test.js .phase1-test/tests/meta-firebase/firebase-integration.test.js",
+    "test:rules:run": "npm run build:test && node --test .phase1-test/tests/meta-firebase/firebase-rules-emulator.test.js",
+    "test:emulator": "firebase emulators:exec --project demo-beyblade-meta --only auth,firestore \"npm run test:rules:run\"",
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.phase2.json",
+    "serve:evidence": "node scripts/evidence-mvp-server.mjs",
+    "generate:meta-config": "node scripts/generate-meta-firebase-config.mjs",
+    "verify:release-artifact": "node scripts/verify-release-artifact.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "@types/node": "^26.1.2",
+    "eslint": "^10.8.0",
+    "firebase": "^11.2.0",
+    "firebase-tools": "^15.25.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.65.0"
+  }
+}

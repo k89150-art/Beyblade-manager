@@ -457,8 +457,11 @@ function getOperationButtons(tableType) {
   const analyzeButton = tableType === "config"
     ? '<button onclick="analyzeConfigRow(this)">分析</button>'
     : "";
+  const metaButton = tableType === "config"
+    ? '<button onclick="openMetaAnalysisForConfig(this)">Meta</button>'
+    : "";
 
-  if (isReadOnly()) return analyzeButton;
+  if (isReadOnly()) return `${analyzeButton}${metaButton}`;
 
   if (tableType === "beyblade") {
     return '<button onclick="deleteRow(this)">刪除</button>';
@@ -466,6 +469,7 @@ function getOperationButtons(tableType) {
 
   return `
     ${analyzeButton}
+    ${metaButton}
     <button onclick="editRow(this, '${tableType}')">修改</button>
     <button onclick="deleteRow(this)">刪除</button>
   `;
@@ -548,6 +552,22 @@ window.analyzeConfigRow = function (button) {
   params.set("auto", "1");
 
   window.location.href = `analysis.html?${params.toString()}`;
+};
+
+window.openMetaAnalysisForConfig = function (button) {
+  const row = button?.closest("tr");
+  if (!row) return;
+
+  const layer = cleanAnalysisValue(getTextCell(row, 1));
+  const main = cleanAnalysisValue(
+    getStockNameFromCell(row.cells[3]) || getTextCell(row, 3)
+  );
+  const metal = cleanAnalysisValue(getTextCell(row, 5));
+  const targetName = metal || main || layer;
+  const params = new URLSearchParams();
+
+  if (targetName) params.set("name", targetName);
+  window.location.href = `meta.html${params.size ? `?${params.toString()}` : ""}`;
 };
 
 function buildHistoryRecordFromConfigRow(row, result, note) {
