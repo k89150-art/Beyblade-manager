@@ -60,14 +60,9 @@ function isAdmin() {
 }
 
 function setAdminMenuVisibility(show) {
-  document.querySelectorAll('.side-menu a[href="admin.html"]').forEach(link => {
-    link.style.display = show ? "block" : "none";
-  });
-
-  document.querySelectorAll(".side-menu-section").forEach(section => {
-    if (section.textContent.trim() === "管理") {
-      section.style.display = show ? "block" : "none";
-    }
+  document.body.classList.toggle("is-admin", show);
+  document.querySelectorAll('.side-menu [data-admin-only="true"]').forEach(item => {
+    item.setAttribute("aria-hidden", String(!show));
   });
 }
 

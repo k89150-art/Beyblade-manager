@@ -119,6 +119,16 @@ body .side-menu-section[data-menu-group="說明"] {
   margin-top: auto;
 }
 
+body .side-menu [data-admin-only="true"] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body.is-admin .side-menu [data-admin-only="true"] {
+  visibility: visible;
+  pointer-events: auto;
+}
+
 body .side-menu-link {
   min-height: 48px;
   margin: 2px 0;

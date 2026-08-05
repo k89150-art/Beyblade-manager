@@ -99,14 +99,14 @@ function buildSideMenuInnerHtml() {
   SIDE_MENU_ITEMS.forEach(item => {
     if (item.group !== currentGroup) {
       currentGroup = item.group;
-      const hidden = item.adminOnly ? ' style="display:none;"' : "";
-      html += `<div class="side-menu-section" data-menu-group="${item.group}"${hidden}>${item.group}</div>`;
+      const adminOnly = item.adminOnly ? ' data-admin-only="true" aria-hidden="true"' : "";
+      html += `<div class="side-menu-section" data-menu-group="${item.group}"${adminOnly}>${item.group}</div>`;
     }
 
     const activeClass = isMenuItemActive(item) ? " active" : "";
-    const hidden = item.adminOnly ? ' style="display:none;"' : "";
+    const adminOnly = item.adminOnly ? ' data-admin-only="true" aria-hidden="true"' : "";
     const sectionTarget = item.section ? ` data-section-target="${item.section}"` : "";
-    html += `<a href="${item.href}" class="side-menu-link${activeClass}"${sectionTarget}${hidden}>${buildMenuLinkInnerHtml(item)}</a>`;
+    html += `<a href="${item.href}" class="side-menu-link${activeClass}"${sectionTarget}${adminOnly}>${buildMenuLinkInnerHtml(item)}</a>`;
   });
 
   html += `<button type="button" class="side-menu-close" onclick="closeSideMenu()">關閉選單</button>`;
@@ -204,12 +204,12 @@ function setAdminMenuVisibility(isAdmin) {
   document.body.classList.toggle("is-admin", isAdmin);
 
   document.querySelectorAll('.side-menu a[href="admin.html"]').forEach(link => {
-    link.style.display = isAdmin ? "block" : "none";
+    link.setAttribute("aria-hidden", String(!isAdmin));
   });
 
   document.querySelectorAll('.side-menu-section').forEach(section => {
     if (section.textContent.trim() === "管理") {
-      section.style.display = isAdmin ? "block" : "none";
+      section.setAttribute("aria-hidden", String(!isAdmin));
     }
   });
 }
