@@ -939,11 +939,19 @@ function isUsefulCell(value) {
   return Boolean(text && text !== "-" && text !== "無");
 }
 
-function addOwnedName(bucket, name, count = 1) {
+function addOwnedName(bucket, name, count = 1, source = "collection") {
   if (!isUsefulCell(name)) return;
   const key = normalizeText(name);
-  const existing = bucket.get(key) || { name: String(name).trim(), count: 0 };
-  existing.count += Math.max(1, Number(count) || 1);
+  const existing = bucket.get(key) || {
+    name: String(name).trim(),
+    count: 0,
+    collectionCount: 0,
+    inventoryCount: 0
+  };
+  const amount = Math.max(1, Number(count) || 1);
+  existing.count += amount;
+  if (source === "inventory") existing.inventoryCount += amount;
+  else existing.collectionCount += amount;
   bucket.set(key, existing);
 }
 
@@ -957,6 +965,9 @@ function createOwnedBuckets() {
     metals: new Map(),
     overs: new Map(),
     assists: new Map(),
+    inventoryParts: [],
+    cxBaseBuilds: [],
+    correctedInventoryTypes: [],
     sourceSummary: {
       collectionRows: 0,
       inventoryItems: 0
@@ -983,22 +994,98 @@ function savedValueOrFallback(value, fallback) {
   return isUsefulCell(value) ? value : fallback;
 }
 
+function addCxBaseBuild(owned, values) {
+  const hasMain = isUsefulCell(values.main);
+  const hasSplit = isUsefulCell(values.metal) && isUsefulCell(values.over);
+  if (!isUsefulCell(values.lock) || !isUsefulCell(values.assist) || !isUsefulCell(values.bit)) return;
+  if (!hasMain && !hasSplit) return;
+
+  const cxType = hasSplit ? "split" : "main";
+  const config = {
+    label: cxType === "split" ? "CX 金屬 + 超越" : "CX 主要戰刃",
+    cxType,
+    inputs: {
+      lock: values.lock,
+      main: hasMain ? values.main : "",
+      metal: hasSplit ? values.metal : "",
+      over: hasSplit ? values.over : "",
+      assist: values.assist,
+      ratchet: values.ratchet,
+      bit: values.bit
+    },
+    parts: {
+      lock: findPart("cxLocks", values.lock),
+      main: hasMain ? findPart("cxMains", values.main) : null,
+      metal: hasSplit ? findPart("cxMetals", values.metal) : null,
+      over: hasSplit ? findPart("cxOvers", values.over) : null,
+      assist: findPart("cxAssists", values.assist),
+      ratchet: findPart("ratchets", values.ratchet),
+      bit: findPart("bits", values.bit)
+    },
+    required: cxType === "split"
+      ? ["lock", "metal", "over", "assist", "bit"]
+      : ["lock", "main", "assist", "bit"],
+    ratchetInput: values.ratchet
+  };
+
+  if (!validateConfig(config).fatal.length) owned.cxBaseBuilds.push(config);
+}
+
 function addBeybladeRowToOwned(owned, row) {
   const cells = row?.cells || [];
   const product = findStockProductForSavedRow(row, cells);
   const parts = product?.parts || {};
   const originalBit = parts.bit || product?.integratedRatchetBit || "";
+  const values = {
+    blade: savedValueOrFallback(cells[1], parts.blade || product?.displayNameZh),
+    lock: savedValueOrFallback(cells[2], parts.lockChip),
+    main: savedValueOrFallback(cells[3], parts.mainBlade),
+    over: savedValueOrFallback(cells[4], parts.overBlade),
+    metal: savedValueOrFallback(cells[5], parts.metalBlade),
+    assist: savedValueOrFallback(cells[6], parts.assistBlade),
+    ratchet: savedValueOrFallback(cells[7], parts.ratchet),
+    bit: savedValueOrFallback(cells[8], originalBit)
+  };
 
   owned.sourceSummary.collectionRows += 1;
 
-  addOwnedName(owned.blades, savedValueOrFallback(cells[1], parts.blade || product?.displayNameZh));
-  addOwnedName(owned.locks, savedValueOrFallback(cells[2], parts.lockChip));
-  addOwnedName(owned.mains, savedValueOrFallback(cells[3], parts.mainBlade));
-  addOwnedName(owned.overs, savedValueOrFallback(cells[4], parts.overBlade));
-  addOwnedName(owned.metals, savedValueOrFallback(cells[5], parts.metalBlade));
-  addOwnedName(owned.assists, savedValueOrFallback(cells[6], parts.assistBlade));
-  addOwnedName(owned.ratchets, savedValueOrFallback(cells[7], parts.ratchet));
-  addOwnedName(owned.bits, savedValueOrFallback(cells[8], originalBit));
+  addOwnedName(owned.blades, values.blade);
+  addOwnedName(owned.locks, values.lock);
+  addOwnedName(owned.mains, values.main);
+  addOwnedName(owned.overs, values.over);
+  addOwnedName(owned.metals, values.metal);
+  addOwnedName(owned.assists, values.assist);
+  addOwnedName(owned.ratchets, values.ratchet);
+  addOwnedName(owned.bits, values.bit);
+  addCxBaseBuild(owned, values);
+}
+
+function inventoryTypeDefinitions(owned) {
+  return [
+    { type: "軸心", bucket: owned.bits, indexName: "bits", slot: "bit" },
+    { type: "固鎖", bucket: owned.ratchets, indexName: "ratchets", slot: "ratchet" },
+    { type: "上蓋", bucket: owned.blades, indexName: "blades", slot: "blade" },
+    { type: "紋章鎖", bucket: owned.locks, indexName: "cxLocks", slot: "lock" },
+    { type: "主要戰刃", bucket: owned.mains, indexName: "cxMains", slot: "main" },
+    { type: "金屬戰刃", bucket: owned.metals, indexName: "cxMetals", slot: "metal" },
+    { type: "超越戰刃", bucket: owned.overs, indexName: "cxOvers", slot: "over" },
+    { type: "輔助戰刃", bucket: owned.assists, indexName: "cxAssists", slot: "assist" }
+  ];
+}
+
+function resolveInventoryPart(owned, declaredType, name) {
+  const definitions = inventoryTypeDefinitions(owned);
+  const expected = definitions.find(item => item.type === declaredType);
+  const expectedPart = expected ? findPart(expected.indexName, name) : null;
+  if (expectedPart) return { ...expected, part: expectedPart };
+
+  for (const definition of definitions) {
+    if (definition === expected) continue;
+    const part = findPart(definition.indexName, name);
+    if (part) return { ...definition, part };
+  }
+
+  return expected ? { ...expected, part: null } : null;
 }
 
 function addPartRowToOwned(owned, row) {
@@ -1006,21 +1093,25 @@ function addPartRowToOwned(owned, row) {
   const type = String(cells[0] || "").trim();
   const name = String(cells[1] || "").trim();
   const count = Number(cells[2]) || 1;
+  if (!isUsefulCell(name)) return;
 
-  const target = {
-    上蓋: owned.blades,
-    固鎖: owned.ratchets,
-    軸心: owned.bits,
-    紋章鎖: owned.locks,
-    主要戰刃: owned.mains,
-    金屬戰刃: owned.metals,
-    超越戰刃: owned.overs,
-    輔助戰刃: owned.assists
-  }[type];
+  const resolved = resolveInventoryPart(owned, type, name);
+  if (!resolved) return;
 
-  if (target && isUsefulCell(name)) {
-    addOwnedName(target, name, count);
-    owned.sourceSummary.inventoryItems += Math.max(1, count);
+  addOwnedName(resolved.bucket, name, count, "inventory");
+  owned.sourceSummary.inventoryItems += Math.max(1, count);
+  owned.inventoryParts.push({
+    declaredType: type,
+    resolvedType: resolved.type,
+    indexName: resolved.indexName,
+    slot: resolved.slot,
+    name,
+    count: Math.max(1, count),
+    part: resolved.part
+  });
+
+  if (resolved.part && type !== resolved.type) {
+    owned.correctedInventoryTypes.push({ name, from: type, to: resolved.type });
   }
 }
 
@@ -1080,31 +1171,23 @@ function analysisScoreValue(analysis, target) {
   return Math.round((base + (scores.metaConfidence || 0) * 0.25) * 10) / 10;
 }
 
-function makeStandardSuggestion(blade, ratchet, bit, target) {
-  const config = {
-    label: "庫存推薦",
-    inputs: {},
-    parts: { blade, ratchet, bit },
-    required: ["blade", "bit"],
-    ratchetInput: ratchet ? codeOf(ratchet) : "-"
-  };
-
+function makeConfigSuggestions(config, label) {
   const analysis = analyzeCombo(toEngineInput(config), database, { debug: false });
   const role = classifyBuild(config, analysis);
-  const label = [partSentenceName(blade), ratchet ? partSentenceName(ratchet) : "無固鎖", partSentenceName(bit)].filter(Boolean).join(" + ");
 
-  return {
+  return ["attack", "stamina", "defense", "balance"].map(target => ({
     target,
     label,
     role,
     analysis,
+    parts: config.parts,
     value: analysisScoreValue(analysis, target),
     recommendationMomentum: Number(analysis.metaCoach?.recommendationMomentum) || 0,
     strengths: buildStrengths(config, analysis).slice(0, 2),
     warnings: buildWarnings(config, analysis, analysis.warnings || []).slice(0, 2),
     recommendations: buildRecommendations(config, analysis).slice(0, 2),
     deckRole: buildDeckRole(config, role, analysis)
-  };
+  }));
 }
 
 function buildStandardSuggestions(owned) {
@@ -1117,10 +1200,84 @@ function buildStandardSuggestions(owned) {
     bits.forEach(bit => {
       noRatchetCandidatesFor(blade, bit, ratchets).forEach(ratchet => {
         if (!isSuggestionLegal(blade, ratchet, bit)) return;
-        ["attack", "stamina", "defense", "balance"].forEach(target => {
-          suggestions.push(makeStandardSuggestion(blade, ratchet, bit, target));
-        });
+        const config = {
+          label: "庫存推薦",
+          inputs: {},
+          parts: { blade, ratchet, bit },
+          required: ["blade", "bit"],
+          ratchetInput: ratchet ? codeOf(ratchet) : "-"
+        };
+        const label = [partSentenceName(blade), ratchet ? partSentenceName(ratchet) : "無固鎖", partSentenceName(bit)].filter(Boolean).join(" + ");
+        suggestions.push(...makeConfigSuggestions(config, label));
       });
+    });
+  });
+
+  return suggestions;
+}
+
+function partIdentity(part) {
+  return normalizeText(part?.id || part?.code || part?.name || optionLabel(part));
+}
+
+function buildCxInventorySuggestions(owned, inventoryPart) {
+  if (!inventoryPart.part || !["lock", "main", "metal", "over", "assist"].includes(inventoryPart.slot)) return [];
+
+  return owned.cxBaseBuilds.flatMap(baseConfig => {
+    if (inventoryPart.slot === "main" && baseConfig.cxType !== "main") return [];
+    if (["metal", "over"].includes(inventoryPart.slot) && baseConfig.cxType !== "split") return [];
+
+    const config = {
+      ...baseConfig,
+      inputs: {
+        ...baseConfig.inputs,
+        [inventoryPart.slot]: partSentenceName(inventoryPart.part)
+      },
+      parts: {
+        ...baseConfig.parts,
+        [inventoryPart.slot]: inventoryPart.part
+      }
+    };
+    if (validateConfig(config).fatal.length) return [];
+
+    const orderedParts = config.cxType === "split"
+      ? [config.parts.lock, config.parts.metal, config.parts.over, config.parts.assist, config.parts.ratchet, config.parts.bit]
+      : [config.parts.lock, config.parts.main, config.parts.assist, config.parts.ratchet, config.parts.bit];
+    const label = orderedParts
+      .map(part => partSentenceName(part))
+      .filter(Boolean)
+      .join(" + ");
+    return makeConfigSuggestions(config, label);
+  });
+}
+
+function buildInventorySpecificSuggestions(owned, standardSuggestions) {
+  const suggestions = [];
+  const seen = new Set();
+
+  owned.inventoryParts.forEach(inventoryPart => {
+    if (!inventoryPart.part) return;
+    const wanted = partIdentity(inventoryPart.part);
+    let candidates = [];
+
+    if (["blade", "ratchet", "bit"].includes(inventoryPart.slot)) {
+      candidates = standardSuggestions.filter(item => partIdentity(item.parts?.[inventoryPart.slot]) === wanted);
+    } else {
+      candidates = buildCxInventorySuggestions(owned, inventoryPart);
+    }
+
+    const best = candidates.sort((a, b) => (
+      (b.value + b.recommendationMomentum) - (a.value + a.recommendationMomentum)
+    ))[0];
+    if (!best) return;
+
+    const key = `${inventoryPart.resolvedType}:${wanted}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    suggestions.push({
+      ...best,
+      targetLabel: `額外${inventoryPart.resolvedType}`,
+      inventoryPartName: inventoryPart.name
     });
   });
 
@@ -1153,7 +1310,31 @@ function pickTopSuggestions(suggestions) {
   });
 }
 
-function renderStockSuggestions(items, owned) {
+function renderSuggestionCards(items) {
+  return items.map((item, index) => `
+    <details class="suggestion-card" ${index === 0 ? "open" : ""}>
+      <summary class="suggestion-summary">
+        <span>
+          <span class="analysis-pill">${escapeHtml(item.targetLabel)}</span>
+          ${item.recommendationMomentum > 0 ? '<span class="analysis-pill">近期上升</span>' : ""}
+          <span class="suggestion-title">${escapeHtml(item.label)}</span>
+        </span>
+        <span class="suggestion-score">${escapeHtml(item.value)}</span>
+      </summary>
+      <div class="analysis-note">${escapeHtml(item.role)}｜${escapeHtml(item.deckRole)}</div>
+      <div class="suggestion-detail">
+        <div class="section-title">優點</div>
+        <ul class="status-list">${renderList(item.strengths, "status-good")}</ul>
+        <div class="section-title">注意</div>
+        <ul class="status-list">${renderList(item.warnings, "status-warn")}</ul>
+        <div class="section-title">可怎麼測</div>
+        <ul class="status-list">${renderList(item.recommendations)}</ul>
+      </div>
+    </details>
+  `).join("");
+}
+
+function renderStockSuggestions(items, owned, inventorySuggestions = []) {
   const result = document.getElementById("stockSuggestResult");
   if (!result) return;
 
@@ -1166,32 +1347,26 @@ function renderStockSuggestions(items, owned) {
   }
 
   const summary = `已讀取收藏陀螺 ${owned.sourceSummary.collectionRows} 顆、額外零件 ${owned.sourceSummary.inventoryItems} 個；可用上蓋 ${ownedBucketSummary(owned.blades)}、固鎖 ${ownedBucketSummary(owned.ratchets)}、軸心 ${ownedBucketSummary(owned.bits)}。兩種來源都已納入推薦；以下只列出分數較高的測試方向。`;
+  const correctedTypes = owned.correctedInventoryTypes.length
+    ? `<div class="status-warn">已依零件資料自動辨識類別：${escapeHtml(owned.correctedInventoryTypes.map(item => `${item.name}（${item.from} → ${item.to}）`).join("、"))}。原始庫存資料不會被修改。</div>`
+    : "";
+  const unresolved = owned.inventoryParts.filter(item => !item.part);
+  const unresolvedNote = unresolved.length
+    ? `<div class="status-warn">尚無法辨識：${escapeHtml(unresolved.map(item => `${item.declaredType} ${item.name}`).join("、"))}，暫時無法產生分析。</div>`
+    : "";
   result.style.display = "block";
   result.innerHTML = `
     <div class="analysis-note">${escapeHtml(summary)}</div>
+    ${correctedTypes}
+    ${unresolvedNote}
+    <div class="section-title">整體高分推薦</div>
     <div class="suggestion-grid">
-      ${items.map((item, index) => `
-        <details class="suggestion-card" ${index === 0 ? "open" : ""}>
-          <summary class="suggestion-summary">
-            <span>
-              <span class="analysis-pill">${escapeHtml(item.targetLabel)}</span>
-              ${item.recommendationMomentum > 0 ? '<span class="analysis-pill">近期上升</span>' : ""}
-              <span class="suggestion-title">${escapeHtml(item.label)}</span>
-            </span>
-            <span class="suggestion-score">${escapeHtml(item.value)}</span>
-          </summary>
-          <div class="analysis-note">${escapeHtml(item.role)}｜${escapeHtml(item.deckRole)}</div>
-          <div class="suggestion-detail">
-            <div class="section-title">優點</div>
-            <ul class="status-list">${renderList(item.strengths, "status-good")}</ul>
-            <div class="section-title">注意</div>
-            <ul class="status-list">${renderList(item.warnings, "status-warn")}</ul>
-            <div class="section-title">可怎麼測</div>
-            <ul class="status-list">${renderList(item.recommendations)}</ul>
-          </div>
-        </details>
-      `).join("")}
+      ${renderSuggestionCards(items)}
     </div>
+    <div class="section-title">額外零件測試方向</div>
+    ${inventorySuggestions.length
+      ? `<div class="suggestion-grid">${renderSuggestionCards(inventorySuggestions)}</div>`
+      : '<div class="analysis-note">目前沒有可由額外零件組成的合法測試方向。</div>'}
   `;
 }
 
@@ -1218,8 +1393,10 @@ async function renderStockSuggestionsFromCloud() {
     }
 
     const owned = readOwnedPartsFromSavedData(snap.data());
-    const suggestions = pickTopSuggestions(buildStandardSuggestions(owned));
-    renderStockSuggestions(suggestions, owned);
+    const standardSuggestions = buildStandardSuggestions(owned);
+    const suggestions = pickTopSuggestions(standardSuggestions);
+    const inventorySuggestions = buildInventorySpecificSuggestions(owned, standardSuggestions);
+    renderStockSuggestions(suggestions, owned, inventorySuggestions);
   } catch (error) {
     console.error("庫存推薦產生失敗", error);
     result.style.display = "block";
