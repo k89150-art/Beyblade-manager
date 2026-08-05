@@ -4,7 +4,7 @@ import {
   getMetaCoachInsight,
   getMetaCoachPartStatus,
   getMetaEvidence
-} from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260726-coach1";
+} from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260805-top-level-only-v1";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -201,7 +201,7 @@ async function loadData() {
   if (database && rules) return;
 
   const [loadedDatabase, loadedRules, stockCatalog] = await Promise.all([
-    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260805-independent-v2"),
+    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260805-schema-sync-v6"),
     loadJson("./beyblade_x_analysis_rules_v1_zhTW.json?v=20260630-engine2"),
     loadJson("./stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260805-stock-inventory1")
   ]);
@@ -265,14 +265,18 @@ function buildPartIndex(items = []) {
       item.id,
       item.code,
       item.name,
+      item.name_zh,
       item.name_en,
       item.displayName,
+      item.displayNameZh,
+      item.referenceNameEn,
       item.model,
       optionLabel(item),
       item.model && item.name ? `${item.model}${item.name}` : "",
       item.name && item.name_en ? `${item.name}${item.name_en}` : "",
       item.code && item.name_en ? `${item.code}${item.name_en}` : "",
-      ...(Array.isArray(item.aliases) ? item.aliases : [])
+      ...(Array.isArray(item.aliases) ? item.aliases : []),
+      ...(Array.isArray(item.legacyIds) ? item.legacyIds : [])
     ].filter(Boolean));
   });
   return index;
@@ -479,8 +483,8 @@ function isAttackBlade(blade) {
 }
 
 function isHeavyAttackBlade(blade) {
-  const text = `${nameOf(blade)} ${partTitle(blade)} ${tagsOf(blade).join(" ")}`;
-  return isAttackBlade(blade) && (/暴龍|爆擊|龍|衝擊|重攻擊|一擊|霸擊/.test(text) || hasAnyTag(blade, ["特化", "奇襲"]));
+  const roleText = `${blade?.role || ""} ${(blade?.primaryRoles || []).join(" ")} ${tagsOf(blade).join(" ")}`;
+  return isAttackBlade(blade) && (/重攻擊|一擊|爆發|壓制/.test(roleText) || hasAnyTag(blade, ["特化", "奇襲"]));
 }
 
 function isStaminaBlade(blade) {
@@ -830,13 +834,23 @@ function buildWarnings(config, analysis, baseWarnings) {
 function buildRecommendations(config, analysis) {
   const recommendations = [...(analysis.recommendations || [])];
   const blade = primaryBladePart(config);
-  const bit = config.parts.bit;
   const ratchet = config.parts.ratchet;
-  const code = bitCode(bit);
   const height = ratchetHeight(ratchet);
   const strongMetaRole = analysis.metaEvidence?.scoreDelta > 0
     ? analysis.metaEvidence.role
     : "";
+
+  const recommendationFields = [
+    ["recommendedBits", "軸心"],
+    ["recommendedRatchets", "固鎖"],
+    ["recommendedAssistBlades", "輔助戰刃"],
+    ["recommendedOver", "超越戰刃"]
+  ];
+  recommendationFields.forEach(([field, label]) => {
+    const candidates = rankedRecommendationCandidates(blade, field);
+    if (!candidates.length) return;
+    recommendations.push(`資料庫${label}候選：${candidates.map(candidate => candidate.part).join(" → ")}。`);
+  });
 
   if (strongMetaRole) {
     if (/攻擊|壓制|終結/.test(strongMetaRole)) {
@@ -848,22 +862,12 @@ function buildRecommendations(config, analysis) {
     if (/防守|反打|anti/.test(strongMetaRole)) {
       recommendations.push("此路線偏防守反打，建議優先測試面對高爆發攻擊型的抗壓能力。");
     }
-    return uniqueItems(recommendations.map(item => item.trim()));
+  } else if (blade?.independentEvaluation?.enabled) {
+    recommendations.push("以上候選依新版資料庫的獨立零件評級呈現；完整配置協同性另外判斷，不會回寫或提高單一零件 Tier。");
   }
 
-  if (isHeavyAttackBlade(blade) && BURST_BITS.has(code)) {
-    recommendations.push("若想提高穩定攻擊，可改 R 或 LR。");
-    recommendations.push("若想提高爆發，可保留 Impact / I 或測 GF、A、V 類軸心。");
-    recommendations.push("若想讓攻擊打點更集中，可測 1-60 或 3-60。");
-  } else if (isAttackBlade(blade)) {
-    recommendations.push("若想提高攻擊穩定度，可優先測 R、LR、P 或 T 類軸心。");
-    recommendations.push("若想提高爆發，可測 1-60、3-60 或更低身位固鎖。");
-  }
-
-  if (isStaminaBlade(blade)) recommendations.push("若想提高持久，可測 B、O、DB、LO 類軸心與 9-60 / 3-60 固鎖。 ");
-  if (isDefenseBlade(blade)) recommendations.push("若想提高防守反打，可測 H、WB、BS 類軸心與 9 系或 7 系固鎖。 ");
   if (height >= 70) recommendations.push("目前固鎖偏高，可另測 60 高度版本，比較抗打與尾段穩定性。");
-  if (hasIntegratedBit(bit)) recommendations.push("Op / Tr 屬於一體式軸心，調整重點應放在上蓋或 CX 戰刃相性。 ");
+  if (hasIntegratedBit(config.parts.bit)) recommendations.push("Op / Tr 屬於一體式軸心，調整重點應放在上蓋或 CX 戰刃相性。 ");
 
   if (!recommendations.length) {
     recommendations.push("此配置方向明確，可先保留核心零件測試，再依實戰結果微調固鎖或軸心。 ");
@@ -927,6 +931,134 @@ function renderList(items, className = "") {
 
 function uniqueItems(items) {
   return [...new Set((items || []).filter(Boolean))];
+}
+
+function partIdentityTokens(part) {
+  return uniqueItems([
+    part?.id,
+    part?.canonicalId,
+    part?.code,
+    part?.name,
+    part?.name_zh,
+    part?.name_en,
+    part?.displayName,
+    part?.displayNameZh,
+    part?.referenceNameEn,
+    part?.model,
+    ...(Array.isArray(part?.aliases) ? part.aliases : []),
+    ...(Array.isArray(part?.legacyIds) ? part.legacyIds : [])
+  ]).map(normalizeText);
+}
+
+function rankedRecommendationCandidates(part, field) {
+  if (!part) return [];
+  const annotated = part.contextualRecommendationCandidates?.[field];
+  if (Array.isArray(annotated) && annotated.length) {
+    return annotated
+      .map((candidate, index) => ({
+        part: String(candidate?.part || ""),
+        tier: candidate?.independentTier || "",
+        context: candidate?.context || "",
+        priority: candidate?.priority !== null
+          && candidate?.priority !== undefined
+          && Number.isFinite(Number(candidate.priority))
+          ? Number(candidate.priority)
+          : Number.isFinite(Number(candidate?.independentPriority))
+            ? Number(candidate.independentPriority)
+            : index + 1,
+        sourceIndex: index
+      }))
+      .filter(candidate => candidate.part)
+      .sort((left, right) => left.priority - right.priority || left.sourceIndex - right.sourceIndex);
+  }
+
+  return (Array.isArray(part[field]) ? part[field] : [])
+    .filter(candidate => typeof candidate === "string" && candidate.trim())
+    .map((candidate, index) => ({ part: candidate, tier: "", context: "", priority: index + 1, sourceIndex: index }));
+}
+
+function findFeaturedBladeProfile(blade) {
+  if (!blade) return null;
+  const bladeTokens = new Set(partIdentityTokens(blade));
+  return (database.featuredBladeProfiles || []).find(profile => (
+    [profile?.bladeId, profile?.name_en, profile?.name_zh, profile?.displayNameZh]
+      .filter(Boolean)
+      .some(value => bladeTokens.has(normalizeText(value)))
+  )) || null;
+}
+
+function renderRecommendationGroup(part, field, label) {
+  const candidates = rankedRecommendationCandidates(part, field);
+  if (!candidates.length) return "";
+  const rows = candidates.map((candidate, index) => {
+    const details = [candidate.tier ? `Tier ${candidate.tier}` : "", candidate.context].filter(Boolean).join("｜");
+    return `<li><strong>${index + 1}. ${escapeHtml(candidate.part)}</strong>${details ? `｜${escapeHtml(details)}` : ""}</li>`;
+  }).join("");
+  return `<div><strong>${escapeHtml(label)}：</strong><ol class="status-list">${rows}</ol></div>`;
+}
+
+function renderBladeEvidenceProfile(blade) {
+  const profile = findFeaturedBladeProfile(blade);
+  if (!profile) return "";
+  const assessment = profile.integratedAssessment || {};
+  const evidence = profile.evidenceSummary || {};
+  const monthly = evidence.monthlyRanking || {};
+  const topCuts = (evidence.reportedTopCutAppearances || []).map(item => {
+    const rate = Number.isFinite(Number(item.firstPlaceAfterTopCutRate))
+      ? `，進入前段後奪冠比例 ${Math.round(Number(item.firstPlaceAfterTopCutRate) * 1000) / 10}%`
+      : "";
+    return `${item.combo}：前段出現 ${item.count} 次${rate}`;
+  });
+  const official = evidence.officialEventCase;
+  const officialLine = official
+    ? `${official.event}｜${official.combo}${official.publishedBattleRecord ? `｜已公開四強／決賽 ${official.publishedBattleRecord.wins} 勝 ${official.publishedBattleRecord.losses} 敗` : ""}`
+    : "";
+  const cases = (evidence.recentWboCases || []).map(item => (
+    `${item.date}｜${item.event}｜第 ${item.placement} 名｜${item.combo}${item.participants ? `｜${item.participants} 人` : ""}`
+  ));
+
+  return `
+    <div class="section-title">月榜與賽事案例</div>
+    <div class="result-card database-profile" data-profile-id="${escapeHtml(profile.id || "")}">
+      ${assessment.summary ? `<div><strong>整合評價：</strong>${escapeHtml(assessment.summary)}</div>` : ""}
+      ${(monthly.monthlyTier || monthly.rankingBand) ? `<div><strong>月榜：</strong>${escapeHtml([monthly.monthlyTier ? `Tier ${monthly.monthlyTier}` : "", monthly.rankingBand ? `排名區間 ${monthly.rankingBand}` : ""].filter(Boolean).join("｜"))}</div>` : ""}
+      ${topCuts.length ? `<div><strong>前段名次統計：</strong><ul class="status-list">${renderList(topCuts)}</ul></div>` : ""}
+      ${officialLine ? `<div><strong>官方賽事案例：</strong>${escapeHtml(officialLine)}</div>` : ""}
+      ${cases.length ? `<div><strong>近期 WBO 案例：</strong><ul class="status-list">${renderList(cases)}</ul></div>` : ""}
+      ${(profile.recommendedRoutes || []).length ? `<div><strong>資料庫推薦配置：</strong>${escapeHtml(profile.recommendedRoutes.join(" → "))}</div>` : ""}
+      <div class="analysis-note">前段名次、前段後奪冠比例與已公開局數不是完整逐場勝率。</div>
+    </div>
+  `;
+}
+
+function renderIndependentPartProfile(config) {
+  const part = primaryBladePart(config);
+  if (!part) return "";
+  const independent = part.independentEvaluation || {};
+  const rank = part.rank !== null && part.rank !== undefined && Number.isFinite(Number(part.rank))
+    ? Number(part.rank)
+    : null;
+  const groups = [
+    renderRecommendationGroup(part, "recommendedBits", "軸心推薦順位"),
+    renderRecommendationGroup(part, "recommendedRatchets", "固鎖推薦順位"),
+    renderRecommendationGroup(part, "recommendedAssistBlades", "輔助戰刃推薦順位"),
+    renderRecommendationGroup(part, "recommendedOver", "超越戰刃推薦順位")
+  ].filter(Boolean).join("");
+
+  return `
+    <div class="section-title">新版資料庫零件資料</div>
+    <div class="result-card database-part-profile" data-part-id="${escapeHtml(part.id || part.code || "")}">
+      <div><strong>${escapeHtml(partTitle(part))}</strong></div>
+      <div class="pill-row">
+        ${rank !== null ? `<span class="analysis-pill database-rank">正式排名：第 ${rank} 名</span>` : ""}
+        ${independent.baseTier ? `<span class="analysis-pill">獨立 Tier：${escapeHtml(independent.baseTier)}</span>` : ""}
+        ${part.evidenceClass ? `<span class="analysis-pill">證據：${escapeHtml(part.evidenceClass)}</span>` : ""}
+      </div>
+      ${groups}
+      ${independent.enabled ? '<div class="analysis-note">此 Tier 僅評估單一零件；原裝關係權重為 0，完整配置協同性另行呈現。</div>' : ""}
+    </div>
+    ${config.parts.blade ? renderBladeEvidenceProfile(config.parts.blade) : ""}
+  `;
 }
 
 function userDocRef() {
@@ -1490,6 +1622,7 @@ function renderAnalysis() {
     <div class="score-card-grid">${renderScores(analysis.scores)}</div>
     <div class="section-title">已辨識零件</div>
     <ul class="status-list">${renderList(detailParts)}</ul>
+    ${renderIndependentPartProfile(config)}
     ${renderMetaCoach(analysis.metaCoach)}
     <div class="section-title">優點</div>
     <ul class="status-list">${renderList(strengths, "status-good")}</ul>

@@ -27,7 +27,8 @@ function allNames(item = {}) {
     item.model,
     item.combo,
     item.updateId,
-    ...(Array.isArray(item.aliases) ? item.aliases : [])
+    ...(Array.isArray(item.aliases) ? item.aliases : []),
+    ...(Array.isArray(item.legacyIds) ? item.legacyIds : [])
   ]);
 }
 function partDataPriority(item = {}) {
@@ -59,10 +60,12 @@ function aliasCanonicalBit(database, input) {
   return input;
 }
 function arrFor(database, section) {
-  const v18 = database.__v18 || database;
-  if (section === "blades") return uniq([...(database.blades || []), ...(v18.bladesTop30 || [])]);
-  if (section === "bits") return uniq([...(database.bits || []), ...(v18.bits || [])]);
-  if (section === "ratchets") return uniq([...(database.ratchets || []), ...(v18.ratchets || [])]);
+  // The top-level database is the only runtime source of truth. `__v18` is an
+  // embedded compatibility/export view and must never be merged back into the
+  // live collections, otherwise stale records can override current entries.
+  if (section === "blades") return database.blades || [];
+  if (section === "bits") return database.bits || [];
+  if (section === "ratchets") return database.ratchets || [];
   return database?.[section] || [];
 }
 export function findPart(database, section, matcher) {
