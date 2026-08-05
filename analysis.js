@@ -201,7 +201,7 @@ async function loadData() {
   if (database && rules) return;
 
   const [loadedDatabase, loadedRules, stockCatalog] = await Promise.all([
-    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260805-expand-wheel1"),
+    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260805-independent-v2"),
     loadJson("./beyblade_x_analysis_rules_v1_zhTW.json?v=20260630-engine2"),
     loadJson("./stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260805-stock-inventory1")
   ]);
