@@ -13,7 +13,7 @@ const analysisHtml = read("../analysis.html");
 
 assert.equal(database.metadata?.updatePackage, "2026.08.05-schema-layer-sync-fix");
 assert.match(analysisSource, /beyblade_x_database_v1_zhTW\.json\?v=20260805-schema-sync-v6/);
-assert.match(analysisHtml, /analysis\.js\?v=20260805-schema-sync-v6/);
+assert.match(analysisHtml, /analysis\.js\?v=20260805-schema-sync-v6b/);
 assert.doesNotMatch(helperSource, /const v18\s*=|database\.__v18/);
 
 const tyrannoMatches = database.blades.filter((part) => {
