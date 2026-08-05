@@ -93,6 +93,51 @@ test("缺少可選 CX 零件時庫存推薦不會讀取 null.canonicalId", () =>
   ]));
 });
 
+test("標準、CX 主要戰刃與 CX 金屬超越混合候選可安全完成排序", () => {
+  const selected = selectTopInventorySuggestions([
+    null,
+    {
+      target: "attack",
+      label: "無固鎖標準配置",
+      value: 10,
+      parts: { blade: tyranno, ratchet: null, bit: bits.LR }
+    },
+    {
+      target: "attack",
+      label: "CX 主要戰刃配置",
+      value: 9,
+      parts: {
+        blade: null,
+        lock: { canonicalId: "LOCK_TEST", tier: "A" },
+        main: { canonicalId: "MAIN_TEST", tier: "A" },
+        metal: null,
+        over: null,
+        assist: { canonicalId: "ASSIST_TEST", tier: "A" },
+        ratchet: null,
+        bit: bits.LR
+      }
+    },
+    {
+      target: "balance",
+      label: "CX 金屬超越配置",
+      value: 8,
+      parts: {
+        blade: null,
+        lock: { canonicalId: "LOCK_TEST_2", tier: "A" },
+        main: null,
+        metal: { canonicalId: "METAL_TEST", tier: "A" },
+        over: { canonicalId: "OVER_TEST", tier: "A" },
+        assist: null,
+        ratchet: ratchet760,
+        bit: bits.R
+      }
+    }
+  ]);
+  assert.ok(selected.length >= 2);
+  assert.equal(selected.some(item => item.label === "無固鎖標準配置"), true);
+  assert.equal(selected.some(item => item.label === "CX 金屬超越配置"), true);
+});
+
 test("推薦候選文字不自行加入順位，編號只交給 ol", () => {
   assert.equal(recommendationCandidateText({ part: "LR", tier: "S" }), "LR｜Tier S");
   assert.doesNotMatch(recommendationCandidateText({ part: "LR", tier: "S" }), /^\d+\./);

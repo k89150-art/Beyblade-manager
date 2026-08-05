@@ -183,12 +183,15 @@ export function recommendationCandidateText(candidate) {
 }
 
 export function selectTopInventorySuggestions(suggestions, limits = {}) {
+  const sourceSuggestions = Array.isArray(suggestions)
+    ? suggestions.filter(item => item && typeof item === "object")
+    : [];
   const targets = ["attack", "specializedAttack", "stamina", "defense", "balance"];
   return targets.flatMap(target => {
     const seenConfigurations = new Set();
     const seenDiversity = new Set();
     const limit = limits[target] ?? (target === "specializedAttack" ? 1 : 2);
-    return (suggestions || [])
+    return sourceSuggestions
       .filter(item => item.target === target)
       .sort(compareSuggestionsByIndependentParts)
       .filter(item => {

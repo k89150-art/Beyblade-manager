@@ -14,8 +14,9 @@ const analysisHtml = fs.readFileSync(new URL("../analysis.html", import.meta.url
 
 assert.equal(database.metadata.updatePackage, "2026.08.05-inventory-recommendation-order-fix");
 assert.match(analysisSource, /beyblade_x_database_v1_zhTW\.json\?v=20260805-inventory-v7/);
-assert.match(analysisHtml, /analysis\.js\?v=20260806-inventory-nullfix1/);
-assert.match(analysisSource, /beyblade_x_inventory_recommendation_v1\.js\?v=20260806-inventory-nullfix1/);
+assert.match(analysisHtml, /analysis_inventory_nullsafe_v2\.js/);
+assert.match(analysisHtml, /推薦程式版本：2026-08-06\.2/);
+assert.match(analysisSource, /beyblade_x_inventory_recommendation_nullsafe_v2\.js/);
 
 const tyranno = getBlade(database, "TYRANNO_BEAT");
 assert.strictEqual(getBlade(database, "Tyranno Beat"), tyranno);
