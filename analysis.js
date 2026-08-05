@@ -1576,6 +1576,11 @@ function renderMetaEvidence(evidence) {
 
 function renderAnalysis() {
   const result = document.getElementById("analysisResult");
+  if (!database || !indexes) {
+    result.style.display = "block";
+    result.innerHTML = '<div class="analysis-note">配置資料庫載入中，完成後即可分析。</div>';
+    return;
+  }
   const config = collectConfig();
   const validation = validateConfig(config);
 
@@ -1651,13 +1656,16 @@ function clearForm() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const analyzeButton = document.getElementById("analyzeBtn");
+  if (analyzeButton) analyzeButton.disabled = true;
   document.querySelectorAll(".mode-tab").forEach(button => button.addEventListener("click", () => setMode(button.dataset.mode)));
-  document.getElementById("analyzeBtn")?.addEventListener("click", renderAnalysis);
+  analyzeButton?.addEventListener("click", renderAnalysis);
   document.getElementById("clearBtn")?.addEventListener("click", clearForm);
   document.getElementById("suggestFromStockBtn")?.addEventListener("click", renderStockSuggestionsFromCloud);
 
   try {
     await loadData();
+    if (analyzeButton) analyzeButton.disabled = false;
     applyUrlPreset();
   } catch (error) {
     console.error("配置分析資料載入失敗", error);
