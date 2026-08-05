@@ -45,7 +45,7 @@ let hasPendingCloudSave = false;
 let lastLocalWriteUpdatedAt = 0;
 let lastAppliedRemoteUpdatedAt = 0;
 
-const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260729-stock3";
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260805-stock-inventory1";
 let stockInputMode = "auto";
 let stockProductsLoadPromise = null;
 let stockProductsLoaded = false;
@@ -2317,7 +2317,8 @@ function formatStockProductParts(product) {
     labels.push("固鎖／軸心 一體式");
   }
 
-  if (parts.bit) labels.push(`軸心 ${parts.bit}`);
+  const bit = parts.bit || product.integratedRatchetBit;
+  if (bit) labels.push(`軸心 ${bit}`);
   return labels.join(" ・ ");
 }
 
@@ -2464,7 +2465,7 @@ function getStockProductRowData(product) {
       valueOrDash(parts.metalBlade),
       valueOrDash(parts.assistBlade),
       valueOrDash(parts.ratchet),
-      valueOrDash(parts.bit)
+      valueOrDash(parts.bit || product.integratedRatchetBit)
     ],
     mainStockName: hasSplitBlade ? "" : valueOrDash(parts.mainBlade),
     metadata: {

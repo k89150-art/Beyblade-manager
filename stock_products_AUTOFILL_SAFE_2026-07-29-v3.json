@@ -5095,7 +5095,7 @@
         "overBlade": null,
         "assistBlade": "A",
         "ratchet": null,
-        "bit": null
+        "bit": "Tr"
       },
       "compositionSource": "爆擊/A",
       "integratedRatchetBit": "Tr",

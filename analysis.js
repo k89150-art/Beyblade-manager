@@ -12,10 +12,10 @@ import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11
 let database = null;
 let rules = null;
 let indexes = null;
+let stockProductsByRecordId = new Map();
+let stockProductsByCode = new Map();
 let currentMode = "standard";
 let currentUser = null;
-let stockSuggestionCache = null;
-const STOCK_SUGGEST_CACHE_MS = 60000;
 
 const firebaseConfig = {
   apiKey: "AIzaSyABQadKr-Am-55GgFJmhZ0tkRY-joARNAQ",
@@ -32,7 +32,6 @@ const db = getFirestore(firebaseApp);
 
 onAuthStateChanged(auth, user => {
   currentUser = user;
-  stockSuggestionCache = null;
 });
 
 const INTEGRATED_BITS = new Set(["OP", "TR"]);
@@ -201,13 +200,35 @@ function analyzeCombo(input, db, options = {}) {
 async function loadData() {
   if (database && rules) return;
 
-  [database, rules] = await Promise.all([
+  const [loadedDatabase, loadedRules, stockCatalog] = await Promise.all([
     loadJson("./beyblade_x_database_v1_zhTW.json?v=20260726-coach1"),
-    loadJson("./beyblade_x_analysis_rules_v1_zhTW.json?v=20260630-engine2")
+    loadJson("./beyblade_x_analysis_rules_v1_zhTW.json?v=20260630-engine2"),
+    loadJson("./stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260805-stock-inventory1")
   ]);
 
+  database = loadedDatabase;
+  rules = loadedRules;
   indexes = buildIndexes(database);
+  buildStockProductIndexes(stockCatalog?.stockProducts || []);
   fillOptions();
+}
+
+function buildStockProductIndexes(stockProducts) {
+  stockProductsByRecordId = new Map();
+  stockProductsByCode = new Map();
+
+  stockProducts.forEach(product => {
+    const recordId = normalizeText(product?.recordId);
+    if (recordId) stockProductsByRecordId.set(recordId, product);
+
+    [product?.productCode, product?.canonicalProductCode].forEach(code => {
+      const key = normalizeText(code);
+      if (!key) return;
+      const matches = stockProductsByCode.get(key) || [];
+      if (!matches.includes(product)) matches.push(product);
+      stockProductsByCode.set(key, matches);
+    });
+  });
 }
 
 function optionLabel(item) {
@@ -935,20 +956,49 @@ function createOwnedBuckets() {
     mains: new Map(),
     metals: new Map(),
     overs: new Map(),
-    assists: new Map()
+    assists: new Map(),
+    sourceSummary: {
+      collectionRows: 0,
+      inventoryItems: 0
+    }
   };
+}
+
+function findStockProductForSavedRow(row, cells) {
+  const recordId = normalizeText(row?.stockRecordId);
+  if (recordId && stockProductsByRecordId.has(recordId)) {
+    return stockProductsByRecordId.get(recordId);
+  }
+
+  const productCode = normalizeText(row?.stockProductCode || cells[0]);
+  const matches = stockProductsByCode.get(productCode) || [];
+  if (matches.length === 1) return matches[0];
+
+  const savedName = normalizeText(cells[1]);
+  const namedMatches = matches.filter(product => normalizeText(product?.displayNameZh) === savedName);
+  return namedMatches.length === 1 ? namedMatches[0] : null;
+}
+
+function savedValueOrFallback(value, fallback) {
+  return isUsefulCell(value) ? value : fallback;
 }
 
 function addBeybladeRowToOwned(owned, row) {
   const cells = row?.cells || [];
-  addOwnedName(owned.blades, cells[1]);
-  addOwnedName(owned.locks, cells[2]);
-  addOwnedName(owned.mains, cells[3]);
-  addOwnedName(owned.overs, cells[4]);
-  addOwnedName(owned.metals, cells[5]);
-  addOwnedName(owned.assists, cells[6]);
-  addOwnedName(owned.ratchets, cells[7]);
-  addOwnedName(owned.bits, cells[8]);
+  const product = findStockProductForSavedRow(row, cells);
+  const parts = product?.parts || {};
+  const originalBit = parts.bit || product?.integratedRatchetBit || "";
+
+  owned.sourceSummary.collectionRows += 1;
+
+  addOwnedName(owned.blades, savedValueOrFallback(cells[1], parts.blade || product?.displayNameZh));
+  addOwnedName(owned.locks, savedValueOrFallback(cells[2], parts.lockChip));
+  addOwnedName(owned.mains, savedValueOrFallback(cells[3], parts.mainBlade));
+  addOwnedName(owned.overs, savedValueOrFallback(cells[4], parts.overBlade));
+  addOwnedName(owned.metals, savedValueOrFallback(cells[5], parts.metalBlade));
+  addOwnedName(owned.assists, savedValueOrFallback(cells[6], parts.assistBlade));
+  addOwnedName(owned.ratchets, savedValueOrFallback(cells[7], parts.ratchet));
+  addOwnedName(owned.bits, savedValueOrFallback(cells[8], originalBit));
 }
 
 function addPartRowToOwned(owned, row) {
@@ -968,7 +1018,10 @@ function addPartRowToOwned(owned, row) {
     輔助戰刃: owned.assists
   }[type];
 
-  if (target) addOwnedName(target, name, count);
+  if (target && isUsefulCell(name)) {
+    addOwnedName(target, name, count);
+    owned.sourceSummary.inventoryItems += Math.max(1, count);
+  }
 }
 
 function readOwnedPartsFromSavedData(data) {
@@ -978,13 +1031,28 @@ function readOwnedPartsFromSavedData(data) {
   return owned;
 }
 
-function partsFromBucket(bucket, indexName, limit = 10) {
+function partsFromBucket(bucket, indexName) {
+  const seen = new Set();
+
   return [...bucket.values()]
     .map(item => ({ owned: item, part: findPart(indexName, item.name) }))
     .filter(item => item.part)
     .sort((a, b) => b.owned.count - a.owned.count)
-    .slice(0, limit)
+    .filter(item => {
+      const key = normalizeText(item.part.id || item.part.code || item.part.name || optionLabel(item.part));
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
     .map(item => item.part);
+}
+
+function ownedBucketTotal(bucket) {
+  return [...bucket.values()].reduce((total, item) => total + item.count, 0);
+}
+
+function ownedBucketSummary(bucket) {
+  return `${ownedBucketTotal(bucket)} 個（${bucket.size} 種）`;
 }
 
 function noRatchetCandidatesFor(blade, bit, ratchets) {
@@ -1040,9 +1108,9 @@ function makeStandardSuggestion(blade, ratchet, bit, target) {
 }
 
 function buildStandardSuggestions(owned) {
-  const blades = partsFromBucket(owned.blades, "blades", 8);
-  const ratchets = partsFromBucket(owned.ratchets, "ratchets", 10);
-  const bits = partsFromBucket(owned.bits, "bits", 10);
+  const blades = partsFromBucket(owned.blades, "blades");
+  const ratchets = partsFromBucket(owned.ratchets, "ratchets");
+  const bits = partsFromBucket(owned.bits, "bits");
   const suggestions = [];
 
   blades.forEach(blade => {
@@ -1085,7 +1153,7 @@ function pickTopSuggestions(suggestions) {
   });
 }
 
-function renderStockSuggestions(items, owned, fromCache = false) {
+function renderStockSuggestions(items, owned) {
   const result = document.getElementById("stockSuggestResult");
   if (!result) return;
 
@@ -1097,7 +1165,7 @@ function renderStockSuggestions(items, owned, fromCache = false) {
     return;
   }
 
-  const summary = `已讀取：上蓋 ${owned.blades.size}、固鎖 ${owned.ratchets.size}、軸心 ${owned.bits.size}。以下只列出分數較高的測試方向。${fromCache ? "（使用 60 秒內快取，未重新讀取雲端）" : ""}`;
+  const summary = `已讀取收藏陀螺 ${owned.sourceSummary.collectionRows} 顆、額外零件 ${owned.sourceSummary.inventoryItems} 個；可用上蓋 ${ownedBucketSummary(owned.blades)}、固鎖 ${ownedBucketSummary(owned.ratchets)}、軸心 ${ownedBucketSummary(owned.bits)}。兩種來源都已納入推薦；以下只列出分數較高的測試方向。`;
   result.style.display = "block";
   result.innerHTML = `
     <div class="analysis-note">${escapeHtml(summary)}</div>
@@ -1140,16 +1208,6 @@ async function renderStockSuggestionsFromCloud() {
   try {
     await loadData();
 
-    const now = Date.now();
-    if (
-      stockSuggestionCache &&
-      stockSuggestionCache.uid === currentUser.uid &&
-      now - stockSuggestionCache.createdAt < STOCK_SUGGEST_CACHE_MS
-    ) {
-      renderStockSuggestions(stockSuggestionCache.suggestions, stockSuggestionCache.owned, true);
-      return;
-    }
-
     result.style.display = "block";
     result.innerHTML = `<div class="analysis-note">正在讀取你的庫存並產生建議...</div>`;
 
@@ -1161,12 +1219,6 @@ async function renderStockSuggestionsFromCloud() {
 
     const owned = readOwnedPartsFromSavedData(snap.data());
     const suggestions = pickTopSuggestions(buildStandardSuggestions(owned));
-    stockSuggestionCache = {
-      uid: currentUser.uid,
-      createdAt: Date.now(),
-      owned,
-      suggestions
-    };
     renderStockSuggestions(suggestions, owned);
   } catch (error) {
     console.error("庫存推薦產生失敗", error);
