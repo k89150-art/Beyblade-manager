@@ -4,20 +4,29 @@
     "version": "1.9-compatible",
     "created": "2026-07-01",
     "language": "zh-TW",
-    "status": "v1.8 資料包整合版；非官方勝率資料庫",
+    "status": "v1.9 相容研究整合版；非逐場勝率資料庫",
     "notes": [
       "優先整合 beyblade_x_codex_database_v1_8_ASCII_SAFE.json。",
       "分析與推薦僅供理論參考，不保證實戰結果。",
-      "保留舊版相容欄位，避免既有配置分析頁失效。"
+      "保留舊版相容欄位，避免既有配置分析頁失效。",
+      "2026-07-30 更新將逐場勝率、前段名次出現次數、前段後奪冠比例與專家評分分開呈現。",
+      "社群個人測試只作為低權重路線提示，不直接提高 Meta 分數。",
+      "2026-08-05 整理暴龍霸擊與武士魂斬：去除 top-level blades 重複條目，補入官方商品／賽事與 WBO 可驗證配置案例。",
+      "2026-08-05 新增 CX 輔助戰刃 W（Wheel）專題：整合官方設計、全球前段統計、常用完整配置及四件式代表骨架。",
+      "2026-08-05 補入 CX-13～15 Expand Blade 的官方中文整機名稱與 W 四件式優先測試骨架；性能推導不冒充賽事勝率或成熟主流。"
     ],
-    "updated": "2026-07-26",
-    "updatePackage": "2026.07.26-meta-coach",
+    "updated": "2026-08-05",
+    "updatePackage": "2026.08.05-expand-wheel-routing",
     "appliedUpdates": [
       "2026.07.11-delta1",
       "2026.07.15-g-bit",
       "2026.07.23-multi-model-index",
       "2026.07.24-meta-routes",
-      "2026.07.26-meta-coach"
+      "2026.07.26-meta-coach",
+      "2026.07.30-research-integration",
+      "2026.08.05-tyranno-samurai-profile",
+      "2026.08.05-wheel-assist-profile",
+      "2026.08.05-expand-wheel-routing"
     ]
   },
   "enums": {
@@ -65,12 +74,14 @@
       ],
       "role": "低身位可控攻擊 / 下方攻擊核心",
       "strengths": [
-        "擊飛",
-        "打固鎖",
-        "Xtreme Finish"
+        "可同時威脅擊飛、極限終結與爆裂",
+        "LR 路線具多次上軌壓力",
+        "攻擊型中仍保有較好的姿態恢復與末段"
       ],
       "weaknesses": [
-        "第一波沒打到時後段容易輸持久"
+        "LR 高速時有跳軌自爆風險",
+        "需要發射力量、角度與配重調整",
+        "下方鰭片及刃面磨耗會降低攻擊力，並有白化或斷裂風險"
       ],
       "metaTier": "S",
       "confidence": "high",
@@ -79,16 +90,18 @@
         "LR",
         "R",
         "K",
-        "L"
+        "FB"
       ],
       "recommendedRatchets": [
         "1-70",
-        "1-60",
         "3-60",
+        "9-60",
+        "1-60",
         "4-50"
       ],
       "weight_g": null,
-      "diameter_mm": null
+      "diameter_mm": null,
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "魔導神杖",
@@ -104,33 +117,36 @@
       ],
       "role": "持久核心 / Meta 基準",
       "strengths": [
-        "持久勝",
-        "抗攻擊後拖末段"
+        "H 路線具成熟的防守持久能力",
+        "B／FB 路線提供純持久與末段",
+        "LO 路線可在抗擊飛與末段間折衷"
       ],
       "weaknesses": [
-        "純 B 配置怕高壓攻擊",
-        "容易被針對"
+        "LO 會較早刮地",
+        "純持久路線怕強攻與左迴旋反旋",
+        "主動得分能力低且容易被針對"
       ],
       "metaTier": "S",
       "confidence": "high",
       "notes": "v1.8 Top 30",
       "recommendedBits": [
-        "B",
         "H",
-        "L",
         "FB",
+        "B",
+        "LO",
         "O",
         "DB"
       ],
       "recommendedRatchets": [
-        "9-60",
-        "3-60",
-        "5-60",
         "1-60",
-        "9-70"
+        "3-60",
+        "9-60",
+        "6-60",
+        "5-60"
       ],
       "weight_g": null,
-      "diameter_mm": null
+      "diameter_mm": null,
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "空力天馬",
@@ -145,30 +161,32 @@
       ],
       "role": "高重量攻擊持久混合 / 反 Meta 攻擊",
       "strengths": [
-        "擊飛",
-        "反打",
-        "攻擊後拖末段"
+        "高重量可控攻擊",
+        "R 路線能兼顧連續壓力與穩定",
+        "可依 Ratchet 調整為姿態穩定或低身位壓制"
       ],
       "weaknesses": [
-        "配置不當會耗耐久或主動得分不足"
+        "與鮫鯊狂鱗同隊時角色可能重疊",
+        "激進路線仍有自爆與失速風險"
       ],
       "metaTier": "S",
       "confidence": "high",
       "notes": "v1.8 Top 30",
       "recommendedBits": [
-        "L",
         "R",
-        "P",
-        "H"
+        "LR",
+        "L",
+        "K"
       ],
       "recommendedRatchets": [
+        "3-60",
         "7-60",
         "1-60",
-        "5-70",
-        "9-60"
+        "1-50"
       ],
       "weight_g": null,
-      "diameter_mm": null
+      "diameter_mm": null,
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "蒼穹龍騎士",
@@ -219,30 +237,34 @@
       ],
       "role": "左迴旋攻擊 / 反旋攻擊混合",
       "strengths": [
-        "左迴旋攻擊",
-        "反旋末段",
-        "擊飛"
+        "L 路線具成熟的左迴旋攻擊持久能力",
+        "9-60E 可兼顧吸轉、回場與反打",
+        "對多數右迴旋配置具有末段翻盤能力"
       ],
       "weaknesses": [
-        "比 Cobalt 更需要發射角度與 Bit 相性"
+        "同為左迴旋對局的純持久較弱",
+        "E 的軸粗與固鎖鬆緊會顯著影響爆裂風險",
+        "橡膠磨耗與發射角度會大幅改變表現"
       ],
       "metaTier": "S",
       "confidence": "high",
       "notes": "v1.8 Top 30",
       "recommendedBits": [
+        "L",
         "E",
         "R",
-        "LR",
-        "L",
-        "Z"
+        "LR"
       ],
       "recommendedRatchets": [
+        "7-60",
+        "7-70",
         "9-60",
-        "3-60",
-        "3-70"
+        "9-65",
+        "5-60"
       ],
       "weight_g": null,
-      "diameter_mm": null
+      "diameter_mm": null,
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "飛龍盤旋",
@@ -410,32 +432,30 @@
       ],
       "role": "低身位持久 / 防守持久核心",
       "strengths": [
-        "持久勝",
-        "防守持久",
-        "抗攻擊後拖末段"
+        "9-60FB 是大樣本穩定防守持久路線",
+        "適合降低牌組波動"
       ],
       "weaknesses": [
-        "主動得分不足，怕高爆發攻擊或反持久"
+        "主動得分能力不足",
+        "前段後奪冠比例低於頂級主動核心"
       ],
       "metaTier": "A",
       "confidence": "high",
       "notes": "v1.8 Top 30",
       "recommendedBits": [
-        "LO",
         "FB",
+        "LO",
         "H",
-        "B",
-        "O",
-        "UN"
+        "B"
       ],
       "recommendedRatchets": [
         "9-60",
-        "7-55",
-        "5-60",
-        "9-65"
+        "9-70",
+        "1-60"
       ],
       "weight_g": null,
-      "diameter_mm": null
+      "diameter_mm": null,
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "鳳凰飛翼",
@@ -517,38 +537,131 @@
       "model": "Tyranno Beat",
       "name": "暴龍霸擊",
       "name_en": "Tyranno Beat",
-      "series": "BX/UX/CX",
+      "series": "BX",
       "roleTags": [
-        "攻擊"
+        "攻擊",
+        "平衡"
       ],
-      "role": "重攻擊 / 壓制型攻擊",
+      "role": "穩定重攻擊 / 控制碰撞 / 第三槽彈性位",
       "strengths": [
-        "重量撞擊",
-        "擊飛",
-        "壓制"
+        "約 37g 級重型上蓋，碰撞交換穩定",
+        "R／P／K／LR 可形成不同速度與續航曲線",
+        "相較純爆發上蓋較能保留失擊後的第二次接觸機會"
       ],
       "weaknesses": [
-        "暴衝型 Bit 容易自爆，持久不算主力"
+        "純持久仍輸給頂級圓形持久上蓋",
+        "Q 與過度暴衝配置自爆率高",
+        "路線分散，需依場地與對局選軸而非照抄單一配置"
       ],
-      "metaTier": "B",
+      "metaTier": "A-",
       "confidence": "high",
-      "notes": "v1.8 Top 30",
+      "notes": "2026-08-05 專題整理：保留 A- 成熟次主流；近期用途以三陀螺牌組第三槽與可調式重攻擊為主。",
       "recommendedBits": [
+        "R",
+        "P",
+        "K",
+        "LR",
+        "L",
+        "C",
+        "H"
+      ],
+      "recommendedRatchets": [
+        "9-60",
+        "7-60",
+        "7-70",
+        "3-60",
+        "1-70",
+        "1-50",
+        "5-60"
+      ],
+      "weight_g": null,
+      "diameter_mm": null,
+      "displayNameZh": "暴龍霸擊",
+      "referenceNameEn": "Tyranno Beat",
+      "tier": "A-",
+      "metaConfidence": "high",
+      "primaryRoles": [
+        "穩定重攻擊",
+        "控制碰撞攻擊",
+        "第三槽彈性位"
+      ],
+      "routes": [
+        {
+          "ratchets": [
+            "9-60",
+            "7-60",
+            "7-70"
+          ],
+          "bits": [
+            "R",
+            "P",
+            "K"
+          ],
+          "role": "主流重型平衡攻擊",
+          "evidenceClass": "established_secondary"
+        },
+        {
+          "ratchets": [
+            "3-60",
+            "1-70"
+          ],
+          "bits": [
+            "LR",
+            "R",
+            "L"
+          ],
+          "role": "低軌／可控碰撞攻擊",
+          "evidenceClass": "established_secondary"
+        },
+        {
+          "ratchets": [
+            "5-60"
+          ],
+          "bits": [
+            "C"
+          ],
+          "role": "官方大型賽案例的留場控制",
+          "evidenceClass": "official_event_case"
+        },
+        {
+          "ratchets": [
+            "1-50"
+          ],
+          "bits": [
+            "R"
+          ],
+          "role": "近期低身位爆發變體",
+          "evidenceClass": "emerging"
+        },
+        {
+          "ratchets": [
+            "3-60",
+            "9-60"
+          ],
+          "bits": [
+            "H"
+          ],
+          "role": "防守反打改造",
+          "evidenceClass": "successful_rogue"
+        }
+      ],
+      "avoidConflictForBits": [
         "R",
         "LR",
         "P",
         "GF",
         "H",
-        "I"
+        "I",
+        "K",
+        "L",
+        "C"
       ],
-      "recommendedRatchets": [
-        "1-60",
-        "3-60",
-        "4-50",
-        "5-60"
-      ],
-      "weight_g": null,
-      "diameter_mm": null
+      "trueConflictBits": [],
+      "updateId": "TYRANNO_BEAT_20260805",
+      "productCode": "BX-31",
+      "stockCombo": "4-70Q",
+      "releaseDate": "2024-04-27",
+      "evidenceClass": "established_secondary"
     },
     {
       "id": "時鐘幻象",
@@ -562,31 +675,31 @@
       ],
       "role": "低身位持久 / 穩定持久核心",
       "strengths": [
-        "持久勝",
-        "低身位穩定",
-        "末段"
+        "有利持久對局的 Spin Finish 上限極高",
+        "4-55UN 可作為純持久反制",
+        "LO／FB 提供較泛用的持久分支"
       ],
       "weaknesses": [
-        "主動擊殺能力不足，怕高爆發攻擊"
+        "對強攻的擊飛與爆裂防禦脆弱",
+        "不適合資訊不足時盲選",
+        "Blade 底部接合塑膠與 Simple Ratchet 磨耗快"
       ],
       "metaTier": "B",
       "confidence": "high",
       "notes": "v1.8 Top 30",
       "recommendedBits": [
+        "UN",
         "LO",
-        "B",
         "FB",
-        "H",
-        "O"
+        "B"
       ],
       "recommendedRatchets": [
-        "7-55",
-        "9-60",
-        "5-60",
-        "9-65"
+        "4-55",
+        "7-55"
       ],
       "weight_g": null,
-      "diameter_mm": null
+      "diameter_mm": null,
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "古屍詛咒",
@@ -960,36 +1073,132 @@
       "model": "Samurai Calibur",
       "name": "武士魂斬",
       "name_en": "Samurai Calibur",
-      "series": "BX/UX/CX",
+      "series": "BX",
       "roleTags": [
-        "攻擊"
+        "攻擊",
+        "平衡",
+        "防守反打"
       ],
-      "role": "集中刀刃攻擊",
+      "role": "持久反打 / 技術型控制攻擊 / anti-attack",
       "strengths": [
-        "集中攻擊",
-        "可控攻擊",
-        "反打"
+        "外形兼具小刃連打與大刃重擊，能在傾斜後製造反打",
+        "B／FB 路線有多場上位牌組重複佐證",
+        "R／K／P 可把圓潤外形轉為可控攻擊"
       ],
       "weaknesses": [
-        "需要準確接觸角度，否則輸出不穩"
+        "偏重心與傾倒後的姿態崩潰會拖累末段續航",
+        "對頂級純持久上蓋的正面旋轉勝率沒有足夠證據支持",
+        "原裝 M 高度與挙動較特殊，不能直接視為競技預設"
       ],
-      "metaTier": "C",
-      "confidence": "medium",
-      "notes": "v1.8 Top 30",
+      "metaTier": "B+",
+      "confidence": "medium-high",
+      "notes": "2026-08-05 專題整理：由 emerging 修正為 B+ 成熟次主流；主軸是 9-60 B／FB 的持久反打與 1-60 R 的技術攻擊。",
       "recommendedBits": [
+        "B",
+        "FB",
+        "R",
+        "K",
+        "P",
+        "T",
+        "LR",
+        "H"
+      ],
+      "recommendedRatchets": [
+        "9-60",
+        "5-60",
+        "1-60",
+        "5-70",
+        "1-70",
+        "7-60"
+      ],
+      "weight_g": null,
+      "diameter_mm": null,
+      "displayNameZh": "武士魂斬",
+      "referenceNameEn": "Samurai Calibur",
+      "tier": "B+",
+      "metaConfidence": "medium-high",
+      "primaryRoles": [
+        "持久反打",
+        "技術型控制攻擊",
+        "anti-attack"
+      ],
+      "routes": [
+        {
+          "ratchets": [
+            "9-60",
+            "5-60"
+          ],
+          "bits": [
+            "B",
+            "FB"
+          ],
+          "role": "成熟持久反打",
+          "evidenceClass": "established_secondary"
+        },
+        {
+          "ratchets": [
+            "1-60",
+            "5-70"
+          ],
+          "bits": [
+            "R"
+          ],
+          "role": "技術型控制攻擊",
+          "evidenceClass": "established_secondary"
+        },
+        {
+          "ratchets": [
+            "9-60"
+          ],
+          "bits": [
+            "K"
+          ],
+          "role": "攻守平衡",
+          "evidenceClass": "established_secondary"
+        },
+        {
+          "ratchets": [
+            "1-60",
+            "7-60"
+          ],
+          "bits": [
+            "H",
+            "P",
+            "T"
+          ],
+          "role": "防守／平衡變體",
+          "evidenceClass": "successful_rogue"
+        },
+        {
+          "ratchets": [
+            "6-70"
+          ],
+          "bits": [
+            "M"
+          ],
+          "role": "原裝機構體驗；非競技預設",
+          "evidenceClass": "stock_only"
+        }
+      ],
+      "avoidConflictForBits": [
         "R",
         "LR",
         "H",
-        "P"
+        "P",
+        "B",
+        "FB",
+        "J",
+        "K",
+        "T",
+        "W",
+        "WB"
       ],
-      "recommendedRatchets": [
-        "3-60",
-        "1-60",
-        "9-60",
-        "6-70"
-      ],
-      "weight_g": null,
-      "diameter_mm": null
+      "trueConflictBits": [],
+      "updateId": "SAMURAI_CALIBUR_20260805",
+      "productCode": "BX-45",
+      "stockCombo": "6-70M",
+      "releaseDate": "2025-08-09",
+      "evidenceClass": "established_secondary"
     },
     {
       "id": "騎士重盾",
@@ -2683,114 +2892,6 @@
       "updateId": "WHALE_WAVE"
     },
     {
-      "id": "武士魂斬",
-      "displayNameZh": "武士魂斬",
-      "referenceNameEn": "Samurai Calibur",
-      "tier": "B+",
-      "metaConfidence": "medium",
-      "primaryRoles": [
-        "技術型刀刃攻擊",
-        "控制反打",
-        "配置依賴型平衡"
-      ],
-      "routes": [
-        {
-          "bits": [
-            "LR",
-            "J"
-          ],
-          "role": "刀刃攻擊／干擾攻擊",
-          "evidenceClass": "established_secondary",
-          "ratchets": [
-            "5-60",
-            "1-70"
-          ]
-        },
-        {
-          "bits": [
-            "K",
-            "P",
-            "T"
-          ],
-          "role": "技術型控制攻擊",
-          "evidenceClass": "established_secondary",
-          "ratchets": [
-            "1-60",
-            "9-70",
-            "7-60"
-          ]
-        },
-        {
-          "bits": [
-            "W",
-            "WB",
-            "FB",
-            "H",
-            "B"
-          ],
-          "role": "反打／防守改造",
-          "evidenceClass": "successful_rogue",
-          "ratchets": [
-            "1-60",
-            "9-60",
-            "5-60"
-          ]
-        }
-      ],
-      "avoidConflictForBits": [
-        "B",
-        "FB",
-        "H",
-        "J",
-        "K",
-        "LR",
-        "P",
-        "T",
-        "W",
-        "WB"
-      ],
-      "model": "Samurai Calibur",
-      "name": "武士魂斬",
-      "name_en": "Samurai Calibur",
-      "series": "BX/UX/CX",
-      "roleTags": [
-        "攻擊",
-        "平衡"
-      ],
-      "role": "技術型刀刃攻擊 / 控制反打 / 配置依賴型平衡",
-      "strengths": [
-        "刀刃攻擊／干擾攻擊",
-        "技術型控制攻擊",
-        "反打／防守改造"
-      ],
-      "weaknesses": [],
-      "metaTier": "B+",
-      "confidence": "medium",
-      "notes": "2026-07-11 delta",
-      "recommendedBits": [
-        "LR",
-        "J",
-        "K",
-        "P",
-        "T",
-        "W",
-        "WB",
-        "FB",
-        "H",
-        "B"
-      ],
-      "recommendedRatchets": [
-        "5-60",
-        "1-70",
-        "1-60",
-        "9-70",
-        "7-60",
-        "9-60"
-      ],
-      "trueConflictBits": [],
-      "updateId": "SAMURAI_CALIBUR"
-    },
-    {
       "id": "魔像奇岩",
       "displayNameZh": "魔像奇岩",
       "referenceNameEn": "Golem Rock",
@@ -3059,12 +3160,9 @@
           "role": "左迴旋攻擊持久核心",
           "evidenceClass": "mainstream",
           "ratchets": [
-            "5-60",
             "7-60",
             "7-70",
-            "8-70",
-            "0-60",
-            "1-70"
+            "5-60"
           ]
         },
         {
@@ -3074,14 +3172,24 @@
           "role": "左迴旋末段／反旋拖勝",
           "evidenceClass": "established_secondary",
           "ratchets": [
-            "6-60"
+            "9-60"
           ]
         },
         {
           "bits": [
+            "E"
+          ],
+          "role": "提高防守、犧牲部分末段的變體",
+          "evidenceClass": "emerging",
+          "ratchets": [
+            "9-65"
+          ],
+          "sampleWarning": true
+        },
+        {
+          "bits": [
             "R",
-            "LR",
-            "F"
+            "LR"
           ],
           "role": "左迴旋主動攻擊",
           "evidenceClass": "successful_rogue",
@@ -3108,11 +3216,15 @@
       ],
       "role": "左迴旋攻擊持久 / 主動反旋",
       "strengths": [
-        "左迴旋攻擊持久核心",
-        "左迴旋末段／反旋拖勝",
-        "左迴旋主動攻擊"
+        "L 路線具成熟的左迴旋攻擊持久能力",
+        "9-60E 可兼顧吸轉、回場與反打",
+        "對多數右迴旋配置具有末段翻盤能力"
       ],
-      "weaknesses": [],
+      "weaknesses": [
+        "同為左迴旋對局的純持久較弱",
+        "E 的軸粗與固鎖鬆緊會顯著影響爆裂風險",
+        "橡膠磨耗與發射角度會大幅改變表現"
+      ],
       "metaTier": "A-",
       "confidence": "high",
       "notes": "2026-07-11 delta",
@@ -3120,20 +3232,18 @@
         "L",
         "E",
         "R",
-        "LR",
-        "F"
+        "LR"
       ],
       "recommendedRatchets": [
-        "5-60",
         "7-60",
         "7-70",
-        "8-70",
-        "0-60",
-        "1-70",
-        "6-60"
+        "9-60",
+        "9-65",
+        "5-60"
       ],
       "trueConflictBits": [],
-      "updateId": "METEOR_DRAGOON"
+      "updateId": "METEOR_DRAGOON",
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "武士星劍",
@@ -3229,26 +3339,25 @@
       "routes": [
         {
           "bits": [
-            "LR",
-            "R"
+            "LR"
           ],
-          "role": "低身位重攻擊／可控連續攻擊",
+          "role": "低身位連續重攻擊",
           "evidenceClass": "mainstream",
           "ratchets": [
             "1-70",
-            "3-60",
-            "9-60"
+            "3-60"
           ]
         },
         {
           "bits": [
-            "J",
-            "T"
+            "R"
           ],
-          "role": "干擾奇襲／技術攻擊",
-          "evidenceClass": "established_secondary",
+          "role": "可控連續攻擊",
+          "evidenceClass": "mainstream",
           "ratchets": [
-            "4-50"
+            "1-60",
+            "3-60",
+            "9-60"
           ]
         },
         {
@@ -3258,19 +3367,18 @@
           "role": "控制攻擊／移動反打",
           "evidenceClass": "established_secondary",
           "ratchets": [
-            "1-60"
+            "1-60",
+            "3-60"
           ]
         },
         {
           "bits": [
-            "FB",
-            "LO"
+            "FB"
           ],
-          "role": "特殊防守反打",
-          "evidenceClass": "successful_rogue",
+          "role": "防守反打／攻擊持久變速",
+          "evidenceClass": "established_secondary",
           "ratchets": [
-            "1-60",
-            "5-60"
+            "9-60"
           ]
         }
       ],
@@ -3294,34 +3402,34 @@
       ],
       "role": "頂級低身位攻擊 / 多路線攻擊核心 / 控制反打",
       "strengths": [
-        "低身位重攻擊／可控連續攻擊",
-        "干擾奇襲／技術攻擊",
-        "控制攻擊／移動反打",
-        "特殊防守反打"
+        "可同時威脅擊飛、極限終結與爆裂",
+        "LR 路線具多次上軌壓力",
+        "攻擊型中仍保有較好的姿態恢復與末段"
       ],
-      "weaknesses": [],
+      "weaknesses": [
+        "LR 高速時有跳軌自爆風險",
+        "需要發射力量、角度與配重調整",
+        "下方鰭片及刃面磨耗會降低攻擊力，並有白化或斷裂風險"
+      ],
       "metaTier": "S",
       "confidence": "high",
       "notes": "2026-07-11 delta",
       "recommendedBits": [
         "LR",
         "R",
-        "J",
-        "T",
         "K",
-        "FB",
-        "LO"
+        "FB"
       ],
       "recommendedRatchets": [
         "1-70",
         "3-60",
         "9-60",
-        "4-50",
         "1-60",
-        "5-60"
+        "4-50"
       ],
       "trueConflictBits": [],
-      "updateId": "SHARK_SCALE"
+      "updateId": "SHARK_SCALE",
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "空力天馬",
@@ -3342,10 +3450,10 @@
           "role": "重量可控攻擊",
           "evidenceClass": "mainstream",
           "ratchets": [
+            "3-60",
+            "7-60",
             "1-60",
-            "1-50",
-            "6-60",
-            "3-60"
+            "1-50"
           ]
         },
         {
@@ -3355,7 +3463,8 @@
           "role": "低軌重量壓制",
           "evidenceClass": "established_secondary",
           "ratchets": [
-            "9-60"
+            "9-60",
+            "1-50"
           ]
         },
         {
@@ -3365,7 +3474,8 @@
           "role": "重量攻擊持久",
           "evidenceClass": "established_secondary",
           "ratchets": [
-            "1-60"
+            "1-60",
+            "7-60"
           ]
         }
       ],
@@ -3384,28 +3494,32 @@
       ],
       "role": "高重量泛用攻擊 / 可控重攻擊 / 攻擊持久",
       "strengths": [
-        "重量可控攻擊",
-        "低軌重量壓制",
-        "重量攻擊持久"
+        "高重量可控攻擊",
+        "R 路線能兼顧連續壓力與穩定",
+        "可依 Ratchet 調整為姿態穩定或低身位壓制"
       ],
-      "weaknesses": [],
+      "weaknesses": [
+        "與鮫鯊狂鱗同隊時角色可能重疊",
+        "激進路線仍有自爆與失速風險"
+      ],
       "metaTier": "A+",
       "confidence": "high",
       "notes": "2026-07-11 delta",
       "recommendedBits": [
         "R",
         "LR",
-        "L"
+        "L",
+        "K"
       ],
       "recommendedRatchets": [
-        "1-60",
-        "1-50",
-        "6-60",
         "3-60",
-        "9-60"
+        "7-60",
+        "1-60",
+        "1-50"
       ],
       "trueConflictBits": [],
-      "updateId": "AERO_PEGASUS"
+      "updateId": "AERO_PEGASUS",
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "銀狼",
@@ -3473,29 +3587,30 @@
       ],
       "role": "安全型防守持久 / 抗傾斜持久 / anti-attack持久",
       "strengths": [
-        "防守持久核心",
-        "純持久／穩定續航",
-        "anti-attack持久",
-        "低身位持久"
+        "9-60FB 是大樣本穩定防守持久路線",
+        "適合降低牌組波動"
       ],
-      "weaknesses": [],
+      "weaknesses": [
+        "主動得分能力不足",
+        "前段後奪冠比例低於頂級主動核心"
+      ],
       "metaTier": "A",
       "confidence": "high",
       "notes": "2026-07-11 delta",
       "recommendedBits": [
         "FB",
-        "B",
+        "LO",
         "H",
-        "LO"
+        "B"
       ],
       "recommendedRatchets": [
         "9-60",
-        "1-60",
         "9-70",
-        "3-60"
+        "1-60"
       ],
       "trueConflictBits": [],
-      "updateId": "SILVER_WOLF"
+      "updateId": "SILVER_WOLF",
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "時鐘幻象",
@@ -3513,11 +3628,10 @@
           "bits": [
             "UN"
           ],
-          "role": "超低身位定點防守",
-          "evidenceClass": "mainstream",
+          "role": "純持久反制／定點 Counterpick",
+          "evidenceClass": "established_secondary",
           "ratchets": [
-            "4-55",
-            "7-55"
+            "4-55"
           ]
         },
         {
@@ -3538,7 +3652,6 @@
           "role": "防守持久核心",
           "evidenceClass": "mainstream",
           "ratchets": [
-            "4-55",
             "7-55"
           ]
         },
@@ -3571,12 +3684,15 @@
       ],
       "role": "超低身位防守持久 / 定點anti-attack / 低高度專用核心",
       "strengths": [
-        "超低身位定點防守",
-        "超低身位持久",
-        "防守持久核心",
-        "純持久分支"
+        "有利持久對局的 Spin Finish 上限極高",
+        "4-55UN 可作為純持久反制",
+        "LO／FB 提供較泛用的持久分支"
       ],
-      "weaknesses": [],
+      "weaknesses": [
+        "對強攻的擊飛與爆裂防禦脆弱",
+        "不適合資訊不足時盲選",
+        "Blade 底部接合塑膠與 Simple Ratchet 磨耗快"
+      ],
       "metaTier": "A-",
       "confidence": "high",
       "notes": "2026-07-11 delta",
@@ -3591,105 +3707,8 @@
         "7-55"
       ],
       "trueConflictBits": [],
-      "updateId": "CLOCK_MIRAGE"
-    },
-    {
-      "id": "暴龍霸擊",
-      "displayNameZh": "暴龍霸擊",
-      "referenceNameEn": "Tyranno Beat",
-      "tier": "A-",
-      "metaConfidence": "medium-high",
-      "primaryRoles": [
-        "穩定重攻擊",
-        "技術型攻擊平衡",
-        "可控爆發"
-      ],
-      "routes": [
-        {
-          "bits": [
-            "R"
-          ],
-          "role": "可控重攻擊",
-          "evidenceClass": "mainstream",
-          "ratchets": [
-            "3-60",
-            "1-60",
-            "1-70"
-          ]
-        },
-        {
-          "bits": [
-            "P"
-          ],
-          "role": "技術型重量平衡",
-          "evidenceClass": "established_secondary",
-          "ratchets": [
-            "9-60",
-            "7-70"
-          ]
-        },
-        {
-          "bits": [
-            "K"
-          ],
-          "role": "控制重攻擊／反打",
-          "evidenceClass": "established_secondary",
-          "ratchets": [
-            "3-60"
-          ]
-        },
-        {
-          "bits": [
-            "I"
-          ],
-          "role": "一擊爆發",
-          "evidenceClass": "established_secondary",
-          "ratchets": [
-            "5-60"
-          ]
-        }
-      ],
-      "avoidConflictForBits": [
-        "I",
-        "K",
-        "P",
-        "R"
-      ],
-      "model": "Tyranno Beat",
-      "name": "暴龍霸擊",
-      "name_en": "Tyranno Beat",
-      "series": "BX/UX/CX",
-      "roleTags": [
-        "攻擊",
-        "平衡"
-      ],
-      "role": "穩定重攻擊 / 技術型攻擊平衡 / 可控爆發",
-      "strengths": [
-        "可控重攻擊",
-        "技術型重量平衡",
-        "控制重攻擊／反打",
-        "一擊爆發"
-      ],
-      "weaknesses": [],
-      "metaTier": "A-",
-      "confidence": "high",
-      "notes": "2026-07-11 delta",
-      "recommendedBits": [
-        "R",
-        "P",
-        "K",
-        "I"
-      ],
-      "recommendedRatchets": [
-        "3-60",
-        "1-60",
-        "1-70",
-        "9-60",
-        "7-70",
-        "5-60"
-      ],
-      "trueConflictBits": [],
-      "updateId": "TYRANNO_BEAT"
+      "updateId": "CLOCK_MIRAGE",
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "鳳凰飛翼",
@@ -4546,8 +4565,12 @@
         "Clock Mirage",
         "Golem Rock",
         "Cobalt Dragoon",
-        "Phoenix Wing"
-      ]
+        "Phoenix Wing",
+        "Meteor Dragoon",
+        "Shark Scale"
+      ],
+      "researchNote": "9-60 可為 E 或 FB 等較保守路線提供爆抗與穩定。",
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "3-60",
@@ -4582,8 +4605,11 @@
         "Wizard Rod",
         "Aero Pegasus",
         "Tyranno Beat",
-        "Knight Mail"
-      ]
+        "Knight Mail",
+        "Shark Scale"
+      ],
+      "researchNote": "近期與長期資料均支持 3-60 作為攻擊型姿態修正與泛用低高度選項。",
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "1-70",
@@ -4840,7 +4866,9 @@
         "Shark Scale",
         "Blitz",
         "Clock Mirage"
-      ]
+      ],
+      "researchNote": "Clock Mirage 4-55UN／LO 是成熟低身位路線；需注意 Simple Ratchet 與接合部磨耗。",
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "7-55",
@@ -4903,8 +4931,11 @@
       "recommendedBlades": [
         "Wizard Rod",
         "Silver Wolf",
-        "Clock Mirage"
-      ]
+        "Clock Mirage",
+        "Meteor Dragoon"
+      ],
+      "researchNote": "Meteor Dragoon 9-65E 為專家提出的防守型變體，目前仍屬低樣本。",
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "0-60",
@@ -4987,8 +5018,11 @@
       ],
       "recommendedBlades": [
         "Dran Brave",
-        "早期 CX"
-      ]
+        "早期 CX",
+        "Wizard Rod"
+      ],
+      "researchNote": "Wizard Rod 6-60H 有近期優勝牌組佐證，但不代表整體優於 1-60H。",
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "8-70",
@@ -5485,9 +5519,13 @@
       "role": "泛用可控攻擊",
       "metaTier": "S-",
       "confidence": "medium-high",
-      "strengths": [],
+      "strengths": [
+        "可控移動與多次接觸",
+        "比 LR 更容易降低自爆率"
+      ],
       "weaknesses": [
-        "爆發不如 GF / A / I"
+        "低身位上勾與瞬間爆發低於 LR",
+        "純持久能力有限"
       ],
       "bestWith": [
         "Phoenix Wing",
@@ -5495,7 +5533,8 @@
         "Tyranno Beat",
         "Shark Scale",
         "Dran Buster"
-      ]
+      ],
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "LR",
@@ -5509,9 +5548,13 @@
       "role": "低軌攻擊",
       "metaTier": "S",
       "confidence": "medium-high",
-      "strengths": [],
+      "strengths": [
+        "低身位、高速、多次 Xtreme Dash",
+        "與鮫鯊狂鱗等高性能攻擊刃相性佳"
+      ],
       "weaknesses": [
-        "續航有限，第一波沒打到會失分"
+        "可能跳過 Xtreme Line 或地面凸紋而自爆",
+        "需要發射角度與力量控制"
       ],
       "bestWith": [
         "Shark Scale",
@@ -5519,7 +5562,8 @@
         "Blitz",
         "Tyranno Beat",
         "Impact Drake"
-      ]
+      ],
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "H",
@@ -5559,14 +5603,20 @@
       "role": "左迴旋末段 / 反旋",
       "metaTier": "A+",
       "confidence": "medium-high",
-      "strengths": [],
+      "strengths": [
+        "左迴旋吸轉、末段與回場能力",
+        "粗軸版本可顯著改善固鎖安全"
+      ],
       "weaknesses": [
-        "右迴旋泛用性較低"
+        "細軸或鬆配合時爆裂風險高",
+        "同旋持久與橡膠磨耗會影響結果",
+        "需要熟悉左迴旋走位"
       ],
       "bestWith": [
         "Cobalt Dragoon",
         "Meteor Dragoon"
-      ]
+      ],
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "B",
@@ -5714,15 +5764,20 @@
       "role": "低身位持久",
       "metaTier": "A",
       "confidence": "medium-high",
-      "strengths": [],
+      "strengths": [
+        "低身位、抗擊飛與持久折衷",
+        "適合 Wizard Rod、Clock Mirage、Silver Wolf"
+      ],
       "weaknesses": [
-        "主動得分不足"
+        "較早刮地",
+        "純持久通常不如 B，純防守未必勝過 H"
       ],
       "bestWith": [
         "Silver Wolf",
         "Clock Mirage",
         "Wizard Arc"
-      ]
+      ],
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "GF",
@@ -6016,15 +6071,20 @@
       "role": "定點低移動防守",
       "metaTier": "B+ to A-",
       "confidence": "medium-high",
-      "strengths": [],
+      "strengths": [
+        "低移動定點與純持久反制能力",
+        "Clock Mirage 4-55UN 在有利對局上限極高"
+      ],
       "weaknesses": [
-        "Needle 系抗推弱，怕強攻推出"
+        "被強攻命中時擊飛與爆裂風險高",
+        "不適合作為資訊不足時的泛用盲選"
       ],
       "bestWith": [
         "Silver Wolf",
         "Clock Mirage",
         "Golem Rock"
-      ]
+      ],
+      "researchUpdated": "2026-07-30"
     },
     {
       "id": "U",
@@ -7889,23 +7949,64 @@
         "code": "W",
         "name": "Wheel",
         "roleTags": [
-          "攻擊",
           "持久",
-          "防禦"
+          "防禦",
+          "平衡"
         ],
-        "role": "持久 / 防守 / 化解攻擊",
+        "role": "厚圓化解攻擊 / 持久防守 / Blast 平衡化",
         "metaTier": "A+",
         "confidence": "high",
         "bestWith": [
+          "Blast",
+          "Might",
+          "Fortress",
           "Flame",
-          "Whip",
-          "Fort",
-          "Rage",
-          "Blast"
+          "Eclipse"
         ],
-        "weaknesses": [],
+        "weaknesses": [
+          "會遮住部分 Main／Metal Blade 打點，純攻擊配置可能反而降輸出",
+          "厚高塑膠外圈可能成為低身位攻擊的接觸目標",
+          "不應把原裝 Flame W5-80WB 直接當成最佳競技配置"
+        ],
         "name_en": "Wheel",
-        "requiresOrientation": false
+        "requiresOrientation": false,
+        "name_zh": "輔助戰刃W",
+        "partType": "CX Assist Blade",
+        "namespaceKey": "cx.assistBlades.W",
+        "evidenceClass": "mainstream",
+        "weight_g": 7.2,
+        "strengths": [
+          "厚、圓且外圈平滑，可增加重量並降低碰撞造成的失速",
+          "能將 Blast 的高攻擊骨架修正為攻守平衡或 anti-attack 路線",
+          "搭配低高度固鎖與 H／LR／L／T 時已有大量前段紀錄"
+        ],
+        "preferredOverBlades": [
+          "Guard",
+          "Outer",
+          "Flow"
+        ],
+        "preferredRatchets": [
+          "9-60",
+          "3-60",
+          "7-60",
+          "4-50",
+          "1-60",
+          "6-60"
+        ],
+        "preferredBits": [
+          "H",
+          "LR",
+          "L",
+          "T",
+          "R",
+          "K",
+          "B",
+          "FB"
+        ],
+        "avoidFor": [
+          "需要露出下層主打點的純爆發配置"
+        ],
+        "notes": "2026-08-05：W 在 CX 零件命名空間代表 Wheel；Bit 的 W 仍代表 Wedge，兩者不可混用。"
       },
       {
         "id": "D",
@@ -8107,8 +8208,12 @@
     },
     {
       "combo": "Blast + Heavy / Blast + Wheel",
-      "role": "CX 攻擊平衡 / CX 平衡持久",
-      "confidence": "中高"
+      "role": "CX 攻擊平衡（Heavy）／防守平衡與低軌混合（Wheel）",
+      "confidence": "高",
+      "notes": [
+        "2026-08-05：Blast + Wheel 已有大量前段紀錄，不再只視為理論持久路線。",
+        "Wheel 常見 H／LR／L／T；Heavy 仍是較泛用的攻擊重量預設。"
+      ]
     },
     {
       "combo": "Rage + Flow + Erase",
@@ -8123,7 +8228,40 @@
     {
       "combo": "Whip + Outer + Wheel",
       "role": "持久 / 化解攻擊",
-      "confidence": "低～中"
+      "confidence": "低～中／experimental",
+      "notes": [
+        "結構協同成立，但尚缺足夠重複前段案例，不列主要推薦。"
+      ]
+    },
+    {
+      "combo": "Shark Scale 3-60LR / 1-70LR",
+      "role": "主流低身位連續重攻擊",
+      "confidence": "高",
+      "evidenceClass": "mainstream"
+    },
+    {
+      "combo": "Wizard Rod 1-60LO",
+      "role": "低身位防守持久折衷",
+      "confidence": "中高",
+      "evidenceClass": "established_secondary"
+    },
+    {
+      "combo": "Meteor Dragoon 9-60E / 9-65E",
+      "role": "左迴旋反旋末段；9-65 偏防守",
+      "confidence": "中高／9-65 中",
+      "evidenceClass": "established_secondary_and_emerging"
+    },
+    {
+      "combo": "Emperor Blast Heavy 7-60R",
+      "role": "CX 重量可控攻擊／泛用平衡",
+      "confidence": "中高",
+      "evidenceClass": "established_secondary"
+    },
+    {
+      "combo": "Clock Mirage 4-55UN",
+      "role": "純持久反制／定點 Counterpick",
+      "confidence": "中高",
+      "evidenceClass": "established_secondary"
     }
   ],
   "analysisRules": {
@@ -8221,7 +8359,9 @@
       "language": "zh-TW",
       "encoding_note": "ASCII-safe JSON 使用 ensure_ascii=true，避免 Codex 或 Windows 編輯器亂碼；瀏覽器解析後仍會顯示繁體中文。",
       "created_at": "2026-06-30T17:48:45",
-      "disclaimer": "玩家資料庫、WBO 上位組合、BBX Weekly 趨勢、社群與實測邏輯整理；Meta 信心不是官方勝率。"
+      "disclaimer": "玩家資料庫、WBO 上位組合、BBX Weekly 趨勢、社群與實測邏輯整理；Meta 信心不是官方勝率。",
+      "updated_at": "2026-07-30",
+      "research_update": "2026.07.30-research-integration"
     },
     "schema": {
       "normalCombo": [
@@ -14233,6 +14373,36 @@
         "combo": "Whip + Outer + Wheel",
         "role": "持久 / 化解攻擊",
         "confidence": "低～中"
+      },
+      {
+        "combo": "Shark Scale 3-60LR / 1-70LR",
+        "role": "主流低身位連續重攻擊",
+        "confidence": "高",
+        "evidenceClass": "mainstream"
+      },
+      {
+        "combo": "Wizard Rod 1-60LO",
+        "role": "低身位防守持久折衷",
+        "confidence": "中高",
+        "evidenceClass": "established_secondary"
+      },
+      {
+        "combo": "Meteor Dragoon 9-60E / 9-65E",
+        "role": "左迴旋反旋末段；9-65 偏防守",
+        "confidence": "中高／9-65 中",
+        "evidenceClass": "established_secondary_and_emerging"
+      },
+      {
+        "combo": "Emperor Blast Heavy 7-60R",
+        "role": "CX 重量可控攻擊／泛用平衡",
+        "confidence": "中高",
+        "evidenceClass": "established_secondary"
+      },
+      {
+        "combo": "Clock Mirage 4-55UN",
+        "role": "純持久反制／定點 Counterpick",
+        "confidence": "中高",
+        "evidenceClass": "established_secondary"
       }
     ],
     "analysisRules": {
@@ -14618,6 +14788,37 @@
       "deprecatedAliases": [
         "Peak"
       ]
+    },
+    {
+      "type": "expandBladeProduct",
+      "canonicalZh": "龍王閃擊",
+      "referenceEn": "Bahamut Blitz",
+      "model": "CX-13",
+      "aliases": [
+        "Bahamut Blitz",
+        "BahamutBlitz"
+      ]
+    },
+    {
+      "type": "expandBladeProduct",
+      "canonicalZh": "騎士堡壘",
+      "referenceEn": "Knight Fortress",
+      "model": "CX-14",
+      "aliases": [
+        "Knight Fortress",
+        "KnightFortress"
+      ]
+    },
+    {
+      "type": "expandBladeProduct",
+      "canonicalZh": "邪神狂怒",
+      "referenceEn": "Ragna Rage",
+      "model": "CX-15",
+      "aliases": [
+        "Ragna Rage",
+        "RagnaRage",
+        "Rage Ragna"
+      ]
     }
   ],
   "parts": [
@@ -14915,6 +15116,66 @@
     {
       "packageVersion": "2026.07.11-delta1",
       "appliedAt": "2026-07-10T18:53:59.402Z"
+    },
+    {
+      "packageVersion": "2026.07.30-research-integration",
+      "appliedAt": "2026-07-30T14:00:00+08:00",
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "changes": {
+        "addedMetaRoutes": 12,
+        "updatedBladeFamilies": 6,
+        "updatedRatchets": 5,
+        "updatedBits": 5,
+        "addedMetaCoachUpdate": true
+      }
+    },
+    {
+      "id": "2026.08.05-tyranno-samurai-profile",
+      "date": "2026-08-05",
+      "scope": [
+        "暴龍霸擊",
+        "武士魂斬"
+      ],
+      "changes": [
+        "合併 top-level blades 重複條目",
+        "修正中文顯示名稱",
+        "新增 featuredBladeProfiles",
+        "補入可驗證配置案例與證據類型",
+        "明確區分前段名次、前段後奪冠比例與逐場勝率"
+      ]
+    },
+    {
+      "id": "2026.08.05-wheel-assist-profile",
+      "date": "2026-08-05",
+      "scope": [
+        "cx.assistBlades.W",
+        "featuredCxPartProfiles",
+        "metaCombos"
+      ],
+      "changes": [
+        "補強 Wheel 零件本體評價與名稱空間規則",
+        "新增 Blast／Might／Fortress／Flame 等夥伴統計",
+        "新增 H／LR／L 常見完整配置及四件式代表骨架",
+        "區分前段名次、前段後奪冠比例、來源 win share 與逐場勝率",
+        "Whip + Outer + Wheel 保留為 experimental"
+      ]
+    },
+    {
+      "id": "2026.08.05-expand-wheel-routing",
+      "date": "2026-08-05",
+      "scope": [
+        "CX-13 龍王閃擊",
+        "CX-14 騎士堡壘",
+        "CX-15 邪神狂怒",
+        "CX Expand Blade + Assist W"
+      ],
+      "changes": [
+        "新增 CX-13～15 台灣官方中文整機名稱與英文搜尋別名",
+        "補入 Rage／Fortress／Blitz 搭配 Flow／Guard／Break＋Wheel 的四件式測試骨架",
+        "依角色區分純耐久、耐久抗撞、防守、姿勢保持及實驗性平衡攻擊",
+        "新增配置一律標示為結構推導或優先測試，不宣稱已有賽事勝率",
+        "後續賽事監測同步搜尋中文整機名及 Rage FW／Fortress FW／Fortress GW／Blitz BW 記法"
+      ]
     }
   ],
   "metaSnapshots": [
@@ -14942,6 +15203,65 @@
         "低樣本但第一名比例高的配置不可直接視為主流。",
         "固鎖可替換時，應把核心軸心或路線視為主體，不要只鎖定單一完整配置。",
         "本資料整理自 2026-07-24 對話中已搜集的公開賽事與社群統計摘要；交給 Codex 前仍建議比對最新網站。"
+      ]
+    },
+    {
+      "id": "meta_snapshot_2026-07-30_research_integration",
+      "updated": "2026-07-30",
+      "sourceWindow": "all-time rankings through 2026-07-22; July report 2026-07-01/2026-07-22; WBO spot-check through 2026-07-28",
+      "scope": "公開賽事前段牌組、近期優勝配置、專家配置指南與社群實測建議交叉整合",
+      "evidenceType": "reported_top_cut_appearance_first_place_conversion_expert_analysis_and_community_testing",
+      "sources": [
+        {
+          "name": "BEYWATCH.GG July 2026 Meta Report",
+          "type": "monthly_reported_top_cut_aggregate",
+          "url": "https://beywatch.gg/meta/july-2026",
+          "accessedAt": "2026-07-30",
+          "note": "涵蓋 98 場賽事、287 副前段牌組、914 個配置選擇；資料截至 2026-07-22。"
+        },
+        {
+          "name": "BEYWATCH.GG Full Combo Rankings",
+          "type": "all_time_reported_top_cut_ranking",
+          "url": "https://beywatch.gg/combos",
+          "accessedAt": "2026-07-30",
+          "note": "以重複出現量與前段後奪冠比例評級；不是逐場對戰勝率。"
+        },
+        {
+          "name": "BeyBase Best Beyblade X Combos",
+          "type": "expert_testing_and_tournament_experience",
+          "url": "https://beybase.com/best-beyblade-x-combos-players-guide/",
+          "accessedAt": "2026-07-30",
+          "note": "用於優缺點、磨耗、公差、發射技術與角色定位，不將五星主觀評分換算為勝率。"
+        },
+        {
+          "name": "World Beyblade Organization Winning Combinations",
+          "type": "reported_winning_decks_spot_check",
+          "url": "https://worldbeyblade.org/Thread-Winning-Combinations-at-WBO-Organized-Events-Beyblade-X-BBX?page=146",
+          "accessedAt": "2026-07-30",
+          "note": "補查 2026-07-25 至 2026-07-28 左右新公布的優勝牌組；只作近期佐證，不自行推估總體使用率。"
+        },
+        {
+          "name": "r/BeybladeX and BBX Weekly discussions",
+          "type": "community_testing",
+          "url": "https://www.reddit.com/r/BeybladeX/",
+          "accessedAt": "2026-07-30",
+          "note": "只收錄與賽事或專家資料方向一致、或值得保留為實驗路線的建議。"
+        }
+      ],
+      "headlineFindings": [
+        "Shark Scale、Wizard Rod 仍是 2026 年 7 月最普遍的前段核心。",
+        "Shark Scale 1-70LR 與 3-60LR 是成熟低身位攻擊路線；R 分支降低爆發但提高可控性。",
+        "Wizard Rod 1-60H 是主流防守持久；1-60LO 是防守與持久折衷；3-60B、9-60B 偏純持久。",
+        "Meteor Dragoon 的 L 路線樣本較大；9-60E 已有足夠交叉證據升為成熟次主流。",
+        "Emperor Blast Heavy 7-60R 是目前最完整的 CX 泛用攻擊平衡路线之一。",
+        "Clock Mirage 4-55UN 是高持久反制件，而非盲選泛用防守。"
+      ],
+      "warnings": [
+        "BEYWATCH 的 1st Place Rate 是進入已報告前段後獲得第一名的比例，不是逐場勝率。",
+        "BEYWATCH Combo Ranking 表中的 Win Share 是該配置占已報告第一名結果的份額，也不是逐場勝率。",
+        "WBO 頁面是優勝牌組紀錄，不包含每輪對戰與未進前段牌組，不能計算真實 matchup 勝率。",
+        "BeyBase 五星分數屬專家實測評價，不能與賽事統計直接相加。",
+        "零件磨耗、公差、配重、發射器與發射角度會顯著改變實戰結果。"
       ]
     }
   ],
@@ -15264,7 +15584,7 @@
     },
     {
       "blade": "Tyranno Beat",
-      "displayNameZh": "暴龍節拍",
+      "displayNameZh": "暴龍霸擊",
       "rankingBand": "11-20",
       "monthlyTier": "B",
       "evidenceClass": "established_secondary",
@@ -15274,40 +15594,51 @@
           "bit": "P",
           "reportedTopCuts": 17,
           "firstPlaceRate": 0.294,
-          "role": "重型平衡攻擊"
+          "role": "重型平衡攻擊",
+          "rateDefinition": "firstPlaceRate 僅代表進入前段後的奪冠比例，不是逐場勝率",
+          "actualMatchWinRate": null
         },
         {
           "ratchet": "7-70",
           "bit": "R",
           "reportedTopCuts": 17,
           "firstPlaceRate": 0.412,
-          "role": "可控碰撞攻擊"
+          "role": "可控碰撞攻擊",
+          "rateDefinition": "firstPlaceRate 僅代表進入前段後的奪冠比例，不是逐場勝率",
+          "actualMatchWinRate": null
         },
         {
           "ratchet": "7-70",
           "bit": "K",
           "reportedTopCuts": 15,
           "firstPlaceRate": 0.267,
-          "role": "控制攻擊／反打"
+          "role": "控制攻擊／反打",
+          "rateDefinition": "firstPlaceRate 僅代表進入前段後的奪冠比例，不是逐場勝率",
+          "actualMatchWinRate": null
         },
         {
           "ratchet": "3-60",
           "bit": "LR",
           "reportedTopCuts": 15,
           "firstPlaceRate": 0.267,
-          "role": "低高度攻擊"
+          "role": "低高度攻擊",
+          "rateDefinition": "firstPlaceRate 僅代表進入前段後的奪冠比例，不是逐場勝率",
+          "actualMatchWinRate": null
         },
         {
           "ratchet": "3-70",
           "bit": "P",
           "reportedTopCuts": 13,
           "firstPlaceRate": 0.154,
-          "role": "平衡攻擊"
+          "role": "平衡攻擊",
+          "rateDefinition": "firstPlaceRate 僅代表進入前段後的奪冠比例，不是逐場勝率",
+          "actualMatchWinRate": null
         }
       ],
       "role": "重型平衡攻擊／可控碰撞",
       "notes": [
-        "配置不集中於單一路線，應建立多條 R／P／K／LR 路線。"
+        "配置不集中於單一路線，應建立多條 R／P／K／LR 路線。",
+        "2026-08-05：維持成熟次主流，多路線並存；不可把前段名次出現次數或前段後奪冠比例稱為逐場勝率。"
       ],
       "id": "route_20260724_014",
       "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
@@ -15459,19 +15790,50 @@
     },
     {
       "blade": "Samurai Calibur",
-      "displayNameZh": "武士聖劍",
+      "displayNameZh": "武士魂斬",
       "rankingBand": "11-20",
       "monthlyTier": "B",
-      "evidenceClass": "emerging",
+      "evidenceClass": "established_secondary",
       "stockCombo": "6-70・M",
       "role": "平衡反打／anti-attack",
       "notes": [
-        "目前尚未形成清楚且重複的完整配置，不急著鎖定 commonRoutes。"
+        "2026-08-05：多場 WBO 上位配置已形成 B／FB 持久反打與 R 技術攻擊兩條可重複路線。",
+        "verifiedPlacementCases 是可核對的前段案例數，不是逐場勝率。"
       ],
       "id": "route_20260724_018",
       "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
       "sourceWindow": "2026-07-01/2026-07-24",
-      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+      "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking",
+      "commonRoutes": [
+        {
+          "ratchet": "9-60",
+          "bit": "B/FB",
+          "role": "持久反打",
+          "verifiedPlacementCases": 3,
+          "verifiedFirstPlaceCases": 2
+        },
+        {
+          "ratchet": "5-60",
+          "bit": "FB",
+          "role": "持久反打",
+          "verifiedPlacementCases": 1,
+          "verifiedFirstPlaceCases": 1
+        },
+        {
+          "ratchet": "1-60",
+          "bit": "R",
+          "role": "技術型控制攻擊",
+          "verifiedPlacementCases": 1,
+          "verifiedFirstPlaceCases": 1
+        },
+        {
+          "ratchet": "5-70",
+          "bit": "R",
+          "role": "中高度重擊",
+          "verifiedPlacementCases": 1,
+          "verifiedFirstPlaceCases": 0
+        }
+      ]
     },
     {
       "cx": {
@@ -15756,6 +16118,218 @@
       "sourceSnapshotId": "meta_snapshot_2026-07-24_broad_top20",
       "sourceWindow": "2026-07-01/2026-07-24",
       "evidenceType": "reported_top_cut_appearance_and_monthly_tier_ranking"
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_030",
+      "blade": "Shark Scale",
+      "displayNameZh": "鮫鯊狂鱗",
+      "rankingBand": "top5",
+      "evidenceClass": "mainstream",
+      "ratchet": "3-60",
+      "bit": "LR",
+      "reportedTopCutsAllTime": 380,
+      "firstPlaceRate": 0.376,
+      "role": "低身位連續重攻擊",
+      "coachAnalysis": "3-60 修正鮫鯊狂鱗的偏重並保留低身位；LR 可連續上軌，但需要控制發射角度與自爆風險。",
+      "risks": [
+        "LR 可能跳軌自爆",
+        "戰刃下方鰭片會磨耗、白化或斷裂",
+        "舊刃攻擊力可能下降"
+      ]
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_031",
+      "blade": "Shark Scale",
+      "displayNameZh": "鮫鯊狂鱗",
+      "rankingBand": "top5",
+      "evidenceClass": "established_secondary",
+      "ratchet": "9-60",
+      "bit": "FB",
+      "reportedTopCutsAllTime": 164,
+      "firstPlaceRate": 0.341,
+      "role": "防守反打／攻擊持久特殊路線",
+      "coachAnalysis": "犧牲主動追擊換取留中與末段；適合作為對攻擊型的變速反制，不應取代 LR 主攻路線。"
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_032",
+      "blade": "Wizard Rod",
+      "displayNameZh": "魔導神杖",
+      "rankingBand": "top5",
+      "evidenceClass": "established_secondary",
+      "ratchet": "1-60",
+      "bit": "LO",
+      "reportedTopCutsAllTime": 65,
+      "firstPlaceRate": 0.323,
+      "role": "低身位防守持久折衷",
+      "coachAnalysis": "比 B 路線更抗擊飛、比 H 路線更保留末段；代價是較早刮地，且仍怕高品質左迴旋與純持久。"
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_033",
+      "blade": "Wizard Rod",
+      "displayNameZh": "魔導神杖",
+      "rankingBand": "top5",
+      "evidenceClass": "established_secondary",
+      "ratchet": "6-60",
+      "bit": "H",
+      "role": "近期優勝防守持久變體",
+      "coachAnalysis": "近期 WBO 優勝牌組再次出現；屬 1-60H 之外的穩定替代，但現有公開資料不足以判定優於 1-60H。",
+      "recentResultCorroboration": true
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_034",
+      "blade": "Meteor Dragoon",
+      "displayNameZh": "隕星龍騎士",
+      "rankingBand": "top20",
+      "evidenceClass": "established_secondary",
+      "ratchet": "9-60",
+      "bit": "E",
+      "reportedTopCutsAllTime": 57,
+      "firstPlaceRate": 0.404,
+      "role": "左迴旋反旋末段／混合反打",
+      "coachAnalysis": "E 讓左迴旋吸轉、回場與末段能力成形；9-60提高爆抗。數量仍少於 L 主流路線，但已不是單純實驗配置。",
+      "risks": [
+        "優先使用粗軸、緊配合的 E",
+        "遇同為左迴旋時持久優勢下降",
+        "橡膠磨耗會顯著改變反作用與表現",
+        "需要練習左迴旋走位"
+      ]
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_035",
+      "blade": "Meteor Dragoon",
+      "displayNameZh": "隕星龍騎士",
+      "rankingBand": "emerging",
+      "evidenceClass": "emerging",
+      "ratchet": "9-65",
+      "bit": "E",
+      "role": "提高防守、犧牲部分末段的 E 變體",
+      "coachAnalysis": "專家實測建議的變體；比 9-60E 更偏防守，但目前缺少足夠公開前段樣本，暫不加 Meta 分。",
+      "sampleWarning": true
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_036",
+      "cx": {
+        "lockChip": "Emperor",
+        "mainBlade": "Blast",
+        "assistBlade": "Heavy"
+      },
+      "displayNameZh": "Emperor Blast Heavy",
+      "rankingBand": "top20",
+      "evidenceClass": "established_secondary",
+      "ratchet": "7-60",
+      "bit": "R",
+      "role": "CX 重量可控攻擊／泛用平衡",
+      "coachAnalysis": "約 45–45.5 g 的高重量加上 R 的可控多次衝擊，可靠性高；但 CX 配重方向、零件成本、Heavy 磨耗與 7-60 暴露度都需管理。"
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_037",
+      "cx": {
+        "lockChip": "Emperor",
+        "mainBlade": "Blast",
+        "assistBlade": "Heavy"
+      },
+      "displayNameZh": "Emperor Blast Heavy",
+      "rankingBand": "recent_result",
+      "evidenceClass": "emerging",
+      "ratchet": "3-60",
+      "bit": "LR",
+      "role": "CX 低軌重攻擊",
+      "coachAnalysis": "2026 年 7 月下旬 WBO 前段牌組提供近期佐證；爆發高於 R 路線，但自爆與 CX 上重心風險也更高。",
+      "sampleWarning": true
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_038",
+      "blade": "Clock Mirage",
+      "displayNameZh": "時鐘幻象",
+      "rankingBand": "counterpick",
+      "evidenceClass": "established_secondary",
+      "ratchet": "4-55",
+      "bit": "UN",
+      "role": "純持久反制／定點 Counterpick",
+      "coachAnalysis": "有利持久對局的上限很高，但對強攻的擊飛與爆裂防禦很差；適合掌握對手牌組後出場，不適合盲選。",
+      "risks": [
+        "怕高爆發攻擊",
+        "Blade 底部接合塑膠與 Simple Ratchet 磨耗快",
+        "正式賽宜使用接近新品的零件"
+      ]
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_039",
+      "blade": "Aero Pegasus",
+      "displayNameZh": "空力天馬",
+      "rankingBand": "top10",
+      "evidenceClass": "mainstream",
+      "ratchet": "3-60",
+      "bit": "R",
+      "reportedTopCutsAllTime": 103,
+      "firstPlaceRate": 0.437,
+      "role": "重型可控攻擊",
+      "coachAnalysis": "3-60 提供姿態修正，R 兼顧連續接觸與控制；近期 WBO 優勝牌組亦有再出現。"
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_040",
+      "blade": "Silver Wolf",
+      "displayNameZh": "霜輝銀狼",
+      "rankingBand": "top10",
+      "evidenceClass": "established_secondary",
+      "ratchet": "9-60",
+      "bit": "FB",
+      "reportedTopCutsAllTime": 276,
+      "firstPlaceRate": 0.279,
+      "role": "防守持久核心",
+      "coachAnalysis": "公開樣本大、爆抗與留中穩定；前段後奪冠比例不算突出，定位應是穩定牌而非主動制勝核心。",
+      "recentResultCorroboration": true
+    },
+    {
+      "sourceSnapshotId": "meta_snapshot_2026-07-30_research_integration",
+      "sourceWindow": "through 2026-07-28",
+      "evidenceType": "cross_source_reported_top_cut_and_expert_analysis",
+      "id": "route_20260730_041",
+      "cx": {
+        "mainBlade": "Blast",
+        "assistBlade": "Erase"
+      },
+      "displayNameZh": "Blast Erase",
+      "rankingBand": "community_test",
+      "evidenceClass": "experimental",
+      "ratchet": "9-60",
+      "bit": "K",
+      "role": "CX anti-attack／重量反打測試",
+      "coachAnalysis": "社群認為可作 Heavy 之外的反打分支，但缺乏足夠公開前段樣本；保留為測試建議，不提高基礎分數。",
+      "sampleWarning": true
     }
   ],
   "metaEvidencePolicy": {
@@ -15895,6 +16469,657 @@
           "base performance scoring"
         ]
       }
+    },
+    {
+      "metadata": {
+        "id": "meta_coach_update_2026-07-30",
+        "version": "1.1.0",
+        "updated": "2026-07-30",
+        "scope": "cross_source_combo_and_part_analysis",
+        "baseline": "2026-07-26 meta coach",
+        "applyMode": "merge_only",
+        "summary": "核心排名不翻盤；補強成熟配置分支、零件磨耗／公差風險與近期 WBO 佐證。"
+      },
+      "changes": [
+        {
+          "subject": "Shark Scale",
+          "changeType": "route_refinement",
+          "result": "1-70LR／3-60LR 維持主流，9-60FB 列為變速反打；加入磨耗與自爆風險。",
+          "scoreImpact": 0
+        },
+        {
+          "subject": "Wizard Rod",
+          "changeType": "route_expansion",
+          "result": "加入 1-60LO 與近期 6-60H；保留 H／B／FB 的不同定位。",
+          "scoreImpact": 0
+        },
+        {
+          "subject": "Meteor Dragoon 9-60E",
+          "changeType": "evidence_upgrade",
+          "result": "由實驗提升為成熟次主流；9-65E 僅列新興變體。",
+          "scoreImpact": 0
+        },
+        {
+          "subject": "Emperor Blast Heavy 7-60R",
+          "changeType": "expert_validation",
+          "result": "列為 CX 泛用攻擊平衡的優先完整配置。",
+          "scoreImpact": 0
+        },
+        {
+          "subject": "Clock Mirage 4-55UN",
+          "changeType": "role_correction",
+          "result": "明確標示純持久 Counterpick，不再泛稱穩定防守。",
+          "scoreImpact": 0
+        }
+      ],
+      "scoringRules": [
+        "不把前段後奪冠比例當逐場勝率。",
+        "不把專家五星評分換算為 Meta 分數。",
+        "單一 WBO 牌組只作近期佐證，不直接升 Tier。",
+        "社群測試只建立 experimental 路線，不增加 base score。"
+      ]
+    }
+  ],
+  "featuredBladeProfiles": [
+    {
+      "id": "profile_tyranno_beat_20260805",
+      "bladeId": "暴龍霸擊",
+      "name_en": "Tyranno Beat",
+      "updated": "2026-08-05",
+      "integratedAssessment": {
+        "tier": "A-",
+        "evidenceClass": "established_secondary",
+        "confidence": "high",
+        "summary": "已離開最前排固定核心，但仍是能在 R／P／K／LR 間調整的成熟重攻擊上蓋；目前最合理定位是三陀螺牌組的第三槽，而不是取代鯊魚鱗片等主攻核心。",
+        "regionalDifference": "全球 WBO 近期仍可見 9-60R、1-70R、7-60L/R 等主動攻擊；官方亞洲大型賽則出現 5-60C 的留場控制。差異更像賽制與場地導致的軸心選擇，而非上蓋定位相反。"
+      },
+      "evidenceSummary": {
+        "monthlyRanking": {
+          "sourceWindow": "2026-07-01/2026-07-24",
+          "monthlyTier": "B",
+          "rankingBand": "11-20"
+        },
+        "reportedTopCutAppearances": [
+          {
+            "combo": "7-60P",
+            "count": 17,
+            "firstPlaceAfterTopCutRate": 0.294
+          },
+          {
+            "combo": "7-70R",
+            "count": 17,
+            "firstPlaceAfterTopCutRate": 0.412
+          },
+          {
+            "combo": "7-70K",
+            "count": 15,
+            "firstPlaceAfterTopCutRate": 0.267
+          },
+          {
+            "combo": "3-60LR",
+            "count": 15,
+            "firstPlaceAfterTopCutRate": 0.267
+          },
+          {
+            "combo": "3-70P",
+            "count": 13,
+            "firstPlaceAfterTopCutRate": 0.154
+          }
+        ],
+        "officialEventCase": {
+          "event": "BEYBLADE X Kuala Lumpur Open Class",
+          "combo": "5-60C",
+          "publishedBattleRecord": {
+            "wins": 2,
+            "losses": 1,
+            "rateWithinPublishedTop4AndFinalBattles": 0.667
+          },
+          "warning": "僅計官方頁面公開的四強與決賽三場，不是整場賽事勝率，也不可外推為此配置的通用勝率。"
+        },
+        "recentWboCases": [
+          {
+            "date": "2026-05-12",
+            "event": "Joyful Toad Weekly Standard #37",
+            "participants": 70,
+            "placement": 1,
+            "combo": "9-60R"
+          },
+          {
+            "date": "2026-01-10",
+            "event": "X Masters 36",
+            "placement": 1,
+            "combo": "1-70R"
+          },
+          {
+            "date": "2026-01-11",
+            "event": "TTTs BBX Tournament",
+            "participants": 34,
+            "placement": 3,
+            "combo": "7-60L"
+          }
+        ],
+        "actualMatchWinRate": null
+      },
+      "recommendedRoutes": [
+        "9-60R",
+        "7-60P",
+        "7-70R",
+        "7-70K",
+        "3-60LR",
+        "1-70R",
+        "5-60C"
+      ],
+      "sources": [
+        {
+          "type": "official_product",
+          "title": "Takara Tomy BX-31",
+          "url": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/bx31.html"
+        },
+        {
+          "type": "official_event",
+          "title": "BEYBLADE X Kuala Lumpur Open Class",
+          "url": "https://beyblade.takaratomy.co.jp/beyblade-x/event/players_acs/T7f9.html"
+        },
+        {
+          "type": "wbo_tournament_records",
+          "title": "WBO Winning Combinations page 94",
+          "url": "https://worldbeyblade.org/Thread-Winning-Combinations-at-WBO-Organized-Events-Beyblade-X-BBX?page=94"
+        },
+        {
+          "type": "wbo_tournament_records",
+          "title": "WBO Winning Combinations page 145",
+          "url": "https://worldbeyblade.org/Thread-Winning-Combinations-at-WBO-Organized-Events-Beyblade-X-BBX?page=145"
+        }
+      ]
+    },
+    {
+      "id": "profile_samurai_calibur_20260805",
+      "bladeId": "武士魂斬",
+      "name_en": "Samurai Calibur",
+      "updated": "2026-08-05",
+      "integratedAssessment": {
+        "tier": "B+",
+        "evidenceClass": "established_secondary",
+        "confidence": "medium-high",
+        "summary": "多場 WBO 上位牌組已讓它跨過「只有單點成功」門檻。最成熟的不是原裝 M，而是 9-60B／FB 的持久反打；1-60R、5-70R 則保留刀刃重擊與主動勝法。",
+        "regionalDifference": "日本官方把原裝定位描述為前段小刃連打、末段傾斜後由大刃重擊；全球賽事實際上更常用低高度 B／FB／R，把機構概念改造成較穩定的競技路線。兩邊差異主要是原裝設計意圖與改裝實戰的差別。"
+      },
+      "evidenceSummary": {
+        "monthlyRanking": {
+          "sourceWindow": "2026-07-01/2026-07-24",
+          "monthlyTier": "B",
+          "rankingBand": "11-20"
+        },
+        "reportedTopCutAppearances": null,
+        "verifiedPlacementCases": [
+          {
+            "date": "2026-01-11",
+            "event": "Portland Trail-Bladers Tournament #10",
+            "participants": 25,
+            "placement": 1,
+            "combo": "9-60B"
+          },
+          {
+            "date": "2026-01-11",
+            "event": "TTTs BBX Tournament",
+            "participants": 34,
+            "placement": 1,
+            "combo": "5-60FB"
+          },
+          {
+            "date": "2026-01-10",
+            "event": "Meteor Showdown BBX",
+            "placement": 1,
+            "combo": "1-60R"
+          },
+          {
+            "date": "2025-12-13",
+            "event": "Mischief Group Up! Part 9",
+            "participants": 9,
+            "placement": 1,
+            "combo": "9-60FB"
+          },
+          {
+            "date": "2025-09-28",
+            "event": "Top Cut Clash Wizard Cup",
+            "participants": 62,
+            "placement": 2,
+            "combo": "5-70R"
+          }
+        ],
+        "actualMatchWinRate": null,
+        "warning": "以上是前段名次／奪冠配置案例，不是逐局勝率；由於缺乏完整逐戰分母，不計算配置勝率。"
+      },
+      "recommendedRoutes": [
+        "9-60B",
+        "9-60FB",
+        "5-60FB",
+        "1-60R",
+        "5-70R",
+        "9-60K"
+      ],
+      "sources": [
+        {
+          "type": "official_product",
+          "title": "Takara Tomy BX-45",
+          "url": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/bx45.html"
+        },
+        {
+          "type": "wbo_tournament_records",
+          "title": "WBO Winning Combinations page 94",
+          "url": "https://worldbeyblade.org/Thread-Winning-Combinations-at-WBO-Organized-Events-Beyblade-X-BBX?page=94"
+        },
+        {
+          "type": "wbo_tournament_records",
+          "title": "WBO Winning Combinations result 1902183",
+          "url": "https://worldbeyblade.org/Thread-Winning-Combinations-at-WBO-Organized-Events-Beyblade-X-BBX?pid=1902183"
+        },
+        {
+          "type": "community_analysis",
+          "title": "Calibur/Saber configuration analysis",
+          "url": "https://note.com/kamen_a/n/n4bd2e1a8ea01"
+        }
+      ]
+    }
+  ],
+  "featuredCxPartProfiles": [
+    {
+      "id": "profile_cx_assist_wheel_20260805",
+      "partPath": "cx.assistBlades.W",
+      "code": "W",
+      "displayNameZh": "輔助戰刃 W（Wheel／輪環）",
+      "updated": "2026-08-05",
+      "integratedAssessment": {
+        "tier": "A+",
+        "evidenceClass": "mainstream",
+        "confidence": "high",
+        "summary": "W 是目前成熟的 CX 持久／防守輔助戰刃，但實戰主流不是平均搭配各主戰刃，而是明顯集中在 Blast。它的核心價值是用厚圓塑膠外圈增加重量、吸收碰撞並延長 Blast 的第二次接觸機會。",
+        "regionalDifference": "日本官方以 Cerberus Flame W5-80WB 展示「兩層厚圓結構＋姿態保持」的持久設計；全球賽事卻主要把 W 裝在 Blast，並以 H、LR、L、T 等軸心做防守平衡或保有攻擊性的混合路線。這代表官方設計概念被競技玩家延伸，而不是日本與全球對 W 的性能判斷相反。",
+        "comparisonWithHeavy": "Heavy 仍是更泛用的重量／攻擊穩定預設；Wheel 在需要圓滑化接觸、持久與 anti-attack 時更有特色。攻擊主打點必須露出時優先 Heavy 或較低干涉的輔助戰刃。"
+      },
+      "evidenceSummary": {
+        "sourceAsOf": "2026-08-03",
+        "partAggregate": {
+          "reportedTopCuts": 357,
+          "firstPlaceAfterTopCutRate": 0.347,
+          "providerWinShare": 0.041,
+          "providerUsage": 0.04,
+          "actualMatchWinRate": null,
+          "warning": "reportedTopCuts 是前段名次出現數；firstPlaceAfterTopCutRate 是進前段後的奪冠比例；providerWinShare 是來源網站自訂的勝者份額，三者都不是逐場勝率。"
+        },
+        "reportedPartnerBlades": [
+          {
+            "blade": "Blast",
+            "reportedTopCuts": 306,
+            "firstPlaceAfterTopCutRate": 0.353,
+            "evidenceClass": "mainstream"
+          },
+          {
+            "blade": "Might",
+            "reportedTopCuts": 19,
+            "firstPlaceAfterTopCutRate": 0.211,
+            "evidenceClass": "established_secondary"
+          },
+          {
+            "blade": "Fortress",
+            "reportedTopCuts": 16,
+            "firstPlaceAfterTopCutRate": 0.438,
+            "evidenceClass": "established_secondary"
+          },
+          {
+            "blade": "Flare",
+            "reportedTopCuts": 12,
+            "firstPlaceAfterTopCutRate": 0.083,
+            "evidenceClass": "established_secondary_low_conversion"
+          },
+          {
+            "blade": "Flame",
+            "reportedTopCuts": 7,
+            "firstPlaceAfterTopCutRate": 0.571,
+            "evidenceClass": "emerging_small_sample"
+          },
+          {
+            "blade": "Eclipse",
+            "reportedTopCuts": 6,
+            "firstPlaceAfterTopCutRate": 0.167,
+            "evidenceClass": "emerging_small_sample"
+          },
+          {
+            "blade": "Arc",
+            "reportedTopCuts": 3,
+            "firstPlaceAfterTopCutRate": 0,
+            "evidenceClass": "single_sample_cluster"
+          }
+        ],
+        "caveat": "來源頁面持續更新，總數與個別夥伴統計可能在不同快取時間略有差異；資料庫保留來源顯示值，不自行拼算逐場勝率。"
+      },
+      "commonConfigurations": [
+        {
+          "rankGroup": "primary",
+          "fullCombo": "Emperor Blast Wheel 9-60H",
+          "skeleton": {
+            "lockChip": "Emperor",
+            "mainBlade": "Blast",
+            "assistBlade": "Wheel",
+            "ratchet": "9-60",
+            "bit": "H"
+          },
+          "role": "重型防守平衡／anti-attack",
+          "reportedTopCuts": 16,
+          "firstPlaceAfterTopCutRate": 0.375,
+          "actualMatchWinRate": null,
+          "evidenceClass": "mainstream",
+          "evaluation": "W 最成熟的完整配置之一。Emperor 補重量，9-60H 降低自爆並讓厚圓外圈持續吸收碰撞；代價是主動擊飛能力低於 Heavy＋攻擊軸。"
+        },
+        {
+          "rankGroup": "primary",
+          "fullCombo": "Pegasus Blast Wheel 9-60H",
+          "skeleton": {
+            "lockChip": "Pegasus",
+            "mainBlade": "Blast",
+            "assistBlade": "Wheel",
+            "ratchet": "9-60",
+            "bit": "H"
+          },
+          "role": "防守持久／留場",
+          "reportedTopCuts": 13,
+          "firstPlaceAfterTopCutRate": 0.154,
+          "actualMatchWinRate": null,
+          "evidenceClass": "mainstream_low_conversion",
+          "evaluation": "出現頻率高但前段後奪冠比例偏低，說明它可靠地進入上位牌組，卻不一定是收尾能力最強的 W 路線。"
+        },
+        {
+          "rankGroup": "primary",
+          "fullCombo": "Pegasus Blast Wheel 9-60LR",
+          "skeleton": {
+            "lockChip": "Pegasus",
+            "mainBlade": "Blast",
+            "assistBlade": "Wheel",
+            "ratchet": "9-60",
+            "bit": "LR"
+          },
+          "role": "低軌攻擊平衡",
+          "reportedTopCuts": 12,
+          "firstPlaceAfterTopCutRate": 0.333,
+          "actualMatchWinRate": null,
+          "evidenceClass": "mainstream",
+          "evaluation": "用 LR 把 W 遮住打點造成的攻擊損失補回來；比 H 更主動，但仍有自爆與末段傾倒風險。"
+        },
+        {
+          "rankGroup": "secondary",
+          "fullCombo": "Pegasus Blast Wheel 3-60LR",
+          "skeleton": {
+            "lockChip": "Pegasus",
+            "mainBlade": "Blast",
+            "assistBlade": "Wheel",
+            "ratchet": "3-60",
+            "bit": "LR"
+          },
+          "role": "低高度攻擊平衡",
+          "reportedTopCuts": 8,
+          "firstPlaceAfterTopCutRate": 0.5,
+          "actualMatchWinRate": null,
+          "evidenceClass": "established_secondary",
+          "evaluation": "比 9-60LR 更主動、接觸角度更低；樣本較小但轉換表現較佳，適合把 W 當作穩定器而不是純持久環。"
+        },
+        {
+          "rankGroup": "secondary",
+          "fullCombo": "Valkyrie Blast Wheel 4-50LR",
+          "skeleton": {
+            "lockChip": "Valkyrie",
+            "mainBlade": "Blast",
+            "assistBlade": "Wheel",
+            "ratchet": "4-50",
+            "bit": "LR"
+          },
+          "role": "極低身位爆發",
+          "reportedTopCuts": 8,
+          "firstPlaceAfterTopCutRate": 0.625,
+          "actualMatchWinRate": null,
+          "evidenceClass": "established_secondary",
+          "evaluation": "以 4-50LR 強迫接觸下層並保留爆發，是高報酬路線；8 次前段仍不足以把 62.5% 外推為通用勝率。"
+        },
+        {
+          "rankGroup": "secondary",
+          "fullCombo": "Emperor Blast Wheel 9-60L",
+          "skeleton": {
+            "lockChip": "Emperor",
+            "mainBlade": "Blast",
+            "assistBlade": "Wheel",
+            "ratchet": "9-60",
+            "bit": "L"
+          },
+          "role": "可控攻擊平衡",
+          "reportedTopCuts": 5,
+          "firstPlaceAfterTopCutRate": 0.6,
+          "actualMatchWinRate": null,
+          "evidenceClass": "emerging_small_sample",
+          "evaluation": "近期仍有冠軍案例，L 讓重型骨架兼顧移動與續航；但僅 5 次前段，不應排在 H／LR 主路線之前。"
+        },
+        {
+          "rankGroup": "four_piece_secondary",
+          "fullCombo": "Emperor Fortress Outer Wheel 6-60H",
+          "skeleton": {
+            "lockChip": "Emperor",
+            "metalBlade": "Fortress",
+            "overBlade": "Outer",
+            "assistBlade": "Wheel",
+            "ratchet": "6-60",
+            "bit": "H"
+          },
+          "role": "四件式厚圓防守／持久",
+          "verifiedRecentPlacementCases": 1,
+          "actualMatchWinRate": null,
+          "evidenceClass": "single_recent_winner_case",
+          "evaluation": "2026-07-30 的近期勝者案例證明 Fortress＋Outer＋Wheel 可成立，但目前仍是代表性骨架，不足以視為成熟主流。"
+        },
+        {
+          "rankGroup": "four_piece_secondary",
+          "fullCombo": "Knight Fortress Guard Wheel 9-60H",
+          "skeleton": {
+            "lockChip": "Knight",
+            "metalBlade": "Fortress",
+            "overBlade": "Guard",
+            "assistBlade": "Wheel",
+            "ratchet": "9-60",
+            "bit": "H"
+          },
+          "role": "四件式防守包覆",
+          "verifiedRecentPlacementCases": 1,
+          "actualMatchWinRate": null,
+          "evidenceClass": "single_recent_winner_case",
+          "evaluation": "Guard＋Wheel 進一步包覆下層，適合抗壓；但也更可能犧牲主動得分，目前只列特殊成功案例。"
+        },
+        {
+          "rankGroup": "expand_w_priority_test",
+          "fullCombo": "邪神狂怒 FW 3-60B",
+          "referenceComboEn": "Ragna Rage Flow Wheel 3-60B",
+          "searchNotation": "Rage FW 3-60B",
+          "skeleton": {
+            "lockChip": "Ragna",
+            "metalBlade": "Rage",
+            "overBlade": "Flow",
+            "assistBlade": "Wheel",
+            "ratchet": "3-60",
+            "bit": "B"
+          },
+          "role": "四件式純耐久優先測試",
+          "reportedTopCuts": null,
+          "actualMatchWinRate": null,
+          "evidenceClass": "structural_inference_priority_test",
+          "evaluation": "Flow 與 Wheel 都朝低干涉、圓滑化及旋轉維持發展，3-60B 提供低重心耐久基準；目前是最值得優先驗證的 Expand＋W 純耐久骨架，但尚未取得足夠重複前段案例。"
+        },
+        {
+          "rankGroup": "expand_w_priority_test",
+          "fullCombo": "騎士堡壘 FW 3-60B",
+          "referenceComboEn": "Knight Fortress Flow Wheel 3-60B",
+          "searchNotation": "Fortress FW 3-60B",
+          "skeleton": {
+            "lockChip": "Knight",
+            "metalBlade": "Fortress",
+            "overBlade": "Flow",
+            "assistBlade": "Wheel",
+            "ratchet": "3-60",
+            "bit": "B"
+          },
+          "role": "四件式耐久兼抗撞",
+          "reportedTopCuts": null,
+          "actualMatchWinRate": null,
+          "evidenceClass": "structural_inference_priority_test",
+          "evaluation": "Fortress 的低反作用骨架配合 Flow＋Wheel，理論上比 Rage FW 更能承受攻擊；主動得分較弱，需以實測確認其同旋耐久是否足以補償。"
+        },
+        {
+          "rankGroup": "expand_w_priority_test",
+          "fullCombo": "騎士堡壘 GW 5-60H",
+          "referenceComboEn": "Knight Fortress Guard Wheel 5-60H",
+          "searchNotation": "Fortress GW 5-60H",
+          "skeleton": {
+            "lockChip": "Knight",
+            "metalBlade": "Fortress",
+            "overBlade": "Guard",
+            "assistBlade": "Wheel",
+            "ratchet": "5-60",
+            "bit": "H"
+          },
+          "role": "四件式防守／anti-attack",
+          "reportedTopCuts": null,
+          "actualMatchWinRate": null,
+          "evidenceClass": "structural_inference_supported_by_related_case",
+          "relatedEvidence": "Knight Fortress Guard Wheel 9-60H 已有單一近期勝者案例；5-60H 為待驗證的低重心替代。",
+          "evaluation": "Guard＋Wheel 強化包覆與留場，5-60H 偏向承受衝撞及反打；不能把 9-60H 的單一案例直接外推成此配置的勝率。"
+        },
+        {
+          "rankGroup": "expand_w_priority_test",
+          "fullCombo": "邪神狂怒 FW 5-60Y",
+          "referenceComboEn": "Ragna Rage Flow Wheel 5-60Y",
+          "searchNotation": "Rage FW 5-60Y",
+          "skeleton": {
+            "lockChip": "Ragna",
+            "metalBlade": "Rage",
+            "overBlade": "Flow",
+            "assistBlade": "Wheel",
+            "ratchet": "5-60",
+            "bit": "Y"
+          },
+          "role": "四件式姿勢保持測試",
+          "reportedTopCuts": null,
+          "actualMatchWinRate": null,
+          "evidenceClass": "structural_inference_experimental",
+          "evaluation": "保留 CX-15 的 Y 軸心概念並改用 5-60 降低重心，測試 W 對傾斜恢復與末段纏鬥的幫助；Y 的穩定性仍需逐組實測，優先度低於 B 路線。"
+        },
+        {
+          "rankGroup": "expand_w_experimental",
+          "fullCombo": "龍王閃擊 BW 1-50LR",
+          "referenceComboEn": "Bahamut Blitz Break Wheel 1-50LR",
+          "searchNotation": "Blitz BW 1-50LR",
+          "skeleton": {
+            "lockChip": "Bahamut",
+            "metalBlade": "Blitz",
+            "overBlade": "Break",
+            "assistBlade": "Wheel",
+            "ratchet": "1-50",
+            "bit": "LR"
+          },
+          "role": "四件式實驗性平衡攻擊",
+          "reportedTopCuts": null,
+          "actualMatchWinRate": null,
+          "evidenceClass": "structural_inference_experimental",
+          "evaluation": "Wheel 可望降低 Blitz＋Break 第一波失手後的失速，但也可能遮蔽攻擊打點、削弱一擊爆發；純攻擊仍應優先 Knuckle 等攻擊型輔助戰刃。"
+        },
+        {
+          "rankGroup": "official_stock_and_emerging",
+          "fullCombo": "Cerberus Flame Wheel 5-80WB",
+          "skeleton": {
+            "lockChip": "Cerberus",
+            "mainBlade": "Flame",
+            "assistBlade": "Wheel",
+            "ratchet": "5-80",
+            "bit": "WB"
+          },
+          "role": "官方厚圓持久概念",
+          "actualMatchWinRate": null,
+          "evidenceClass": "stock_only",
+          "evaluation": "官方設計能證明 W 的持久／姿態保持意圖，但 5-80WB 只應作原裝參考；競技上通常優先改為較低固鎖與 B／FB／H。"
+        }
+      ],
+      "notPrimaryRecommendations": [
+        {
+          "skeleton": "Whip + Outer + Wheel",
+          "reason": "結構協同性合理，但最新統計未顯示足夠重複前段案例；保留為 experimental，不列常用主配置。"
+        },
+        {
+          "skeleton": "Arc + Wheel",
+          "reason": "只有少量前段紀錄且目前轉換不佳，不因理論持久協同而升級。"
+        },
+        {
+          "skeleton": "Flare + Wheel",
+          "reason": "已有多次前段但前段後奪冠比例偏低，暫不優先於 Blast／Fortress。"
+        }
+      ],
+      "sources": [
+        {
+          "type": "official_product",
+          "title": "Takara Tomy CX-08 Random Booster Vol.7",
+          "url": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx08.html",
+          "date": "2025-07-19"
+        },
+        {
+          "type": "aggregated_tournament_stats",
+          "title": "Beywatch Wheel Assist Blade Stats",
+          "url": "https://beywatch.gg/parts/assist-wheel",
+          "lastUpdated": "2026-08-03"
+        },
+        {
+          "type": "wbo_aggregated_combo",
+          "title": "Beywatch Emperor Blast Wheel 9-60H",
+          "url": "https://beywatch.gg/combos/emperor-blast-wheel-9-60-hexa"
+        },
+        {
+          "type": "wbo_aggregated_combo",
+          "title": "Beywatch Pegasus Blast Wheel 9-60LR",
+          "url": "https://beywatch.gg/combos/pegasus-blast-wheel-9-60-low-rush"
+        },
+        {
+          "type": "recent_tournament_index",
+          "title": "Beywatch Tournament Index",
+          "url": "https://beywatch.gg/tournaments",
+          "checked": "2026-08-05"
+        },
+        {
+          "type": "official_product",
+          "title": "Takara Tomy CX-13 Bahamut Blitz BK1-50I",
+          "url": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx13.html",
+          "checked": "2026-08-05",
+          "note": "確認 Expand Blade 四件式結構及 Blitz＋Break＋Knuckle 原裝定位。"
+        },
+        {
+          "type": "official_product",
+          "title": "Takara Tomy CX-14 Knight Fortress GV8-70UN",
+          "url": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx14.html",
+          "checked": "2026-08-05",
+          "note": "確認 Fortress＋Guard＋Vertical 原裝防守定位。"
+        },
+        {
+          "type": "official_product",
+          "title": "Takara Tomy CX-15 Ragna Rage FE4-55Y",
+          "url": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx15.html",
+          "checked": "2026-08-05",
+          "note": "確認 Rage＋Flow＋Erase 原裝持久定位。"
+        },
+        {
+          "type": "expert_system_compatibility",
+          "title": "BeyBase Custom Line CX Buyer's Guide",
+          "url": "https://beybase.com/beyblade-x-custom-line-cx-buyers-guide/",
+          "checked": "2026-08-05",
+          "note": "確認舊 Assist Blade 可與 Expand Blade 的 Metal＋Over 結構互換；推薦骨架仍需賽事或對戰測試驗證。"
+        },
+        {
+          "type": "taiwan_official_name_crosscheck",
+          "title": "Taiwan retail listings for CX-13～15",
+          "checked": "2026-08-05",
+          "note": "整機中文顯示名統一為龍王閃擊、騎士堡壘、邪神狂怒；英文保留為搜尋別名。"
+        }
+      ]
     }
   ]
 }
