@@ -7,6 +7,7 @@ export function normalizeInventoryIdentity(value) {
 }
 
 export function partIdentityCandidates(part = {}) {
+  if (!part || typeof part !== "object") return [];
   return [
     part.canonicalId,
     part.id,

@@ -14,7 +14,7 @@ import {
   recommendationCandidateText,
   selectTopInventorySuggestions,
   sortAndDedupeInventoryParts
-} from "./beyblade_x_inventory_recommendation_v1.js?v=20260805-inventory-v7";
+} from "./beyblade_x_inventory_recommendation_v1.js?v=20260806-inventory-nullfix1";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";

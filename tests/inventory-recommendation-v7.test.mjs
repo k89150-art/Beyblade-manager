@@ -72,6 +72,27 @@ test("武士魂斬的兩組 I 軸只保留一個多樣化特化候選", () => {
   assert.equal(selected.find(item => item.target === "attack")?.parts.bit.code, "LR");
 });
 
+test("缺少可選 CX 零件時庫存推薦不會讀取 null.canonicalId", () => {
+  assert.deepEqual(partIdentityCandidates(null), []);
+  assert.doesNotThrow(() => selectTopInventorySuggestions([
+    {
+      target: "attack",
+      label: "暴龍霸擊 + 9-60 + LR",
+      value: 10,
+      parts: {
+        blade: tyranno,
+        ratchet: ratchet760,
+        bit: bits.LR,
+        lock: null,
+        main: null,
+        metal: null,
+        over: null,
+        assist: null
+      }
+    }
+  ]));
+});
+
 test("推薦候選文字不自行加入順位，編號只交給 ol", () => {
   assert.equal(recommendationCandidateText({ part: "LR", tier: "S" }), "LR｜Tier S");
   assert.doesNotMatch(recommendationCandidateText({ part: "LR", tier: "S" }), /^\d+\./);
