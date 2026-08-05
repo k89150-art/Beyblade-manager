@@ -5,6 +5,16 @@ import {
   getMetaCoachPartStatus,
   getMetaEvidence
 } from "./beyblade_x_analysis_helper_v1_8_ASCII_SAFE.js?v=20260805-top-level-only-v1";
+import {
+  canonicalPartIdentity,
+  comparePartsByIndependentRank,
+  independentTierLabel,
+  partIdentityCandidates,
+  recommendationTargetsForBit,
+  recommendationCandidateText,
+  selectTopInventorySuggestions,
+  sortAndDedupeInventoryParts
+} from "./beyblade_x_inventory_recommendation_v1.js?v=20260805-inventory-v7";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -201,7 +211,7 @@ async function loadData() {
   if (database && rules) return;
 
   const [loadedDatabase, loadedRules, stockCatalog] = await Promise.all([
-    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260805-schema-sync-v6"),
+    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260805-inventory-v7"),
     loadJson("./beyblade_x_analysis_rules_v1_zhTW.json?v=20260630-engine2"),
     loadJson("./stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260805-stock-inventory1")
   ]);
@@ -263,6 +273,7 @@ function buildPartIndex(items = []) {
   items.forEach(item => {
     addIndex(index, item, [
       item.id,
+      item.canonicalId,
       item.code,
       item.name,
       item.name_zh,
@@ -375,6 +386,10 @@ function findPart(indexName, input) {
   for (const item of indexes[indexName].values()) {
     const combined = normalizeText(optionLabel(item));
     if (combined && compact.includes(combined)) return item;
+    const identityMatch = partIdentityCandidates(item)
+      .filter(token => token.length >= 3)
+      .some(token => compact.includes(token));
+    if (identityMatch) return item;
     if (item.model && item.name && compact.includes(normalizeText(item.model)) && compact.includes(normalizeText(item.name))) return item;
   }
 
@@ -934,47 +949,48 @@ function uniqueItems(items) {
 }
 
 function partIdentityTokens(part) {
-  return uniqueItems([
-    part?.id,
-    part?.canonicalId,
-    part?.code,
-    part?.name,
-    part?.name_zh,
-    part?.name_en,
-    part?.displayName,
-    part?.displayNameZh,
-    part?.referenceNameEn,
-    part?.model,
-    ...(Array.isArray(part?.aliases) ? part.aliases : []),
-    ...(Array.isArray(part?.legacyIds) ? part.legacyIds : [])
-  ]).map(normalizeText);
+  return partIdentityCandidates(part);
 }
 
 function rankedRecommendationCandidates(part, field) {
   if (!part) return [];
   const annotated = part.contextualRecommendationCandidates?.[field];
+  const indexName = {
+    recommendedBits: "bits",
+    recommendedRatchets: "ratchets",
+    recommendedAssistBlades: "cxAssists",
+    recommendedOver: "cxOvers"
+  }[field];
   if (Array.isArray(annotated) && annotated.length) {
     return annotated
       .map((candidate, index) => ({
         part: String(candidate?.part || ""),
-        tier: candidate?.independentTier || "",
-        context: candidate?.context || "",
-        priority: candidate?.priority !== null
-          && candidate?.priority !== undefined
-          && Number.isFinite(Number(candidate.priority))
-          ? Number(candidate.priority)
-          : Number.isFinite(Number(candidate?.independentPriority))
-            ? Number(candidate.independentPriority)
-            : index + 1,
+        resolvedPart: indexName ? findPart(indexName, candidate?.part) : null,
         sourceIndex: index
       }))
       .filter(candidate => candidate.part)
-      .sort((left, right) => left.priority - right.priority || left.sourceIndex - right.sourceIndex);
+      .map(candidate => ({
+        ...candidate,
+        tier: independentTierLabel(candidate.resolvedPart) || annotated[candidate.sourceIndex]?.independentTier || ""
+      }))
+      .sort((left, right) => (
+        left.resolvedPart && right.resolvedPart
+          ? comparePartsByIndependentRank(left.resolvedPart, right.resolvedPart)
+          : left.sourceIndex - right.sourceIndex
+      ));
   }
 
   return (Array.isArray(part[field]) ? part[field] : [])
     .filter(candidate => typeof candidate === "string" && candidate.trim())
-    .map((candidate, index) => ({ part: candidate, tier: "", context: "", priority: index + 1, sourceIndex: index }));
+    .map((candidate, index) => {
+      const resolvedPart = indexName ? findPart(indexName, candidate) : null;
+      return { part: candidate, resolvedPart, tier: independentTierLabel(resolvedPart), sourceIndex: index };
+    })
+    .sort((left, right) => (
+      left.resolvedPart && right.resolvedPart
+        ? comparePartsByIndependentRank(left.resolvedPart, right.resolvedPart)
+        : left.sourceIndex - right.sourceIndex
+    ));
 }
 
 function findFeaturedBladeProfile(blade) {
@@ -990,10 +1006,9 @@ function findFeaturedBladeProfile(blade) {
 function renderRecommendationGroup(part, field, label) {
   const candidates = rankedRecommendationCandidates(part, field);
   if (!candidates.length) return "";
-  const rows = candidates.map((candidate, index) => {
-    const details = [candidate.tier ? `Tier ${candidate.tier}` : "", candidate.context].filter(Boolean).join("｜");
-    return `<li><strong>${index + 1}. ${escapeHtml(candidate.part)}</strong>${details ? `｜${escapeHtml(details)}` : ""}</li>`;
-  }).join("");
+  const rows = candidates
+    .map(candidate => `<li><strong>${escapeHtml(recommendationCandidateText(candidate))}</strong></li>`)
+    .join("");
   return `<div><strong>${escapeHtml(label)}：</strong><ol class="status-list">${rows}</ol></div>`;
 }
 
@@ -1255,19 +1270,10 @@ function readOwnedPartsFromSavedData(data) {
 }
 
 function partsFromBucket(bucket, indexName) {
-  const seen = new Set();
-
-  return [...bucket.values()]
-    .map(item => ({ owned: item, part: findPart(indexName, item.name) }))
-    .filter(item => item.part)
-    .sort((a, b) => b.owned.count - a.owned.count)
-    .filter(item => {
-      const key = normalizeText(item.part.id || item.part.code || item.part.name || optionLabel(item.part));
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .map(item => item.part);
+  const resolvedParts = [...bucket.values()]
+    .map(item => findPart(indexName, item.name))
+    .filter(Boolean);
+  return sortAndDedupeInventoryParts(resolvedParts);
 }
 
 function ownedBucketTotal(bucket) {
@@ -1293,12 +1299,13 @@ function isSuggestionLegal(blade, ratchet, bit) {
 
 function analysisScoreValue(analysis, target) {
   const scores = analysis?.scores || {};
+  const scoreTarget = target === "specializedAttack" ? "attack" : target;
   const base = {
     attack: (scores.attack || 0) * 1.45 + (scores.control || 0) * 0.7 + (scores.burstSafety || 0) * 0.35,
     stamina: (scores.stamina || 0) * 1.45 + (scores.burstSafety || 0) * 0.7 + (scores.control || 0) * 0.45,
     defense: (scores.defense || 0) * 1.45 + (scores.burstSafety || 0) * 0.7 + (scores.control || 0) * 0.45,
     balance: (scores.balance || 0) * 1.2 + (scores.control || 0) * 0.75 + (scores.burstSafety || 0) * 0.45
-  }[target] || 0;
+  }[scoreTarget] || 0;
 
   return Math.round((base + (scores.metaConfidence || 0) * 0.25) * 10) / 10;
 }
@@ -1306,8 +1313,9 @@ function analysisScoreValue(analysis, target) {
 function makeConfigSuggestions(config, label) {
   const analysis = analyzeCombo(toEngineInput(config), database, { debug: false });
   const role = classifyBuild(config, analysis);
+  const targets = recommendationTargetsForBit(config.parts.bit);
 
-  return ["attack", "stamina", "defense", "balance"].map(target => ({
+  return targets.map(target => ({
     target,
     label,
     role,
@@ -1349,7 +1357,7 @@ function buildStandardSuggestions(owned) {
 }
 
 function partIdentity(part) {
-  return normalizeText(part?.id || part?.code || part?.name || optionLabel(part));
+  return canonicalPartIdentity(part);
 }
 
 function buildCxInventorySuggestions(owned, inventoryPart) {
@@ -1413,29 +1421,7 @@ function buildInventorySpecificSuggestions(owned, standardSuggestions) {
 }
 
 function pickTopSuggestions(suggestions) {
-  const labels = {
-    attack: "攻擊推薦",
-    stamina: "持久推薦",
-    defense: "防守推薦",
-    balance: "平衡推薦"
-  };
-
-  return Object.keys(labels).flatMap(target => {
-    const seen = new Set();
-    return suggestions
-      .filter(item => item.target === target)
-      .sort((a, b) => (
-        (b.value + b.recommendationMomentum) - (a.value + a.recommendationMomentum)
-      ))
-      .filter(item => {
-        const key = normalizeText(item.label);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      })
-      .slice(0, 2)
-      .map(item => ({ ...item, targetLabel: labels[target] }));
-  });
+  return selectTopInventorySuggestions(suggestions);
 }
 
 function renderSuggestionCards(items) {
@@ -1444,6 +1430,7 @@ function renderSuggestionCards(items) {
       <summary class="suggestion-summary">
         <span>
           <span class="analysis-pill">${escapeHtml(item.targetLabel)}</span>
+          ${item.specialized ? '<span class="analysis-pill">不得取代較高 Tier 泛用軸心</span>' : ""}
           ${item.recommendationMomentum > 0 ? '<span class="analysis-pill">近期上升</span>' : ""}
           <span class="suggestion-title">${escapeHtml(item.label)}</span>
         </span>
