@@ -1266,18 +1266,14 @@ function buildInventorySpecificSuggestions(owned, standardSuggestions) {
       candidates = buildCxInventorySuggestions(owned, inventoryPart);
     }
 
-    const best = candidates.sort((a, b) => (
-      (b.value + b.recommendationMomentum) - (a.value + a.recommendationMomentum)
-    ))[0];
-    if (!best) return;
-
-    const key = `${inventoryPart.resolvedType}:${wanted}`;
-    if (seen.has(key)) return;
-    seen.add(key);
-    suggestions.push({
-      ...best,
-      targetLabel: `額外${inventoryPart.resolvedType}`,
-      inventoryPartName: inventoryPart.name
+    candidates.forEach(candidate => {
+      const key = `${candidate.target}:${normalizeText(candidate.label)}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      suggestions.push({
+        ...candidate,
+        inventoryPartName: inventoryPart.name
+      });
     });
   });
 
@@ -1334,7 +1330,7 @@ function renderSuggestionCards(items) {
   `).join("");
 }
 
-function renderStockSuggestions(items, owned, inventorySuggestions = []) {
+function renderStockSuggestions(items, owned) {
   const result = document.getElementById("stockSuggestResult");
   if (!result) return;
 
@@ -1363,10 +1359,6 @@ function renderStockSuggestions(items, owned, inventorySuggestions = []) {
     <div class="suggestion-grid">
       ${renderSuggestionCards(items)}
     </div>
-    <div class="section-title">額外零件測試方向</div>
-    ${inventorySuggestions.length
-      ? `<div class="suggestion-grid">${renderSuggestionCards(inventorySuggestions)}</div>`
-      : '<div class="analysis-note">目前沒有可由額外零件組成的合法測試方向。</div>'}
   `;
 }
 
@@ -1394,9 +1386,9 @@ async function renderStockSuggestionsFromCloud() {
 
     const owned = readOwnedPartsFromSavedData(snap.data());
     const standardSuggestions = buildStandardSuggestions(owned);
-    const suggestions = pickTopSuggestions(standardSuggestions);
     const inventorySuggestions = buildInventorySpecificSuggestions(owned, standardSuggestions);
-    renderStockSuggestions(suggestions, owned, inventorySuggestions);
+    const suggestions = pickTopSuggestions([...standardSuggestions, ...inventorySuggestions]);
+    renderStockSuggestions(suggestions, owned);
   } catch (error) {
     console.error("庫存推薦產生失敗", error);
     result.style.display = "block";
