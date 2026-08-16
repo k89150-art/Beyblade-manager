@@ -36,6 +36,11 @@ const SCORE_TYPES = {
   spin: { label: "迴轉勝利", point: 1 }
 };
 
+const DIRECT_ADVANCE_TYPES = {
+  bye: { label: "輪空／種子晉級", opponentName: "輪空" },
+  walkover: { label: "對手棄權／未到", opponentName: "對手未到" }
+};
+
 let currentUser = null;
 let mainData = {};
 let tournamentRecords = [];
@@ -200,7 +205,93 @@ function calculateMatchScore(match) {
   return { myScore, opponentScore };
 }
 
+function getMatchOutcome(match) {
+  if (DIRECT_ADVANCE_TYPES[match?.advancementType]) return "advance";
+
+  const score = calculateMatchScore(match || {});
+  if (score.myScore >= 4) return "win";
+  if (score.opponentScore >= 4) return "lose";
+  return "incomplete";
+}
+
+function normalizeParticipantCount(value) {
+  const count = Number(value);
+  return Number.isInteger(count) && count >= 2 ? count : null;
+}
+
+function calculateTournamentStanding(record) {
+  const participantCount = normalizeParticipantCount(record?.participantCount);
+
+  if (!participantCount) {
+    return {
+      label: record?.rank || "待輸入總人數",
+      detail: record?.rank ? "舊版手動名次" : "輸入總人數後才可自動計算",
+      isFinal: Boolean(record?.rank),
+      advances: 0
+    };
+  }
+
+  const totalRounds = Math.max(1, Math.ceil(Math.log2(participantCount)));
+  let advances = 0;
+  let hasLoss = false;
+  let incompleteCount = 0;
+
+  for (const match of record.matches || []) {
+    const outcome = getMatchOutcome(match);
+    if (outcome === "win" || outcome === "advance") {
+      advances += 1;
+    } else if (outcome === "lose") {
+      hasLoss = true;
+      break;
+    } else {
+      incompleteCount += 1;
+      break;
+    }
+  }
+
+  if (hasLoss) {
+    const best = Math.min(participantCount, (2 ** Math.max(0, totalRounds - advances - 1)) + 1);
+    const worst = Math.min(participantCount, 2 ** Math.max(0, totalRounds - advances));
+    const label = best === worst ? `第 ${best} 名` : `第 ${best}–${worst} 名`;
+
+    return {
+      label,
+      detail: `晉級 ${advances} 輪後落敗`,
+      isFinal: true,
+      advances
+    };
+  }
+
+  if (advances >= totalRounds) {
+    return {
+      label: "冠軍（第 1 名）",
+      detail: `完成 ${totalRounds} 輪晉級`,
+      isFinal: true,
+      advances
+    };
+  }
+
+  if (incompleteCount > 0) {
+    return {
+      label: `第 ${advances + 1} 輪進行中`,
+      detail: `已有 ${incompleteCount} 局尚未分出勝負`,
+      isFinal: false,
+      advances
+    };
+  }
+
+  return {
+    label: advances > 0 ? `已晉級第 ${advances + 1} 輪` : "尚未開始",
+    detail: advances > 0 ? `已完成 ${advances} 輪晉級` : "尚無賽程紀錄",
+    isFinal: false,
+    advances
+  };
+}
+
 function getMatchStatus(match) {
+  const directAdvance = DIRECT_ADVANCE_TYPES[match?.advancementType];
+  if (directAdvance) return directAdvance.label;
+
   const score = calculateMatchScore(match);
 
   if (score.myScore >= 4) return "本局勝利";
@@ -210,6 +301,8 @@ function getMatchStatus(match) {
 }
 
 function getMatchStatusClass(match) {
+  if (DIRECT_ADVANCE_TYPES[match?.advancementType]) return "win-text";
+
   const status = getMatchStatus(match);
 
   if (status === "本局勝利") return "win-text";
@@ -243,6 +336,8 @@ function renderTournamentCard(record) {
   const isOpen = openedTournamentIds.has(record.id);
   const matchCount = (record.matches || []).length;
   const isFinished = record.isFinished === true;
+  const participantCount = normalizeParticipantCount(record.participantCount);
+  const standing = calculateTournamentStanding(record);
 
   return `
     <div class="tournament-card" data-tournament-id="${escapeHtml(record.id)}">
@@ -252,10 +347,12 @@ function renderTournamentCard(record) {
           <div class="tournament-meta">
             <span>日期：${escapeHtml(record.date || "-")}</span>
             <span>地點：${escapeHtml(record.location || "-")}</span>
-            <span>名次：${escapeHtml(record.rank || "-")}</span>
-            <span>對局數：${matchCount}</span>
+            <span>總人數：${escapeHtml(participantCount || "-")}</span>
+            <span>成績：${escapeHtml(standing.label)}</span>
+            <span>賽程紀錄：${matchCount}</span>
             <span class="${isFinished ? "win-text" : "progress-text"}">狀態：${isFinished ? "已完成" : "編輯中"}</span>
           </div>
+          <div class="tournament-note">計算依據：${escapeHtml(standing.detail)}</div>
           ${record.note ? `<div class="tournament-note">備註：${escapeHtml(record.note)}</div>` : ""}
         </div>
 
@@ -286,7 +383,7 @@ function renderTournamentDetail(record) {
 
       <h4>對局紀錄</h4>
       ${(record.matches || []).length
-        ? record.matches.map(match => renderMatchCard(record.id, match, isFinished)).join("")
+        ? record.matches.map((match, index) => renderMatchCard(record.id, match, isFinished, index + 1)).join("")
         : `<div class="empty-state">尚未新增對局。</div>`
       }
     </div>
@@ -296,6 +393,12 @@ function renderTournamentDetail(record) {
 function renderAddMatchForm(tournamentId) {
   return `
     <div class="match-form">
+      <div class="direct-advance-actions">
+        <button type="button" onclick="addDirectAdvance('${escapeHtml(tournamentId)}', 'bye')">輪空／種子，直接晉級</button>
+        <button type="button" onclick="addDirectAdvance('${escapeHtml(tournamentId)}', 'walkover')">對手棄權／未到，直接晉級</button>
+      </div>
+      <div class="direct-advance-note">直接晉級會計入一輪晉級，但不會建立比分或回合紀錄。</div>
+
       <input type="text" data-match-opponent placeholder="對手名稱">
 
       <div class="deck-input-group">
@@ -321,37 +424,37 @@ function renderAddMatchForm(tournamentId) {
   `;
 }
 
-function renderMatchCard(tournamentId, match, isFinished) {
+function renderMatchCard(tournamentId, match, isFinished, matchNumber) {
   const score = calculateMatchScore(match);
   const status = getMatchStatus(match);
   const statusClass = getMatchStatusClass(match);
   const deck = match.deck || [];
+  const directAdvance = DIRECT_ADVANCE_TYPES[match.advancementType];
 
   return `
     <div class="match-card" data-match-id="${escapeHtml(match.id)}">
       <div class="match-header">
         <div>
-          <div class="match-title">對手：${escapeHtml(match.opponentName || "-")}</div>
-          <div class="match-score">
-            比分：我方 ${score.myScore} : ${score.opponentScore} 對手
-            <span class="${statusClass}">${status}</span>
-          </div>
+          <div class="match-title">第 ${escapeHtml(matchNumber)} 局｜${directAdvance ? escapeHtml(directAdvance.label) : `對手：${escapeHtml(match.opponentName || "-")}`}</div>
+          ${directAdvance
+            ? `<div class="match-score"><span class="direct-advance-badge">${escapeHtml(status)}</span></div>`
+            : `<div class="match-score">比分：我方 ${score.myScore} : ${score.opponentScore} 對手 <span class="${statusClass}">${status}</span></div>`}
         </div>
         <div class="match-actions">
-          ${!isFinished ? `<button type="button" onclick="editMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')">修改對局</button>` : ""}
+          ${!isFinished && !directAdvance ? `<button type="button" onclick="editMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')">修改對局</button>` : ""}
           ${!isFinished ? `<button type="button" onclick="deleteMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')" class="danger-btn">刪除對局</button>` : ""}
         </div>
       </div>
 
-      <div class="deck-list">
+      ${!directAdvance ? `<div class="deck-list">
         <div><strong>陀螺 1：</strong>${escapeHtml(deck[0]?.configText || "-")}</div>
         <div><strong>陀螺 2：</strong>${escapeHtml(deck[1]?.configText || "-")}</div>
         <div><strong>陀螺 3：</strong>${escapeHtml(deck[2]?.configText || "-")}</div>
-      </div>
+      </div>` : ""}
 
-      ${!isFinished ? `<h5>新增回合</h5>${renderAddRoundForm(tournamentId, match)}` : ""}
+      ${!isFinished && !directAdvance ? `<h5>新增回合</h5>${renderAddRoundForm(tournamentId, match)}` : ""}
 
-      <div class="table-wrap round-table-wrap">
+      ${!directAdvance ? `<div class="table-wrap round-table-wrap">
         <table class="round-table">
           <thead>
             <tr>
@@ -371,7 +474,7 @@ function renderMatchCard(tournamentId, match, isFinished) {
             }
           </tbody>
         </table>
-      </div>
+      </div>` : `<div class="empty-state">本局未進行比賽，已直接晉級下一輪。</div>`}
     </div>
   `;
 }
@@ -488,13 +591,13 @@ window.addTournament = async function () {
   const dateInput = document.getElementById("tournamentDate");
   const nameInput = document.getElementById("tournamentName");
   const locationInput = document.getElementById("tournamentLocation");
-  const rankInput = document.getElementById("tournamentRank");
+  const participantCountInput = document.getElementById("tournamentParticipantCount");
   const noteInput = document.getElementById("tournamentNote");
 
   const date = dateInput.value;
   const tournamentName = nameInput.value.trim();
   const location = locationInput.value.trim();
-  const rank = rankInput.value.trim();
+  const participantCount = normalizeParticipantCount(participantCountInput.value);
   const note = noteInput.value.trim();
 
   if (!date) {
@@ -507,6 +610,11 @@ window.addTournament = async function () {
     return;
   }
 
+  if (!participantCount) {
+    alert("請輸入至少 2 人的比賽總人數（包含自己）。");
+    return;
+  }
+
   const id = generateId("tournament");
 
   tournamentRecords.push({
@@ -514,7 +622,8 @@ window.addTournament = async function () {
     tournamentName,
     date,
     location,
-    rank,
+    participantCount,
+    rank: "",
     note,
     isFinished: false,
     matches: []
@@ -525,7 +634,7 @@ window.addTournament = async function () {
   dateInput.value = "";
   nameInput.value = "";
   locationInput.value = "";
-  rankInput.value = "";
+  participantCountInput.value = "";
   noteInput.value = "";
 
   await saveTournamentData();
@@ -548,7 +657,11 @@ window.finishTournament = async function (tournamentId) {
   const record = tournamentRecords.find(item => item.id === tournamentId);
   if (!record) return;
 
-  const ok = confirm("確定要完成這場比賽嗎？完成後會隱藏新增對局與新增回合；按修改可重新開啟編輯。");
+  const standing = calculateTournamentStanding(record);
+  const incompleteWarning = standing.isFinal
+    ? ""
+    : `\n\n目前尚未算出最終名次，將顯示「${standing.label}」。`;
+  const ok = confirm(`確定要完成這場比賽嗎？\n目前計算成績：${standing.label}${incompleteWarning}\n\n完成後會隱藏新增對局與新增回合；按修改可重新開啟編輯。`);
   if (!ok) return;
 
   record.isFinished = true;
@@ -587,8 +700,9 @@ function openTournamentEditDialog(record) {
         <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">地點</label>
         <input id="editTournamentLocation" type="text" value="${escapeHtml(record.location || "")}" style="width:100%;margin-bottom:10px;">
 
-        <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">名次</label>
-        <input id="editTournamentRank" type="text" value="${escapeHtml(record.rank || "")}" style="width:100%;margin-bottom:10px;">
+        <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">總人數（包含自己）</label>
+        <input id="editTournamentParticipantCount" type="number" min="2" step="1" inputmode="numeric" value="${escapeHtml(record.participantCount || "")}" style="width:100%;margin-bottom:10px;">
+        ${record.rank && !record.participantCount ? `<div style="margin:-3px 0 10px;color:#9ba8b5;font-size:12px;">舊版手動名次：${escapeHtml(record.rank)}。輸入總人數後將改由系統計算。</div>` : ""}
 
         <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">備註</label>
         <input id="editTournamentNote" type="text" value="${escapeHtml(record.note || "")}" style="width:100%;margin-bottom:14px;">
@@ -605,7 +719,7 @@ function openTournamentEditDialog(record) {
     const nameInput = overlay.querySelector("#editTournamentName");
     const dateInput = overlay.querySelector("#editTournamentDate");
     const locationInput = overlay.querySelector("#editTournamentLocation");
-    const rankInput = overlay.querySelector("#editTournamentRank");
+    const participantCountInput = overlay.querySelector("#editTournamentParticipantCount");
     const noteInput = overlay.querySelector("#editTournamentNote");
     const cancelBtn = overlay.querySelector("#cancelTournamentEditBtn");
     const saveBtn = overlay.querySelector("#saveTournamentEditBtn");
@@ -631,11 +745,17 @@ function openTournamentEditDialog(record) {
         return;
       }
 
+      const participantCount = normalizeParticipantCount(participantCountInput.value);
+      if (!participantCount) {
+        alert("請輸入至少 2 人的比賽總人數（包含自己）。");
+        return;
+      }
+
       close({
         tournamentName,
         date,
         location: locationInput.value.trim(),
-        rank: rankInput.value.trim(),
+        participantCount,
         note: noteInput.value.trim()
       });
     };
@@ -654,7 +774,7 @@ window.editTournament = async function (tournamentId) {
   record.tournamentName = edited.tournamentName;
   record.date = edited.date;
   record.location = edited.location;
-  record.rank = edited.rank;
+  record.participantCount = edited.participantCount;
   record.note = edited.note;
   record.isFinished = false;
 
@@ -728,12 +848,50 @@ window.addMatch = async function (tournamentId) {
   renderTournamentList();
 };
 
+window.addDirectAdvance = async function (tournamentId, advancementType) {
+  if (!requireLogin()) return;
+
+  const record = tournamentRecords.find(item => item.id === tournamentId);
+  const advanceInfo = DIRECT_ADVANCE_TYPES[advancementType];
+  if (!record || !advanceInfo) return;
+
+  if (record.isFinished) {
+    alert("這場比賽已完成。請先按修改，再新增直接晉級紀錄。");
+    return;
+  }
+
+  const ok = confirm(`確定要新增「${advanceInfo.label}」嗎？\n這筆紀錄會計為晉級一輪，不會建立比分或回合。`);
+  if (!ok) return;
+
+  if (!Array.isArray(record.matches)) {
+    record.matches = [];
+  }
+
+  record.matches.push({
+    id: generateId("match"),
+    advancementType,
+    opponentName: advanceInfo.opponentName,
+    deck: [],
+    rounds: []
+  });
+
+  openedTournamentIds.add(tournamentId);
+
+  await saveTournamentData();
+  renderTournamentList();
+};
+
 window.editMatch = async function (tournamentId, matchId) {
   if (!requireLogin()) return;
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   const match = record?.matches?.find(item => item.id === matchId);
   if (!record || !match) return;
+
+  if (DIRECT_ADVANCE_TYPES[match.advancementType]) {
+    alert("直接晉級紀錄不需要修改對手或陀螺；若類型選錯，請刪除後重新新增。");
+    return;
+  }
 
   if (record.isFinished) {
     alert("這場比賽已完成。請先按修改，再調整對局。");
@@ -793,6 +951,11 @@ window.addRound = async function (tournamentId, matchId) {
   const record = tournamentRecords.find(item => item.id === tournamentId);
   const match = record?.matches?.find(item => item.id === matchId);
   if (!record || !match) return;
+
+  if (DIRECT_ADVANCE_TYPES[match.advancementType]) {
+    alert("直接晉級紀錄不需要新增回合。");
+    return;
+  }
 
   if (record.isFinished) {
     alert("這場比賽已完成。請先按修改，再新增回合。");

@@ -46,6 +46,9 @@
     .tournament-detail h4 { color: #ffffff; margin: 4px 0 10px 0; font-size: 16px; }
     .tournament-detail h5 { color: #dcdcdc; margin: 12px 0 8px 0; font-size: 14px; }
     .match-form { display: grid; grid-template-columns: 1fr; gap: 10px; background: #151515; border: 1px solid #303030; border-radius: 10px; padding: 12px; margin-bottom: 16px; }
+    .direct-advance-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .direct-advance-note { color: #9ba8b5; font-size: 12px; line-height: 1.6; }
+    .direct-advance-badge { display: inline-flex; align-items: center; min-height: 25px; padding: 2px 8px; border: 1px solid rgba(61,126,255,.42); border-radius: 999px; color: #86b6ff; background: rgba(61,126,255,.09); font-size: 11px; font-weight: 800; }
     .deck-input-group { display: grid; grid-template-columns: 70px 1fr 1fr; gap: 8px; align-items: center; }
     .deck-input-group label { color: #dcdcdc; font-size: 13px; font-weight: 700; }
     .match-card { background: #151515; border: 1px solid #303030; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
@@ -63,7 +66,7 @@
     .progress-text { color: #ffcc66; }
     .empty-state { background: #181818; border: 1px solid #333; border-radius: 10px; padding: 12px; color: #bdbdbd; font-size: 14px; line-height: 1.5; }
     @media (max-width: 900px) { .tournament-form { grid-template-columns: repeat(2, 1fr); } .round-form { grid-template-columns: repeat(2, 1fr); } .tournament-summary, .match-header { flex-direction: column; } .tournament-actions, .match-actions { width: 100%; justify-content: flex-start; } }
-    @media (max-width: 600px) { .side-menu-button { left: 10px; top: 10px; width: 42px; height: 42px; } .auth-card { margin-top: 56px; } .page-nav { flex-direction: column; } .nav-link { width: 100%; } .tournament-form, .match-form, .round-form { display: flex; flex-direction: column; gap: 8px; } .deck-input-group { display: flex; flex-direction: column; align-items: stretch; gap: 6px; } .tournament-actions button, .match-actions button { min-height: 38px; } .tournament-card, .match-card { border-radius: 8px; } }
+    @media (max-width: 600px) { .side-menu-button { left: 10px; top: 10px; width: 42px; height: 42px; } .auth-card { margin-top: 56px; } .page-nav { flex-direction: column; } .nav-link { width: 100%; } .tournament-form, .match-form, .round-form { display: flex; flex-direction: column; gap: 8px; } .direct-advance-actions { grid-template-columns: 1fr; } .deck-input-group { display: flex; flex-direction: column; align-items: stretch; gap: 6px; } .tournament-actions button, .match-actions button { min-height: 38px; } .tournament-card, .match-card { border-radius: 8px; } }
     @media (max-width: 700px) {
       .tournament-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .match-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -162,7 +165,7 @@
     <h2>參賽紀錄</h2>
 
     <div class="history-note">
-      這裡可以記錄每場比賽、對手局、每回合得失分與當局使用的 3 顆陀螺。
+      這裡可以記錄每場比賽、總人數、對手局、直接晉級與每回合得失分；系統會依單敗淘汰賽程自動計算最終成績。
     </div>
 
     <h3>新增比賽</h3>
@@ -171,7 +174,7 @@
       <input type="date" id="tournamentDate">
       <input type="text" id="tournamentName" placeholder="比賽名稱">
       <input type="text" id="tournamentLocation" placeholder="地點">
-      <input type="text" id="tournamentRank" placeholder="名次">
+      <input type="number" id="tournamentParticipantCount" min="2" step="1" inputmode="numeric" placeholder="總人數（含自己）">
       <input type="text" id="tournamentNote" placeholder="備註">
       <button type="button" onclick="addTournament()" class="primary-btn">新增比賽</button>
     </div>
@@ -189,7 +192,7 @@
       document.body.classList.remove("side-menu-open");
     }
   </script>
-  <script type="module" src="tournament.js?v=20260805-sidebar-stable1"></script>
+  <script type="module" src="tournament.js?v=20260816-auto-standing1"></script>
   <script src="site-menu.js?v=20260805-ui3"></script>
 </body>
 </html>
