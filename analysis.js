@@ -9,12 +9,13 @@ import {
   canonicalPartIdentity,
   comparePartsByIndependentRank,
   independentTierLabel,
+  inventoryCandidateGate,
   partIdentityCandidates,
-  recommendationTargetsForBit,
   recommendationCandidateText,
+  recommendationTargetFromRole,
   selectTopInventorySuggestions,
   sortAndDedupeInventoryParts
-} from "./beyblade_x_inventory_recommendation_nullsafe_v2.js";
+} from "./beyblade_x_inventory_recommendation_nullsafe_v2.js?v=20260816-hard-gates-v10";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -211,7 +212,7 @@ async function loadData() {
   if (database && rules) return;
 
   const [loadedDatabase, loadedRules, stockCatalog] = await Promise.all([
-    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260816-meta-watch1"),
+    loadJson("./beyblade_x_database_v1_zhTW.json?v=20260816-hard-gates-v10"),
     loadJson("./beyblade_x_analysis_rules_v1_zhTW.json?v=20260630-engine2"),
     loadJson("./stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260805-stock-inventory1")
   ]);
@@ -268,36 +269,56 @@ function addIndex(index, item, keys) {
   });
 }
 
+function partIndexKeys(item = {}) {
+  return [
+    item.id,
+    item.canonicalId,
+    item.code,
+    item.name,
+    item.name_zh,
+    item.name_en,
+    item.displayName,
+    item.displayNameZh,
+    item.referenceNameEn,
+    item.model,
+    optionLabel(item),
+    item.model && item.name ? `${item.model}${item.name}` : "",
+    item.name && item.name_en ? `${item.name}${item.name_en}` : "",
+    item.code && item.name_en ? `${item.code}${item.name_en}` : "",
+    ...(Array.isArray(item.aliases) ? item.aliases : []),
+    ...(Array.isArray(item.inventoryIdentityKeys) ? item.inventoryIdentityKeys : []),
+    ...(Array.isArray(item.legacyIds) ? item.legacyIds : [])
+  ].filter(Boolean);
+}
+
 function buildPartIndex(items = []) {
   const index = new Map();
   items.forEach(item => {
-    addIndex(index, item, [
-      item.id,
-      item.canonicalId,
-      item.code,
-      item.name,
-      item.name_zh,
-      item.name_en,
-      item.displayName,
-      item.displayNameZh,
-      item.referenceNameEn,
-      item.model,
-      optionLabel(item),
-      item.model && item.name ? `${item.model}${item.name}` : "",
-      item.name && item.name_en ? `${item.name}${item.name_en}` : "",
-      item.code && item.name_en ? `${item.code}${item.name_en}` : "",
-      ...(Array.isArray(item.aliases) ? item.aliases : []),
-      ...(Array.isArray(item.legacyIds) ? item.legacyIds : [])
-    ].filter(Boolean));
+    addIndex(index, item, partIndexKeys(item));
+  });
+  return index;
+}
+
+function buildCanonicalCompatIndex(canonicalItems = [], compatibilityItems = []) {
+  const index = buildPartIndex(canonicalItems);
+  compatibilityItems.forEach(compatibilityItem => {
+    const canonicalItem = partIndexKeys(compatibilityItem)
+      .map(key => index.get(normalizeText(key)))
+      .find(Boolean);
+    const resolvedItem = canonicalItem || compatibilityItem;
+    partIndexKeys(compatibilityItem).forEach(key => {
+      const normalized = normalizeText(key);
+      if (normalized) index.set(normalized, resolvedItem);
+    });
   });
   return index;
 }
 
 function buildIndexes(db) {
   return {
-    blades: buildPartIndex(db.blades),
-    ratchets: buildPartIndex(db.ratchets),
-    bits: buildPartIndex(db.bits),
+    blades: buildCanonicalCompatIndex(db.blades, db.__v18?.bladesTop30),
+    ratchets: buildCanonicalCompatIndex(db.ratchets, db.__v18?.ratchets),
+    bits: buildCanonicalCompatIndex(db.bits, db.__v18?.bits),
     cxLocks: buildPartIndex(db.cx?.lockChips),
     cxMains: buildPartIndex(db.cx?.mainBlades),
     cxMetals: buildPartIndex(db.cx?.metalBlades),
@@ -1299,7 +1320,7 @@ function isSuggestionLegal(blade, ratchet, bit) {
 
 function analysisScoreValue(analysis, target) {
   const scores = analysis?.scores || {};
-  const scoreTarget = target === "specializedAttack" ? "attack" : target;
+  const scoreTarget = target.includes("specialist") ? "attack" : target;
   const base = {
     attack: (scores.attack || 0) * 1.45 + (scores.control || 0) * 0.7 + (scores.burstSafety || 0) * 0.35,
     stamina: (scores.stamina || 0) * 1.45 + (scores.burstSafety || 0) * 0.7 + (scores.control || 0) * 0.45,
@@ -1310,13 +1331,26 @@ function analysisScoreValue(analysis, target) {
   return Math.round((base + (scores.metaConfidence || 0) * 0.25) * 10) / 10;
 }
 
-function makeConfigSuggestions(config, label) {
+function makeConfigSuggestions(config, label, enabledModes = []) {
+  const gate = inventoryCandidateGate({
+    blade: config.parts.blade || null,
+    ratchet: config.parts.ratchet || null,
+    bit: config.parts.bit || null,
+    databaseOrPolicy: database,
+    enabledModes
+  });
+  if (!gate.allowed) return [];
+
   const analysis = analyzeCombo(toEngineInput(config), database, { debug: false });
   const role = classifyBuild(config, analysis);
-  const targets = recommendationTargetsForBit(config.parts.bit);
+  const target = gate.mode !== "generic"
+    ? gate.mode
+    : recommendationTargetFromRole(role, config.parts.bit);
+  if (!target) return [];
 
-  return targets.map(target => ({
+  return [{
     target,
+    actualTarget: target,
     label,
     role,
     analysis,
@@ -1327,10 +1361,10 @@ function makeConfigSuggestions(config, label) {
     warnings: buildWarnings(config, analysis, analysis.warnings || []).slice(0, 2),
     recommendations: buildRecommendations(config, analysis).slice(0, 2),
     deckRole: buildDeckRole(config, role, analysis)
-  }));
+  }];
 }
 
-function buildStandardSuggestions(owned) {
+function buildStandardSuggestions(owned, enabledModes = []) {
   const blades = partsFromBucket(owned.blades, "blades");
   const ratchets = partsFromBucket(owned.ratchets, "ratchets");
   const bits = partsFromBucket(owned.bits, "bits");
@@ -1348,7 +1382,7 @@ function buildStandardSuggestions(owned) {
           ratchetInput: ratchet ? codeOf(ratchet) : "-"
         };
         const label = [partSentenceName(blade), ratchet ? partSentenceName(ratchet) : "無固鎖", partSentenceName(bit)].filter(Boolean).join(" + ");
-        suggestions.push(...makeConfigSuggestions(config, label));
+        suggestions.push(...makeConfigSuggestions(config, label, enabledModes));
       });
     });
   });
@@ -1360,7 +1394,7 @@ function partIdentity(part) {
   return canonicalPartIdentity(part);
 }
 
-function buildCxInventorySuggestions(owned, inventoryPart) {
+function buildCxInventorySuggestions(owned, inventoryPart, enabledModes = []) {
   if (!inventoryPart.part || !["lock", "main", "metal", "over", "assist"].includes(inventoryPart.slot)) return [];
 
   return owned.cxBaseBuilds.flatMap(baseConfig => {
@@ -1387,11 +1421,11 @@ function buildCxInventorySuggestions(owned, inventoryPart) {
       .map(part => partSentenceName(part))
       .filter(Boolean)
       .join(" + ");
-    return makeConfigSuggestions(config, label);
+    return makeConfigSuggestions(config, label, enabledModes);
   });
 }
 
-function buildInventorySpecificSuggestions(owned, standardSuggestions) {
+function buildInventorySpecificSuggestions(owned, standardSuggestions, enabledModes = []) {
   const suggestions = [];
   const seen = new Set();
 
@@ -1403,7 +1437,7 @@ function buildInventorySpecificSuggestions(owned, standardSuggestions) {
     if (["blade", "ratchet", "bit"].includes(inventoryPart.slot)) {
       candidates = standardSuggestions.filter(item => partIdentity(item.parts?.[inventoryPart.slot]) === wanted);
     } else {
-      candidates = buildCxInventorySuggestions(owned, inventoryPart);
+      candidates = buildCxInventorySuggestions(owned, inventoryPart, enabledModes);
     }
 
     candidates.forEach(candidate => {
@@ -1456,7 +1490,7 @@ function renderStockSuggestions(items, owned) {
   if (!items.length) {
     result.style.display = "block";
     result.innerHTML = `
-      <div class="status-bad">目前資料不足，找不到可分析的上蓋、固鎖與軸心。請先在工具頁新增持有零件或陀螺資料。</div>
+      <div class="status-bad">目前庫存沒有同時符合角色、結構與硬性排除規則的合適配置；系統不會使用特化零件或不相容零件強行補滿推薦。</div>
     `;
     return;
   }
@@ -1469,16 +1503,39 @@ function renderStockSuggestions(items, owned) {
   const unresolvedNote = unresolved.length
     ? `<div class="status-warn">尚無法辨識：${escapeHtml(unresolved.map(item => `${item.declaredType} ${item.name}`).join("、"))}，暫時無法產生分析。</div>`
     : "";
+  const targetLabels = {
+    attack: "攻擊",
+    stamina: "持久",
+    defense: "防守",
+    balance: "平衡"
+  };
+  const selectedTargets = new Set(items.map(item => item.target));
+  const missingTargets = Object.entries(targetLabels)
+    .filter(([target]) => !selectedTargets.has(target))
+    .map(([, label]) => label);
+  const missingRoleNote = missingTargets.length
+    ? `<div class="analysis-note">目前庫存沒有合適的${escapeHtml(missingTargets.join("、"))}配置，因此不顯示對應推薦卡。</div>`
+    : "";
   result.style.display = "block";
   result.innerHTML = `
     <div class="analysis-note">${escapeHtml(summary)}</div>
     ${correctedTypes}
     ${unresolvedNote}
+    ${missingRoleNote}
     <div class="section-title">整體高分推薦</div>
     <div class="suggestion-grid">
       ${renderSuggestionCards(items)}
     </div>
   `;
+}
+
+function selectedInventoryRecommendationModes() {
+  return [
+    ["enableOneHitSpecialist", "one_hit_specialist"],
+    ["enableLowHeightSpecialist", "low_height_attack_specialist"]
+  ]
+    .filter(([id]) => document.getElementById(id)?.checked)
+    .map(([, mode]) => mode);
 }
 
 async function renderStockSuggestionsFromCloud() {
@@ -1504,8 +1561,9 @@ async function renderStockSuggestionsFromCloud() {
     }
 
     const owned = readOwnedPartsFromSavedData(snap.data());
-    const standardSuggestions = buildStandardSuggestions(owned);
-    const inventorySuggestions = buildInventorySpecificSuggestions(owned, standardSuggestions);
+    const enabledModes = selectedInventoryRecommendationModes();
+    const standardSuggestions = buildStandardSuggestions(owned, enabledModes);
+    const inventorySuggestions = buildInventorySpecificSuggestions(owned, standardSuggestions, enabledModes);
     const suggestions = pickTopSuggestions([...standardSuggestions, ...inventorySuggestions]);
     renderStockSuggestions(suggestions, owned);
   } catch (error) {

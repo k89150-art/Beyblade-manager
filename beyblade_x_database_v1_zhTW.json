@@ -21,10 +21,11 @@
       "2026-08-05 修復網站實際讀取的 __v18 相容層：同步暴龍霸擊索引、移除重複上蓋與重排全庫推薦陣列。",
       "2026-08-05 修正庫存推薦入口：暴龍霸擊納入候選正規化，I 軸只保留為一擊特化，不得壓過較高獨立 Tier，並移除推薦清單重複編號與 contextual override 文字。",
       "2026-08-09 Meta Watch：新增 WBO 兩週 ranked 趨勢、天蠍長矛與 Glory Valkyrie 近期變化、1-50 情境集中限制，以及 Wheel 跨來源使用占比確認；未將排名、前段案例或來源占比冒充逐場勝率。",
-      "2026-08-16 Meta Watch：補入 2026 年 7 月 WBO Ranked 月榜（81 場／延べ 2,463 人）；確認飛龍颶風 9-60 K 收斂、蒼龍突擊月度下滑與 Narrow 跨賽事竄升。月榜加權分數、前段出現與奪冠案例均不視為逐場勝率。"
+      "2026-08-16 Meta Watch：補入 2026 年 7 月 WBO Ranked 月榜（81 場／延べ 2,463 人）；確認飛龍颶風 9-60 K 收斂、蒼龍突擊月度下滑與 Narrow 跨賽事竄升。月榜加權分數、前段出現與奪冠案例均不視為逐場勝率。",
+      "2026-08-16 推薦器硬閘修正：暴龍霸擊的 I 與 1-50 自泛用候選、一般 routes 及 fallback 輸入移除；只有使用者明確選擇一擊／低身位特化模式才可出現。相同完整配置不得跨角色重複顯示。"
     ],
     "updated": "2026-08-16",
-    "updatePackage": "2026.08.16-meta-watch",
+    "updatePackage": "2026.08.16-generic-recommender-hard-gates",
     "appliedUpdates": [
       "2026.07.11-delta1",
       "2026.07.15-g-bit",
@@ -41,7 +42,8 @@
       "2026.08.05-schema-layer-sync-fix",
       "2026.08.05-inventory-recommendation-order-fix",
       "2026.08.09-meta-watch",
-      "2026.08.16-meta-watch"
+      "2026.08.16-meta-watch",
+      "2026.08.16-generic-recommender-hard-gates"
     ]
   },
   "enums": {
@@ -1834,8 +1836,7 @@
         "GF",
         "P",
         "K",
-        "C",
-        "I"
+        "C"
       ],
       "recommendedRatchets": [
         "1-60",
@@ -1845,8 +1846,7 @@
         "1-70",
         "7-70",
         "4-50",
-        "5-60",
-        "1-50"
+        "5-60"
       ],
       "weight_g": null,
       "diameter_mm": null,
@@ -1896,16 +1896,6 @@
           ],
           "role": "官方大型賽案例的留場控制",
           "evidenceClass": "official_event_case"
-        },
-        {
-          "ratchets": [
-            "1-50"
-          ],
-          "bits": [
-            "R"
-          ],
-          "role": "近期低身位爆發變體",
-          "evidenceClass": "emerging"
         },
         {
           "ratchets": [
@@ -2008,13 +1998,6 @@
             "part": "C",
             "independentTier": "B",
             "stockRelationshipBonus": 0
-          },
-          {
-            "part": "I",
-            "independentTier": "A- specialized",
-            "stockRelationshipBonus": 0,
-            "specialization": "one_hit_only",
-            "genericPrimaryEligible": false
           }
         ],
         "recommendedRatchets": [
@@ -2057,12 +2040,6 @@
             "part": "5-60",
             "independentTier": "A- to A",
             "stockRelationshipBonus": 0
-          },
-          {
-            "part": "1-50",
-            "independentTier": "A+",
-            "stockRelationshipBonus": 0,
-            "roleGate": "low_profile_attack_specialist_not_generic_default"
           }
         ]
       },
@@ -2082,7 +2059,55 @@
         "TYRANNO_BEAT",
         "Tyranno Beat",
         "暴龍霸擊"
-      ]
+      ],
+      "specializedRoutes": [
+        {
+          "ratchets": [
+            "1-50"
+          ],
+          "bits": [
+            "R"
+          ],
+          "role": "低身位攻擊特化",
+          "evidenceClass": "emerging",
+          "userOptInRequired": true,
+          "excludeFromInventoryAutoRecommendations": true,
+          "allowedRecommendationModes": [
+            "low_height_attack_specialist"
+          ]
+        },
+        {
+          "ratchets": [
+            "5-60"
+          ],
+          "bits": [
+            "I"
+          ],
+          "role": "一擊爆發特化",
+          "evidenceClass": "established_secondary",
+          "userOptInRequired": true,
+          "excludeFromInventoryAutoRecommendations": true,
+          "allowedRecommendationModes": [
+            "one_hit_specialist"
+          ]
+        }
+      ],
+      "genericRecommendationHardExclusions": {
+        "bits": [
+          "I"
+        ],
+        "ratchets": [
+          "1-50"
+        ],
+        "appliesToModes": [
+          "attack",
+          "stamina",
+          "defense",
+          "balance",
+          "overall"
+        ],
+        "reason": "不得因庫存不足、分數加成或 fallback 自動補入；只允許使用者主動開啟對應特化模式。"
+      }
     },
     {
       "id": "時鐘幻象",
@@ -17375,7 +17400,6 @@
       "legacyRecommendedArrays": "為網站相容保留；陣列順序必須使用競技優先度，不得使用商品原裝順序。",
       "enforcementLevel": "canonical_and_all_compatibility_layers",
       "recommendedArraysAreRanked": false,
-      "primaryRecommendationRequiresExplicitContextualPriority": true,
       "coveredPartGroups": {
         "blade": 75,
         "ratchet": 35,
@@ -17393,7 +17417,8 @@
         "top-level",
         "__v18"
       ],
-      "contextualEvidenceMayOverrideIndependentTier": false
+      "contextualEvidenceMayOverrideIndependentTier": false,
+      "primaryRecommendationRule": "hard_compatibility_gate_then_independent_tier"
     },
     "positionWeights": {
       "bladeOrCxBlade": 0.45,
@@ -17546,7 +17571,11 @@
         "I": {
           "label": "一擊特化",
           "mayBeGeneralPrimary": false,
-          "neverDisplaceHigherIndependentTier": true
+          "neverDisplaceHigherIndependentTier": true,
+          "autoRecommendationEligible": false,
+          "requiresExplicitUserMode": "one_hit_specialist",
+          "genericRecommendationScore": null,
+          "excludeWhenModeUnspecified": true
         }
       },
       "requiredCanonicalCandidates": [
@@ -17574,7 +17603,45 @@
           ],
           "requiresBladeCompatibility": true,
           "evidenceConcentration": "Aero Pegasus and selected low-height attackers",
-          "stockRelationshipWeight": 0
+          "stockRelationshipWeight": 0,
+          "autoFallbackEligible": false,
+          "requiresExplicitUserMode": "low_height_attack_specialist",
+          "genericRecommendationScore": null,
+          "excludeWhenModeUnspecified": true
+        }
+      },
+      "fallbackPolicy": {
+        "whenNoCompatibleOwnedComponent": "omit_recommendation_card",
+        "mayUseDisallowedOrSpecializedComponent": false,
+        "mayReuseSingleOwnedRatchetAcrossAllRoles": false,
+        "mayRelabelAttackComboAsDefenseStaminaOrBalance": false
+      },
+      "comboDeduplication": {
+        "enabled": true,
+        "key": [
+          "canonicalBladeId",
+          "ratchetId",
+          "bitId"
+        ],
+        "allowSameComboAcrossRoles": false,
+        "collisionResolution": "keep_highest_score_once"
+      },
+      "roleConsistency": {
+        "required": true,
+        "mismatchAction": "reject_candidate",
+        "attackComboMayFillDefense": false,
+        "attackComboMayFillStamina": false,
+        "attackComboMayFillBalance": false
+      },
+      "hardExcludedGenericComponentsByBlade": {
+        "TYRANNO_BEAT": {
+          "bits": [
+            "I"
+          ],
+          "ratchets": [
+            "1-50"
+          ],
+          "userOptInRequired": true
         }
       }
     }
@@ -17590,7 +17657,7 @@
       "updated_at": "2026-07-30",
       "research_update": "2026.07.30-research-integration",
       "updated": "2026-08-16",
-      "sourcePackage": "2026.08.16-meta-watch",
+      "sourcePackage": "2026.08.16-generic-recommender-hard-gates",
       "canonicalSource": "top-level collections",
       "runtimeSource": false
     },
@@ -19570,8 +19637,7 @@
           "GF",
           "P",
           "K",
-          "C",
-          "I"
+          "C"
         ],
         "recommendedRatchets": [
           "1-60",
@@ -19581,8 +19647,7 @@
           "1-70",
           "7-70",
           "4-50",
-          "5-60",
-          "1-50"
+          "5-60"
         ],
         "winRoutes": [
           "重量撞擊",
@@ -19662,13 +19727,6 @@
               "part": "C",
               "independentTier": "B",
               "stockRelationshipBonus": 0
-            },
-            {
-              "part": "I",
-              "independentTier": "A- specialized",
-              "stockRelationshipBonus": 0,
-              "specialization": "one_hit_only",
-              "genericPrimaryEligible": false
             }
           ],
           "recommendedRatchets": [
@@ -19711,12 +19769,6 @@
               "part": "5-60",
               "independentTier": "A- to A",
               "stockRelationshipBonus": 0
-            },
-            {
-              "part": "1-50",
-              "independentTier": "A+",
-              "stockRelationshipBonus": 0,
-              "roleGate": "low_profile_attack_specialist_not_generic_default"
             }
           ]
         },
@@ -19778,16 +19830,6 @@
             "ratchets": [
               "3-60"
             ]
-          },
-          {
-            "bits": [
-              "I"
-            ],
-            "role": "一擊爆發",
-            "evidenceClass": "established_secondary",
-            "ratchets": [
-              "5-60"
-            ]
           }
         ],
         "avoidConflictForBits": [
@@ -19804,6 +19846,54 @@
           "Tyranno Beat",
           "暴龍霸擊"
         ],
+        "specializedRoutes": [
+          {
+            "ratchets": [
+              "1-50"
+            ],
+            "bits": [
+              "R"
+            ],
+            "role": "低身位攻擊特化",
+            "evidenceClass": "emerging",
+            "userOptInRequired": true,
+            "excludeFromInventoryAutoRecommendations": true,
+            "allowedRecommendationModes": [
+              "low_height_attack_specialist"
+            ]
+          },
+          {
+            "ratchets": [
+              "5-60"
+            ],
+            "bits": [
+              "I"
+            ],
+            "role": "一擊爆發特化",
+            "evidenceClass": "established_secondary",
+            "userOptInRequired": true,
+            "excludeFromInventoryAutoRecommendations": true,
+            "allowedRecommendationModes": [
+              "one_hit_specialist"
+            ]
+          }
+        ],
+        "genericRecommendationHardExclusions": {
+          "bits": [
+            "I"
+          ],
+          "ratchets": [
+            "1-50"
+          ],
+          "appliesToModes": [
+            "attack",
+            "stamina",
+            "defense",
+            "balance",
+            "overall"
+          ],
+          "reason": "不得因庫存不足、分數加成或 fallback 自動補入；只允許使用者主動開啟對應特化模式。"
+        },
         "stockDataIsMetadataOnly": true,
         "evidenceClass": "established_secondary"
       },
@@ -32831,12 +32921,15 @@
       ],
       "legacyArrayPresentation": "independent_tier_ordered_candidates",
       "hidePrimaryBadgeWithoutExplicitPriority": true,
-      "neverUseFirstArrayItemAsPrimary": false,
+      "neverUseFirstArrayItemAsPrimary": true,
       "requireVisibleEnabledSearchableForBladePicker": true,
       "contextualEvidenceMayOverrideIndependentTier": false,
       "renderListOrdinalOnce": true,
       "ordinalSource": "ui_list_only",
-      "candidateLabelMustNotIncludeOrdinal": true
+      "candidateLabelMustNotIncludeOrdinal": true,
+      "primarySelectionRule": "hard_compatibility_gate_then_independent_tier",
+      "hideSpecializedCandidatesWithoutExplicitMode": true,
+      "deduplicateSameComboAcrossRoleCards": true
     },
     "blade": {
       "primaryFormat": "{displayNameZh}",
@@ -33869,6 +33962,24 @@
         "canonical 上蓋層合併 18 組同 ID 舊／新紀錄；保留新紀錄的推薦排序，舊紀錄僅補缺欄位。"
       ],
       "canonicalDuplicateBladeIdsRemoved": 18
+    },
+    {
+      "id": "2026.08.16-generic-recommender-hard-gates",
+      "date": "2026-08-16",
+      "scope": [
+        "inventory recommendation hard eligibility",
+        "Tyranno Beat generic and specialized routes",
+        "role consistency",
+        "combo deduplication",
+        "canonical and __v18 synchronization"
+      ],
+      "changes": [
+        "暴龍霸擊泛用推薦陣列與一般 routes 完全移除 I 軸及 1-50。",
+        "I 與 1-50 移至 specializedRoutes，只有使用者明確啟用對應特化模式才可出現。",
+        "庫存缺少相容零件時改為不產生該推薦卡，不得用唯一可用固鎖或特化軸心補滿所有角色。",
+        "相同 blade＋ratchet＋bit 只能顯示一次，禁止同一攻擊配置重複標成持久、防守與平衡。",
+        "canonical 與 __v18 的暴龍霸擊候選、routes、特化資料及硬排除條件已同步。"
+      ]
     }
   ],
   "metaSnapshots": [

@@ -17,6 +17,7 @@ export function partIdentityCandidates(part = {}) {
     part.name,
     part.name_en,
     ...(Array.isArray(part.aliases) ? part.aliases : []),
+    ...(Array.isArray(part.inventoryIdentityKeys) ? part.inventoryIdentityKeys : []),
     ...(Array.isArray(part.legacyIds) ? part.legacyIds : [])
   ]
     .map(normalizeInventoryIdentity)
@@ -94,9 +95,22 @@ function recencyScore(part) {
   return values.length ? Math.max(...values) : 0;
 }
 
+function generalityScore(part) {
+  if (!part) return 0;
+  const text = [
+    independentTierLabel(part),
+    part?.role,
+    ...(Array.isArray(part?.roleTags) ? part.roleTags : [])
+  ].join(" ").toLowerCase();
+  if (/specialized|特化|一擊|低身位|奇襲/.test(text)) return 0;
+  if (/泛用|平衡|控制|穩定/.test(text)) return 3;
+  return 2;
+}
+
 export function comparePartsByIndependentRank(left, right) {
   return independentTierScore(right) - independentTierScore(left)
     || confidenceScore(right) - confidenceScore(left)
+    || generalityScore(right) - generalityScore(left)
     || recencyScore(right) - recencyScore(left)
     || canonicalPartIdentity(left).localeCompare(canonicalPartIdentity(right));
 }
@@ -124,7 +138,7 @@ export function isSpecializedPart(part) {
 }
 
 export function recommendationTargetsForBit(bit) {
-  if (isSpecializedPart(bit)) return ["specializedAttack"];
+  if (isSpecializedPart(bit)) return [];
   const tags = new Set(bit?.roleTags || []);
   const role = String(bit?.role || "");
   const targets = [];
@@ -133,6 +147,130 @@ export function recommendationTargetsForBit(bit) {
   if (tags.has("防禦") || tags.has("anti-attack") || /防守|防禦|反打/.test(role)) targets.push("defense");
   targets.push("balance");
   return [...new Set(targets)];
+}
+
+function listContainsPart(values, part) {
+  const wanted = new Set(partIdentityCandidates(part));
+  return (Array.isArray(values) ? values : [])
+    .map(normalizeInventoryIdentity)
+    .some(value => wanted.has(value));
+}
+
+function routeContainsPart(route, field, part) {
+  if (!part) return !(Array.isArray(route?.[field]) && route[field].length);
+  return listContainsPart(route?.[field], part);
+}
+
+function matchingSpecializedRoute(blade, ratchet, bit, enabledModes) {
+  return (Array.isArray(blade?.specializedRoutes) ? blade.specializedRoutes : []).find(route => {
+    const modes = Array.isArray(route?.allowedRecommendationModes) ? route.allowedRecommendationModes : [];
+    return modes.some(mode => enabledModes.has(mode))
+      && routeContainsPart(route, "ratchets", ratchet)
+      && routeContainsPart(route, "bits", bit);
+  }) || null;
+}
+
+function policyFor(databaseOrPolicy) {
+  return databaseOrPolicy?.analysisRules?.inventoryRecommendationPolicy
+    || databaseOrPolicy?.inventoryRecommendationPolicy
+    || databaseOrPolicy
+    || {};
+}
+
+function restrictedModeForComponent(policy, ratchet, bit) {
+  const bitCode = String(bit?.code || bit?.id || "");
+  const ratchetCode = String(ratchet?.code || ratchet?.id || "");
+  return policy?.specialisedBits?.[bitCode]?.requiresExplicitUserMode
+    || policy?.roleRestrictedRatchets?.[ratchetCode]?.requiresExplicitUserMode
+    || "";
+}
+
+function bladeHardExclusions(policy, blade) {
+  const rules = policy?.hardExcludedGenericComponentsByBlade || {};
+  return Object.entries(rules).find(([identity]) => (
+    partIdentityCandidates(blade).includes(normalizeInventoryIdentity(identity))
+  ))?.[1] || null;
+}
+
+function genericHardExcludes(blade, ratchet, bit, policy) {
+  const bladeRule = bladeHardExclusions(policy, blade);
+  const bladeOwnRule = blade?.genericRecommendationHardExclusions || {};
+  return listContainsPart(bladeRule?.bits, bit)
+    || listContainsPart(bladeRule?.ratchets, ratchet)
+    || listContainsPart(bladeOwnRule?.bits, bit)
+    || listContainsPart(bladeOwnRule?.ratchets, ratchet);
+}
+
+function componentIsBladeCompatible(blade, ratchet, bit) {
+  const genericRoutes = Array.isArray(blade?.routes) ? blade.routes : [];
+  const exactRoute = genericRoutes.some(route => (
+    routeContainsPart(route, "ratchets", ratchet)
+    && routeContainsPart(route, "bits", bit)
+  ));
+  if (exactRoute) return true;
+
+  const bitCandidates = blade?.recommendedBits;
+  const ratchetCandidates = blade?.recommendedRatchets;
+  const bitCompatible = Array.isArray(bitCandidates) && bitCandidates.length
+    ? listContainsPart(bitCandidates, bit)
+    : genericRoutes.some(route => routeContainsPart(route, "bits", bit));
+  const ratchetCompatible = ratchet
+    ? (Array.isArray(ratchetCandidates) && ratchetCandidates.length
+      ? listContainsPart(ratchetCandidates, ratchet)
+      : genericRoutes.some(route => routeContainsPart(route, "ratchets", ratchet)))
+    : true;
+  return Boolean(bitCompatible && ratchetCompatible);
+}
+
+export function inventoryCandidateGate({
+  blade,
+  ratchet,
+  bit,
+  databaseOrPolicy,
+  enabledModes = []
+} = {}) {
+  const policy = policyFor(databaseOrPolicy);
+  const modes = new Set(Array.isArray(enabledModes) ? enabledModes : [...enabledModes]);
+  if (!isInventoryEligiblePart(bit) || (blade && !isInventoryEligiblePart(blade))) {
+    return { allowed: false, reason: "ineligible_part" };
+  }
+  if (ratchet && !isInventoryEligiblePart(ratchet)) {
+    return { allowed: false, reason: "ineligible_ratchet" };
+  }
+
+  const restrictedMode = restrictedModeForComponent(policy, ratchet, bit);
+  const specializedRoute = matchingSpecializedRoute(blade, ratchet, bit, modes);
+  if (restrictedMode) {
+    if (!modes.has(restrictedMode)) {
+      return { allowed: false, reason: "specialized_mode_not_enabled", requiredMode: restrictedMode };
+    }
+    if (!specializedRoute) {
+      return { allowed: false, reason: "specialized_route_mismatch", requiredMode: restrictedMode };
+    }
+    return { allowed: true, mode: restrictedMode, route: specializedRoute };
+  }
+
+  if (genericHardExcludes(blade, ratchet, bit, policy)) {
+    return { allowed: false, reason: "generic_hard_exclusion" };
+  }
+  if (blade && !componentIsBladeCompatible(blade, ratchet, bit)) {
+    return { allowed: false, reason: "role_or_structure_incompatible" };
+  }
+  return { allowed: true, mode: "generic" };
+}
+
+export function recommendationTargetFromRole(role, bit) {
+  const roleText = String(role || "");
+  if (/攻擊|爆發|衝刺/.test(roleText)) return "attack";
+  if (/持久|續航|反旋/.test(roleText)) return "stamina";
+  if (/防守|防禦|反打|anti-attack/i.test(roleText)) return "defense";
+  if (/平衡|控制/.test(roleText)) return "balance";
+  const bitText = `${(bit?.roleTags || []).join(" ")} ${String(bit?.role || "")}`;
+  if (/攻擊|爆發|衝刺/.test(bitText)) return "attack";
+  if (/持久|續航|反旋/.test(bitText)) return "stamina";
+  if (/防守|防禦|反打|anti-attack/i.test(bitText)) return "defense";
+  if (/平衡|控制/.test(bitText)) return "balance";
+  return "";
 }
 
 function suggestionPartScore(suggestion, slot) {
@@ -166,10 +304,26 @@ export function suggestionDiversityIdentity(suggestion) {
   return [suggestion?.target, blade || cx, bit].join(":");
 }
 
+export function normalizedComboIdentity(suggestion) {
+  const parts = suggestion?.parts || {};
+  const cxParts = ["lock", "main", "metal", "over", "assist"]
+    .map(slot => canonicalPartIdentity(parts[slot]));
+  const hasCx = cxParts.some(Boolean);
+  const identities = hasCx
+    ? [...cxParts, canonicalPartIdentity(parts.ratchet), canonicalPartIdentity(parts.bit)]
+    : [canonicalPartIdentity(parts.blade), canonicalPartIdentity(parts.ratchet), canonicalPartIdentity(parts.bit)];
+  return identities.map(identity => identity || "-").join("+");
+}
+
+export function isRoleConsistentSuggestion(suggestion) {
+  return !suggestion?.actualTarget || suggestion.actualTarget === suggestion.target;
+}
+
 export function recommendationDisplayLabel(target) {
   return {
     attack: "攻擊推薦",
-    specializedAttack: "一擊特化",
+    one_hit_specialist: "一擊特化",
+    low_height_attack_specialist: "低身位攻擊特化",
     stamina: "持久推薦",
     defense: "防守推薦",
     balance: "平衡推薦"
@@ -184,20 +338,24 @@ export function recommendationCandidateText(candidate) {
 
 export function selectTopInventorySuggestions(suggestions, limits = {}) {
   const sourceSuggestions = Array.isArray(suggestions)
-    ? suggestions.filter(item => item && typeof item === "object")
+    ? suggestions.filter(item => item && typeof item === "object" && isRoleConsistentSuggestion(item))
     : [];
-  const targets = ["attack", "specializedAttack", "stamina", "defense", "balance"];
+  const globallyDeduped = [];
+  const comboIndexes = new Map();
+  [...sourceSuggestions].sort(compareSuggestionsByIndependentParts).forEach(item => {
+    const key = normalizedComboIdentity(item);
+    if (!key || comboIndexes.has(key)) return;
+    comboIndexes.set(key, globallyDeduped.length);
+    globallyDeduped.push(item);
+  });
+  const targets = ["attack", "stamina", "defense", "balance", "one_hit_specialist", "low_height_attack_specialist"];
   return targets.flatMap(target => {
-    const seenConfigurations = new Set();
     const seenDiversity = new Set();
-    const limit = limits[target] ?? (target === "specializedAttack" ? 1 : 2);
-    return sourceSuggestions
+    const limit = limits[target] ?? (target.includes("specialist") ? 1 : 2);
+    return globallyDeduped
       .filter(item => item.target === target)
       .sort(compareSuggestionsByIndependentParts)
       .filter(item => {
-        const configurationKey = normalizeInventoryIdentity(item.label);
-        if (seenConfigurations.has(configurationKey)) return false;
-        seenConfigurations.add(configurationKey);
         const diversityKey = suggestionDiversityIdentity(item);
         if (seenDiversity.has(diversityKey)) return false;
         seenDiversity.add(diversityKey);
@@ -207,7 +365,7 @@ export function selectTopInventorySuggestions(suggestions, limits = {}) {
       .map(item => ({
         ...item,
         targetLabel: recommendationDisplayLabel(target),
-        specialized: isSpecializedPart(item.parts?.bit)
+        specialized: target.includes("specialist")
       }));
   });
 }

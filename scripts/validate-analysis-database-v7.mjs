@@ -4,6 +4,7 @@ import { analyzeCombo as analyzeStandardCombo, getBlade } from "../beyblade_x_an
 import { analyzeCombo as analyzeLegacyCombo } from "../beyblade_x_analysis_engine_v1_zhTW.js";
 import {
   findPartByIdentity,
+  inventoryCandidateGate,
   recommendationTargetsForBit,
   sortAndDedupeInventoryParts
 } from "../beyblade_x_inventory_recommendation_v1.js";
@@ -12,10 +13,10 @@ const database = JSON.parse(fs.readFileSync(new URL("../beyblade_x_database_v1_z
 const analysisSource = fs.readFileSync(new URL("../analysis.js", import.meta.url), "utf8");
 const analysisHtml = fs.readFileSync(new URL("../analysis.html", import.meta.url), "utf8");
 
-assert.equal(database.metadata.updatePackage, "2026.08.16-meta-watch");
-assert.match(analysisSource, /beyblade_x_database_v1_zhTW\.json\?v=20260816-meta-watch1/);
+assert.equal(database.metadata.updatePackage, "2026.08.16-generic-recommender-hard-gates");
+assert.match(analysisSource, /beyblade_x_database_v1_zhTW\.json\?v=20260816-hard-gates-v10/);
 assert.match(analysisHtml, /analysis_inventory_nullsafe_v2\.js/);
-assert.match(analysisHtml, /推薦程式版本：2026-08-06\.2/);
+assert.match(analysisHtml, /推薦程式版本：2026-08-16\.10/);
 assert.match(analysisHtml, /分析資料庫版本：2026-08-16/);
 assert.match(analysisSource, /beyblade_x_inventory_recommendation_nullsafe_v2\.js/);
 
@@ -30,7 +31,12 @@ const bits = sortAndDedupeInventoryParts(
   ["I", "GF", "R", "LR"].map(code => database.bits.find(part => part.code === code))
 );
 assert.deepEqual(bits.map(part => part.code), ["LR", "R", "GF", "I"]);
-assert.deepEqual(recommendationTargetsForBit(bits.at(-1)), ["specializedAttack"]);
+assert.deepEqual(recommendationTargetsForBit(bits.at(-1)), []);
+const ratchet150 = database.ratchets.find(part => part.code === "1-50");
+const ratchet560 = database.ratchets.find(part => part.code === "5-60");
+assert.equal(inventoryCandidateGate({ blade: tyranno, ratchet: ratchet150, bit: bits.at(-1), databaseOrPolicy: database }).allowed, false);
+assert.equal(inventoryCandidateGate({ blade: tyranno, ratchet: ratchet560, bit: bits.at(-1), databaseOrPolicy: database }).allowed, false);
+assert.equal(inventoryCandidateGate({ blade: tyranno, ratchet: ratchet560, bit: bits.at(-1), databaseOrPolicy: database, enabledModes: ["one_hit_specialist"] }).allowed, true);
 
 const standard = analyzeStandardCombo({ bladeIdOrName: "TYRANNO_BEAT", ratchetCode: "9-60", bitCode: "LR" }, database);
 assert.ok(standard.role);
@@ -69,6 +75,16 @@ assert.equal(narrow.monthlyMetaEvidence.actualMatchWinRate, null);
 const compatibilityNarrow = database.__v18.bits.find(item => item.code === "Nr");
 assert.equal(compatibilityNarrow.independentEvaluation.baseTier, narrow.independentEvaluation.baseTier);
 assert.deepEqual(compatibilityNarrow.monthlyMetaEvidence, narrow.monthlyMetaEvidence);
+
+const inventoryPolicy = database.analysisRules.inventoryRecommendationPolicy;
+assert.equal(inventoryPolicy.fallbackPolicy.whenNoCompatibleOwnedComponent, "omit_recommendation_card");
+assert.equal(inventoryPolicy.roleConsistency.mismatchAction, "reject_candidate");
+assert.equal(inventoryPolicy.comboDeduplication.allowSameComboAcrossRoles, false);
+assert.equal(inventoryPolicy.specialisedBits.I.autoRecommendationEligible, false);
+assert.equal(inventoryPolicy.roleRestrictedRatchets["1-50"].autoFallbackEligible, false);
+assert.deepEqual(inventoryPolicy.hardExcludedGenericComponentsByBlade.TYRANNO_BEAT.bits, ["I"]);
+assert.deepEqual(inventoryPolicy.hardExcludedGenericComponentsByBlade.TYRANNO_BEAT.ratchets, ["1-50"]);
+assert.equal(database.displayRules.recommendations.neverUseFirstArrayItemAsPrimary, true);
 
 console.log(JSON.stringify({
   package: database.metadata.updatePackage,

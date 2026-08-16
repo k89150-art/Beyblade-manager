@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   findPartByIdentity,
   independentTierLabel,
+  inventoryCandidateGate,
   partIdentityCandidates,
   recommendationCandidateText,
   recommendationTargetsForBit,
@@ -52,8 +53,9 @@ test("獨立 Tier 排序固定為 LR > R > GF > I", () => {
 });
 
 test("I 軸只產生一擊特化用途，不會成為泛用攻擊首推", () => {
-  assert.deepEqual(recommendationTargetsForBit(bits.I), ["specializedAttack"]);
+  assert.deepEqual(recommendationTargetsForBit(bits.I), []);
   assert.ok(recommendationTargetsForBit(bits.LR).includes("attack"));
+  assert.equal(inventoryCandidateGate({ blade: tyranno, ratchet: ratchet560, bit: bits.I, databaseOrPolicy: database }).allowed, false);
   const selected = selectTopInventorySuggestions([
     { target: "attack", label: "武士魂斬 + 7-60 + LR", value: 1, parts: { blade: samurai, ratchet: ratchet760, bit: bits.LR } },
     { target: "attack", label: "武士魂斬 + 7-60 + I", value: 999, parts: { blade: samurai, ratchet: ratchet760, bit: bits.I } }
@@ -61,11 +63,10 @@ test("I 軸只產生一擊特化用途，不會成為泛用攻擊首推", () => 
   assert.equal(selected[0].parts.bit.code, "LR");
 });
 
-test("武士魂斬的兩組 I 軸只保留一個多樣化特化候選", () => {
+test("I 軸只有明確的一擊特化模式可以顯示", () => {
   const selected = selectTopInventorySuggestions([
     { target: "attack", label: "武士魂斬 + 7-60 + LR", value: 10, parts: { blade: samurai, ratchet: ratchet760, bit: bits.LR } },
-    { target: "specializedAttack", label: "武士魂斬 + 7-60 + I", value: 20, parts: { blade: samurai, ratchet: ratchet760, bit: bits.I } },
-    { target: "specializedAttack", label: "武士魂斬 + 5-60 + I", value: 19, parts: { blade: samurai, ratchet: ratchet560, bit: bits.I } }
+    { target: "one_hit_specialist", label: "暴龍霸擊 + 5-60 + I", value: 19, actualTarget: "one_hit_specialist", parts: { blade: tyranno, ratchet: ratchet560, bit: bits.I } }
   ]);
   assert.equal(selected.filter(item => item.parts.bit.code === "I").length, 1);
   assert.equal(selected.find(item => item.parts.bit.code === "I")?.targetLabel, "一擊特化");
@@ -154,8 +155,10 @@ test("canonical 與 __v18 相容層的暴龍霸擊結果一致", () => {
   assert.deepEqual(compatibility.recommendedRatchets, tyranno.recommendedRatchets);
 });
 
-test("執行期不讀 __v18，且 contextual override 文字與邏輯已移除", () => {
+test("canonical 是執行期權威來源，__v18 只補識別鍵，且 contextual override 已移除", () => {
   assert.doesNotMatch(helperSource, /database\.__v18|const v18\s*=/);
+  assert.match(analysisSource, /buildCanonicalCompatIndex\(db\.blades, db\.__v18\?\.bladesTop30\)/);
+  assert.match(analysisSource, /const resolvedItem = canonicalItem \|\| compatibilityItem/);
   assert.doesNotMatch(analysisSource, /explicit contextual priority|candidate\.priority|independentPriority/);
   assert.doesNotMatch(JSON.stringify(database), /explicit contextual priority/);
 });
