@@ -12,7 +12,6 @@ body.site-shell-ready {
   transition: padding-left .2s ease;
 }
 
-body.site-shell-ready .analysis-page,
 body.site-shell-ready .admin-hero,
 body.site-shell-ready .view-hero {
   margin-top: 0;
@@ -238,7 +237,6 @@ body.is-admin .side-menu a[href="admin.html"] {
   }
 
   body.site-shell-ready .auth-card,
-  body.site-shell-ready .analysis-page,
   body.site-shell-ready .admin-hero,
   body.site-shell-ready .view-hero,
   body.site-shell-ready .hero-title {
@@ -305,7 +303,7 @@ body.is-admin .side-menu a[href="admin.html"] {
     min-height: calc(64px + env(safe-area-inset-bottom));
     padding: 6px 6px env(safe-area-inset-bottom);
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     border-top: 1px solid #2b3743;
     background: rgba(10,14,19,.97);
     backdrop-filter: blur(14px);

@@ -1,11 +1,11 @@
 {
   "meta": {
-    "name": "Beyblade X \u914d\u7f6e\u5206\u6790\u8cc7\u6599\u5eab",
+    "name": "Beyblade X／CX 零件與賽事來源資料",
     "version": "1.8_codex_bundle",
     "language": "zh-TW",
-    "encoding_note": "ASCII-safe JSON \u4f7f\u7528 ensure_ascii=true\uff0c\u907f\u514d Codex \u6216 Windows \u7de8\u8f2f\u5668\u4e82\u78bc\uff1b\u700f\u89bd\u5668\u89e3\u6790\u5f8c\u4ecd\u6703\u986f\u793a\u7e41\u9ad4\u4e2d\u6587\u3002",
+    "encoding_note": "ASCII-safe JSON 使用 ensure_ascii=true，避免 Codex 或 Windows 編輯器亂碼；瀏覽器解析後仍會顯示繁體中文。",
     "created_at": "2026-06-30T17:48:45",
-    "disclaimer": "\u73a9\u5bb6\u8cc7\u6599\u5eab\u3001WBO \u4e0a\u4f4d\u7d44\u5408\u3001BBX Weekly \u8da8\u52e2\u3001\u793e\u7fa4\u8207\u5be6\u6e2c\u908f\u8f2f\u6574\u7406\uff1bMeta \u4fe1\u5fc3\u4e0d\u662f\u5b98\u65b9\u52dd\u7387\u3002"
+    "schemaVersion": "reference-only-1"
   },
   "schema": {
     "normalCombo": [
@@ -27,3565 +27,652 @@
       "assistBlade",
       "ratchet",
       "bit"
-    ],
-    "scoreKeys": [
-      "attack",
-      "stamina",
-      "defense",
-      "balance",
-      "burstSafety",
-      "control",
-      "metaConfidence"
     ]
   },
   "bladesTop30": [
     {
-      "rank": 1,
       "name_en": "Shark Scale",
-      "name_zh": "\u9bab\u9bca\u72c2\u9c57",
-      "role": "\u4f4e\u8eab\u4f4d\u53ef\u63a7\u653b\u64ca / \u4e0b\u65b9\u653b\u64ca\u6838\u5fc3",
-      "recommendedBits": [
-        "LR",
-        "R",
-        "K",
-        "L"
-      ],
-      "recommendedRatchets": [
-        "1-70",
-        "1-60",
-        "3-60",
-        "4-50"
-      ],
-      "winRoutes": [
-        "\u64ca\u98db",
-        "\u6253\u56fa\u9396",
-        "Xtreme Finish"
-      ],
-      "risks": [
-        "\u7b2c\u4e00\u6ce2\u6c92\u6253\u5230\u6642\u5f8c\u6bb5\u5bb9\u6613\u8f38\u6301\u4e45"
-      ],
-      "confidence": "\u9ad8",
-      "tags": [
-        "meta_attack_core",
-        "low_height_attack",
-        "control_attack"
-      ]
+      "name_zh": "鮫鯊狂鱗"
     },
     {
-      "rank": 2,
       "name_en": "Wizard Rod",
-      "name_zh": "\u9b54\u5c0e\u795e\u6756",
-      "role": "\u6301\u4e45\u6838\u5fc3 / Meta \u57fa\u6e96",
-      "recommendedBits": [
-        "B",
-        "H",
-        "L",
-        "FB",
-        "O",
-        "DB"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "3-60",
-        "5-60",
-        "1-60",
-        "9-70"
-      ],
-      "winRoutes": [
-        "\u6301\u4e45\u52dd",
-        "\u6297\u653b\u64ca\u5f8c\u62d6\u672b\u6bb5"
-      ],
-      "risks": [
-        "\u7d14 B \u914d\u7f6e\u6015\u9ad8\u58d3\u653b\u64ca",
-        "\u5bb9\u6613\u88ab\u91dd\u5c0d"
-      ],
-      "confidence": "\u9ad8",
-      "tags": [
-        "meta_stamina_core",
-        "stamina_baseline",
-        "anti_attack_with_H"
-      ]
+      "name_zh": "魔導神杖"
     },
     {
-      "rank": 3,
       "name_en": "Aero Pegasus",
-      "name_zh": "\u7a7a\u529b\u5929\u99ac",
-      "role": "\u9ad8\u91cd\u91cf\u653b\u64ca\u6301\u4e45\u6df7\u5408 / \u53cd Meta \u653b\u64ca",
-      "recommendedBits": [
-        "L",
-        "R",
-        "P",
-        "H"
-      ],
-      "recommendedRatchets": [
-        "7-60",
-        "1-60",
-        "5-70",
-        "9-60"
-      ],
-      "winRoutes": [
-        "\u64ca\u98db",
-        "\u53cd\u6253",
-        "\u653b\u64ca\u5f8c\u62d6\u672b\u6bb5"
-      ],
-      "risks": [
-        "\u914d\u7f6e\u4e0d\u7576\u6703\u8017\u8010\u4e45\u6216\u4e3b\u52d5\u5f97\u5206\u4e0d\u8db3"
-      ],
-      "confidence": "\u9ad8",
-      "tags": [
-        "attack_stamina_hybrid",
-        "level_core"
-      ]
+      "name_zh": "空力天馬"
     },
     {
-      "rank": 4,
       "name_en": "Cobalt Dragoon",
-      "name_zh": "\u84bc\u7a79\u9f8d\u9a0e\u58eb",
-      "role": "\u5de6\u8ff4\u65cb\u672b\u6bb5 / \u53cd\u65cb\u6838\u5fc3",
-      "recommendedBits": [
-        "E",
-        "L",
-        "R",
-        "P"
-      ],
-      "recommendedRatchets": [
-        "5-60",
-        "9-60",
-        "3-60"
-      ],
-      "winRoutes": [
-        "\u53cd\u65cb\u672b\u6bb5",
-        "\u6301\u4e45\u62d6\u52dd",
-        "\u5076\u723e\u653b\u64ca\u5f97\u5206"
-      ],
-      "risks": [
-        "\u9047\u5c08\u9580 anti-spin \u6216\u9ad8\u6301\u4e45\u914d\u7f6e\u5403\u529b"
-      ],
-      "confidence": "\u9ad8",
-      "tags": [
-        "left_spin_elevate_core",
-        "spin_equalize"
-      ]
+      "name_zh": "蒼穹龍騎士"
     },
     {
-      "rank": 5,
       "name_en": "Meteor Dragoon",
-      "name_zh": "\u9695\u661f\u9f8d\u9a0e\u58eb",
-      "role": "\u5de6\u8ff4\u65cb\u653b\u64ca / \u53cd\u65cb\u653b\u64ca\u6df7\u5408",
-      "recommendedBits": [
-        "E",
-        "R",
-        "LR",
-        "L",
-        "Z"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "3-60",
-        "3-70"
-      ],
-      "winRoutes": [
-        "\u5de6\u8ff4\u65cb\u653b\u64ca",
-        "\u53cd\u65cb\u672b\u6bb5",
-        "\u64ca\u98db"
-      ],
-      "risks": [
-        "\u6bd4 Cobalt \u66f4\u9700\u8981\u767c\u5c04\u89d2\u5ea6\u8207 Bit \u76f8\u6027"
-      ],
-      "confidence": "\u4e2d\u9ad8",
-      "tags": [
-        "left_spin_attack",
-        "left_spin_hybrid"
-      ]
+      "name_zh": "隕星龍騎士"
     },
     {
-      "rank": 6,
       "name_en": "Wyvern Hover",
-      "name_zh": "\u98db\u9f8d\u76e4\u65cb",
-      "role": "\u9632\u5b88 / \u5e73\u8861 / anti-attack \u89c0\u5bdf\u6838\u5fc3",
-      "recommendedBits": [
-        "K",
-        "H",
-        "FB",
-        "LO",
-        "P"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "7-55"
-      ],
-      "winRoutes": [
-        "\u6297\u653b\u64ca",
-        "\u53cd\u6253",
-        "\u62d6\u6301\u4e45"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u64ca\u6bba\u80fd\u529b\u53ef\u80fd\u4e0d\u8db3"
-      ],
-      "confidence": "\u4e2d\u9ad8",
-      "tags": [
-        "defense_balance",
-        "anti_attack_observer"
-      ]
+      "name_zh": "飛龍盤旋"
     },
     {
-      "rank": 7,
       "name_en": "Knight Mail",
-      "name_zh": "\u9a0e\u58eb\u93a7\u7532",
-      "role": "anti-attack / \u9632\u5b88\u53cd\u6253\u6838\u5fc3",
-      "recommendedBits": [
-        "H",
-        "R",
-        "LR",
-        "LO",
-        "FB"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "1-60",
-        "7-55"
-      ],
-      "winRoutes": [
-        "\u6297\u653b\u64ca",
-        "\u53cd\u6253",
-        "\u7a69\u5b9a\u62d6\u6301\u4e45"
-      ],
-      "risks": [
-        "Bit \u592a\u4fdd\u5b88\u6642\u4e3b\u52d5\u5f97\u5206\u4e0d\u8db3"
-      ],
-      "confidence": "\u4e2d\u9ad8",
-      "tags": [
-        "anti_attack",
-        "defense_counter"
-      ]
+      "name_zh": "騎士鎧甲"
     },
     {
-      "rank": 8,
       "name_en": "Rage",
-      "name_zh": "\u72c2\u6012",
-      "role": "CX anti-attack / \u53cd\u653b\u91d1\u5c6c\u6230\u5203",
-      "recommendedBits": [
-        "H",
-        "P",
-        "L",
-        "WB"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "7-55"
-      ],
-      "winRoutes": [
-        "\u5438\u6536\u653b\u64ca\u5f8c\u53cd\u6253",
-        "\u6297\u653b\u64ca",
-        "\u5e73\u8861\u52dd"
-      ],
-      "risks": [
-        "\u7d14\u6301\u4e45\u4e0d\u4e00\u5b9a\u8d0f",
-        "\u7d14\u653b\u64ca\u7206\u767c\u4e0d\u5982 Blitz"
-      ],
-      "confidence": "\u4e2d\u9ad8",
-      "tags": [
-        "cx_anti_attack",
-        "flow_erase_core"
-      ]
+      "name_zh": "狂怒"
     },
     {
-      "rank": 9,
       "name_en": "Blast",
-      "name_zh": "\u7206\u64ca",
-      "role": "CX \u653b\u64ca\u5e73\u8861\u6838\u5fc3\u5019\u9078",
-      "recommendedBits": [
-        "R",
-        "K",
-        "T",
-        "L",
-        "H"
-      ],
-      "recommendedRatchets": [
-        "1-50",
-        "3-60",
-        "9-60"
-      ],
-      "winRoutes": [
-        "\u64ca\u98db",
-        "\u58d3\u5236",
-        "\u653b\u64ca\u5f8c\u62d6\u672b\u6bb5"
-      ],
-      "risks": [
-        "Heavy/Wheel \u8def\u7dda\u5dee\u7570\u5927\uff0c\u9700\u8981\u62c6\u4ef6\u5224\u65b7"
-      ],
-      "confidence": "\u4e2d\u9ad8",
-      "tags": [
-        "cx_attack_balance",
-        "heavy_or_wheel_core"
-      ]
+      "name_zh": "爆擊"
     },
     {
-      "rank": 10,
       "name_en": "Silver Wolf",
-      "name_zh": "\u971c\u8f1d\u9280\u72fc",
-      "role": "\u4f4e\u8eab\u4f4d\u6301\u4e45 / \u9632\u5b88\u6301\u4e45\u6838\u5fc3",
-      "recommendedBits": [
-        "LO",
-        "FB",
-        "H",
-        "B",
-        "O",
-        "UN"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "7-55",
-        "5-60",
-        "9-65"
-      ],
-      "winRoutes": [
-        "\u6301\u4e45\u52dd",
-        "\u9632\u5b88\u6301\u4e45",
-        "\u6297\u653b\u64ca\u5f8c\u62d6\u672b\u6bb5"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u5f97\u5206\u4e0d\u8db3\uff0c\u6015\u9ad8\u7206\u767c\u653b\u64ca\u6216\u53cd\u6301\u4e45"
-      ],
-      "confidence": "\u4e2d\u9ad8\uff5e\u9ad8",
-      "tags": [
-        "low_height_stamina",
-        "defense_stamina"
-      ]
+      "name_zh": "霜輝銀狼"
     },
     {
-      "rank": 11,
       "name_en": "Phoenix Wing",
-      "name_zh": "\u9cf3\u51f0\u98db\u7ffc",
-      "role": "\u7d93\u5178\u91cd\u91cf\u5e73\u8861\u653b\u64ca / \u53ef\u63a7\u653b\u64ca\u6838\u5fc3",
-      "recommendedBits": [
-        "R",
-        "LR",
-        "H",
-        "P",
-        "E"
-      ],
-      "recommendedRatchets": [
-        "3-60",
-        "1-60",
-        "9-60",
-        "5-60"
-      ],
-      "winRoutes": [
-        "\u64ca\u98db",
-        "\u58d3\u5236",
-        "\u53cd\u6253"
-      ],
-      "risks": [
-        "\u7d14\u653b\u64ca\u7b2c\u4e00\u6ce2\u5931\u624b\u5f8c\u6bb5\u6703\u88ab\u6301\u4e45\u8ffd\u56de"
-      ],
-      "confidence": "\u9ad8",
-      "tags": [
-        "classic_attack",
-        "heavy_balance_attack"
-      ]
+      "name_zh": "鳳凰飛翼"
     },
     {
-      "rank": 12,
       "name_en": "Blitz",
-      "name_zh": "\u9583\u64ca",
-      "role": "CX \u4e00\u64ca\u653b\u64ca / \u96c6\u4e2d\u6253\u9ede\u6838\u5fc3",
-      "recommendedBits": [
-        "I",
-        "R",
-        "LR",
-        "GF"
-      ],
-      "recommendedRatchets": [
-        "1-50",
-        "4-50",
-        "1-60",
-        "3-60"
-      ],
-      "winRoutes": [
-        "\u4e00\u64ca\u64ca\u98db",
-        "\u6253\u56fa\u9396",
-        "Xtreme Finish"
-      ],
-      "risks": [
-        "\u53cd\u4f5c\u7528\u9ad8\uff0c\u6c92\u6253\u4e2d\u6709\u6548\u63a5\u89f8\u6703\u5931\u901f"
-      ],
-      "confidence": "\u4e2d\u9ad8",
-      "tags": [
-        "cx_one_hit_attack",
-        "focused_contact"
-      ]
+      "name_zh": "閃擊"
     },
     {
-      "rank": 13,
       "name_en": "Tyranno Beat",
-      "name_zh": "\u66b4\u9f8d\u9738\u64ca",
-      "role": "\u91cd\u653b\u64ca / \u58d3\u5236\u578b\u653b\u64ca",
-      "recommendedBits": [
-        "R",
-        "LR",
-        "P",
-        "GF",
-        "H",
-        "I"
-      ],
-      "recommendedRatchets": [
-        "1-60",
-        "3-60",
-        "4-50",
-        "5-60"
-      ],
-      "winRoutes": [
-        "\u91cd\u91cf\u649e\u64ca",
-        "\u64ca\u98db",
-        "\u58d3\u5236"
-      ],
-      "risks": [
-        "\u66b4\u885d\u578b Bit \u5bb9\u6613\u81ea\u7206\uff0c\u6301\u4e45\u4e0d\u7b97\u4e3b\u529b"
-      ],
-      "confidence": "\u9ad8",
-      "tags": [
-        "heavy_attack",
-        "pressure_attack"
-      ]
+      "name_zh": "暴龍霸擊"
     },
     {
-      "rank": 14,
       "name_en": "Clock Mirage",
-      "name_zh": "\u6642\u9418\u5e7b\u8c61",
-      "role": "\u4f4e\u8eab\u4f4d\u6301\u4e45 / \u7a69\u5b9a\u6301\u4e45\u6838\u5fc3",
-      "recommendedBits": [
-        "LO",
-        "B",
-        "FB",
-        "H",
-        "O"
-      ],
-      "recommendedRatchets": [
-        "7-55",
-        "9-60",
-        "5-60",
-        "9-65"
-      ],
-      "winRoutes": [
-        "\u6301\u4e45\u52dd",
-        "\u4f4e\u8eab\u4f4d\u7a69\u5b9a",
-        "\u672b\u6bb5"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u64ca\u6bba\u80fd\u529b\u4e0d\u8db3\uff0c\u6015\u9ad8\u7206\u767c\u653b\u64ca"
-      ],
-      "confidence": "\u4e2d\u9ad8",
-      "tags": [
-        "low_height_stamina",
-        "stable_stamina"
-      ]
+      "name_zh": "時鐘幻象"
     },
     {
-      "rank": 15,
       "name_en": "Mummy Curse",
-      "name_zh": "\u53e4\u5c4d\u8a5b\u5492",
-      "role": "\u9632\u5b88 / \u6301\u4e45\u89c0\u5bdf\u4ef6",
-      "recommendedBits": [
-        "W",
-        "H",
-        "FB",
-        "WB",
-        "B"
-      ],
-      "recommendedRatchets": [
-        "7-55",
-        "9-60",
-        "5-60"
-      ],
-      "winRoutes": [
-        "\u9632\u5b88\u6301\u4e45",
-        "\u7a69\u5b9a\u62d6\u52dd"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u5f97\u5206\u4e0d\u8db3\uff0c\u5be6\u6230\u52dd\u7387\u9700\u89c0\u5bdf"
-      ],
-      "confidence": "\u4e2d",
-      "tags": [
-        "defense_stamina_observer"
-      ]
+      "name_zh": "古屍詛咒"
     },
     {
-      "rank": 16,
       "name_en": "Scorpio Spear",
-      "name_zh": "\u5929\u880d\u9577\u77db",
-      "role": "\u9ad8\u91cd\u91cf\u58d3\u5236 / \u5e73\u8861\u653b\u64ca",
-      "recommendedBits": [
-        "R",
-        "H",
-        "P",
-        "L",
-        "Z"
-      ],
-      "recommendedRatchets": [
-        "1-60",
-        "9-60",
-        "5-60",
-        "0-70"
-      ],
-      "winRoutes": [
-        "\u58d3\u5236",
-        "\u53cd\u6253",
-        "\u64ca\u98db"
-      ],
-      "risks": [
-        "Bit \u592a\u4fdd\u5b88\u5bb9\u6613\u4e3b\u52d5\u6027\u4e0d\u8db3"
-      ],
-      "confidence": "\u4e2d\u9ad8",
-      "tags": [
-        "heavy_pressure",
-        "balance_attack"
-      ]
+      "name_zh": "天蠍長矛"
     },
     {
-      "rank": 17,
       "name_en": "Golem Rock",
-      "name_zh": "\u9b54\u50cf\u5947\u5ca9",
-      "role": "\u9632\u5b88\u53cd\u6253 / anti-attack",
-      "recommendedBits": [
-        "H",
-        "WB",
-        "FB",
-        "UN",
-        "B"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "7-55"
-      ],
-      "winRoutes": [
-        "\u6297\u653b\u64ca",
-        "\u53cd\u6253",
-        "\u62d6\u6301\u4e45"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u64ca\u6bba\u80fd\u529b\u4e0d\u8db3\uff0c\u9047\u7d14\u6301\u4e45\u9700\u5c0f\u5fc3"
-      ],
-      "confidence": "\u4e2d\u9ad8",
-      "tags": [
-        "defense_counter",
-        "anti_attack"
-      ]
+      "name_zh": "魔像奇岩"
     },
     {
-      "rank": 18,
       "name_en": "Fort",
-      "name_zh": "\u5821\u58d8",
-      "role": "CX \u9632\u79a6 / \u6297\u58d3\u91d1\u5c6c\u6230\u5203",
-      "recommendedBits": [
-        "H",
-        "WB",
-        "FB",
-        "P"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "7-55",
-        "9-70"
-      ],
-      "winRoutes": [
-        "\u6297\u653b\u64ca",
-        "\u5316\u89e3\u653b\u64ca",
-        "\u53cd\u6253"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u5f97\u5206\u80fd\u529b\u53ef\u80fd\u4e0d\u8db3"
-      ],
-      "confidence": "\u4e2d",
-      "tags": [
-        "cx_defense",
-        "guard_wall"
-      ]
+      "name_zh": "堡壘"
     },
     {
-      "rank": 19,
       "name_en": "Unicorn Sting",
-      "name_zh": "\u5e7b\u7378\u523a\u5fc3",
-      "role": "\u5e73\u8861\u653b\u64ca / \u53cd\u6253",
-      "recommendedBits": [
-        "P",
-        "GP",
-        "H",
-        "R"
-      ],
-      "recommendedRatchets": [
-        "5-60",
-        "3-60",
-        "9-60",
-        "1-60"
-      ],
-      "winRoutes": [
-        "\u5e73\u8861\u53cd\u6253",
-        "\u6280\u8853\u578b\u653b\u64ca"
-      ],
-      "risks": [
-        "\u4e0d\u5920\u6975\u7aef\uff0c\u6613\u88ab\u5c08\u7cbe\u578b\u58d3\u904e"
-      ],
-      "confidence": "\u4e2d\u9ad8",
-      "tags": [
-        "balance_counter"
-      ]
+      "name_zh": "幻獸刺心"
     },
     {
-      "rank": 20,
       "name_en": "Hells Scythe",
-      "name_zh": "\u60e1\u9b54\u7d05\u942e",
-      "role": "\u65e9\u671f\u5e73\u8861\u653b\u64ca / \u53cd\u6253\u8001\u724c\u4ef6",
-      "recommendedBits": [
-        "H",
-        "P",
-        "R",
-        "T"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "3-60",
-        "1-60",
-        "4-60"
-      ],
-      "winRoutes": [
-        "\u53cd\u6253",
-        "\u5e73\u8861\u653b\u64ca"
-      ],
-      "risks": [
-        "\u73fe\u4ee3\u91cd\u91cf\u74b0\u5883\u4e0b\u58d3\u5236\u529b\u4e0d\u8db3"
-      ],
-      "confidence": "\u4e2d",
-      "tags": [
-        "early_balance"
-      ]
+      "name_zh": "惡魔紅鐮"
     },
     {
-      "rank": 21,
       "name_en": "Wizard Arrow",
-      "name_zh": "\u9b54\u5c0e\u5e7b\u7bad",
-      "role": "\u65e9\u671f\u6301\u4e45 / \u5e73\u8861",
-      "recommendedBits": [
-        "B",
-        "O",
-        "H",
-        "P"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "3-60"
-      ],
-      "winRoutes": [
-        "\u6301\u4e45",
-        "\u9632\u5b88\u6301\u4e45"
-      ],
-      "risks": [
-        "\u88ab Wizard Rod / Silver Wolf \u7b49\u5f8c\u671f\u6301\u4e45\u6838\u5fc3\u53d6\u4ee3"
-      ],
-      "confidence": "\u4e2d",
-      "tags": [
-        "early_stamina"
-      ]
+      "name_zh": "魔導幻箭"
     },
     {
-      "rank": 22,
       "name_en": "Roar Tyranno",
-      "name_zh": "\u66b4\u9f8d\u5486\u54ee",
-      "role": "\u653b\u64ca / \u53cd\u6253\u89c0\u5bdf\u4ef6",
-      "recommendedBits": [
-        "L",
-        "R",
-        "LR",
-        "H"
-      ],
-      "recommendedRatchets": [
-        "1-70",
-        "1-60",
-        "3-60",
-        "9-60"
-      ],
-      "winRoutes": [
-        "\u653b\u64ca\u6301\u4e45",
-        "\u53ef\u63a7\u653b\u64ca",
-        "\u53cd\u6253"
-      ],
-      "risks": [
-        "\u6a23\u672c\u8f03\u5c11\uff0c\u4e0d\u80fd\u9ad8\u4f30"
-      ],
-      "confidence": "\u4e2d",
-      "tags": [
-        "attack_observer"
-      ]
+      "name_zh": "暴龍咆哮"
     },
     {
-      "rank": 23,
       "name_en": "Ghost Circle",
-      "name_zh": "\u5e7d\u9748\u5143\u9b42",
-      "role": "\u7279\u5316\u6301\u4e45 / \u8f15\u91cf\u7279\u6b8a\u8def\u7dda",
-      "recommendedBits": [
-        "B",
-        "LO",
-        "UN",
-        "GB"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "7-55",
-        "0-80"
-      ],
-      "winRoutes": [
-        "\u7279\u5316\u6301\u4e45",
-        "\u4f4e\u8eab\u4f4d\u6301\u4e45"
-      ],
-      "risks": [
-        "\u91cd\u91cf\u4f4e\uff0c\u6297\u653b\u64ca\u8207\u6297\u64ca\u98db\u5f31"
-      ],
-      "confidence": "\u4e2d\u4f4e\uff5e\u4e2d",
-      "tags": [
-        "special_stamina",
-        "lightweight"
-      ]
+      "name_zh": "幽靈元魂"
     },
     {
-      "rank": 24,
       "name_en": "Samurai Saber",
-      "name_zh": "\u6b66\u58eb\u661f\u528d",
-      "role": "\u5200\u5203\u653b\u64ca / \u53ef\u63a7\u653b\u64ca",
-      "recommendedBits": [
-        "R",
-        "LR",
-        "L",
-        "P"
-      ],
-      "recommendedRatchets": [
-        "1-60",
-        "3-60",
-        "2-70",
-        "9-60"
-      ],
-      "winRoutes": [
-        "\u653b\u64ca\u6301\u4e45",
-        "\u53ef\u63a7\u653b\u64ca"
-      ],
-      "risks": [
-        "\u63a5\u89f8\u89d2\u5ea6\u4e0d\u5c0d\u6642\u5200\u5203\u578b\u63a5\u89f8\u53ef\u80fd\u6ed1\u6389"
-      ],
-      "confidence": "\u4e2d",
-      "tags": [
-        "blade_attack"
-      ]
+      "name_zh": "武士星劍"
     },
     {
-      "rank": 25,
       "name_en": "Samurai Calibur",
-      "name_zh": "\u6b66\u58eb\u9b42\u65ac",
-      "role": "\u96c6\u4e2d\u5200\u5203\u653b\u64ca",
-      "recommendedBits": [
-        "R",
-        "LR",
-        "H",
-        "P"
-      ],
-      "recommendedRatchets": [
-        "3-60",
-        "1-60",
-        "9-60",
-        "6-70"
-      ],
-      "winRoutes": [
-        "\u96c6\u4e2d\u653b\u64ca",
-        "\u53ef\u63a7\u653b\u64ca",
-        "\u53cd\u6253"
-      ],
-      "risks": [
-        "\u9700\u8981\u6e96\u78ba\u63a5\u89f8\u89d2\u5ea6\uff0c\u5426\u5247\u8f38\u51fa\u4e0d\u7a69"
-      ],
-      "confidence": "\u4e2d",
-      "tags": [
-        "focused_blade_attack"
-      ]
+      "name_zh": "武士魂斬"
     },
     {
-      "rank": 26,
       "name_en": "Knight Shield",
-      "name_zh": "\u9a0e\u58eb\u91cd\u76fe",
-      "role": "\u65e9\u671f\u9632\u79a6 / \u9632\u5b88\u6559\u79d1\u66f8\u4ef6",
-      "recommendedBits": [
-        "H",
-        "WB",
-        "UN",
-        "P"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "7-55",
-        "3-60"
-      ],
-      "winRoutes": [
-        "anti-attack",
-        "\u9632\u5b88\u6301\u4e45"
-      ],
-      "risks": [
-        "\u73fe\u4ee3\u74b0\u5883\u91cd\u91cf\u8207\u4e3b\u52d5\u5f97\u5206\u80fd\u529b\u4e0d\u8db3"
-      ],
-      "confidence": "\u4e2d",
-      "tags": [
-        "early_defense"
-      ]
+      "name_zh": "騎士重盾"
     },
     {
-      "rank": 27,
       "name_en": "Dran Buster",
-      "name_zh": "\u5fb7\u862d\u524b\u661f",
-      "role": "\u9ad8\u7206\u767c\u653b\u64ca / \u5947\u8972\u653b\u64ca",
-      "recommendedBits": [
-        "A",
-        "GF",
-        "R",
-        "LR"
-      ],
-      "recommendedRatchets": [
-        "1-60",
-        "3-60",
-        "4-50"
-      ],
-      "winRoutes": [
-        "\u9ad8\u7206\u767c\u64ca\u98db",
-        "\u5947\u8972"
-      ],
-      "risks": [
-        "\u7e8c\u822a\u5dee\uff0c\u81ea\u7206\u98a8\u96aa\u9ad8"
-      ],
-      "confidence": "\u4e2d",
-      "tags": [
-        "burst_attack",
-        "high_risk_attack"
-      ]
+      "name_zh": "德蘭剋星"
     },
     {
-      "rank": 28,
       "name_en": "Impact Drake",
-      "name_zh": "\u885d\u64ca\u9f8d\u795e",
-      "role": "\u91cd\u653b\u64ca / \u9ad8\u58d3\u653b\u64ca\u89c0\u5bdf\u4ef6",
-      "recommendedBits": [
-        "LR",
-        "R",
-        "GF",
-        "L"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "3-60",
-        "1-60"
-      ],
-      "winRoutes": [
-        "\u4f4e\u8eab\u4f4d\u91cd\u653b\u64ca",
-        "\u53ef\u63a7\u91cd\u653b\u64ca"
-      ],
-      "risks": [
-        "\u904b\u52d5\u6a21\u5f0f\u592a\u66b4\u885d\u6703\u81ea\u8017"
-      ],
-      "confidence": "\u4e2d",
-      "tags": [
-        "heavy_attack_observer"
-      ]
+      "name_zh": "衝擊龍神"
     },
     {
-      "rank": 29,
       "name_en": "Whale Wave",
-      "name_zh": "\u5de8\u9be8\u6012\u6fe4",
-      "role": "\u9632\u5b88 / \u53cd\u6253 / \u539a\u578b\u6297\u58d3",
-      "recommendedBits": [
-        "H",
-        "WB",
-        "LO",
-        "P"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "7-55",
-        "3-60"
-      ],
-      "winRoutes": [
-        "\u9632\u5b88\u53cd\u6253",
-        "\u9632\u5b88\u6301\u4e45"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u64ca\u6bba\u80fd\u529b\u4e0d\u8db3\uff0c\u6210\u6548\u4e0d\u5982\u90e8\u5206\u9632\u5b88\u53cd\u6253\u4ef6"
-      ],
-      "confidence": "\u4e2d\u4f4e\uff5e\u4e2d",
-      "tags": [
-        "thick_defense"
-      ]
+      "name_zh": "巨鯨怒濤"
     },
     {
-      "rank": 30,
       "name_en": "Leon Crest",
-      "name_zh": "\u96c4\u7345\u5dd4\u5cf0",
-      "role": "\u5e73\u8861 / \u9632\u79a6\u89c0\u5bdf\u4ef6",
-      "recommendedBits": [
-        "H",
-        "P",
-        "LO",
-        "GN"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "7-55",
-        "7-60"
-      ],
-      "winRoutes": [
-        "\u9632\u5b88\u53cd\u6253",
-        "\u6280\u8853\u5e73\u8861"
-      ],
-      "risks": [
-        "\u4e0a\u9650\u4e0d\u660e\u986f\uff0c\u5bb9\u6613\u88ab\u5c08\u7cbe\u578b\u58d3\u904e"
-      ],
-      "confidence": "\u4e2d\u4f4e\uff5e\u4e2d",
-      "tags": [
-        "balance_defense_observer"
-      ]
+      "name_zh": "雄獅巔峰"
     }
   ],
   "ratchets": [
     {
-      "code": "1-60",
-      "tier": "S-",
-      "role": "\u653b\u64ca / \u504f\u91cd\u6253\u9ede\u6838\u5fc3",
-      "tags": [
-        "attack",
-        "low_height",
-        "offset_contact"
-      ],
-      "recommendedBits": [
-        "R",
-        "LR",
-        "GF",
-        "A",
-        "L",
-        "P"
-      ],
-      "recommendedBlades": [
-        "Shark Scale",
-        "Phoenix Wing",
-        "Tyranno Beat",
-        "Aero Pegasus",
-        "Dran Buster"
-      ],
-      "advantages": [
-        "\u4f4e\u8eab\u4f4d\u3001\u504f\u91cd\u6253\u9ede\u660e\u78ba\uff0c\u80fd\u5f37\u5316\u653b\u64ca\u63a5\u89f8"
-      ],
-      "risks": [
-        "\u7a69\u5b9a\u8207\u7206\u6297\u4e0d\u5982 9-60 / 5-60\uff1b\u6301\u4e45\u914d\u7f6e\u4e0d\u4e00\u5b9a\u9069\u5408"
-      ]
+      "code": "1-60"
     },
     {
-      "code": "9-60",
-      "tier": "S",
-      "role": "\u9ad8\u7206\u6297\u6cdb\u7528\u6838\u5fc3 / \u6301\u4e45\u5b89\u5168\u6838\u5fc3",
-      "tags": [
-        "stamina",
-        "defense",
-        "burst_safety"
-      ],
-      "recommendedBits": [
-        "B",
-        "O",
-        "DB",
-        "H",
-        "E",
-        "FB",
-        "LO"
-      ],
-      "recommendedBlades": [
-        "Wizard Rod",
-        "Silver Wolf",
-        "Clock Mirage",
-        "Golem Rock",
-        "Cobalt Dragoon",
-        "Phoenix Wing"
-      ],
-      "advantages": [
-        "\u4f4e\u8eab\u4f4d\u3001\u9ad8\u7206\u6297\u3001\u51f8\u9ede\u5c0f\uff0c\u4e0d\u6613\u88ab\u6253\u56fa\u9396"
-      ],
-      "risks": [
-        "\u5c0d\u653b\u64ca\u6253\u9ede\u7684\u5f37\u5316\u4e0d\u5982 1-60 / 3-60"
-      ]
+      "code": "9-60"
     },
     {
-      "code": "3-60",
-      "tier": "S-",
-      "role": "\u6cdb\u7528\u653b\u64ca / \u5e73\u8861\u6838\u5fc3",
-      "tags": [
-        "attack",
-        "balance",
-        "stable"
-      ],
-      "recommendedBits": [
-        "R",
-        "LR",
-        "B",
-        "H",
-        "P",
-        "L"
-      ],
-      "recommendedBlades": [
-        "Phoenix Wing",
-        "Wizard Rod",
-        "Aero Pegasus",
-        "Tyranno Beat",
-        "Knight Mail"
-      ],
-      "advantages": [
-        "\u5c0d\u4f4d\u7a69\u5b9a\uff0c\u653b\u64ca\u8207\u6301\u4e45\u90fd\u80fd\u7528"
-      ],
-      "risks": [
-        "\u7206\u6297\u8207\u5b89\u5168\u6027\u4e0d\u5982 9-60\uff1b\u653b\u64ca\u504f\u91cd\u4e0d\u5982 1-60"
-      ]
+      "code": "3-60"
     },
     {
-      "code": "1-70",
-      "tier": "A+",
-      "role": "\u4e2d\u9ad8\u5ea6\u653b\u64ca\u6253\u9ede / Shark Scale \u71b1\u9580\u6838\u5fc3",
-      "tags": [
-        "attack",
-        "height_adjust"
-      ],
-      "recommendedBits": [
-        "LR",
-        "R",
-        "L",
-        "K"
-      ],
-      "recommendedBlades": [
-        "Shark Scale",
-        "Roar Tyranno",
-        "Aero Pegasus",
-        "Phoenix Wing"
-      ],
-      "advantages": [
-        "\u6bd4 60 \u9ad8\u5ea6\u66f4\u5bb9\u6613\u8abf\u6574\u6253\u9ede"
-      ],
-      "risks": [
-        "70 \u9ad8\u5ea6\u88ab\u6253\u56fa\u9396\u98a8\u96aa\u9ad8\u65bc 60\uff1b\u6301\u4e45\u5b89\u5168\u6027\u8f03\u5dee"
-      ]
+      "code": "1-70"
     },
     {
-      "code": "1-50",
-      "tier": "A+",
-      "role": "\u6975\u4f4e\u8eab\u4f4d\u4e00\u64ca\u653b\u64ca",
-      "tags": [
-        "low_height_attack",
-        "burst_attack"
-      ],
-      "recommendedBits": [
-        "I",
-        "LR",
-        "R",
-        "GF"
-      ],
-      "recommendedBlades": [
-        "Blitz",
-        "Dran Buster",
-        "Shark Scale",
-        "Phoenix Wing"
-      ],
-      "advantages": [
-        "\u8d85\u4f4e\u9ad8\u5ea6\uff0c\u9069\u5408\u4e00\u64ca\u653b\u64ca\u8207\u6253\u56fa\u9396"
-      ],
-      "risks": [
-        "\u7a69\u5b9a\u6027\u8207\u6cdb\u7528\u6027\u8f03\u5dee\uff0c\u53ef\u80fd\u522e\u5730\u6216\u8def\u7dda\u592a\u6975\u7aef"
-      ]
+      "code": "1-50"
     },
     {
-      "code": "3-70",
-      "tier": "A",
-      "role": "\u4e2d\u9ad8\u5ea6\u53ef\u63a7\u653b\u64ca / \u6253\u9ede\u8abf\u6574",
-      "tags": [
-        "attack",
-        "balance",
-        "height_adjust"
-      ],
-      "recommendedBits": [
-        "R",
-        "LR",
-        "L",
-        "P",
-        "J"
-      ],
-      "recommendedBlades": [
-        "Meteor Dragoon",
-        "Aero Pegasus",
-        "Phoenix Wing",
-        "Tyranno Beat"
-      ],
-      "advantages": [
-        "\u63d0\u4f9b\u66f4\u9ad8\u6253\u9ede\u4e14\u4fdd\u6709 3 \u7cfb\u7a69\u5b9a"
-      ],
-      "risks": [
-        "\u6bd4 60 \u66f4\u5bb9\u6613\u88ab\u6253\u56fa\u9396\uff1b\u6301\u4e45\u5b89\u5168\u6027\u4e0b\u964d"
-      ]
+      "code": "3-70"
     },
     {
-      "code": "7-60",
-      "tier": "A",
-      "role": "\u7a69\u5b9a\u5e73\u8861 / \u653b\u64ca\u6301\u4e45\u6df7\u5408",
-      "tags": [
-        "balance",
-        "control"
-      ],
-      "recommendedBits": [
-        "L",
-        "P",
-        "R",
-        "H"
-      ],
-      "recommendedBlades": [
-        "Aero Pegasus",
-        "Scorpio Spear",
-        "Phoenix Wing"
-      ],
-      "advantages": [
-        "\u5e73\u8861\u8207\u63a7\u5236\u6027\u4f73\uff0c\u9069\u5408\u6df7\u5408\u914d\u7f6e"
-      ],
-      "risks": [
-        "\u4e0d\u662f\u6975\u7aef\u653b\u64ca\u6216\u6975\u7aef\u9632\u7206"
-      ]
+      "code": "7-60"
     },
     {
-      "code": "7-70",
-      "tier": "A-",
-      "role": "\u4e2d\u9ad8\u5ea6\u5e73\u8861 / \u6253\u9ede\u8abf\u6574",
-      "tags": [
-        "balance",
-        "height_adjust"
-      ],
-      "recommendedBits": [
-        "L",
-        "P",
-        "R"
-      ],
-      "recommendedBlades": [
-        "Aero Pegasus",
-        "Scorpio Spear"
-      ],
-      "advantages": [
-        "\u80fd\u8abf\u6574\u653b\u64ca\u89d2\u5ea6\u4e26\u4fdd\u7559\u63a7\u5236"
-      ],
-      "risks": [
-        "70 \u9ad8\u5ea6\u4f7f\u7206\u88c2\u5b89\u5168\u6027\u5c0f\u6263\u5206"
-      ]
+      "code": "7-70"
     },
     {
-      "code": "4-50",
-      "tier": "A",
-      "role": "\u4f4e\u8eab\u4f4d\u653b\u64ca / \u9632\u7206\u5947\u8972",
-      "tags": [
-        "low_height_attack",
-        "surprise"
-      ],
-      "recommendedBits": [
-        "LR",
-        "R",
-        "I",
-        "GF"
-      ],
-      "recommendedBlades": [
-        "Shark Scale",
-        "Blitz",
-        "Dran Buster",
-        "Phoenix Wing"
-      ],
-      "advantages": [
-        "5mm \u9ad8\u5ea6\uff0c\u964d\u4f4e\u88ab\u6253\u56fa\u9396\u98a8\u96aa"
-      ],
-      "risks": [
-        "4 \u7a81\u9ede\u53ef\u80fd\u589e\u52a0\u88ab\u63a5\u89f8\u98a8\u96aa\uff1b\u914d\u7f6e\u4e0d\u7576\u6703\u522e\u5730"
-      ]
+      "code": "4-50"
     },
     {
-      "code": "5-60",
-      "tier": "A",
-      "role": "\u7a69\u5b9a\u88dc\u5f37 / \u5e73\u8861\u5b89\u5168\u4ef6",
-      "tags": [
-        "balance",
-        "stable"
-      ],
-      "recommendedBits": [
-        "E",
-        "H",
-        "B",
-        "P",
-        "R"
-      ],
-      "recommendedBlades": [
-        "Cobalt Dragoon",
-        "Wizard Rod",
-        "Golem Rock",
-        "Tyranno Beat",
-        "Silver Wolf"
-      ],
-      "advantages": [
-        "\u6bd4 1 \u7cfb\u7a69\uff0c\u53ef\u88dc\u7a69\u5b9a\uff1b\u6301\u4e45\u914d\u7f6e\u4e5f\u53ef\u7528"
-      ],
-      "risks": [
-        "\u653b\u64ca\u96c6\u4e2d\u5ea6\u4e0d\u5982 1-60 / 3-60\uff1b\u7206\u6297\u4e0d\u5982 9-60"
-      ]
+      "code": "5-60"
     },
     {
-      "code": "4-55",
-      "tier": "A-",
-      "role": "\u4f4e\u8eab\u4f4d\u653b\u64ca / \u5e73\u8861",
-      "tags": [
-        "low_height",
-        "attack_balance"
-      ],
-      "recommendedBits": [
-        "LR",
-        "R",
-        "I",
-        "LO"
-      ],
-      "recommendedBlades": [
-        "Shark Scale",
-        "Blitz",
-        "Clock Mirage"
-      ],
-      "advantages": [
-        "\u4f4e\u91cd\u5fc3\uff0c\u9069\u5408\u4f4e\u8eab\u4f4d\u5947\u8972\u6216\u5e73\u8861"
-      ],
-      "risks": [
-        "\u9700\u6ce8\u610f\u522e\u5730\u8207\u56db\u7a81\u9ede\u63a5\u89f8\u98a8\u96aa"
-      ]
+      "code": "4-55"
     },
     {
-      "code": "7-55",
-      "tier": "A-",
-      "role": "\u4f4e\u8eab\u4f4d\u6301\u4e45 / \u9632\u5b88\u6301\u4e45",
-      "tags": [
-        "low_height_stamina",
-        "defense"
-      ],
-      "recommendedBits": [
-        "LO",
-        "UN",
-        "FB",
-        "H"
-      ],
-      "recommendedBlades": [
-        "Clock Mirage",
-        "Silver Wolf",
-        "Golem Rock"
-      ],
-      "advantages": [
-        "\u58d3\u4f4e\u91cd\u5fc3\uff0c\u9069\u5408\u4f4e\u8eab\u4f4d\u6301\u4e45"
-      ],
-      "risks": [
-        "\u653b\u64ca\u6253\u9ede\u4e0d\u5f37\uff0c\u9700\u9760 Blade / Bit \u88dc\u65b9\u5411"
-      ]
+      "code": "7-55"
     },
     {
-      "code": "9-65",
-      "tier": "A-",
-      "role": "\u4e2d\u4f4e\u9ad8\u5ea6\u6301\u4e45\u5b89\u5168\u4ef6",
-      "tags": [
-        "stamina",
-        "burst_safety"
-      ],
-      "recommendedBits": [
-        "B",
-        "O",
-        "FB",
-        "LO"
-      ],
-      "recommendedBlades": [
-        "Wizard Rod",
-        "Silver Wolf",
-        "Clock Mirage"
-      ],
-      "advantages": [
-        "\u6bd4 70/80 \u5b89\u5168\uff0c\u6301\u4e45\u8def\u7dda\u53ef\u6e2c"
-      ],
-      "risks": [
-        "\u8cc7\u6599\u91cf\u8f03 9-60 \u5c11"
-      ]
+      "code": "9-65"
     },
     {
-      "code": "0-60",
-      "tier": "B",
-      "role": "\u5e73\u8861 / \u7279\u5316",
-      "tags": [
-        "balance"
-      ],
-      "recommendedBits": [
-        "P",
-        "H",
-        "O"
-      ],
-      "recommendedBlades": [
-        "Scorpio Spear",
-        "\u5e73\u8861 Blade"
-      ],
-      "advantages": [
-        "\u53ef\u505a\u7279\u5316\u5e73\u8861"
-      ],
-      "risks": [
-        "\u6cdb\u7528\u6027\u4e0d\u5982 9-60 / 3-60 / 5-60"
-      ]
+      "code": "0-60"
     },
     {
-      "code": "2-60",
-      "tier": "B",
-      "role": "\u653b\u64ca / \u5e73\u8861\u89c0\u5bdf",
-      "tags": [
-        "attack_balance"
-      ],
-      "recommendedBits": [
-        "R",
-        "P"
-      ],
-      "recommendedBlades": [
-        "\u653b\u64ca Blade"
-      ],
-      "advantages": [
-        "\u53ef\u505a\u5e73\u8861\u653b\u64ca\u6e2c\u8a66"
-      ],
-      "risks": [
-        "\u76ee\u524d\u6b0a\u91cd\u4f4e\u65bc 1/3/5/9 \u7cfb"
-      ]
+      "code": "2-60"
     },
     {
-      "code": "6-60",
-      "tier": "B",
-      "role": "\u7a69\u5b9a\u5e73\u8861",
-      "tags": [
-        "balance"
-      ],
-      "recommendedBits": [
-        "R",
-        "P",
-        "H"
-      ],
-      "recommendedBlades": [
-        "Dran Brave",
-        "\u65e9\u671f CX"
-      ],
-      "advantages": [
-        "\u7a69\u5b9a\u3001\u4e0d\u6975\u7aef"
-      ],
-      "risks": [
-        "\u7f3a\u5c11\u660e\u986f Meta \u512a\u52e2"
-      ]
+      "code": "6-60"
     },
     {
-      "code": "8-70",
-      "tier": "B-",
-      "role": "\u4e2d\u9ad8\u5ea6\u5e73\u8861\u89c0\u5bdf",
-      "tags": [
-        "height_adjust"
-      ],
-      "recommendedBits": [
-        "P",
-        "H"
-      ],
-      "recommendedBlades": [
-        "\u5e73\u8861 Blade"
-      ],
-      "advantages": [
-        "\u53ef\u505a\u6253\u9ede\u8abf\u6574"
-      ],
-      "risks": [
-        "\u9ad8\u8eab\u4f4d\u98a8\u96aa"
-      ]
+      "code": "8-70"
     },
     {
-      "code": "9-70",
-      "tier": "B+",
-      "role": "\u4e2d\u9ad8\u5ea6\u6301\u4e45 / \u9632\u5b88\u6301\u4e45",
-      "tags": [
-        "stamina",
-        "height_adjust"
-      ],
-      "recommendedBits": [
-        "FB",
-        "H",
-        "B",
-        "O"
-      ],
-      "recommendedBlades": [
-        "Wizard Rod",
-        "Whip",
-        "\u9632\u5b88 Blade"
-      ],
-      "advantages": [
-        "\u53ef\u8abf\u6574\u9ad8\u5ea6\u8207\u672b\u6bb5"
-      ],
-      "risks": [
-        "\u6bd4 9-60 \u66f4\u5bb9\u6613\u88ab\u6253\u56fa\u9396"
-      ]
+      "code": "9-70"
     },
     {
-      "code": "0-70",
-      "tier": "C",
-      "role": "\u4e2d\u9ad8\u5ea6\u7279\u5316",
-      "tags": [
-        "special"
-      ],
-      "recommendedBits": [
-        "P",
-        "H"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u7279\u5316\u6e2c\u8a66"
-      ],
-      "risks": [
-        "\u9ad8\u8eab\u4f4d\u8207\u6cdb\u7528\u6027\u4e0d\u8db3"
-      ]
+      "code": "0-70"
     },
     {
-      "code": "1-80",
-      "tier": "C",
-      "role": "\u9ad8\u8eab\u4f4d\u653b\u64ca\u7279\u5316",
-      "tags": [
-        "high_risk"
-      ],
-      "recommendedBits": [
-        "R",
-        "LR"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u53ef\u505a\u7279\u6b8a\u6253\u9ede"
-      ],
-      "risks": [
-        "80 \u9ad8\u5ea6\u9ad8\u98a8\u96aa\uff0c\u6613\u88ab\u6253\u56fa\u9396"
-      ]
+      "code": "1-80"
     },
     {
-      "code": "2-70",
-      "tier": "B-",
-      "role": "\u4e2d\u9ad8\u5ea6\u653b\u64ca / \u5e73\u8861\u89c0\u5bdf",
-      "tags": [
-        "height_adjust",
-        "attack_balance"
-      ],
-      "recommendedBits": [
-        "L",
-        "R",
-        "P"
-      ],
-      "recommendedBlades": [
-        "Samurai Saber"
-      ],
-      "advantages": [
-        "\u53ef\u505a\u6253\u9ede\u8abf\u6574"
-      ],
-      "risks": [
-        "\u6bd4 60 \u9ad8\u5ea6\u66f4\u5bb9\u6613\u88ab\u6253\u56fa\u9396"
-      ]
+      "code": "2-70"
     },
     {
-      "code": "2-80",
-      "tier": "C",
-      "role": "\u9ad8\u8eab\u4f4d\u7279\u5316",
-      "tags": [
-        "high_risk"
-      ],
-      "recommendedBits": [
-        "P"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u7279\u6b8a\u9ad8\u5ea6"
-      ],
-      "risks": [
-        "\u9ad8\u98a8\u96aa"
-      ]
+      "code": "2-80"
     },
     {
-      "code": "3-80",
-      "tier": "C",
-      "role": "\u9ad8\u8eab\u4f4d\u5e73\u8861\u7279\u5316",
-      "tags": [
-        "high_risk"
-      ],
-      "recommendedBits": [
-        "P",
-        "H"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u7279\u6b8a\u9ad8\u5ea6\u6e2c\u8a66"
-      ],
-      "risks": [
-        "\u9ad8\u98a8\u96aa\uff0c\u975e\u5fc5\u8981\u4e0d\u5efa\u8b70"
-      ]
+      "code": "3-80"
     },
     {
-      "code": "4-60",
-      "tier": "B",
-      "role": "\u57fa\u6e96\u5e73\u8861",
-      "tags": [
-        "balance"
-      ],
-      "recommendedBits": [
-        "T",
-        "P",
-        "R"
-      ],
-      "recommendedBlades": [
-        "Hells Scythe"
-      ],
-      "advantages": [
-        "\u57fa\u6e96\u7a69\u5b9a"
-      ],
-      "risks": [
-        "\u73fe\u4ee3\u74b0\u5883\u975e\u512a\u5148"
-      ]
+      "code": "4-60"
     },
     {
-      "code": "4-70",
-      "tier": "B-",
-      "role": "\u4e2d\u9ad8\u5ea6\u5e73\u8861",
-      "tags": [
-        "height_adjust"
-      ],
-      "recommendedBits": [
-        "P",
-        "R"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u53ef\u8abf\u6574\u6253\u9ede"
-      ],
-      "risks": [
-        "\u7206\u88c2\u5b89\u5168\u6027\u4e0b\u964d"
-      ]
+      "code": "4-70"
     },
     {
-      "code": "4-80",
-      "tier": "C",
-      "role": "\u9ad8\u8eab\u4f4d\u7279\u5316",
-      "tags": [
-        "high_risk"
-      ],
-      "recommendedBits": [
-        "P"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u7279\u6b8a\u9ad8\u5ea6"
-      ],
-      "risks": [
-        "\u9ad8\u98a8\u96aa"
-      ]
+      "code": "4-80"
     },
     {
-      "code": "5-70",
-      "tier": "B",
-      "role": "\u4e2d\u9ad8\u5ea6\u7a69\u5b9a / \u6301\u4e45\u653b\u64ca\u6df7\u5408",
-      "tags": [
-        "height_adjust",
-        "stable"
-      ],
-      "recommendedBits": [
-        "R",
-        "Nr",
-        "P",
-        "FB"
-      ],
-      "recommendedBlades": [
-        "Aero Pegasus",
-        "Whip"
-      ],
-      "advantages": [
-        "\u53ef\u8abf\u6574\u9ad8\u5ea6\u4e26\u4fdd\u7559\u7a69\u5b9a"
-      ],
-      "risks": [
-        "\u6bd4 60 \u66f4\u5bb9\u6613\u88ab\u6253\u56fa\u9396"
-      ]
+      "code": "5-70"
     },
     {
-      "code": "5-80",
-      "tier": "C",
-      "role": "\u9ad8\u8eab\u4f4d\u7a69\u5b9a\u7279\u5316",
-      "tags": [
-        "high_risk"
-      ],
-      "recommendedBits": [
-        "H",
-        "FB"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u7279\u6b8a\u9ad8\u5ea6"
-      ],
-      "risks": [
-        "\u5bb9\u6613\u88ab\u6253\u56fa\u9396"
-      ]
+      "code": "5-80"
     },
     {
-      "code": "6-70",
-      "tier": "B-",
-      "role": "\u4e2d\u9ad8\u5ea6\u5e73\u8861\u7279\u5316",
-      "tags": [
-        "height_adjust"
-      ],
-      "recommendedBits": [
-        "M",
-        "P"
-      ],
-      "recommendedBlades": [
-        "Samurai Calibur"
-      ],
-      "advantages": [
-        "\u539f\u88dd/\u7279\u5316\u53ef\u7528"
-      ],
-      "risks": [
-        "\u6cdb\u7528\u6027\u4e0d\u8db3"
-      ]
+      "code": "6-70"
     },
     {
-      "code": "6-80",
-      "tier": "C",
-      "role": "\u9ad8\u8eab\u4f4d\u9632\u5b88\u6301\u4e45\u539f\u88dd\u5e38\u898b",
-      "tags": [
-        "high_risk",
-        "defense"
-      ],
-      "recommendedBits": [
-        "W",
-        "H"
-      ],
-      "recommendedBlades": [
-        "Perseus Dark"
-      ],
-      "advantages": [
-        "\u539f\u88dd/\u7279\u5316\u53ef\u7528"
-      ],
-      "risks": [
-        "80 \u9ad8\u5ea6\u660e\u986f\u63d0\u9ad8\u88ab\u6253\u56fa\u9396\u98a8\u96aa"
-      ]
+      "code": "6-80"
     },
     {
-      "code": "7-80",
-      "tier": "C",
-      "role": "\u9ad8\u8eab\u4f4d\u7279\u5316",
-      "tags": [
-        "high_risk"
-      ],
-      "recommendedBits": [
-        "P",
-        "H"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u7279\u6b8a\u9ad8\u5ea6"
-      ],
-      "risks": [
-        "\u9ad8\u98a8\u96aa"
-      ]
+      "code": "7-80"
     },
     {
-      "code": "8-60",
-      "tier": "B-",
-      "role": "\u7a69\u5b9a\u89c0\u5bdf",
-      "tags": [
-        "balance"
-      ],
-      "recommendedBits": [
-        "P",
-        "H"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u53ef\u6e2c\u7a69\u5b9a"
-      ],
-      "risks": [
-        "\u8cc7\u6599\u4e0d\u8db3"
-      ]
+      "code": "8-60"
     },
     {
-      "code": "8-80",
-      "tier": "C",
-      "role": "\u9ad8\u8eab\u4f4d\u7279\u5316",
-      "tags": [
-        "high_risk"
-      ],
-      "recommendedBits": [
-        "P"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u7279\u6b8a\u9ad8\u5ea6"
-      ],
-      "risks": [
-        "\u9ad8\u98a8\u96aa"
-      ]
+      "code": "8-80"
     },
     {
-      "code": "9-80",
-      "tier": "C",
-      "role": "\u9ad8\u8eab\u4f4d\u6301\u4e45\u7279\u5316",
-      "tags": [
-        "high_risk",
-        "stamina"
-      ],
-      "recommendedBits": [
-        "B",
-        "O",
-        "FB"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u9ad8\u8eab\u4f4d\u6301\u4e45\u7279\u5316"
-      ],
-      "risks": [
-        "\u975e\u660e\u78ba\u76ee\u7684\u4e0d\u5efa\u8b70"
-      ]
+      "code": "9-80"
     },
     {
-      "code": "3-85",
-      "tier": "C",
-      "role": "\u9ad8\u8eab\u4f4d\u7279\u5316",
-      "tags": [
-        "high_risk"
-      ],
-      "recommendedBits": [
-        "P"
-      ],
-      "recommendedBlades": [],
-      "advantages": [
-        "\u7279\u6b8a\u9ad8\u5ea6"
-      ],
-      "risks": [
-        "\u88ab\u6253\u56fa\u9396\u98a8\u96aa\u5f88\u9ad8"
-      ]
+      "code": "3-85"
     },
     {
-      "code": "M-85",
-      "tier": "C",
-      "role": "\u7279\u6b8a\u9ad8\u8eab\u4f4d",
-      "tags": [
-        "special",
-        "high_risk"
-      ],
-      "recommendedBits": [
-        "M"
-      ],
-      "recommendedBlades": [
-        "Samurai Calibur"
-      ],
-      "advantages": [
-        "\u539f\u88dd/\u7279\u6b8a\u6e2c\u8a66"
-      ],
-      "risks": [
-        "\u9700\u8981\u7368\u7acb\u6e2c\u8a66\uff0c\u4e0d\u53ef\u9ad8\u4f30"
-      ]
+      "code": "M-85"
     }
   ],
   "bits": [
     {
       "code": "R",
       "name_en": "Rush",
-      "name_zh": "\u885d\u523a",
-      "tier": "S",
-      "role": "\u53ef\u63a7\u653b\u64ca\u6838\u5fc3",
-      "tags": [
-        "attack",
-        "controlled_attack"
-      ],
-      "bestWith": [
-        "Phoenix Wing",
-        "Aero Pegasus",
-        "Tyranno Beat",
-        "Shark Scale",
-        "Dran Buster"
-      ],
-      "risks": [
-        "\u7206\u767c\u4e0d\u5982 GF / A / I"
-      ]
+      "name_zh": "衝刺"
     },
     {
       "code": "LR",
       "name_en": "Low Rush",
-      "name_zh": "\u4f4e\u885d\u523a",
-      "tier": "S",
-      "role": "\u4f4e\u8eab\u4f4d\u653b\u64ca\u6838\u5fc3",
-      "tags": [
-        "attack",
-        "low_height_attack"
-      ],
-      "bestWith": [
-        "Shark Scale",
-        "Phoenix Wing",
-        "Blitz",
-        "Tyranno Beat",
-        "Impact Drake"
-      ],
-      "risks": [
-        "\u7e8c\u822a\u6709\u9650\uff0c\u7b2c\u4e00\u6ce2\u6c92\u6253\u5230\u6703\u5931\u5206"
-      ]
+      "name_zh": "低衝刺"
     },
     {
       "code": "H",
       "name_en": "Hexa",
-      "name_zh": "\u516d\u89d2",
-      "tier": "S",
-      "role": "anti-attack / \u9632\u5b88\u53cd\u6253",
-      "tags": [
-        "defense",
-        "anti_attack",
-        "control"
-      ],
-      "bestWith": [
-        "Wizard Rod",
-        "Golem Rock",
-        "Knight Mail",
-        "Silver Wolf",
-        "Phoenix Wing"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u653b\u64ca\u4e0d\u8db3\uff0c\u7d14\u6301\u4e45\u4e0d\u5982 B/O/FB"
-      ]
+      "name_zh": "六角"
     },
     {
       "code": "E",
       "name_en": "Elevate",
-      "name_zh": "\u5347\u9ad8 / \u6607\u63da",
-      "tier": "S",
-      "role": "\u5de6\u8ff4\u65cb\u672b\u6bb5\u6838\u5fc3",
-      "tags": [
-        "left_spin",
-        "spin_equalize",
-        "stamina"
-      ],
-      "bestWith": [
-        "Cobalt Dragoon",
-        "Meteor Dragoon"
-      ],
-      "risks": [
-        "\u53f3\u8ff4\u65cb\u6cdb\u7528\u6027\u8f03\u4f4e"
-      ]
+      "name_zh": "升高 / 昇揚"
     },
     {
       "code": "B",
       "name_en": "Ball",
-      "name_zh": "\u7403",
-      "tier": "S",
-      "role": "\u7d14\u6301\u4e45\u57fa\u6e96",
-      "tags": [
-        "stamina"
-      ],
-      "bestWith": [
-        "Wizard Rod",
-        "Silver Wolf",
-        "Clock Mirage",
-        "Wizard Arrow"
-      ],
-      "risks": [
-        "\u6297\u63a8\u4e0d\u5920\uff0c\u9700\u8981 Blade/Ratchet \u88dc"
-      ]
+      "name_zh": "球"
     },
     {
       "code": "O",
       "name_en": "Orb",
-      "name_zh": "\u5713\u7403",
-      "tier": "S",
-      "role": "\u7a69\u5b9a\u6301\u4e45",
-      "tags": [
-        "stamina",
-        "stable"
-      ],
-      "bestWith": [
-        "Wizard Rod",
-        "Silver Wolf",
-        "Clock Mirage",
-        "Cerberus Flame"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u5f97\u5206\u4f4e"
-      ]
+      "name_zh": "圓球"
     },
     {
       "code": "DB",
       "name_en": "Disc Ball",
-      "name_zh": "\u5713\u76e4\u7403",
-      "tier": "S",
-      "role": "\u7a69\u5b9a\u6301\u4e45 / \u6297\u50be\u659c",
-      "tags": [
-        "stamina",
-        "lad"
-      ],
-      "bestWith": [
-        "Wizard Rod",
-        "Silver Wolf",
-        "\u9632\u5b88\u6301\u4e45 Blade"
-      ],
-      "risks": [
-        "\u653b\u64ca\u6027\u4f4e"
-      ]
+      "name_zh": "圓盤球"
     },
     {
       "code": "L",
       "name_en": "Level",
-      "name_zh": "\u6c34\u5e73",
-      "tier": "S",
-      "role": "\u653b\u64ca\u6301\u4e45\u6df7\u5408",
-      "tags": [
-        "attack_stamina",
-        "hybrid"
-      ],
-      "bestWith": [
-        "Aero Pegasus",
-        "Wizard Rod",
-        "Shark Scale",
-        "Phoenix Wing"
-      ],
-      "risks": [
-        "\u9700\u8981\u63a7\u5236\u767c\u5c04"
-      ]
+      "name_zh": "水平"
     },
     {
       "code": "P",
       "name_en": "Point",
-      "name_zh": "\u9ede\u8ef8",
-      "tier": "S",
-      "role": "\u6280\u8853\u578b\u5e73\u8861",
-      "tags": [
-        "balance",
-        "technical"
-      ],
-      "bestWith": [
-        "Aero Pegasus",
-        "Scorpio Spear",
-        "Phoenix Wing",
-        "Unicorn Sting"
-      ],
-      "risks": [
-        "\u5f88\u5403\u767c\u5c04\u89d2\u5ea6"
-      ]
+      "name_zh": "點軸"
     },
     {
       "code": "FB",
       "name_en": "Free Ball",
-      "name_zh": "\u81ea\u7531\u7403",
-      "tier": "A+",
-      "role": "\u6301\u4e45\u672b\u6bb5 / \u6297\u50be\u659c\u89c0\u5bdf\u6838\u5fc3",
-      "tags": [
-        "stamina",
-        "endgame"
-      ],
-      "bestWith": [
-        "Wizard Rod",
-        "Silver Wolf",
-        "Clock Mirage",
-        "Golem Rock"
-      ],
-      "risks": [
-        "\u516c\u5dee\u8207\u6643\u52d5\u9700\u770b\u5be6\u9ad4\uff0c\u6297\u63a8\u4e0d\u4e00\u5b9a\u5f37"
-      ]
+      "name_zh": "自由球"
     },
     {
       "code": "LO",
       "name_en": "Low Orb",
-      "name_zh": "\u4f4e\u5713\u7403",
-      "tier": "A+",
-      "role": "\u4f4e\u8eab\u4f4d\u6301\u4e45",
-      "tags": [
-        "low_height_stamina"
-      ],
-      "bestWith": [
-        "Silver Wolf",
-        "Clock Mirage",
-        "Wizard Arc"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u5f97\u5206\u4e0d\u8db3"
-      ]
+      "name_zh": "低圓球"
     },
     {
       "code": "GF",
       "name_en": "Gear Flat",
-      "name_zh": "\u9f52\u8f2a\u5e73\u9762",
-      "tier": "A+",
-      "role": "\u9ad8\u901f\u7206\u767c\u653b\u64ca",
-      "tags": [
-        "attack",
-        "burst_attack"
-      ],
-      "bestWith": [
-        "Dran Buster",
-        "Tyranno Beat",
-        "Phoenix Wing"
-      ],
-      "risks": [
-        "\u9ad8\u81ea\u7206\u98a8\u96aa\u3001\u81ea\u8017\u9ad8"
-      ]
+      "name_zh": "齒輪平面"
     },
     {
       "code": "F",
       "name_en": "Flat",
-      "name_zh": "\u5e73\u9762",
-      "tier": "A",
-      "role": "\u57fa\u6e96\u653b\u64ca",
-      "tags": [
-        "attack"
-      ],
-      "bestWith": [
-        "\u5165\u9580\u653b\u64ca",
-        "Dran \u985e",
-        "Phoenix \u985e"
-      ],
-      "risks": [
-        "\u73fe\u4ee3\u74b0\u5883\u5e38\u88ab R/LR \u53d6\u4ee3"
-      ]
+      "name_zh": "平面"
     },
     {
       "code": "LF",
       "name_en": "Low Flat",
-      "name_zh": "\u4f4e\u5e73\u9762",
-      "tier": "A",
-      "role": "\u4f4e\u8eab\u4f4d\u653b\u64ca",
-      "tags": [
-        "attack",
-        "low_height"
-      ],
-      "bestWith": [
-        "Shark Scale",
-        "Phoenix Wing",
-        "Dran Buster"
-      ],
-      "risks": [
-        "\u7e8c\u822a\u5dee"
-      ]
+      "name_zh": "低平面"
     },
     {
       "code": "A",
       "name_en": "Accel",
-      "name_zh": "\u52a0\u901f",
-      "tier": "A",
-      "role": "\u52a0\u901f\u653b\u64ca",
-      "tags": [
-        "attack",
-        "high_speed"
-      ],
-      "bestWith": [
-        "Dran Buster",
-        "Pegasus Blast",
-        "Phoenix Wing"
-      ],
-      "risks": [
-        "\u63a7\u5834\u98a8\u96aa\u9ad8"
-      ]
+      "name_zh": "加速"
     },
     {
       "code": "V",
       "name_en": "Vortex",
-      "name_zh": "\u6f29\u6e26",
-      "tier": "A",
-      "role": "\u9ad8\u901f\u653b\u64ca",
-      "tags": [
-        "attack",
-        "high_speed"
-      ],
-      "bestWith": [
-        "Dran Brave",
-        "Pegasus Blast"
-      ],
-      "risks": [
-        "\u66b4\u885d\u653b\u64ca\uff0c\u81ea\u7206\u98a8\u96aa"
-      ]
+      "name_zh": "漩渦"
     },
     {
       "code": "GR",
       "name_en": "Gear Rush",
-      "name_zh": "\u9f52\u8f2a\u885d\u523a",
-      "tier": "A",
-      "role": "\u653b\u64ca / \u5e72\u64fe\u653b\u64ca",
-      "tags": [
-        "attack",
-        "observer"
-      ],
-      "bestWith": [
-        "Fox Brush",
-        "\u653b\u64ca Blade"
-      ],
-      "risks": [
-        "\u8cc7\u6599\u91cf\u5c11\u65bc R/LR"
-      ]
+      "name_zh": "齒輪衝刺"
     },
     {
       "code": "I",
       "name_en": "Impact",
-      "name_zh": "\u885d\u64ca",
-      "tier": "A-",
-      "role": "\u4e00\u64ca\u7206\u767c / \u9ad8\u98a8\u96aa\u653b\u64ca",
-      "tags": [
-        "attack",
-        "one_hit"
-      ],
-      "bestWith": [
-        "Blitz",
-        "Tyranno Beat",
-        "Impact Drake",
-        "Shark Scale"
-      ],
-      "risks": [
-        "\u7e8c\u822a\u8207\u63a7\u5834\u98a8\u96aa\u9ad8\uff0c\u7b2c\u4e00\u6ce2\u6c92\u63a5\u89f8\u6703\u5931\u901f"
-      ]
+      "name_zh": "衝擊"
     },
     {
       "code": "J",
       "name_en": "Jolt",
-      "name_zh": "\u731b\u885d",
-      "tier": "A-",
-      "role": "\u7279\u5316\u653b\u64ca / \u8df3\u52d5\u653b\u64ca",
-      "tags": [
-        "attack",
-        "special"
-      ],
-      "bestWith": [
-        "Meteor Dragoon",
-        "Fox Brush"
-      ],
-      "risks": [
-        "\u5bb9\u6613\u5931\u63a7"
-      ]
+      "name_zh": "猛衝"
     },
     {
       "code": "K",
       "name_en": "Kick",
-      "name_zh": "\u8e22\u64ca",
-      "tier": "A-",
-      "role": "\u53cd\u6253 / \u63a7\u5236\u653b\u64ca",
-      "tags": [
-        "balance",
-        "control_attack"
-      ],
-      "bestWith": [
-        "Shark Scale",
-        "Wyvern Hover",
-        "Knight Mail",
-        "Phoenix Wing"
-      ],
-      "risks": [
-        "\u64ca\u6bba\u529b\u4e0d\u5982 R/LR\uff0c\u7d14\u6301\u4e45\u4e0d\u5982 B/O"
-      ]
+      "name_zh": "踢擊"
     },
     {
       "code": "GP",
       "name_en": "Gear Point",
-      "name_zh": "\u9f52\u8f2a\u9ede\u8ef8",
-      "tier": "A",
-      "role": "\u9f52\u8f2a\u9ede\u8ef8 / \u5e73\u8861\u653b\u64ca",
-      "tags": [
-        "balance",
-        "x_dash"
-      ],
-      "bestWith": [
-        "Unicorn Sting",
-        "\u5e73\u8861\u653b\u64ca"
-      ],
-      "risks": [
-        "\u66f4\u4e3b\u52d5\u4f46\u8017\u8010\u4e45"
-      ]
+      "name_zh": "齒輪點軸"
     },
     {
       "code": "GB",
       "name_en": "Gear Ball",
-      "name_zh": "\u9f52\u8f2a\u7403",
-      "tier": "A",
-      "role": "\u6301\u4e45 / X \u8ecc\u4e92\u52d5",
-      "tags": [
-        "stamina",
-        "x_dash"
-      ],
-      "bestWith": [
-        "Ghost Circle",
-        "\u6301\u4e45 Blade"
-      ],
-      "risks": [
-        "\u53ef\u80fd\u589e\u52a0\u63a5\u8ecc\u8207\u8017\u8010"
-      ]
+      "name_zh": "齒輪球"
     },
     {
       "code": "WB",
       "name_en": "Wall Ball",
-      "name_zh": "\u7246\u7403",
-      "tier": "A",
-      "role": "\u9632\u5b88\u6301\u4e45 / \u56de\u6b63",
-      "tags": [
-        "defense",
-        "stamina"
-      ],
-      "bestWith": [
-        "Golem Rock",
-        "Knight Shield",
-        "Whale Wave"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u6027\u4f4e"
-      ]
+      "name_zh": "牆球"
     },
     {
       "code": "W",
       "name_en": "Wedge",
-      "name_zh": "\u6954\u5f62",
-      "tier": "B+",
-      "role": "\u7559\u4e2d\u6301\u4e45 / \u9632\u5b88\u6301\u4e45\u89c0\u5bdf",
-      "tags": [
-        "stamina",
-        "defense"
-      ],
-      "bestWith": [
-        "Clock Mirage",
-        "Mummy Curse",
-        "\u9632\u5b88\u6301\u4e45 Blade"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u5f97\u5206\u4e0d\u8db3\uff0c\u9047\u5f37\u653b\u53ef\u80fd\u88ab\u63a8\u51fa"
-      ]
+      "name_zh": "楔形"
     },
     {
       "code": "UN",
       "name_en": "Under Needle",
-      "name_zh": "\u4e0b\u91dd",
-      "tier": "B+",
-      "role": "\u4f4e\u8eab\u4f4d\u5b9a\u9ede / \u5b89\u5168\u6301\u4e45",
-      "tags": [
-        "stamina",
-        "low_height",
-        "center"
-      ],
-      "bestWith": [
-        "Silver Wolf",
-        "Clock Mirage",
-        "Golem Rock"
-      ],
-      "risks": [
-        "Needle \u7cfb\u6297\u63a8\u5f31\uff0c\u6015\u5f37\u653b\u63a8\u51fa"
-      ]
+      "name_zh": "下針"
     },
     {
       "code": "U",
       "name_en": "Unite",
-      "name_zh": "\u806f\u5408",
-      "tier": "B+",
-      "role": "\u5e73\u8861",
-      "tags": [
-        "balance"
-      ],
-      "bestWith": [
-        "Unicorn Sting",
-        "\u5e73\u8861\u578b Blade"
-      ],
-      "risks": [
-        "\u4e0d\u4e00\u5b9a\u662f\u7b2c\u4e00\u9078"
-      ]
+      "name_zh": "聯合"
     },
     {
       "code": "GU",
       "name_en": "Gear Unite",
-      "name_zh": "\u9f52\u8f2a\u806f\u5408",
-      "tier": "B+",
-      "role": "\u9f52\u8f2a\u5e73\u8861",
-      "tags": [
-        "balance",
-        "x_dash"
-      ],
-      "bestWith": [
-        "\u5e73\u8861 Blade"
-      ],
-      "risks": [
-        "\u8cc7\u6599\u4ecd\u9700\u7d2f\u7a4d"
-      ]
+      "name_zh": "齒輪聯合"
     },
     {
       "code": "BS",
       "name_en": "Bound Spike",
-      "name_zh": "\u5f48\u8df3\u91dd",
-      "tier": "B+",
-      "role": "\u7279\u5316\u9632\u5b88 / \u5438\u9707",
-      "tags": [
-        "defense",
-        "special"
-      ],
-      "bestWith": [
-        "\u9632\u5b88 Blade"
-      ],
-      "risks": [
-        "\u516c\u5dee\u8207\u7a69\u5b9a\u8981\u6e2c"
-      ]
+      "name_zh": "彈跳針"
     },
     {
       "code": "T",
       "name_en": "Taper",
-      "name_zh": "\u9310\u5f62",
-      "tier": "B+",
-      "role": "\u6a19\u6e96\u5e73\u8861",
-      "tags": [
-        "balance"
-      ],
-      "bestWith": [
-        "Hells Scythe",
-        "Blast",
-        "\u5e73\u8861\u6e2c\u8a66"
-      ],
-      "risks": [
-        "\u57fa\u6e96\u5e73\u8861\uff0c\u4e0d\u7a81\u51fa"
-      ]
+      "name_zh": "錐形"
     },
     {
       "code": "N",
       "name_en": "Needle",
-      "name_zh": "\u91dd",
-      "tier": "B",
-      "role": "\u65e9\u671f\u9632\u5b88 / \u5b9a\u9ede",
-      "tags": [
-        "defense",
-        "center"
-      ],
-      "bestWith": [
-        "\u65e9\u671f\u9632\u5b88"
-      ],
-      "risks": [
-        "\u7559\u4e2d\u4f46\u6297\u63a8\u5f31"
-      ]
+      "name_zh": "針"
     },
     {
       "code": "HN",
       "name_en": "High Needle",
-      "name_zh": "\u9ad8\u91dd",
-      "tier": "B",
-      "role": "\u9ad8\u8eab\u4f4d\u5b9a\u9ede",
-      "tags": [
-        "center",
-        "high"
-      ],
-      "bestWith": [
-        "\u9ad8\u8eab\u4f4d\u6e2c\u8a66"
-      ],
-      "risks": [
-        "\u4e0d\u5efa\u8b70\u9ad8\u4f30\uff0c\u6613\u88ab\u63a8"
-      ]
+      "name_zh": "高針"
     },
     {
       "code": "MN",
       "name_en": "Metal Needle",
-      "name_zh": "\u91d1\u5c6c\u91dd",
-      "tier": "B",
-      "role": "\u5b9a\u9ede / \u4f4e\u6469\u64e6",
-      "tags": [
-        "center",
-        "low_friction"
-      ],
-      "bestWith": [
-        "\u6301\u4e45\u6e2c\u8a66"
-      ],
-      "risks": [
-        "\u6297\u63a8\u4ecd\u662f\u554f\u984c"
-      ]
+      "name_zh": "金屬針"
     },
     {
       "code": "GN",
       "name_en": "Gear Needle",
-      "name_zh": "\u9f52\u8f2a\u91dd",
-      "tier": "B",
-      "role": "\u5b9a\u9ede + X \u8ecc\u4e92\u52d5",
-      "tags": [
-        "center",
-        "x_dash"
-      ],
-      "bestWith": [
-        "Leon Crest"
-      ],
-      "risks": [
-        "\u53ef\u80fd\u8017\u8010\u4e45"
-      ]
+      "name_zh": "齒輪針"
     },
     {
       "code": "S",
       "name_en": "Spike",
-      "name_zh": "\u91dd / \u9632\u5b88",
-      "tier": "B",
-      "role": "\u9632\u5b88",
-      "tags": [
-        "defense"
-      ],
-      "bestWith": [
-        "\u65e9\u671f\u9632\u5b88"
-      ],
-      "risks": [
-        "\u6297\u63a8\u4e0d\u8db3"
-      ]
+      "name_zh": "針 / 防守"
     },
     {
       "code": "D",
       "name_en": "Dot",
-      "name_zh": "\u9ede",
-      "tier": "B",
-      "role": "\u5e73\u8861 / \u5b9a\u9ede",
-      "tags": [
-        "balance",
-        "center"
-      ],
-      "bestWith": [
-        "\u5e73\u8861\u6e2c\u8a66"
-      ],
-      "risks": [
-        "\u5be6\u6230\u6b0a\u91cd\u666e\u901a"
-      ]
+      "name_zh": "點"
     },
     {
       "code": "C",
       "name_en": "Cyclone",
-      "name_zh": "\u65cb\u98a8",
-      "tier": "B",
-      "role": "\u653b\u64ca\u5e73\u8861\u89c0\u5bdf",
-      "tags": [
-        "balance",
-        "attack_observer"
-      ],
-      "bestWith": [
-        "\u5e73\u8861\u653b\u64ca"
-      ],
-      "risks": [
-        "\u8cc7\u6599\u4e0d\u8db3"
-      ]
+      "name_zh": "旋風"
     },
     {
       "code": "Q",
       "name_en": "Quake",
-      "name_zh": "\u9707\u52d5",
-      "tier": "C",
-      "role": "\u8df3\u52d5 / \u4e82\u52d5\u5947\u8972",
-      "tags": [
-        "special",
-        "high_risk"
-      ],
-      "bestWith": [
-        "\u9ad8\u98a8\u96aa\u653b\u64ca"
-      ],
-      "risks": [
-        "\u6975\u4e0d\u7a69\u5b9a"
-      ]
+      "name_zh": "震動"
     },
     {
       "code": "RA",
       "name_en": "Rubber Accel",
-      "name_zh": "\u6a61\u81a0\u52a0\u901f",
-      "tier": "C",
-      "role": "\u7206\u767c\u653b\u64ca",
-      "tags": [
-        "attack",
-        "high_risk"
-      ],
-      "bestWith": [
-        "\u653b\u64ca\u5947\u8972"
-      ],
-      "risks": [
-        "\u81ea\u8017\u9ad8"
-      ]
+      "name_zh": "橡膠加速"
     },
     {
       "code": "UF",
       "name_en": "Unit Flat",
-      "name_zh": "\u55ae\u4f4d\u5e73\u9762",
-      "tier": "C",
-      "role": "\u4f4e\u8eab\u4f4d / \u7279\u5316\u653b\u64ca",
-      "tags": [
-        "attack",
-        "special"
-      ],
-      "bestWith": [
-        "\u5947\u8972\u653b\u64ca"
-      ],
-      "risks": [
-        "\u63a7\u5236\u96e3"
-      ]
+      "name_zh": "單位平面"
     },
     {
       "code": "TK",
       "name_en": "Turbo Kick",
-      "name_zh": "\u6e26\u8f2a\u8e22\u64ca",
-      "tier": "C",
-      "role": "\u6a21\u5f0f / \u7279\u5316",
-      "tags": [
-        "mode",
-        "special"
-      ],
-      "bestWith": [
-        "Sol Eclipse"
-      ],
-      "risks": [
-        "\u6a21\u5f0f\u4e0d\u7a69\uff0c\u9700\u5be6\u6e2c"
-      ]
+      "name_zh": "渦輪踢擊"
     },
     {
       "code": "TP",
       "name_en": "Trans Point",
-      "name_zh": "\u8b8a\u63db\u9ede\u8ef8",
-      "tier": "C",
-      "role": "\u6a21\u5f0f / \u5e73\u8861",
-      "tags": [
-        "mode",
-        "balance"
-      ],
-      "bestWith": [
-        "\u6a21\u5f0f\u578b\u914d\u7f6e"
-      ],
-      "risks": [
-        "\u9700\u78ba\u8a8d\u6a21\u5f0f"
-      ]
+      "name_zh": "變換點軸"
     },
     {
       "code": "Y",
       "name_en": "Yard",
-      "name_zh": "\u5ead\u9662",
-      "tier": "C",
-      "role": "\u6301\u4e45 / \u9632\u5b88\u89c0\u5bdf",
-      "tags": [
-        "stamina",
-        "observer"
-      ],
-      "bestWith": [
-        "Ghost Circle"
-      ],
-      "risks": [
-        "\u8cc7\u6599\u4e0d\u8db3"
-      ]
+      "name_zh": "庭院"
     },
     {
       "code": "M",
       "name_en": "Merge",
-      "name_zh": "\u878d\u5408",
-      "tier": "C",
-      "role": "\u653b\u64ca\u5e73\u8861",
-      "tags": [
-        "attack_balance"
-      ],
-      "bestWith": [
-        "Samurai Calibur"
-      ],
-      "risks": [
-        "\u8cc7\u6599\u4e0d\u8db3"
-      ]
+      "name_zh": "融合"
     },
     {
       "code": "Z",
       "name_en": "Zone",
-      "name_zh": "\u5340\u57df",
-      "tier": "C",
-      "role": "\u672b\u6bb5 / \u7279\u5316",
-      "tags": [
-        "stamina",
-        "special"
-      ],
-      "bestWith": [
-        "Meteor Dragoon",
-        "Scorpio Spear"
-      ],
-      "risks": [
-        "\u9700\u5be6\u6e2c\uff0c\u4e0d\u80fd\u9ad8\u4f30"
-      ]
+      "name_zh": "區域"
     },
     {
       "code": "Nr",
       "name_en": "Narrow",
-      "name_zh": "\u7a84\u8ef8",
-      "tier": "C+",
-      "role": "\u65b0\u6301\u4e45\u89c0\u5bdf",
-      "tags": [
-        "stamina",
-        "observer"
-      ],
-      "bestWith": [
-        "Whip",
-        "BrachioWhip"
-      ],
-      "risks": [
-        "\u8cc7\u6599\u4ecd\u5c11"
-      ]
+      "name_zh": "窄軸"
     },
     {
       "code": "Op",
       "name_en": "Orb Pointer",
-      "name_zh": "\u5713\u7403\u6307\u91dd",
-      "tier": "independent",
-      "role": "\u4e00\u9ad4\u5f0f\u56fa\u9396\u8ef8\u5fc3",
-      "tags": [
-        "integrated"
-      ],
-      "bestWith": [
-        "Kaiser Majesty HOp"
-      ],
-      "risks": [
-        "\u4e0d\u53ef\u7576\u4e00\u822c Bit \u5224\u65b7"
-      ]
+      "name_zh": "圓球指針"
     },
     {
       "code": "Tr",
       "name_en": "Trans Rush",
-      "name_zh": "\u8b8a\u63db\u885d\u523a",
-      "tier": "independent",
-      "role": "\u4e00\u9ad4\u5f0f\u56fa\u9396\u8ef8\u5fc3",
-      "tags": [
-        "integrated"
-      ],
-      "bestWith": [
-        "Pegasus Blast ATr"
-      ],
-      "risks": [
-        "\u4e0d\u53ef\u7576\u4e00\u822c Bit \u5224\u65b7"
-      ]
+      "name_zh": "變換衝刺"
     }
   ],
   "cxFourPiece": {
     "metalBlades": [
       {
         "code": "Blitz",
-        "name_zh": "\u9583\u64ca",
-        "role": "\u4e00\u64ca\u653b\u64ca / \u96c6\u4e2d\u91cd\u64ca\u9ede",
-        "recommendedOver": [
-          "Break"
-        ],
-        "recommendedAssist": [
-          "Knuckle",
-          "Heavy"
-        ],
-        "recommendedRatchets": [
-          "1-50",
-          "4-50",
-          "1-60",
-          "3-60"
-        ],
-        "recommendedBits": [
-          "I",
-          "LR",
-          "R",
-          "GF"
-        ],
-        "risks": [
-          "\u53cd\u4f5c\u7528\u5927\uff0c\u7b2c\u4e00\u6ce2\u6c92\u6253\u4e2d\u5bb9\u6613\u5931\u901f"
-        ],
-        "score": {
-          "attack": 3,
-          "stamina": -1,
-          "control": -1
-        }
+        "name_zh": "閃擊"
       },
       {
         "code": "Fort",
-        "name_zh": "\u5821\u58d8",
-        "role": "\u9632\u79a6 / \u6297\u58d3 / \u5316\u89e3\u653b\u64ca",
-        "recommendedOver": [
-          "Guard",
-          "Flow"
-        ],
-        "recommendedAssist": [
-          "Vertical",
-          "Heavy",
-          "Wheel",
-          "Erase"
-        ],
-        "recommendedRatchets": [
-          "9-60",
-          "5-60",
-          "7-55",
-          "9-70"
-        ],
-        "recommendedBits": [
-          "H",
-          "WB",
-          "FB",
-          "P"
-        ],
-        "risks": [
-          "\u4e3b\u52d5\u5f97\u5206\u80fd\u529b\u4e0d\u8db3"
-        ],
-        "score": {
-          "defense": 3,
-          "stamina": 1,
-          "control": 1
-        }
+        "name_zh": "堡壘"
       },
       {
         "code": "Rage",
-        "name_zh": "\u72c2\u6012",
-        "role": "anti-attack / \u53cd\u653b / \u5438\u6536\u5f8c\u53cd\u64ca",
-        "recommendedOver": [
-          "Flow"
-        ],
-        "recommendedAssist": [
-          "Erase",
-          "Heavy",
-          "Wheel"
-        ],
-        "recommendedRatchets": [
-          "9-60",
-          "5-60",
-          "7-55"
-        ],
-        "recommendedBits": [
-          "H",
-          "P",
-          "L",
-          "WB"
-        ],
-        "risks": [
-          "\u7d14\u6301\u4e45\u4e0d\u4e00\u5b9a\u8d0f\uff1b\u7d14\u653b\u64ca\u7206\u767c\u4e0d\u5982 Blitz"
-        ],
-        "score": {
-          "defense": 2,
-          "balance": 2,
-          "control": 1,
-          "attack": 1
-        }
+        "name_zh": "狂怒"
       },
       {
         "code": "Peak",
-        "name_zh": "\u6975\u8b8a",
-        "role": "\u6a21\u5f0f\u5207\u63db / \u6280\u8853\u578b\u5e73\u8861",
-        "recommendedOver": [
-          "Peak"
-        ],
-        "recommendedAssist": [
-          "Odd",
-          "Heavy",
-          "Wheel"
-        ],
-        "recommendedRatchets": [
-          "5-60",
-          "7-60",
-          "9-60",
-          "3-60"
-        ],
-        "recommendedBits": [
-          "P",
-          "L",
-          "H",
-          "R"
-        ],
-        "risks": [
-          "\u6a21\u5f0f\u65b9\u5411\u8207\u767c\u5c04\u89d2\u5ea6\u4e0d\u5c0d\u6642\u6548\u679c\u4e0d\u7a69"
-        ],
-        "score": {
-          "balance": 3,
-          "attack": 1,
-          "defense": 1
-        }
+        "name_zh": "極變"
       },
       {
         "code": "Whip",
-        "name_zh": "\u97ad\u64ca",
-        "role": "\u6301\u4e45 / \u5316\u89e3\u653b\u64ca / \u539a\u5713\u5916\u91cd\u5fc3",
-        "recommendedOver": [
-          "Outer"
-        ],
-        "recommendedAssist": [
-          "Wheel"
-        ],
-        "recommendedRatchets": [
-          "5-70",
-          "9-60",
-          "7-55",
-          "9-70"
-        ],
-        "recommendedBits": [
-          "Nr",
-          "FB",
-          "LO",
-          "B",
-          "O"
-        ],
-        "risks": [
-          "\u4e3b\u52d5\u5f97\u5206\u80fd\u529b\u4e0d\u8db3\uff0c\u65b0\u4ef6\u6a23\u672c\u4ecd\u5c11"
-        ],
-        "score": {
-          "stamina": 3,
-          "defense": 2,
-          "attack": -1,
-          "control": 1
-        }
+        "name_zh": "鞭擊"
       }
     ],
     "overBlades": [
       {
         "code": "Break",
-        "name_zh": "Break / B",
-        "role": "\u653b\u64ca\u88dc\u5f37 / \u7a81\u51fa\u6253\u9ede",
-        "bestWith": [
-          "Blitz",
-          "Blast"
-        ],
-        "risks": [
-          "\u53cd\u4f5c\u7528\u3001\u8017\u8010\u4e45\u3001\u81ea\u7206\u98a8\u96aa"
-        ],
-        "score": {
-          "attack": 2
-        }
+        "name_zh": "Break / B"
       },
       {
         "code": "Guard",
-        "name_zh": "Guard / G",
-        "role": "\u9632\u79a6\u5305\u8986 / \u6297\u58d3\u88dc\u5f37",
-        "bestWith": [
-          "Fort"
-        ],
-        "risks": [
-          "\u653b\u64ca\u8f38\u51fa\u4e0b\u964d"
-        ],
-        "score": {
-          "defense": 2,
-          "attack": -1
-        }
+        "name_zh": "Guard / G"
       },
       {
         "code": "Flow",
-        "name_zh": "Flow / F",
-        "role": "\u4f4e\u5e72\u6d89 / \u7a69\u5b9a / \u53cd\u6253\u8f14\u52a9",
-        "bestWith": [
-          "Rage",
-          "Blast",
-          "Fort"
-        ],
-        "risks": [
-          "\u672c\u8eab\u4e0d\u63d0\u4f9b\u660e\u986f\u7206\u767c"
-        ],
-        "score": {
-          "control": 1,
-          "balance": 1
-        }
+        "name_zh": "Flow / F"
       },
       {
         "code": "Peak",
-        "name_zh": "Peak / P",
-        "role": "\u6a21\u5f0f\u5207\u63db / \u914d\u91cd\u65b9\u5411\u8abf\u6574",
-        "bestWith": [
-          "Peak"
-        ],
-        "risks": [
-          "\u9700\u8981\u8a18\u9304\u65b9\u5411\uff0c\u5426\u5247\u5206\u6790\u4e0d\u6e96"
-        ],
-        "score": {
-          "balance": 2
-        }
+        "name_zh": "Peak / P"
       },
       {
         "code": "Outer",
-        "name_zh": "Outer / O",
-        "role": "\u5916\u91cd\u5fc3 / \u6301\u4e45 / \u539a\u5713\u5316\u89e3\u653b\u64ca",
-        "bestWith": [
-          "Whip"
-        ],
-        "risks": [
-          "\u4e3b\u52d5\u653b\u64ca\u5f31"
-        ],
-        "score": {
-          "stamina": 2,
-          "defense": 1
-        }
+        "name_zh": "Outer / O"
       }
     ]
   },
   "cxAssistBlades": [
     {
       "code": "S",
-      "name_en": "Slash",
-      "role": "\u4f4e\u8eab\u4f4d\u653b\u64ca\u57fa\u6e96",
-      "tier": "B",
-      "bestWith": [
-        "Brave"
-      ],
-      "risks": [
-        "\u4fdd\u7559\u4e3b\u6253\u9ede\uff0c\u4f46\u88dc\u91cd\u91cf\u6709\u9650"
-      ]
+      "name_en": "Slash"
     },
     {
       "code": "R",
-      "name_en": "Round",
-      "role": "\u4fdd\u5b88\u6301\u4e45 / \u5e72\u6d89\u5c11",
-      "tier": "B",
-      "bestWith": [
-        "Arc",
-        "Flame"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u5f97\u5206\u5f31"
-      ]
+      "name_en": "Round"
     },
     {
       "code": "B",
-      "name_en": "Bumper",
-      "role": "\u9632\u5b88\u88dc\u5f37",
-      "tier": "A-",
-      "bestWith": [
-        "Dark",
-        "Flame"
-      ],
-      "risks": [
-        "\u6297\u58d3\u589e\u52a0\u4f46\u4e3b\u52d5\u5f97\u5206\u5f31"
-      ]
+      "name_en": "Bumper"
     },
     {
       "code": "T",
-      "name_en": "Turn",
-      "role": "\u5e73\u8861\u653b\u64ca / \u91cd\u91cf\u9632\u5b88",
-      "tier": "B+",
-      "bestWith": [
-        "Xcalibur"
-      ],
-      "risks": [
-        "\u4e0d\u5920\u6975\u7aef\uff0c\u9700\u914d\u5c0d\u6b63\u78ba"
-      ]
+      "name_en": "Turn"
     },
     {
       "code": "J",
-      "name_en": "Jaggy",
-      "role": "\u5e72\u64fe\u653b\u64ca / \u4e0b\u5c64\u5e72\u64fe",
-      "tier": "B",
-      "bestWith": [
-        "Fox Brush",
-        "Brave"
-      ],
-      "risks": [
-        "\u53cd\u4f5c\u7528\u8207\u8017\u8010\u4e45\u9ad8"
-      ]
+      "name_en": "Jaggy"
     },
     {
       "code": "A",
-      "name_en": "Assault",
-      "role": "\u4e3b\u52d5\u653b\u64ca",
-      "tier": "B",
-      "bestWith": [
-        "Pegasus Blast",
-        "Brave"
-      ],
-      "risks": [
-        "\u81ea\u7206\u8207\u53cd\u4f5c\u7528\u98a8\u96aa\u9ad8"
-      ]
+      "name_en": "Assault"
     },
     {
       "code": "W",
-      "name_en": "Wheel",
-      "role": "\u6301\u4e45 / \u9632\u5b88 / \u539a\u5713\u5316\u89e3\u653b\u64ca",
-      "tier": "A+",
-      "bestWith": [
-        "Flame",
-        "Whip",
-        "Fort",
-        "Rage",
-        "Blast"
-      ],
-      "risks": [
-        "\u53ef\u80fd\u906e\u4f4f\u653b\u64ca\u4e3b\u6253\u9ede"
-      ]
+      "name_en": "Wheel"
     },
     {
       "code": "D",
-      "name_en": "Dual",
-      "role": "\u96d9\u5411 / \u6a21\u5f0f\u578b\u5e73\u8861",
-      "tier": "C+",
-      "bestWith": [
-        "Sol Eclipse"
-      ],
-      "risks": [
-        "\u6cdb\u7528\u5ea6\u9700\u5be6\u6e2c"
-      ]
+      "name_en": "Dual"
     },
     {
       "code": "F",
-      "name_en": "Free",
-      "role": "\u4f4e\u5e72\u6d89 / \u6301\u4e45\u89c0\u5bdf",
-      "tier": "C+",
-      "bestWith": [
-        "Silver Hunt"
-      ],
-      "risks": [
-        "\u516c\u5dee\u8207\u6643\u52d5\u9700\u770b\u5be6\u9ad4"
-      ]
+      "name_en": "Free"
     },
     {
       "code": "H",
-      "name_en": "Heavy",
-      "role": "\u91cd\u91cf\u6cdb\u7528 / CX \u6838\u5fc3 Assist",
-      "tier": "S",
-      "bestWith": [
-        "Brave",
-        "Blast",
-        "Rage",
-        "Fort",
-        "Majesty"
-      ],
-      "risks": [
-        "\u53ef\u80fd\u8b93\u90e8\u5206\u7d44\u5408\u8b8a\u920d"
-      ]
+      "name_en": "Heavy"
     },
     {
       "code": "Z",
-      "name_en": "Zillion",
-      "role": "\u539a\u578b\u5e72\u64fe / \u653b\u9632\u6df7\u5408",
-      "tier": "A-",
-      "bestWith": [
-        "Phoenix Rudder"
-      ],
-      "risks": [
-        "\u9ad8\u5ea6\u8207\u63a5\u89f8\u9762\u53ef\u80fd\u9020\u6210\u8010\u529b\u640d\u5931"
-      ]
+      "name_en": "Zillion"
     },
     {
       "code": "K",
-      "name_en": "Knuckle",
-      "role": "\u96c6\u4e2d\u653b\u64ca / \u9ad8\u53cd\u4f5c\u7528",
-      "tier": "B+",
-      "bestWith": [
-        "Blitz"
-      ],
-      "risks": [
-        "\u53cd\u4f5c\u7528\u3001\u81ea\u7206\u3001\u7e8c\u822a\u4e0b\u964d"
-      ]
+      "name_en": "Knuckle"
     },
     {
       "code": "V",
-      "name_en": "Vertical",
-      "role": "\u9632\u5b88\u7246 / \u5782\u76f4\u63a5\u89f8",
-      "tier": "B",
-      "bestWith": [
-        "Fort"
-      ],
-      "risks": [
-        "\u53ef\u80fd\u8b8a\u6210\u88ab\u6293\u6253\u9ede"
-      ]
+      "name_en": "Vertical"
     },
     {
       "code": "E",
-      "name_en": "Erase",
-      "role": "anti-attack / \u4e0b\u65b9\u653b\u64ca\u5438\u6536",
-      "tier": "A",
-      "bestWith": [
-        "Rage",
-        "Fort"
-      ],
-      "risks": [
-        "\u6cdb\u7528\u5ea6\u4e0d\u5982 Heavy\uff0c\u4e3b\u52d5\u6027\u4e0d\u8db3"
-      ]
+      "name_en": "Erase"
     },
     {
       "code": "O",
-      "name_en": "Odd",
-      "role": "\u6a21\u5f0f\u578b / \u504f\u91cd\u7279\u5316",
-      "tier": "C+",
-      "bestWith": [
-        "Peak"
-      ],
-      "risks": [
-        "\u504f\u91cd\u9020\u6210\u4e0d\u7a69\uff0c\u9700\u8981\u5be6\u6e2c\u65b9\u5411"
-      ]
+      "name_en": "Odd"
     }
   ],
   "cxThreePiece": [
     {
       "name_en": "Dran Brave",
-      "name_zh": "\u84bc\u9f8d\u52c7\u6c23",
+      "name_zh": "蒼龍勇氣",
       "mainBlade": "Brave",
-      "defaultAssist": "Slash",
-      "role": "\u653b\u64ca / \u4e0a\u52fe\u653b\u64ca / \u901f\u5ea6\u653b\u64ca",
-      "recommendedAssist": [
-        "Heavy",
-        "Slash",
-        "Assault",
-        "Jaggy"
-      ],
-      "recommendedRatchets": [
-        "1-60",
-        "3-60",
-        "4-50",
-        "1-50",
-        "6-60"
-      ],
-      "recommendedBits": [
-        "R",
-        "LR",
-        "V",
-        "GF",
-        "I"
-      ],
-      "risks": [
-        "\u82e5\u642d\u592a\u4fdd\u5b88 Bit\uff0c\u4e3b\u6230\u5203\u653b\u64ca\u6027\u88ab\u6d6a\u8cbb\uff1b\u66b4\u885d Bit \u6709\u81ea\u7206\u98a8\u96aa"
-      ],
-      "confidence": "\u4e2d"
+      "defaultAssist": "Slash"
     },
     {
       "name_en": "Wizard Arc",
-      "name_zh": "\u9b54\u5c0e\u81f3\u5c0a",
+      "name_zh": "魔導至尊",
       "mainBlade": "Arc",
-      "defaultAssist": "Round",
-      "role": "\u6301\u4e45 / \u4f4e\u8eab\u4f4d\u7a69\u5b9a / \u5e73\u8861\u6301\u4e45",
-      "recommendedAssist": [
-        "Round",
-        "Wheel",
-        "Heavy",
-        "Bumper"
-      ],
-      "recommendedRatchets": [
-        "4-55",
-        "7-55",
-        "9-60",
-        "5-60"
-      ],
-      "recommendedBits": [
-        "LO",
-        "B",
-        "O",
-        "FB",
-        "H"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u5f97\u5206\u4e0d\u8db3\uff1b\u9047\u5f37\u653b\u9700\u9760 Ratchet/Bit \u88dc\u6297\u58d3"
-      ],
-      "confidence": "\u4e2d"
+      "defaultAssist": "Round"
     },
     {
       "name_en": "Perseus Dark",
-      "name_zh": "\u82f1\u4ed9\u5e7d\u51a5",
+      "name_zh": "英仙幽冥",
       "mainBlade": "Dark",
-      "defaultAssist": "Bumper",
-      "role": "\u9632\u79a6 / \u5e73\u8861 / \u9632\u5b88\u6301\u4e45",
-      "recommendedAssist": [
-        "Bumper",
-        "Wheel",
-        "Heavy",
-        "Erase"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "7-55",
-        "6-80"
-      ],
-      "recommendedBits": [
-        "H",
-        "WB",
-        "W",
-        "FB",
-        "B"
-      ],
-      "risks": [
-        "80 \u9ad8\u5ea6\u5bb9\u6613\u88ab\u6253\u56fa\u9396\uff1b\u4e3b\u52d5\u5f97\u5206\u504f\u4f4e"
-      ],
-      "confidence": "\u4e2d\u4f4e\uff5e\u4e2d"
+      "defaultAssist": "Bumper"
     },
     {
       "name_en": "Xeno Xcalibur",
-      "name_zh": "\u60e1\u9b54\u7375\u9b42",
+      "name_zh": "惡魔獵魂",
       "mainBlade": "Xcalibur",
-      "defaultAssist": "Turn",
-      "role": "\u653b\u64ca / \u53cd\u6253 / \u5e73\u8861\u653b\u64ca",
-      "recommendedAssist": [
-        "Turn",
-        "Heavy",
-        "Assault",
-        "Jaggy"
-      ],
-      "recommendedRatchets": [
-        "1-60",
-        "3-60",
-        "5-60",
-        "4-50"
-      ],
-      "recommendedBits": [
-        "R",
-        "LR",
-        "P",
-        "H",
-        "GF"
-      ],
-      "risks": [
-        "Assist \u592a\u4fdd\u5b88\u8f38\u51fa\u4e0d\u660e\u986f\uff1b\u592a\u6fc0\u9032\u53cd\u4f5c\u7528\u9ad8"
-      ],
-      "confidence": "\u4e2d\u4f4e\uff5e\u4e2d"
+      "defaultAssist": "Turn"
     },
     {
       "name_en": "Fox Brush",
-      "name_zh": "\u6975\u72d0\u4e5d\u5c3e",
+      "name_zh": "極狐九尾",
       "mainBlade": "Brush",
-      "defaultAssist": "Jaggy",
-      "role": "\u5e72\u64fe\u653b\u64ca / \u5947\u8972 / \u4e0b\u5c64\u5e72\u64fe",
-      "recommendedAssist": [
-        "Jaggy",
-        "Heavy",
-        "Assault",
-        "Slash"
-      ],
-      "recommendedRatchets": [
-        "1-60",
-        "3-60",
-        "4-50",
-        "9-60"
-      ],
-      "recommendedBits": [
-        "R",
-        "LR",
-        "GR",
-        "GF",
-        "P"
-      ],
-      "risks": [
-        "\u53cd\u4f5c\u7528\u8207\u8017\u8010\u4e45\u9ad8\uff0c\u7a69\u5b9a\u6027\u4e0d\u5982\u4e3b\u6d41\u653b\u64ca\u6838\u5fc3"
-      ],
-      "confidence": "\u4e2d\u4f4e"
+      "defaultAssist": "Jaggy"
     },
     {
       "name_en": "Pegasus Blast",
-      "name_zh": "\u5929\u99ac\u7206\u64ca",
+      "name_zh": "天馬爆擊",
       "mainBlade": "Blast",
-      "defaultAssist": "Assault",
-      "role": "\u91cd\u64ca\u653b\u64ca / \u9ad8\u7206\u767c\u653b\u64ca",
-      "recommendedAssist": [
-        "Heavy",
-        "Assault",
-        "Slash",
-        "Jaggy"
-      ],
-      "recommendedRatchets": [
-        "1-60",
-        "3-60",
-        "4-50",
-        "7-60"
-      ],
-      "recommendedBits": [
-        "R",
-        "LR",
-        "GF",
-        "A",
-        "V",
-        "P"
-      ],
-      "risks": [
-        "\u66b4\u885d\u8ef8\u5fc3\u5bb9\u6613\u81ea\u7206\uff1b\u642d\u6301\u4e45 Bit \u6703\u8def\u7dda\u62b5\u6d88"
-      ],
-      "confidence": "\u4e2d"
+      "defaultAssist": "Assault"
     },
     {
       "name_en": "Cerberus Flame",
-      "name_zh": "\u9b54\u72ac\u70c8\u7130",
+      "name_zh": "魔犬烈焰",
       "mainBlade": "Flame",
-      "defaultAssist": "Wheel",
-      "role": "\u5e73\u8861 / \u6301\u4e45 / \u9632\u5b88\u6301\u4e45",
-      "recommendedAssist": [
-        "Wheel",
-        "Round",
-        "Heavy",
-        "Bumper"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "7-55",
-        "7-60"
-      ],
-      "recommendedBits": [
-        "B",
-        "O",
-        "FB",
-        "H",
-        "LO",
-        "P"
-      ],
-      "risks": [
-        "\u4e3b\u52d5\u64ca\u6bba\u80fd\u529b\u4e0d\u8db3\uff1b\u9047\u7d14\u6301\u4e45\u6838\u5fc3\u9700\u9760 Bit"
-      ],
-      "confidence": "\u4e2d"
+      "defaultAssist": "Wheel"
     },
     {
       "name_en": "Sol Eclipse",
-      "name_zh": "\u7130\u795e\u6ec5\u4e16",
+      "name_zh": "焰神滅世",
       "mainBlade": "Eclipse",
-      "defaultAssist": "Dual",
-      "role": "\u653b\u64ca / \u5e73\u8861 / \u96d9\u5411\u63a5\u89f8\u7279\u5316",
-      "recommendedAssist": [
-        "Dual",
-        "Heavy",
-        "Assault",
-        "Turn"
-      ],
-      "recommendedRatchets": [
-        "5-70",
-        "3-60",
-        "1-60",
-        "9-60"
-      ],
-      "recommendedBits": [
-        "TK",
-        "R",
-        "LR",
-        "P",
-        "L"
-      ],
-      "risks": [
-        "TK / \u6a21\u5f0f\u578b Bit \u4e0d\u7a69\uff1bDual \u6cdb\u7528\u5ea6\u5f85\u6e2c"
-      ],
-      "confidence": "\u4e2d\u4f4e"
+      "defaultAssist": "Dual"
     },
     {
       "name_en": "Silver Hunt",
-      "name_zh": "\u9280\u72fc\u72e9\u7375",
+      "name_zh": "銀狼狩獵",
       "mainBlade": "Hunt",
-      "defaultAssist": "Free",
-      "role": "\u5e73\u8861 / \u4f4e\u5e72\u6d89 / \u6301\u4e45\u89c0\u5bdf",
-      "recommendedAssist": [
-        "Free",
-        "Heavy",
-        "Wheel",
-        "Round"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "7-55"
-      ],
-      "recommendedBits": [
-        "FB",
-        "O",
-        "B",
-        "H",
-        "LO"
-      ],
-      "risks": [
-        "Free \u6a5f\u69cb\u53ef\u80fd\u6709\u516c\u5dee\u8207\u6643\u52d5\uff1b\u4e3b\u52d5\u5f97\u5206\u4e0d\u8db3"
-      ],
-      "confidence": "\u4e2d\u4f4e"
+      "defaultAssist": "Free"
     },
     {
       "name_en": "Kaiser Majesty",
-      "name_zh": "\u5e1d\u738b\u5a01\u80fd",
+      "name_zh": "帝王威能",
       "mainBlade": "Majesty",
-      "defaultAssist": "Heavy",
-      "role": "\u91cd\u91cf\u5e73\u8861 / anti-attack / \u7a69\u5b9a\u6838\u5fc3",
-      "recommendedAssist": [
-        "Heavy",
-        "Wheel",
-        "Bumper",
-        "Erase"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "5-60",
-        "7-55",
-        "3-60"
-      ],
-      "recommendedBits": [
-        "H",
-        "P",
-        "R",
-        "FB",
-        "O"
-      ],
-      "risks": [
-        "Bit \u592a\u4fdd\u5b88\u6703\u7f3a\u4e3b\u52d5\u5f97\u5206\uff1b\u592a\u66b4\u885d\u6703\u81ea\u8017"
-      ],
-      "confidence": "\u4e2d\u9ad8"
+      "defaultAssist": "Heavy"
     },
     {
       "name_en": "Phoenix Rudder",
-      "name_zh": "\u9cf3\u51f0\u9583\u7130",
+      "name_zh": "鳳凰閃焰",
       "mainBlade": "Rudder",
-      "defaultAssist": "Zillion",
-      "role": "\u539a\u578b\u5e72\u64fe / \u653b\u64ca\u9632\u5b88\u6df7\u5408",
-      "recommendedAssist": [
-        "Zillion",
-        "Heavy",
-        "Wheel",
-        "Erase"
-      ],
-      "recommendedRatchets": [
-        "9-60",
-        "3-60",
-        "1-60",
-        "9-70"
-      ],
-      "recommendedBits": [
-        "H",
-        "R",
-        "P",
-        "WB",
-        "L"
-      ],
-      "risks": [
-        "Zillion \u9ad8\u5ea6 80\uff0c\u53ef\u80fd\u8017\u8010\u4e45\uff0c\u4e5f\u53ef\u80fd\u906e\u4e3b\u6253\u9ede"
-      ],
-      "confidence": "\u4e2d\u4f4e\uff5e\u4e2d"
+      "defaultAssist": "Zillion"
     }
   ],
-  "metaCombos": [
-    {
-      "combo": "Wizard Rod 3-60B / 9-60B",
-      "role": "\u7d14\u6301\u4e45\u6838\u5fc3",
-      "confidence": "\u9ad8"
-    },
-    {
-      "combo": "Wizard Rod 1-60H / 5-60H",
-      "role": "\u6297\u653b\u64ca\u6301\u4e45",
-      "confidence": "\u9ad8"
-    },
-    {
-      "combo": "Wizard Rod 9-70FB",
-      "role": "\u6301\u4e45 / \u672b\u6bb5",
-      "confidence": "\u4e2d\u9ad8"
-    },
-    {
-      "combo": "Clock Mirage 7-55LO",
-      "role": "\u4f4e\u8eab\u4f4d\u6301\u4e45",
-      "confidence": "\u4e2d\u9ad8"
-    },
-    {
-      "combo": "Golem Rock 9-60H",
-      "role": "\u9632\u5b88\u53cd\u6253",
-      "confidence": "\u4e2d\u9ad8"
-    },
-    {
-      "combo": "Phoenix Wing 1-60LR / 3-60R",
-      "role": "\u53ef\u63a7\u653b\u64ca",
-      "confidence": "\u9ad8"
-    },
-    {
-      "combo": "Shark Scale 1-70LR / 1-60K / 3-60LR",
-      "role": "\u4f4e\u8eab\u4f4d\u653b\u64ca / \u63a7\u5236\u653b\u64ca",
-      "confidence": "\u9ad8"
-    },
-    {
-      "combo": "Cobalt Dragoon 5-60E / 9-60E / 3-60E",
-      "role": "\u5de6\u8ff4\u65cb\u672b\u6bb5",
-      "confidence": "\u9ad8"
-    },
-    {
-      "combo": "Aero Pegasus 7-60L / 1-60R",
-      "role": "\u653b\u64ca\u6301\u4e45\u6df7\u5408 / \u53ef\u63a7\u653b\u64ca",
-      "confidence": "\u9ad8"
-    },
-    {
-      "combo": "Silver Wolf 9-60LO / 9-60FB",
-      "role": "\u4f4e\u8eab\u4f4d\u6301\u4e45 / \u9632\u5b88\u6301\u4e45",
-      "confidence": "\u4e2d\u9ad8"
-    },
-    {
-      "combo": "Blast + Heavy / Blast + Wheel",
-      "role": "CX \u653b\u64ca\u5e73\u8861 / CX \u5e73\u8861\u6301\u4e45",
-      "confidence": "\u4e2d\u9ad8"
-    },
-    {
-      "combo": "Rage + Flow + Erase",
-      "role": "anti-attack / \u53cd\u653b",
-      "confidence": "\u4e2d\u9ad8"
-    },
-    {
-      "combo": "Blitz + Break + Knuckle + 1-50I",
-      "role": "\u4f4e\u8eab\u4f4d\u4e00\u64ca\u7206\u767c",
-      "confidence": "\u4e2d\u9ad8"
-    },
-    {
-      "combo": "Whip + Outer + Wheel",
-      "role": "\u6301\u4e45 / \u5316\u89e3\u653b\u64ca",
-      "confidence": "\u4f4e\uff5e\u4e2d"
-    }
-  ],
-  "analysisRules": {
-    "positionWeights": {
-      "bladeOrCxBlade": 0.45,
-      "bit": 0.35,
-      "ratchet": 0.2
-    },
-    "corePrinciples": [
-      "Blade / CX \u4e3b\u6230\u5203\u6c7a\u5b9a\u4e3b\u8981\u8def\u7dda\uff0cBit \u6c7a\u5b9a\u904b\u52d5\u6a21\u5f0f\u8207\u52dd\u5229\u65b9\u5f0f\uff0cRatchet \u53ea\u4fee\u6b63\u9ad8\u5ea6\u3001\u6253\u9ede\u8207\u7206\u88c2\u5b89\u5168\u3002",
-      "60 \u9ad8\u5ea6\u4e0d\u80fd\u81ea\u52d5\u5224\u6210\u6301\u4e45\uff1b\u653b\u64ca Blade + \u653b\u64ca Bit \u4ecd\u61c9\u5224\u653b\u64ca\u3002",
-      "70/80/85 \u9ad8\u5ea6\u4e0d\u80fd\u4e00\u5f8b\u6263\u5206\uff1b\u82e5\u6709\u660e\u78ba\u653b\u64ca\u6253\u9ede\u76ee\u7684\u53ef\u52a0\u653b\u64ca\u4e26\u63d0\u793a\u7206\u88c2\u98a8\u96aa\u3002",
-      "CX \u5fc5\u9808\u62c6\u5c64\u5206\u6790\uff1aMain/Metal Blade\u3001Over Blade\u3001Assist Blade\u3001Ratchet\u3001Bit\u3002",
-      "\u6c92\u6709\u660e\u78ba\u98a8\u96aa\u6642\uff0c\u4e0d\u986f\u793a\u300e\u76ee\u524d\u6c92\u6709\u660e\u986f\u9805\u76ee\u300f\uff1b\u6539\u7528\u5be6\u6e2c\u5efa\u8b70\u53e5\u3002"
-    ],
-    "comboSynergyRules": [
-      {
-        "if": "attack blade + R/LR/F/LF/GR",
-        "then": "\u53ef\u63a7\u653b\u64ca\uff1battack +2, control +1"
-      },
-      {
-        "if": "heavy attack blade + I/GF/A/V/J",
-        "then": "\u9ad8\u7206\u767c\u653b\u64ca / \u5947\u8972\u653b\u64ca\uff1battack +3, control -1, \u52a0\u81ea\u7206\u8207\u5931\u901f\u98a8\u96aa"
-      },
-      {
-        "if": "attack blade + B/O/DB/FB/LO",
-        "then": "\u8def\u7dda\u53ef\u80fd\u62b5\u6d88\uff1b\u63d0\u793a\u4e3b\u52d5\u5f97\u5206\u4e0b\u964d\uff0c\u9664\u975e\u523b\u610f\u505a\u53cd\u6253"
-      },
-      {
-        "if": "stamina blade + B/O/DB/FB/LO",
-        "then": "\u6301\u4e45 / \u672b\u6bb5\uff1bstamina +3, control +1"
-      },
-      {
-        "if": "stamina blade + attack bit",
-        "then": "\u53cd\u6253 / \u7279\u5316\u6df7\u5408\uff1b\u4e0d\u53ef\u76f4\u63a5\u5224\u7d14\u653b\u64ca"
-      },
-      {
-        "if": "left spin blade + E",
-        "then": "\u5de6\u8ff4\u65cb\u672b\u6bb5 / \u53cd\u65cb\u6838\u5fc3\uff1bstamina +3, control +1"
-      },
-      {
-        "if": "defense/heavy blade + H/WB/FB",
-        "then": "\u9632\u5b88\u53cd\u6253 / \u9632\u5b88\u6301\u4e45\uff1bdefense +2, stamina +1"
-      },
-      {
-        "if": "ratchet 1-60 + attack blade",
-        "then": "\u504f\u91cd\u6253\u9ede\u653b\u64ca\uff1battack +2, control +1"
-      },
-      {
-        "if": "ratchet 1-70 + Shark Scale",
-        "then": "\u4e2d\u9ad8\u5ea6\u53ef\u63a7\u653b\u64ca\uff1battack +2\uff0c\u63d0\u793a 70 \u9ad8\u5ea6\u7206\u88c2\u98a8\u96aa"
-      },
-      {
-        "if": "ratchet 1-50/4-50/4-55 + attack bit",
-        "then": "\u4f4e\u8eab\u4f4d\u5947\u8972\u653b\u64ca\uff1battack +2, burstSafety +1\uff0c\u63d0\u793a\u522e\u5730\u8207\u5931\u7a69"
-      },
-      {
-        "if": "ratchet 7-55/9-65 + stamina bit",
-        "then": "\u4f4e\u8eab\u4f4d\u6301\u4e45\uff1bstamina +2, burstSafety +1"
-      },
-      {
-        "if": "Blitz + Break + Knuckle",
-        "then": "\u4f4e\u8eab\u4f4d\u4e00\u64ca\u7206\u767c\uff1battack +4\uff0c\u63d0\u793a\u9ad8\u53cd\u4f5c\u7528"
-      },
-      {
-        "if": "Rage + Flow + Erase",
-        "then": "anti-attack / \u9632\u5b88\u53cd\u6253\uff1bdefense +3, balance +2"
-      },
-      {
-        "if": "Whip + Outer + Wheel",
-        "then": "\u6301\u4e45 / \u5316\u89e3\u653b\u64ca\uff1bstamina +3, defense +2"
-      },
-      {
-        "if": "Assist Heavy",
-        "then": "attack +1, balance +1, metaConfidence +1"
-      },
-      {
-        "if": "Assist Wheel",
-        "then": "stamina +1, defense +2\uff0c\u63d0\u793a\u53ef\u80fd\u906e\u4f4f\u653b\u64ca\u4e3b\u6253\u9ede"
-      },
-      {
-        "if": "bit Op/Tr",
-        "then": "\u56fa\u9396\u4e00\u9ad4\u5f0f\u8ef8\u5fc3\uff0c\u4e0d\u53ef\u7528\u4e00\u822c Ratchet + Bit \u908f\u8f2f\u5224\u65b7"
-      }
-    ],
-    "emptyResultText": {
-      "risks": "\u76ee\u524d\u6c92\u6709\u91cd\u5927\u7d50\u69cb\u6027\u98a8\u96aa\uff0c\u5efa\u8b70\u5148\u5be6\u6e2c\u767c\u5c04\u7a69\u5b9a\u6027\u8207\u5c0d\u653b\u64ca\u578b\u7684\u6297\u58d3\u80fd\u529b\u3002",
-      "suggestions": "\u6b64\u914d\u7f6e\u65b9\u5411\u660e\u78ba\uff0c\u53ef\u5148\u4fdd\u7559\u6838\u5fc3\u96f6\u4ef6\u6e2c\u8a66\uff0c\u518d\u4f9d\u5be6\u6230\u7d50\u679c\u5fae\u8abf\u56fa\u9396\u6216\u8ef8\u5fc3\u3002"
-    }
-  }
+  "reportedComboObservations": []
 }

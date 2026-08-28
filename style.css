@@ -1465,7 +1465,6 @@ td select {
 /* Shared content cards used by information and feature pages */
 .info-card,
 .feature-card,
-.analysis-panel,
 .admin-card,
 .preview-panel {
   border-color: var(--line) !important;

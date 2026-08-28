@@ -12,8 +12,8 @@
   <link rel="manifest" href="manifest.json?v=20260715-ui1" />
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>更新紀錄｜戰鬥陀螺管理表</title>
-  <link rel="stylesheet" href="style.css?v=20260716-design4" />
-  <link rel="stylesheet" href="site-menu.css?v=20260805-ui3" />
+  <link rel="stylesheet" href="style.css?v=20260828-reference-only" />
+  <link rel="stylesheet" href="site-menu.css?v=20260828-reference-only" />
   <style>
     .site-nav { display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 18px; }
     .site-nav a { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:9px 12px; }
@@ -62,8 +62,6 @@
       <div class="version-meta">2026-07-24</div>
       <ul class="update-list">
         <li><span class="change-tag">資料</span>加入 2026-07-24 的 29 條主流、次主流、新興、冷門成功與實驗路線，以及對應資料快照與證據政策。</li>
-        <li><span class="change-tag">判讀</span>主流與次主流可增加分析信心；新興、冷門成功與實驗案例不作強推薦，其中實驗案例完全不增加 Meta 分數。</li>
-        <li><span class="change-tag">提醒</span>分析頁會明確顯示「前段名次紀錄，不等於逐場勝率」，低樣本配置另加警示。</li>
         <li><span class="change-tag">修正</span>補入 G 軸心、移除不存在的 8-60／8-80，並補齊 UX-19 戰刃一體式與 H 軸心結構資料。</li>
         <li><span class="change-tag">收藏</span>原裝配置仍只供收藏自動帶入，保留 213 筆現有資料並補上完整型號與主型號索引，不參與性能評分。</li>
       </ul>
@@ -74,8 +72,6 @@
       <div class="version-meta">2026-07-23</div>
       <ul class="update-list">
         <li><span class="change-tag">配置</span>修正列尚在修改時，其他新增或刪除動作可能把下拉選單文字誤存到雲端的問題；未按保存前一律維持原資料。</li>
-        <li><span class="change-tag">分析</span>修正同名零件優先讀到舊版資料，讓 2026-07-11 的新版 Tier、相性與配置路線正常生效。</li>
-        <li><span class="change-tag">規則</span>補上 UX-20 戰刃一體式無固鎖分析規則，並同步 UX-01 蒼龍爆刃、UX-02 惡魔重錘、UX-20 榮耀戰神名稱。</li>
         <li><span class="change-tag">後台</span>管理員使用者列表改以實際更新時間排序，不再依格式化日期文字排序。</li>
       </ul>
     </div>
@@ -91,7 +87,6 @@
         <li><span class="change-tag">優化</span>恢復配置卡結構標籤與三個等寬操作按鈕；收藏卡改為標籤、刪除同列並依內容自然收合，同時修正手機裁切與建議卡互相拉長。</li>
         <li><span class="change-tag">同步</span>修正新增後立即刪除被補回、同步狀態反覆切換及卡片持續重建而無法點擊。</li>
         <li><span class="change-tag">資料</span>收藏配置與參賽紀錄改為分欄合併儲存，避免不同頁面互相覆蓋資料。</li>
-        <li><span class="change-tag">教學</span>依新版收藏、庫存、快速配置、分析與賽事流程重寫使用教學。</li>
         <li><span class="change-tag">後台</span>管理員唯讀檢視中的收藏與配置紀錄改為新版卡片呈現，維持不可修改、刪除或還原。</li>
         <li><span class="change-tag">原裝</span>後台會依最新原裝資料即時補齊收藏顯示；舊收藏可在使用者下次登入時由本人權限自動更新，無法唯一辨識的資料不會覆蓋。</li>
         <li><span class="change-tag">相容</span>保留既有資料、Google 登入、Firestore、CX 規則、庫存防呆與配置／歷史操作流程。</li>
@@ -102,43 +97,21 @@
     <details class="version-archive">
       <summary>查看歷史版本（v1.2.0～v1.7.0）</summary>
     <div class="info-card">
-      <div class="version-title">v1.7.0｜2026-07-11 資料庫與分析規則更新</div>
+      <div class="version-title">v1.7.0｜2026-07-11 資料更新</div>
       <div class="version-meta">2026-07-11</div>
       <ul class="update-list">
         <li><span class="change-tag">資料</span>合併 2026-07-11 Beyblade X 增量資料，新增 BX-49 蒼龍突擊、CX-18 腕龍鞭擊與多筆主流、次主流、特殊成功配置路線。</li>
-        <li><span class="change-tag">規則</span>新增 7 筆 CX priority rules，命中優先規則時會鎖定定位，避免被一般分數誤判。</li>
-        <li><span class="change-tag">名稱</span>修正名稱與縮寫對照：I 為 Ignition、Y 為 Yielding、極變為 Delta；Bit 分析句維持使用縮寫。</li>
-        <li><span class="change-tag">分析</span>調整分析流程為 alias 正規化、基礎向量、priority rules、情境規則、衝突偵測、同尺度計分與語意去重。</li>
-        <li><span class="change-tag">推薦</span>successful_rogue 與 single_sample 路線只作測試提示，不列為主要推薦，也不自動判定為路線衝突。</li>
-        <li><span class="change-tag">資料量</span>分析資料庫更新後：Blade 77 筆、Part 12 筆、Priority Rule 7 筆、Alias 8 筆、Bit 50 筆。</li>
-        <li><span class="change-tag">測試</span>完成 2026-07-11 regression tests：名稱顯示 5/5、Bit 顯示 4/4、分析邏輯 9/9 全部通過。</li>
         <li><span class="change-tag">註記</span>當時 BX-50 與 UX-20 尚未加入；UX-20 已於 2026-07-16 依確認資料補入。</li>
       </ul>
     </div>    <div class="info-card">
-      <div class="version-title">v1.6.0｜配置分析資料 v1.8 與推薦體驗優化</div>
+      <div class="version-title">v1.6.0｜零件資料更新</div>
       <div class="version-meta">2026-07-01</div>
       <ul class="update-list">
         <li><span class="change-tag">資料</span>整合 Beyblade X Codex v1.8 資料包，優先使用 ASCII-safe 資料庫，降低中文亂碼風險。</li>
-        <li><span class="change-tag">分析</span>一般 BX / UX 配置分析優先使用 v1.8 helper；CX 分析保留既有穩定相容邏輯作為 fallback。</li>
-        <li><span class="change-tag">資料量</span>分析資料庫擴充至上蓋 50 筆、固鎖 37 筆、軸心 49 筆，並補入 CX 主要戰刃、金屬戰刃、Over 與輔助戰刃資料。</li>
-        <li><span class="change-tag">快捷</span>第三區配置紀錄每列新增「分析」按鈕，可直接帶入配置分析頁並自動分析，不會修改資料或扣除庫存。</li>
-        <li><span class="change-tag">手機</span>庫存推薦結果改為可展開卡片，手機版預設只展開第一筆，減少畫面過長。</li>
-        <li><span class="change-tag">成本</span>庫存推薦加入 60 秒頁面快取，短時間重複點擊不會重新讀取 Firestore。</li>
-        <li><span class="change-tag">提醒</span>補強說明：配置分析與推薦僅供理論參考，不保證實戰一定有效或取得勝利。</li>
         <li><span class="change-tag">備份</span>本次更新後可直接從 GitHub 下載完整專案作為備份檔。</li>
       </ul>
     </div>
-    <div class="info-card">
-      <div class="version-title">v1.5.7｜配置分析</div>
-      <div class="version-meta">2026-06-30</div>
-      <ul class="update-list">
-        <li><span class="change-tag">新增</span>新增配置分析頁，可輸入 BX / UX 配置或 CX 三件式、CX 分體式配置進行分析。</li>
-        <li><span class="change-tag">CX</span>CX 分析會區分「紋章鎖 + 主要戰刃 + 輔助戰刃」與「紋章鎖 + 金屬戰刃 + 超越戰刃 + 輔助戰刃」。</li>
-        <li><span class="change-tag">防呆</span>Op / Tr 固鎖一體式軸心會提示不能再搭配一般固鎖。</li>
-        <li><span class="change-tag">引擎</span>接入 analyzeCombo() 規則引擎，顯示一句話定位、七維分數、改裝建議、3G / 5G 建議位置與信心等級。</li>
-        <li><span class="change-tag">說明</span>分析結果只做理論判讀，不會保存、不會修改配置紀錄，也不會扣除庫存。</li>
-      </ul>
-    </div>
+
 
     <div class="info-card">
       <div class="version-title">v1.5.6｜固鎖與軸心防呆規則</div>
@@ -250,6 +223,6 @@
     </div>
     </details>
   </div>
-  <script src="site-menu.js?v=20260805-ui3"></script>
+  <script src="site-menu.js?v=20260828-reference-only"></script>
 </body>
 </html>
