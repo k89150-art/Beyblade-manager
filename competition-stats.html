@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d12">
+  <title>競賽統計｜戰鬥陀螺管理表</title>
+  <link rel="icon" href="app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="site-menu.css?v=20260829-stats1">
+  <link rel="stylesheet" href="competition-stats.css?v=20260829-density4">
+</head>
+<body class="stats-page">
+  <a class="skip-link" href="#statistics-main">跳至競賽統計</a>
+  <main id="statistics-main" class="stats-main">
+    <div id="load-state" class="load-state" role="status">正在載入競賽統計…</div>
+    <div id="error-state" class="error-state" role="alert" hidden><h1>競賽統計暫時無法載入</h1><p id="error-message"></p><button type="button" id="retry-load">重新載入</button></div>
+    <div id="stats-home" hidden>
+      <header class="stats-hero"><p class="eyebrow">BEYBLADE X / CX · COMPETITION DATA</p><h1>競賽統計</h1><p>從零件熱門度，查看來源記錄的上蓋與完整配置統計。</p></header>
+      <section class="search-section" aria-label="搜尋上蓋">
+        <label for="blade-search">搜尋上蓋</label>
+        <div class="search-controls"><input id="blade-search" type="search" autocomplete="off" placeholder="中文、英文、日文或零件 ID；Enter 開啟" aria-controls="search-results" aria-describedby="search-help search-keyboard-help"><button type="button" id="clear-search">清除</button></div>
+        <p id="search-help">支援中文、英文、日文及零件 ID</p><span id="search-keyboard-help" class="sr-only">可使用上下方向鍵選擇搜尋結果，按 Enter 開啟。</span>
+        <div id="search-results-panel" hidden><div class="search-results-heading"><p id="search-count" role="status"></p><button id="close-search" type="button">收起搜尋結果</button></div><ul id="search-results" aria-label="上蓋搜尋結果"></ul></div>
+      </section>
+      <div class="section-title"><div><p class="eyebrow">METABEYS</p><h2>Part Popularity</h2></div><span>依來源名次 · 初始 Top 10</span></div>
+      <div id="category-tabs"></div>
+      <div id="leaderboards" class="leaderboards"></div>
+      <footer id="meta-source"></footer>
+    </div>
+    <article id="stats-detail" hidden></article>
+    <details class="metric-definitions" id="metric-definitions" hidden><summary>統計指標怎麼看？</summary><dl><dt>Part Popularity</dt><dd>MetaBeys 原站的零件使用熱門度。</dd><dt>Usage</dt><dd>Beywatch 原站的上蓋使用占比。</dd><dt>Pick %</dt><dd>指定上蓋使用該固鎖或軸心的選用占比。</dd><dt>1st Rate</dt><dd>Beywatch 原站定義的第一名比例指標。</dd><dt>Top Cuts</dt><dd>Beywatch 記錄的前段／上位出現數。</dd></dl></details>
+  </main>
+  <script src="site-menu.js?v=20260829-stats1"></script>
+  <script type="module" src="competition-stats.js?v=20260829-density4"></script>
+</body>
+</html>

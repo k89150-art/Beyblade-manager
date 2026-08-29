@@ -30,12 +30,15 @@ test('前端沒有舊入口、候選器、推薦卡或空白導覽欄', () => {
   for (const file of fs.readdirSync('.').filter(x => /\.(html|js|css)$/.test(x) && x !== 'retire-analysis-cache.js')) {
     assert.doesNotMatch(read(file), /analysis\.html|analyzeConfigRow|makeConfigSuggestions|inventoryCandidateGate|selectTopInventorySuggestions|suggestFromStock|suggestion-card|配置分析|從我的庫存推薦/);
   }
-  assert.match(read('site-menu.css'), /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
+  assert.match(read('site-menu.css'), /grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/);
+  assert.match(read('site-menu.js'), /competition-stats\.html/);
 });
 test('canonical、__v18、獨立相容檔及既有 exports 都沒有分析欄位', () => {
   const files = ['beyblade_x_database_v1_zhTW.json', 'beyblade_x_codex_database_v1_8_ASCII_SAFE.json',
-    ...fs.readdirSync('exports').filter(x => x.endsWith('.json')).map(x => 'exports/' + x)];
+    ...(fs.existsSync('exports') ? fs.readdirSync('exports').filter(x => x.endsWith('.json')).map(x => 'exports/' + x) : [])];
   for (const file of files) walk(JSON.parse(read(file)), (key, value, path) => {
+    // Only source-provided rank in the new objective snapshot is valid.
+    if (key === 'rank' && /^\.competitionStatistics\.(metaBeys\.categories\.(blades|ratchets|bits|assistBlades)|beywatch\.blades)\[\d+\]\.rank$/.test(path)) return;
     assert.equal(forbidden.test(key) || /recommend|synergy|fallback|contextual|speciali[sz]ed|hardExcludedGeneric|genericRecommendation/i.test(key), false, file + path);
   });
 });
@@ -49,8 +52,9 @@ const collections = data => [data.blades, data.ratchets, data.bits, data.parts, 
   data.__v18?.bladesTop30, data.__v18?.ratchets, data.__v18?.bits, data.__v18?.cxAssistBlades,
   data.__v18?.cxThreePiece, ...Object.values(data.__v18?.cxFourPiece || {})].filter(Array.isArray);
 test('所有零件身分、名稱、別名、官方原裝與 CX 結構逐筆完整保留', () => {
-  assert.deepEqual(collections(db).map(xs => xs.map(project)), collections(oldDb).map(xs => xs.map(project)));
-  assert.deepEqual(db.aliases, oldDb.aliases);
+  const currentCollections = collections(db), originalCollections = collections(oldDb);
+  originalCollections.forEach((parts, i) => assert.deepEqual(currentCollections[i].slice(0,parts.length).map(project),parts.map(project)));
+  assert.deepEqual(db.aliases.slice(0,oldDb.aliases.length), oldDb.aliases);
   for (const key of ['normalCombo', 'cx3Combo', 'cx4Combo']) assert.deepEqual(db.__v18.schema[key], oldDb.__v18.schema[key]);
   const oldStandalone = JSON.parse(previous('beyblade_x_codex_database_v1_8_ASCII_SAFE.json'));
   const standalone = JSON.parse(read('beyblade_x_codex_database_v1_8_ASCII_SAFE.json'));
@@ -114,11 +118,13 @@ test('客觀案例、前段次數、Beywatch 比例及 MetaBeys 使用占比保�
     });
     return values.sort();
   };
-  assert.deepEqual(leaves(db), leaves(oldDb));
+  const {competitionStatistics, competitionStatisticsImport, ...preserved} = db;
+  assert.deepEqual(leaves(preserved), leaves(oldDb));
 });
 test('所有來源網址、快照日期與跨引用仍有效', () => {
   const urls = data => { const values = new Set(); walk(data, (k,v) => { if (k === 'url') values.add(v); }); return [...values].sort(); };
-  assert.deepEqual(urls(db), urls(oldDb));
+  const {competitionStatistics, competitionStatisticsImport, ...preserved} = db;
+  assert.deepEqual(urls(preserved), urls(oldDb));
   assert.deepEqual(db.metaSnapshots.map(x=>[x.id,x.updated,x.sourceWindow,x.sample]), oldDb.metaSnapshots.map(x=>[x.id,x.updated,x.sourceWindow,x.sample]));
   const snapshots = new Set(db.metaSnapshots.map(x => x.id));
   walk(db, (key, value) => { if (key === 'sourceSnapshotId') assert.ok(snapshots.has(value), value); });

@@ -303,7 +303,7 @@ body.is-admin .side-menu a[href="admin.html"] {
     min-height: calc(64px + env(safe-area-inset-bottom));
     padding: 6px 6px env(safe-area-inset-bottom);
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     border-top: 1px solid #2b3743;
     background: rgba(10,14,19,.97);
     backdrop-filter: blur(14px);

@@ -1,0 +1,179 @@
+# 競賽統計名稱對應報告
+
+產生日期：2026-08-29。未對應項目保留來源名稱；沒有建立翻譯或假 canonicalId。
+
+## 尚無已驗證台灣官方繁中上蓋（157）
+
+- Glory Valkyrie
+- Bullet Griffon
+- Delta
+- Cobalt Drake
+- Eclipse
+- Shark Edge
+- Dran Sword
+- Brave
+- Antler
+- Arc
+- Bite Croc
+- Black Shell
+- Brush
+- Bumblebee
+- Captain America
+- Chewbacca
+- Clamp Crab
+- Cutter Shinobi
+- Dark
+- Darth Vader
+- Draciel Shield
+- Dragoon Storm
+- Dranzer Spiral
+- Driger Slash
+- Fang
+- Flame
+- Flare
+- Fortress
+- General Grievous
+- Gill Shark
+- Glare Cyclops
+- Green Goblin
+- Grogu
+- Gust Bat
+- Hack Viking
+- Heavens Ring
+- Hells Nether
+- Hulk
+- Hunt
+- Hurricane
+- Iron Man
+- Knife Shinobi
+- Knight Lance
+- Leon Claw
+- Lightning L-Drago (Rapid-Hit Type)
+- Lightning L-Drago (Upper Type)
+- Luke Skywalker
+- Megatron
+- Might
+- Miles Morales
+- Moff Gideon
+- Obi-Wan Kenobi
+- Optimus Primal
+- Optimus Prime
+- Phoenix Feather
+- Phoenix Rudder
+- Rampart Aegis
+- Reaper
+- Red Hulk
+- Rhino Horn
+- Rock Leone
+- Savage Bear
+- Seize Jaguar
+- Shatter Horus
+- Shinobi Shadow
+- Shockwave
+- Sphinx Cowl
+- Spider-Man
+- Starscream
+- Steel Samurai
+- Storm Pegasis
+- Storm Spriggan
+- Stormtrooper
+- Stun Medusa
+- Suppress Superion
+- Tackle Goat
+- Talon Ptera
+- Thanos
+- The Mandalorian
+- Tread
+- Tricera Press
+- Tricera Spiky
+- Trypio
+- Tusk Mammoth
+- Valor Bison
+- Venom
+- Victory Valkyrie
+- Viper Tail
+- Volt
+- Weiss Tiger
+- Whip
+- Wriggle
+- Wyvern Gale
+- Xeno Xcalibur
+- Yell Kong
+- Valkyrie Blast
+- Emperor Blast
+- Sol Eclipse
+- Rock Golem
+- Cerberus Blast
+- Emperor Might
+- Bullet Griffin
+- Keel Shark
+- Bahamut Blitz
+- LDrago
+- T Rex
+- Whale Blast
+- Bullet Gryphon
+- Emperor Eclipse
+- Hells Blast
+- Hells Reaper
+- Hover Wyern
+- Hovery Wyvern
+- Ragna Rage
+- Ring Aether
+- Tyranno Roar
+- Unicorn Delta
+- Wizard Arc
+- Aero Pegaus
+- Areo Pegasus
+- Bahama Blitz
+- Brachio Delta
+- Bullet Griffn
+- Ceberus Blast
+- Cerberus Flame
+- Dran Brave
+- Driger
+- Emperor Arc
+- Emperor Delta
+- Emperor Flare
+- Fox Blast
+- Fox Brave
+- Goelm Rock
+- Hells Flare
+- Hells Rage Flow
+- Helm Knight
+- Hornet Blast
+- Knight Fortress
+- Meteo Dragoon
+- Orochu Cluster
+- Pegasus Rage
+- Pegaus Blast
+- Phoeniz Wing
+- Rhino Blast
+- Samurai Sabre
+- Scale Shark
+- Scark Scale
+- Scorpio Sting
+- Sol Blast
+- Storm Pegasus
+- Triserra Press
+- Valkyrie Blitz
+- Valkyrie Volt
+- Whale Delta Peak
+- Whale Eclipse
+- Wizard Blast
+- Wolf Hunt
+
+## 無法由主資料驗證縮寫的軸心來源名稱（13）
+
+- Under Flat
+- Zap
+- Trans Kick
+- High Taper
+- Jaggy
+- Bounce Spike
+- TransKick
+- Hexq
+- Jagger
+- Low Taper
+- Points
+- Wall Wedge
+- Weedge

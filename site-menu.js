@@ -12,6 +12,7 @@ const SIDE_MENU_ITEMS = [
   { href: "index.html#collectionSection", label: "收藏", symbol: "C", group: "工具", section: "collectionSection", bottom: true },
   { href: "index.html#inventorySection", label: "庫存", symbol: "I", group: "工具", section: "inventorySection", bottom: true },
   { href: "index.html#configSection", label: "配置", symbol: "X", group: "工具", section: "configSection", bottom: true },
+  { href: "competition-stats.html", label: "競賽統計", symbol: "S", group: "工具", page: "competition-stats.html", bottom: true },
   { href: "tournament.html", label: "賽事", symbol: "3G", group: "工具", page: "tournament.html", bottom: true },
   { href: "home.html", label: "首頁", group: "說明" },
   { href: "guide.html", label: "使用教學", group: "說明" },
