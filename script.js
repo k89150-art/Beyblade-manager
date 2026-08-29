@@ -3282,7 +3282,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   if (openConfigEditorBtn) {
-    openConfigEditorBtn.addEventListener("click", openConfigQuickEditor);
+    openConfigEditorBtn.addEventListener("click", () => openConfigQuickEditor());
   }
 
   [closeConfigEditorBtn, cancelConfigEditorBtn, configEditorBackdrop].forEach(button => {

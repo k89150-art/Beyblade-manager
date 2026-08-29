@@ -16,6 +16,7 @@ test("configuration model stays internal and is no longer user input", () => {
 
 test("configuration editing reuses Quick Editor without consuming its own stock", () => {
   assert.match(script, /if \(tableType === "config"\) \{\s*openConfigQuickEditor\(row\);\s*return;/);
+  assert.match(script, /openConfigEditorBtn\.addEventListener\("click", \(\) => openConfigQuickEditor\(\)\)/);
   assert.match(script, /refreshSelectors\(editingRow\)/);
   assert.match(script, /configEditorRow \? getUsedPartsExceptRow\(configEditorRow\) : getUsedParts\(\)/);
 });
