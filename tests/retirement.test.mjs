@@ -58,10 +58,20 @@ test('所有零件身分、名稱、別名、官方原裝與 CX 結構逐筆完�
     assert.deepEqual(standalone[key].map(project), oldStandalone[key].map(project));
   }
 });
-test('231 筆官方產品、套組及 exactByCode／variantsByBaseCode 完全未修改', () => {
+test('231 筆官方產品、套組及查詢索引不變，只補完整型錄英文名稱', () => {
   const file = 'stock_products_AUTOFILL_SAFE_2026-07-29-v3.json';
-  assert.equal(normalizeLines(read(file)), normalizeLines(previous(file)));
   const stock = JSON.parse(read(file));
+  const oldStock = JSON.parse(previous(file));
+  const withoutCatalogNames = data => {
+    const copy = structuredClone(data);
+    if (copy.metadata) delete copy.metadata.nameCatalogUpdate;
+    for (const product of copy.stockProducts) {
+      delete product.displayNameEn;
+      delete product.referenceNameEn;
+    }
+    return copy;
+  };
+  assert.deepEqual(withoutCatalogNames(stock), withoutCatalogNames(oldStock));
   assert.equal(stock.stockProducts.length, 231);
   const ids = new Set(stock.stockProducts.map(x => x.recordId));
   for (const entries of Object.values(stock.lookupIndexes)) for (const values of Object.values(entries)) {
@@ -72,11 +82,17 @@ test('使用者資料與賽事儲存流程未改寫；只移除配置列分析�
   const expected = normalizeLines(previous('script.js'))
     .replace(/  const analyzeButton = tableType === "config"[\s\S]*?  if \(isReadOnly\(\)\) return analyzeButton;/, '  if (isReadOnly()) return "";')
     .replace('    ${analyzeButton}\n', '')
-    .replace(/function getTextCell\(row, index\)[\s\S]*?function buildHistoryRecordFromConfigRow/, 'function buildHistoryRecordFromConfigRow');
+    .replace(/function getTextCell\(row, index\)[\s\S]*?function buildHistoryRecordFromConfigRow/, 'function buildHistoryRecordFromConfigRow')
+    .replace('?v=20260805-stock-inventory1', '?v=20260829-namecatalog2');
   assert.equal(normalizeLines(read('script.js')), expected);
-  for (const file of ['tournament.js', 'admin.js', 'user-view.js', 'firestore.rules', 'firebase.json']) {
+  for (const file of ['tournament.js', 'admin.js', 'firestore.rules', 'firebase.json']) {
     assert.equal(normalizeLines(read(file)), normalizeLines(previous(file)), file);
   }
+  assert.equal(
+    normalizeLines(read('user-view.js')),
+    normalizeLines(previous('user-view.js')).replace('?v=20260729-stock3', '?v=20260829-namecatalog2'),
+    'user-view.js'
+  );
 });
 test('客觀案例、前段次數、Beywatch 比例及 MetaBeys 使用占比保留', () => {
   for (let i = 0; i < oldDb.featuredBladeProfiles.length; i++) {
