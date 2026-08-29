@@ -54,6 +54,9 @@ let stockProductsByBaseCode = new Map();
 let stockProductsByRecordId = new Map();
 let stockChoiceResolve = null;
 let stockChoiceProducts = [];
+let configEditorRow = null;
+let configEditorMode = "bxux";
+let inventoryFilterType = "all";
 
 function isAdmin() {
   return currentUser && currentUser.uid === ADMIN_UID;
@@ -293,6 +296,43 @@ function getSeriesFromModel(model) {
   return "OTHER";
 }
 
+function getConfigStructureModeFromRow(row) {
+  if (!row) return "bxux";
+
+  const values = [2, 3, 4, 5, 6]
+    .map(index => row.cells[index]?.innerText.trim() || "")
+    .filter(value => value && value !== "-");
+
+  if (values.length > 0 || getSeriesFromModel(row.cells[0]?.innerText.trim() || "") === "CX") {
+    return "cx";
+  }
+
+  return "bxux";
+}
+
+function findSourceModelForLayer(layer) {
+  const normalizedLayer = String(layer || "").trim();
+  if (!normalizedLayer) return "";
+
+  const collectionMatch = Array.from(document.querySelectorAll("#beybladeTable tbody tr"))
+    .find(row => (row.cells[1]?.innerText.trim() || "") === normalizedLayer);
+  if (collectionMatch) return normalizeModel(collectionMatch.cells[0]?.innerText.trim() || "");
+
+  const productMatch = Array.from(stockProductsByRecordId.values())
+    .find(product => String(product?.parts?.blade || "").trim() === normalizedLayer);
+
+  return normalizeModel(productMatch?.productCode || "");
+}
+
+function buildInternalConfigModel(mode, layer, existingModel = "") {
+  const preserved = normalizeModel(existingModel);
+  if (preserved) return preserved;
+  if (mode === "cx") return "CX-CUSTOM";
+
+  const sourceModel = findSourceModelForLayer(layer);
+  return sourceModel ? `${sourceModel} CUSTOM` : "BX-CUSTOM";
+}
+
 /* ====== 排序：UX → BX → CX → 其他（第一區與第三區共用） ====== */
 
 const TABLE_SORT_ORDER = { UX: 1, BX: 2, CX: 3, OTHER: 4 };
@@ -455,11 +495,83 @@ function getOperationButtons(tableType) {
     return '<button onclick="deleteRow(this)">刪除</button>';
   }
 
+  if (tableType === "config") {
+    return `
+      <div class="config-action-menu">
+        <button
+          type="button"
+          class="config-action-trigger"
+          aria-label="開啟配置操作"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          onclick="toggleConfigActionMenu(event, this)"
+        >⋯</button>
+        <div class="config-action-panel" role="menu" hidden>
+          <button type="button" role="menuitem" onclick="runConfigCardAction(event, this, 'edit')">修改</button>
+          <button type="button" role="menuitem" class="danger-action" onclick="runConfigCardAction(event, this, 'delete')">刪除</button>
+        </div>
+      </div>
+    `;
+  }
+
   return `
     <button onclick="editRow(this, '${tableType}')">修改</button>
     <button onclick="deleteRow(this)">刪除</button>
   `;
 }
+
+function closeConfigActionMenus(exceptTrigger = null) {
+  document.querySelectorAll(".config-action-trigger[aria-expanded='true']").forEach(trigger => {
+    if (trigger === exceptTrigger) return;
+
+    trigger.setAttribute("aria-expanded", "false");
+    const panel = trigger.parentElement?.querySelector(".config-action-panel");
+    if (panel) panel.hidden = true;
+  });
+
+  const hasOpenMenu = Boolean(document.querySelector(".config-action-trigger[aria-expanded='true']"));
+  document.body.classList.toggle("config-action-menu-open", hasOpenMenu);
+}
+
+window.toggleConfigActionMenu = function (event, trigger) {
+  event.stopPropagation();
+  const panel = trigger.parentElement?.querySelector(".config-action-panel");
+  if (!panel) return;
+
+  const willOpen = trigger.getAttribute("aria-expanded") !== "true";
+  closeConfigActionMenus(willOpen ? trigger : null);
+  trigger.setAttribute("aria-expanded", String(willOpen));
+  panel.hidden = !willOpen;
+  document.body.classList.toggle("config-action-menu-open", willOpen);
+
+  if (willOpen) panel.querySelector("button")?.focus({ preventScroll: true });
+};
+
+window.runConfigCardAction = function (event, button, action) {
+  event.stopPropagation();
+  closeConfigActionMenus();
+
+  if (action === "edit") {
+    window.editRow(button, "config");
+    return;
+  }
+
+  if (action === "delete") window.deleteRow(button);
+};
+
+document.addEventListener("click", event => {
+  if (!event.target.closest(".config-action-menu")) closeConfigActionMenus();
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key !== "Escape") return;
+
+  const openTrigger = document.querySelector(".config-action-trigger[aria-expanded='true']");
+  if (!openTrigger) return;
+
+  closeConfigActionMenus();
+  openTrigger.focus({ preventScroll: true });
+});
 
 function getEditingButtons(tableType) {
   return `
@@ -807,9 +919,15 @@ window.deleteRow = async function (button) {
 /* ====== 表格內修改功能 ====== */
 
 window.editRow = function (button, tableType) {
-    if (!requireLogin()) return;
-  const row = button.parentElement.parentElement;
-    if (row.dataset.editing === "true") return;
+  if (!requireLogin()) return;
+  const row = button.closest("tr");
+  if (!row) return;
+  if (row.dataset.editing === "true") return;
+
+  if (tableType === "config") {
+    openConfigQuickEditor(row);
+    return;
+  }
 
   row.dataset.editing = "true";
   row.classList.add("editing-row");
@@ -1900,6 +2018,34 @@ function updateUiSummaries() {
   setUiSummaryValue("historyCount", historyRows.length);
 }
 
+function inventoryTypeMatchesFilter(type, filter) {
+  if (filter === "all") return true;
+  if (filter === "CX分件") {
+    return ["紋章鎖", "主要戰刃", "超越戰刃", "金屬戰刃", "輔助戰刃"].includes(type);
+  }
+  return type === filter;
+}
+
+function applyInventoryFilters() {
+  const query = document.getElementById("inventorySearchInput")?.value.trim().toLocaleLowerCase("zh-TW") || "";
+  const rows = Array.from(document.querySelectorAll("#partTable tbody tr"));
+  let visibleCount = 0;
+
+  rows.forEach(row => {
+    const cells = getPersistedRowCells(row);
+    const type = cells[0] || "";
+    const name = cells[1] || "";
+    const matchesType = inventoryTypeMatchesFilter(type, inventoryFilterType);
+    const matchesQuery = !query || `${type} ${name}`.toLocaleLowerCase("zh-TW").includes(query);
+    const visible = matchesType && matchesQuery;
+    row.hidden = !visible;
+    if (visible) visibleCount += 1;
+  });
+
+  const status = document.getElementById("inventoryFilterStatus");
+  if (status) status.textContent = rows.length ? `顯示 ${visibleCount} / ${rows.length} 種` : "尚無額外零件";
+}
+
 function updateResponsiveTableCells() {
   const collectionLayersByModel = new Map(
     Array.from(document.querySelectorAll("#beybladeTable tbody tr"), row => {
@@ -2001,78 +2147,55 @@ function updateResponsiveTableCells() {
         const [layerValue, lockValue, mainValue, transcendValue, metalValue, auxValue, fixValue, axisValue] = values;
         const hasValue = value => value && value !== "-";
         const hasCxParts = [lockValue, mainValue, transcendValue, metalValue, auxValue].some(hasValue);
+        const structuralSeries = hasCxParts
+          ? "CX"
+          : ["BX", "UX"].includes(series) ? series : "BX/UX";
         const cxCoreValue = hasValue(metalValue) ? metalValue : mainValue;
-        cells[3]?.classList.toggle("card-display-suppressed", series === "CX" && hasValue(metalValue));
-        const titleLayer = series === "CX"
-          ? hasCxParts
-            ? [lockValue, cxCoreValue].filter(hasValue).join("")
-            : resolvedLayer
+        row.dataset.series = structuralSeries;
+        if (cells[0]) cells[0].dataset.series = structuralSeries;
+        cells[3]?.classList.toggle("card-display-suppressed", hasCxParts && hasValue(metalValue));
+        const titleLayer = hasCxParts
+          ? [lockValue, cxCoreValue].filter(hasValue).join("")
           : resolvedLayer;
-        const summaryValues = series === "CX"
-          ? hasCxParts
-            ? [
-                lockValue,
-                hasValue(mainValue) && !hasValue(metalValue) ? mainValue : "",
-                metalValue,
-                transcendValue,
-                auxValue,
-                fixValue,
-                axisValue
-              ]
-            : [resolvedLayer, fixValue, axisValue]
-          : values;
+        const summaryValues = hasCxParts
+          ? [transcendValue, auxValue, fixValue, axisValue]
+          : [fixValue, axisValue];
         const summary = summaryValues
           .filter(hasValue)
           .join(" ・ ");
 
         if (cells[0]) {
-          cells[0].dataset.cardTitle = [model, titleLayer !== "-" ? titleLayer : ""]
-            .filter(Boolean)
-            .join(" ");
+          cells[0].dataset.cardTitle = titleLayer && titleLayer !== "-" ? titleLayer : "自訂配置";
         }
         if (cells[1]) cells[1].dataset.cardSummary = summary || "-";
 
         if (!row.classList.contains("editing-row")) {
-          const cardTags = [];
-          const addCardTag = (value, label) => {
-            if (hasValue(value)) cardTags.push(label);
-          };
-
-          if (series === "CX" && hasCxParts) {
-            addCardTag(lockValue, "紋章鎖");
-            if (hasValue(transcendValue) && hasValue(metalValue)) {
-              cardTags.push("金屬+超越");
-            } else if (hasValue(mainValue)) {
-              cardTags.push("主要戰刃");
-            } else {
-              addCardTag(metalValue, "金屬戰刃");
-              addCardTag(transcendValue, "超越戰刃");
-            }
-            addCardTag(auxValue, "輔助");
-          } else {
-            addCardTag(resolvedLayer, "上蓋");
-            addCardTag(fixValue, "固鎖");
-            addCardTag(axisValue, "軸心");
+          let compactContent = row.querySelector(".config-card-compact-content");
+          if (!compactContent) {
+            compactContent = document.createElement("div");
+            compactContent.className = "config-card-compact-content";
+            compactContent.innerHTML = `
+              <span class="config-card-series"></span>
+              <strong class="config-card-title"></strong>
+              <span class="config-card-summary"></span>
+            `;
+            row.prepend(compactContent);
           }
 
+          const displayTitle = titleLayer && titleLayer !== "-" ? titleLayer : "自訂配置";
+          const displaySummary = summary || "-";
+          const layoutKey = [structuralSeries, displayTitle, displaySummary].join("|");
+          if (compactContent.dataset.layoutKey !== layoutKey) {
+            compactContent.dataset.layoutKey = layoutKey;
+            compactContent.querySelector(".config-card-series").textContent = structuralSeries;
+            compactContent.querySelector(".config-card-title").textContent = displayTitle;
+            compactContent.querySelector(".config-card-summary").textContent = displaySummary;
+          }
+
+          row.classList.add("has-config-compact-content");
           const operationCell = cells[cells.length - 1];
-          if (operationCell) {
-            let tagList = operationCell.querySelector(".config-card-tags, .config-card-groups");
-            if (!tagList) {
-              tagList = document.createElement("div");
-              operationCell.prepend(tagList);
-            }
-            tagList.className = "record-card-tags config-card-tags";
-            row.classList.remove("has-config-card-groups");
-
-            const tagKey = cardTags.join("|");
-            if (tagList.dataset.tagKey !== tagKey) {
-              tagList.dataset.tagKey = tagKey;
-              tagList.innerHTML = cardTags
-                .map(tag => `<span>${escapeHtml(tag)}</span>`)
-                .join("");
-            }
-          }
+          operationCell?.querySelector(".config-card-tags, .config-card-groups")?.remove();
+          row.classList.remove("has-config-card-groups");
         }
       }
 
@@ -2545,6 +2668,7 @@ function installUiSummaryObservers() {
   const refreshUi = () => {
     updateUiSummaries();
     updateResponsiveTableCells();
+    applyInventoryFilters();
   };
 
   ["beybladeTable", "partTable", "configTable", "historyTable"].forEach(tableId => {
@@ -2589,6 +2713,7 @@ function updateNoRatchetConfigOption() {
 
 function setConfigEditorMode(mode, clearOpposite = false) {
   const normalizedMode = mode === "cx" ? "cx" : "bxux";
+  configEditorMode = normalizedMode;
 
   document.querySelectorAll("[data-config-mode]").forEach(button => {
     const active = button.dataset.configMode === normalizedMode;
@@ -2609,6 +2734,14 @@ function setConfigEditorMode(mode, clearOpposite = false) {
       if (field) field.value = "";
     });
   }
+
+  if (!configEditorRow) {
+    const modelInput = document.getElementById("confModel");
+    const layer = document.getElementById("sel上蓋")?.value || "";
+    if (modelInput) modelInput.value = buildInternalConfigModel(normalizedMode, layer);
+  }
+
+  updateNoRatchetConfigOption();
 }
 
 function syncConfigEditorModeFromModel() {
@@ -2620,17 +2753,74 @@ function syncConfigEditorModeFromModel() {
   }
 }
 
-function openConfigQuickEditor() {
+function syncConfigModelFromSelection() {
+  if (configEditorRow) return;
+  const modelInput = document.getElementById("confModel");
+  const layer = document.getElementById("sel上蓋")?.value || "";
+  if (modelInput) modelInput.value = buildInternalConfigModel(configEditorMode, layer);
+  updateNoRatchetConfigOption();
+}
+
+function clearConfigEditorFields() {
+  partTypes.forEach(type => {
+    const field = document.getElementById(selectorMap[type]);
+    if (field) field.value = "";
+  });
+}
+
+function populateConfigEditorFromRow(row) {
+  const values = Array.from(row.cells).slice(0, 9).map(cell => cell.innerText.trim());
+  const mainValue = values[3] || "";
+  const hasSplitMain = Boolean((values[4] && values[4] !== "-") || (values[5] && values[5] !== "-"));
+  const fieldValues = {
+    "上蓋": values[1],
+    "紋章鎖": values[2],
+    "主要戰刃": hasSplitMain ? "" : mainValue,
+    "超越戰刃": values[4],
+    "金屬戰刃": values[5],
+    "輔助戰刃": values[6],
+    "固鎖": values[7],
+    "軸心": values[8]
+  };
+
+  Object.entries(fieldValues).forEach(([type, value]) => {
+    const field = document.getElementById(selectorMap[type]);
+    if (field) field.value = value && value !== "-" ? value : value === "-" && type === "固鎖" ? "-" : "";
+  });
+}
+
+function openConfigQuickEditor(editingRow = null) {
   const editor = document.getElementById("configQuickEditor");
   if (!editor) return;
 
-  refreshSelectors();
-  const model = document.getElementById("confModel")?.value.trim().toUpperCase() || "";
-  setConfigEditorMode(model.startsWith("CX") ? "cx" : "bxux");
+  configEditorRow = editingRow;
+  clearConfigEditorFields();
+  refreshSelectors(editingRow);
+
+  const mode = editingRow ? getConfigStructureModeFromRow(editingRow) : "bxux";
+  const modelInput = document.getElementById("confModel");
+  if (modelInput) {
+    modelInput.value = editingRow
+      ? normalizeModel(editingRow.cells[0]?.innerText.trim() || "")
+      : buildInternalConfigModel(mode, "");
+  }
+
+  setConfigEditorMode(mode);
+  if (editingRow) populateConfigEditorFromRow(editingRow);
+  updateNoRatchetConfigOption();
+
+  const title = document.getElementById("configEditorTitle");
+  const saveButton = document.getElementById("saveConfigEditorBtn");
+  if (title) title.textContent = editingRow ? "修改配置" : "建立配置";
+  if (saveButton) saveButton.textContent = editingRow ? "儲存修改" : "儲存配置";
+
   editor.hidden = false;
   document.body.classList.add("config-editor-open");
 
-  requestAnimationFrame(() => document.getElementById("confModel")?.focus());
+  requestAnimationFrame(() => {
+    const firstFieldId = mode === "cx" ? "sel紋章鎖" : "sel上蓋";
+    document.getElementById(firstFieldId)?.focus();
+  });
 }
 
 function closeConfigQuickEditor() {
@@ -2639,12 +2829,13 @@ function closeConfigQuickEditor() {
 
   editor.hidden = true;
   document.body.classList.remove("config-editor-open");
+  configEditorRow = null;
   document.getElementById("openConfigEditorBtn")?.focus();
 }
 
-window.refreshSelectors = function () {
+window.refreshSelectors = function (editingRow = null) {
   const total = getTotalParts();
-  const used = getUsedParts();
+  const used = editingRow ? getUsedPartsExceptRow(editingRow) : getUsedParts();
   const selectorPlaceholders = {
     "上蓋": "從持有零件選擇",
     "紋章鎖": "從持有零件選擇",
@@ -2707,17 +2898,8 @@ function checkStock(type, name, total, used) {
 
 window.addConfig = function () {
   if (!requireLogin()) return;
-  
+
   const modelInput = document.getElementById("confModel");
-  const model = normalizeModel(modelInput.value.trim());
-
-  if (!model) {
-    alert("請輸入陀螺型號！");
-    return;
-  }
-
-  const series = getSeriesFromModel(model);
-
   const layerSel = document.getElementById("sel上蓋").value;
   const lockSel = document.getElementById("sel紋章鎖").value;
   const mainSel = document.getElementById("sel主要戰刃").value;
@@ -2726,6 +2908,10 @@ window.addConfig = function () {
   const auxSel = document.getElementById("sel輔助戰刃").value;
   let fixSel = document.getElementById("sel固鎖").value;
   const axisSel = document.getElementById("sel軸心").value;
+  const existingModel = configEditorRow?.cells[0]?.innerText.trim() || "";
+  const model = buildInternalConfigModel(configEditorMode, layerSel, existingModel);
+  const series = configEditorMode === "cx" ? "CX" : "BX";
+  if (modelInput) modelInput.value = model;
   fixSel = getNoRatchetFixValue(model, axisSel, fixSel);
 
   if (!validateRatchetRules(model, axisSel, fixSel)) return;
@@ -2737,7 +2923,7 @@ window.addConfig = function () {
   let metalPart = "-";
   let auxPart = "-";
 
-  const isBooster = isRandomBooster(model);
+  const isBooster = Boolean(configEditorRow && isRandomBooster(model));
 
   if (series === "CX" && !isBooster) {
     if (!lockSel || !auxSel || !fixSel || !axisSel) {
@@ -2790,7 +2976,7 @@ window.addConfig = function () {
   }
 
   const total = getTotalParts();
-  const used = getUsedParts();
+  const used = configEditorRow ? getUsedPartsExceptRow(configEditorRow) : getUsedParts();
 
   const selectedParts = [
     ["上蓋", (series === "CX" && !isBooster) ? "" : layerSel],
@@ -2807,34 +2993,35 @@ window.addConfig = function () {
     if (!checkStock(type, name, total, used)) return;
   }
 
-  const candidateHistory = buildHistoryRecordFromConfigValues({
-    model,
-    layer,
-    lockPart,
-    mainPart,
-    transcendPart,
-    metalPart,
-    auxPart,
-    fix: fixSel,
-    axis: axisSel
-  });
+  if (!configEditorRow) {
+    const candidateHistory = buildHistoryRecordFromConfigValues({
+      model,
+      layer,
+      lockPart,
+      mainPart,
+      transcendPart,
+      metalPart,
+      auxPart,
+      fix: fixSel,
+      axis: axisSel
+    });
 
-  const oldHistory = findHistoryByComboKey(candidateHistory.comboKey);
+    const oldHistory = findHistoryByComboKey(candidateHistory.comboKey);
 
-  if (oldHistory) {
-    const stillAdd = confirm(
-      "這個組合以前測試過！\n\n" +
-      `型號：${oldHistory.model}\n` +
-      `組合：${oldHistory.combo}\n` +
-      `固鎖：${oldHistory.fix}\n` +
-      `軸心：${oldHistory.axis}\n` +
-      `結果：${oldHistory.result}\n` +
-      `備註：${oldHistory.note || "無"}\n` +
-      `日期：${oldHistory.date || "無"}\n\n` +
-      "是否仍要加入配置表？"
-    );
+    if (oldHistory) {
+      const stillAdd = confirm(
+        "這個組合以前測試過！\n\n" +
+        `組合：${oldHistory.combo}\n` +
+        `固鎖：${oldHistory.fix}\n` +
+        `軸心：${oldHistory.axis}\n` +
+        `結果：${oldHistory.result}\n` +
+        `備註：${oldHistory.note || "無"}\n` +
+        `日期：${oldHistory.date || "無"}\n\n` +
+        "是否仍要加入配置表？"
+      );
 
-    if (!stillAdd) return;
+      if (!stillAdd) return;
+    }
   }
 
   const tbody = document.querySelector("#configTable tbody");
@@ -2844,13 +3031,19 @@ window.addConfig = function () {
     return;
   }
 
-  const row = tbody.insertRow();
+  const isEditing = Boolean(configEditorRow);
+  if (isEditing && !confirm("確定要保存這次配置修改嗎？")) return;
 
-  row.insertCell(0).innerText = model;
-  row.insertCell(1).innerText = layer;
-  row.insertCell(2).innerText = lockPart;
+  const row = configEditorRow || tbody.insertRow();
+  if (!isEditing) {
+    for (let index = 0; index < 10; index += 1) row.insertCell(index);
+  }
 
-  const mainCell = row.insertCell(3);
+  row.cells[0].innerText = model;
+  row.cells[1].innerText = layer;
+  row.cells[2].innerText = lockPart;
+
+  const mainCell = row.cells[3];
   mainCell.innerText = mainPart;
 
   if (transcendPart !== "-" && metalPart !== "-") {
@@ -2859,15 +3052,14 @@ window.addConfig = function () {
     mainCell.dataset.stockName = mainPart;
   }
 
-  row.insertCell(4).innerText = transcendPart;
-  row.insertCell(5).innerText = metalPart;
-  row.insertCell(6).innerText = auxPart;
-  row.insertCell(7).innerText = fixSel;
-  row.insertCell(8).innerText = axisSel;
+  row.cells[4].innerText = transcendPart;
+  row.cells[5].innerText = metalPart;
+  row.cells[6].innerText = auxPart;
+  row.cells[7].innerText = fixSel;
+  row.cells[8].innerText = axisSel;
+  row.cells[9].innerHTML = getOperationButtons("config");
 
-  row.insertCell(9).innerHTML = getOperationButtons("config");
-
-  modelInput.value = "";
+  modelInput.value = "BX-CUSTOM";
 
   partTypes.forEach(type => {
     const sel = document.getElementById(selectorMap[type]);
@@ -3003,7 +3195,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const partCountInput = document.getElementById("partCount");
   const stockModelInput = document.getElementById("model");
   const configModelInput = document.getElementById("confModel");
+  const configLayerSelect = document.getElementById(selectorMap["上蓋"]);
   const configAxisSelect = document.getElementById(selectorMap["軸心"]);
+  const inventorySearchInput = document.getElementById("inventorySearchInput");
   const openConfigEditorBtn = document.getElementById("openConfigEditorBtn");
   const closeConfigEditorBtn = document.getElementById("closeConfigEditorBtn");
   const cancelConfigEditorBtn = document.getElementById("cancelConfigEditorBtn");
@@ -3066,6 +3260,26 @@ document.addEventListener("DOMContentLoaded", function () {
   if (configAxisSelect) {
     configAxisSelect.addEventListener("change", updateNoRatchetConfigOption);
   }
+
+  if (configLayerSelect) {
+    configLayerSelect.addEventListener("change", syncConfigModelFromSelection);
+  }
+
+  if (inventorySearchInput) {
+    inventorySearchInput.addEventListener("input", applyInventoryFilters);
+  }
+
+  document.querySelectorAll("[data-inventory-filter]").forEach(button => {
+    button.addEventListener("click", () => {
+      inventoryFilterType = button.dataset.inventoryFilter || "all";
+      document.querySelectorAll("[data-inventory-filter]").forEach(candidate => {
+        const active = candidate === button;
+        candidate.classList.toggle("active", active);
+        candidate.setAttribute("aria-pressed", String(active));
+      });
+      applyInventoryFilters();
+    });
+  });
 
   if (openConfigEditorBtn) {
     openConfigEditorBtn.addEventListener("click", openConfigQuickEditor);

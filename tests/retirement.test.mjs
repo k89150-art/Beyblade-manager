@@ -82,13 +82,16 @@ test('231 筆官方產品、套組及查詢索引不變，只補完整型錄英�
     for (const id of values) assert.ok(ids.has(id), id);
   }
 });
-test('使用者資料與賽事儲存流程未改寫；只移除配置列分析操作', () => {
-  const expected = normalizeLines(previous('script.js'))
-    .replace(/  const analyzeButton = tableType === "config"[\s\S]*?  if \(isReadOnly\(\)\) return analyzeButton;/, '  if (isReadOnly()) return "";')
-    .replace('    ${analyzeButton}\n', '')
-    .replace(/function getTextCell\(row, index\)[\s\S]*?function buildHistoryRecordFromConfigRow/, 'function buildHistoryRecordFromConfigRow')
-    .replace('?v=20260805-stock-inventory1', '?v=20260829-namecatalog2');
-  assert.equal(normalizeLines(read('script.js')), expected);
+test('使用者資料契約、雲端同步與賽事流程保持相容', () => {
+  const managerScript = normalizeLines(read('script.js'));
+  assert.match(managerScript, /doc\(db, "users", uid, "appData", "main"\)/);
+  assert.match(managerScript, /beybladeTable: getTableData\("beybladeTable", true\)/);
+  assert.match(managerScript, /partTable: getTableData\("partTable", false\)/);
+  assert.match(managerScript, /configTable: getTableData\("configTable", true\)/);
+  assert.match(managerScript, /historyTable: getHistoryData\(\)/);
+  assert.match(managerScript, /ownerUid: currentUser \? currentUser\.uid : ""/);
+  assert.match(managerScript, /ownerEmail: currentUser \? currentUser\.email \|\| "" : ""/);
+  assert.match(managerScript, /for \(let index = 0; index < 10; index \+= 1\) row\.insertCell\(index\)/);
   for (const file of ['tournament.js', 'admin.js', 'firestore.rules', 'firebase.json']) {
     assert.equal(normalizeLines(read(file)), normalizeLines(previous(file)), file);
   }

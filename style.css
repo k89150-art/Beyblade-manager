@@ -2371,3 +2371,738 @@ body .modal-actions {
   grid-column: 2;
   grid-row: 1;
 }
+
+/* 2026-08-29: scoped density and soft-dark refresh for collection tools only. */
+.manager-page #collectionSection,
+.manager-page #inventorySection,
+.manager-page #configSection,
+.manager-page #configQuickEditor {
+  --manager-surface: #121a23;
+  --manager-surface-raised: #18222d;
+  --manager-card: #141e28;
+  --manager-card-hover: #182430;
+  --manager-input: #1a2530;
+  --manager-border: #2d3c4b;
+  --manager-divider: rgba(74, 93, 111, .5);
+  --manager-text: #f3f6f8;
+  --manager-text-secondary: #b3c0cb;
+  --manager-text-muted: #8291a0;
+  --manager-accent: #5798ff;
+  --manager-accent-soft: rgba(87, 152, 255, .12);
+  --manager-danger: #ee858d;
+  --manager-success: #5fd390;
+  --manager-warning: #e4bd68;
+}
+
+.sr-only {
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.manager-page #collectionSection .section-note,
+.manager-page #inventorySection .section-note,
+.manager-page #configSection .section-note {
+  color: var(--manager-text-secondary);
+  background: rgba(53, 193, 202, .075);
+}
+
+.manager-page #collectionSection .entry-panel,
+.manager-page #inventorySection .entry-panel,
+.manager-page #inventorySection .summary-strip {
+  border-color: var(--manager-border);
+  background: var(--manager-surface);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .16);
+}
+
+.manager-page #collectionSection input,
+.manager-page #collectionSection select,
+.manager-page #inventorySection input,
+.manager-page #inventorySection select,
+.manager-page #configSection input,
+.manager-page #configSection select,
+.manager-page #configQuickEditor input,
+.manager-page #configQuickEditor select {
+  border-color: var(--manager-border);
+  color: var(--manager-text);
+  background: var(--manager-input);
+}
+
+.manager-page #collectionSection input::placeholder,
+.manager-page #inventorySection input::placeholder,
+.manager-page #configQuickEditor input::placeholder {
+  color: var(--manager-text-muted);
+}
+
+.manager-page #collectionSection input:focus,
+.manager-page #collectionSection select:focus,
+.manager-page #inventorySection input:focus,
+.manager-page #inventorySection select:focus,
+.manager-page #configQuickEditor select:focus {
+  border-color: var(--manager-accent);
+  box-shadow: 0 0 0 3px rgba(87, 152, 255, .13);
+}
+
+/* Collection and configuration cards: title-first, compact, and easy to scan. */
+.manager-page #beybladeTable tbody,
+.manager-page #configTable tbody {
+  grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+  gap: 10px;
+}
+
+.manager-page #beybladeTable tbody tr:not(.editing-row),
+.manager-page #configTable tbody tr:not(.editing-row) {
+  min-height: 0;
+  padding: 14px;
+  border-color: var(--manager-border);
+  background: var(--manager-card);
+  box-shadow: 0 7px 18px rgba(0, 0, 0, .15);
+}
+
+.manager-page #beybladeTable tbody tr:not(.editing-row):hover,
+.manager-page #configTable tbody tr:not(.editing-row):hover {
+  border-color: #40556a;
+  background: var(--manager-card-hover);
+}
+
+.manager-page #beybladeTable tbody tr:not(.editing-row) td:nth-child(1),
+.manager-page #configTable tbody tr:not(.editing-row) td:nth-child(1) {
+  min-height: 31px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.manager-page #beybladeTable tbody tr:not(.editing-row) td:nth-child(1)::before,
+.manager-page #configTable tbody tr:not(.editing-row) td:nth-child(1)::before {
+  position: static;
+  min-width: 36px;
+  min-height: 24px;
+  padding: 2px 7px;
+  flex: 0 0 auto;
+}
+
+.manager-page #beybladeTable tbody tr:not(.editing-row) td:nth-child(1)::after,
+.manager-page #configTable tbody tr:not(.editing-row) td:nth-child(1)::after {
+  position: static;
+  width: auto;
+  min-width: 0;
+  flex: 1;
+  color: var(--manager-text);
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.manager-page #beybladeTable tbody tr:not(.editing-row) td:nth-child(2),
+.manager-page #configTable tbody tr:not(.editing-row) td:nth-child(2) {
+  min-height: 27px;
+  padding: 4px 0 3px;
+}
+
+.manager-page #beybladeTable tbody tr:not(.editing-row) td:nth-child(2)::after,
+.manager-page #configTable tbody tr:not(.editing-row) td:nth-child(2)::after {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--manager-text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.manager-page #beybladeTable tbody tr:not(.editing-row) td:last-child,
+.manager-page #configTable tbody tr:not(.editing-row) td:last-child {
+  margin-top: 7px;
+  gap: 6px;
+}
+
+.manager-page #beybladeTable .record-card-tags,
+.manager-page #configTable .record-card-tags {
+  min-height: 24px;
+  padding: 0;
+  gap: 5px;
+  border-bottom: 0;
+}
+
+.manager-page #beybladeTable .record-card-tags span,
+.manager-page #configTable .record-card-tags span {
+  min-height: 22px;
+  padding: 2px 7px;
+  color: #b7c5d0;
+  background: #1c2935;
+  font-size: 9px;
+}
+
+.manager-page #beybladeTable tbody tr:not(.editing-row) td:last-child button,
+.manager-page #configTable tbody tr:not(.editing-row) td:last-child button {
+  min-height: 40px;
+  padding: 7px 11px;
+  border-color: #3a4a5a;
+  color: #dce4eb;
+  background: transparent;
+  box-shadow: none;
+  font-size: 12px;
+}
+
+.manager-page #beybladeTable tbody tr:not(.editing-row) td:last-child button:last-child,
+.manager-page #configTable tbody tr:not(.editing-row) td:last-child button:last-child {
+  border-color: rgba(238, 133, 141, .25);
+  color: var(--manager-danger);
+  background: transparent;
+}
+
+/* Configuration actions stay secondary until explicitly requested. */
+.manager-page #configTable tbody {
+  gap: 8px;
+}
+
+.manager-page #configTable tbody tr:not(.editing-row) {
+  position: relative;
+  padding: 10px 12px;
+  display: block;
+  overflow: visible;
+}
+
+.manager-page #configTable tbody tr.has-config-compact-content td:nth-child(1),
+.manager-page #configTable tbody tr.has-config-compact-content td:nth-child(2) {
+  display: none;
+}
+
+.manager-page #configTable .config-card-compact-content {
+  width: calc(100% - 48px);
+  min-width: 0;
+  min-height: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+  column-gap: 10px;
+  row-gap: 2px;
+}
+
+.manager-page #configTable .config-card-series {
+  min-width: 36px;
+  min-height: 24px;
+  padding: 2px 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(63, 134, 247, .48);
+  border-radius: 999px;
+  color: #86b6ff;
+  background: rgba(63, 134, 247, .09);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: .04em;
+}
+
+.manager-page #configTable tr[data-series="CX"] .config-card-series {
+  border-color: rgba(53, 193, 202, .48);
+  color: #69d5db;
+  background: rgba(53, 193, 202, .09);
+}
+
+.manager-page #configTable .config-card-title {
+  max-width: 100%;
+  flex: 0 0 auto;
+  color: var(--manager-text);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.manager-page #configTable .config-card-summary {
+  max-width: 100%;
+  flex: 0 0 auto;
+  color: #cbd7e0;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.manager-page #configTable tbody tr:not(.editing-row) td:last-child {
+  width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  display: block;
+  flex: 0 0 0;
+}
+
+.manager-page #configTable .config-action-menu {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  z-index: 32;
+}
+
+.manager-page #configTable .config-action-trigger,
+.manager-page #configTable tbody tr:not(.editing-row) td:last-child .config-action-trigger {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-color: #3a4a5a;
+  border-radius: 8px;
+  color: var(--manager-text-secondary);
+  background: transparent;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.manager-page #configTable .config-action-trigger:hover,
+.manager-page #configTable .config-action-trigger[aria-expanded="true"] {
+  border-color: #52687d;
+  color: var(--manager-text);
+  background: var(--manager-surface-raised);
+}
+
+.manager-page #configTable .config-action-panel {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  width: 144px;
+  padding: 6px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--manager-border);
+  border-radius: 8px;
+  background: var(--manager-surface-raised);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .34);
+}
+
+.manager-page #configTable .config-action-panel[hidden] {
+  display: none;
+}
+
+.manager-page #configTable tbody tr:not(.editing-row) td:last-child .config-action-panel button {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 11px;
+  justify-content: flex-start;
+  border-color: transparent;
+  color: var(--manager-text);
+  background: transparent;
+  text-align: left;
+  font-size: 13px;
+}
+
+.manager-page #configTable tbody tr:not(.editing-row) td:last-child .config-action-panel button:hover,
+.manager-page #configTable tbody tr:not(.editing-row) td:last-child .config-action-panel button:focus-visible {
+  background: var(--manager-card-hover);
+}
+
+.manager-page #configTable tbody tr:not(.editing-row) td:last-child .config-action-panel .danger-action {
+  border-color: transparent;
+  color: var(--manager-danger);
+}
+
+@media (max-width: 600px) {
+  body.manager-page.config-action-menu-open::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(3, 8, 13, .48);
+  }
+
+  .manager-page #configTable .config-action-menu {
+    z-index: auto;
+  }
+
+  .manager-page #configTable .config-action-menu:has(.config-action-trigger[aria-expanded="true"]) {
+    z-index: 95;
+  }
+
+  .manager-page #configTable .config-action-trigger {
+    position: relative;
+    z-index: auto;
+  }
+
+  .manager-page #configTable .config-action-trigger[aria-expanded="true"] {
+    visibility: hidden;
+  }
+
+  .manager-page #configTable .config-action-panel {
+    position: fixed;
+    top: auto;
+    right: 12px;
+    bottom: calc(74px + env(safe-area-inset-bottom));
+    left: 12px;
+    z-index: 96;
+    width: auto;
+    padding: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .manager-page #configTable tbody tr:not(.editing-row) td:last-child .config-action-panel button {
+    min-height: 48px;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* Inventory: searchable compact rows where part and quantity are the focus. */
+.manager-page .inventory-toolbar {
+  margin: 11px 0 12px;
+  padding: 9px;
+  display: grid;
+  grid-template-columns: minmax(170px, .9fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--manager-border);
+  border-radius: var(--radius);
+  background: var(--manager-surface);
+}
+
+.manager-page .inventory-search input {
+  width: 100%;
+  min-height: 40px;
+}
+
+.manager-page .inventory-filters {
+  min-width: 0;
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.manager-page .inventory-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.manager-page .inventory-filter {
+  min-height: 36px;
+  padding: 6px 10px;
+  flex: 0 0 auto;
+  border-color: transparent;
+  color: var(--manager-text-secondary);
+  background: transparent;
+  font-size: 11px;
+}
+
+.manager-page .inventory-filter.active {
+  border-color: rgba(87, 152, 255, .38);
+  color: #dceaff;
+  background: var(--manager-accent-soft);
+}
+
+.manager-page .inventory-filter-status {
+  color: var(--manager-text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.manager-page #inventorySection .table-wrap {
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.manager-page #partTable {
+  min-width: 0;
+  display: block;
+  background: transparent;
+}
+
+.manager-page #partTable thead {
+  display: none;
+}
+
+.manager-page #partTable tbody {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.manager-page #partTable tbody tr {
+  min-width: 0;
+  min-height: 56px;
+  padding: 7px 9px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--manager-border);
+  border-radius: var(--radius);
+  background: var(--manager-card);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .12);
+}
+
+.manager-page #partTable td {
+  width: auto;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  display: block;
+  grid-column: auto;
+  border: 0;
+  text-align: left;
+}
+
+.manager-page #partTable td::before {
+  display: none;
+}
+
+.manager-page #partTable td:nth-child(1) {
+  min-height: 25px;
+  padding: 3px 7px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-tag);
+  color: #a9bbca;
+  background: #1d2a36;
+  font-size: 9px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.manager-page #partTable td:nth-child(2) {
+  color: var(--manager-text);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.manager-page #partTable td:nth-child(3) {
+  min-width: 34px;
+  color: #9ec1ff;
+  font-size: 13px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.manager-page #partTable td:nth-child(3)::after {
+  content: " 個";
+  color: var(--manager-text-muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.manager-page #partTable td:last-child {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+}
+
+.manager-page #partTable td:last-child button {
+  min-width: 0;
+  min-height: 38px;
+  padding: 6px 8px;
+  flex: 0 0 auto;
+  border-color: #394a5a;
+  color: #d8e1e8;
+  background: transparent;
+  box-shadow: none;
+  font-size: 11px;
+}
+
+.manager-page #partTable td:last-child button:last-child {
+  border-color: transparent;
+  color: var(--manager-danger);
+}
+
+/* Quick Editor: preserve touch size while reducing unused vertical rhythm. */
+.manager-page #configQuickEditor .quick-editor-panel {
+  width: min(470px, 100%);
+  border-color: var(--manager-border);
+  background: var(--manager-surface);
+}
+
+.manager-page #configQuickEditor .quick-editor-header {
+  min-height: 88px;
+  padding: 20px 22px 17px;
+  border-color: var(--manager-divider);
+  background: var(--manager-surface-raised);
+}
+
+.manager-page #configQuickEditor .quick-editor-header h2 {
+  margin: 3px 0 0;
+  font-size: 23px;
+}
+
+.manager-page #configQuickEditor .quick-editor-close {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  color: var(--manager-text-secondary);
+  background: transparent;
+}
+
+.manager-page #configQuickEditor .config-mode-switch {
+  margin: 12px 22px 4px;
+  padding: 4px;
+  border-color: var(--manager-border);
+  background: #101821;
+}
+
+.manager-page #configQuickEditor .config-mode-btn {
+  min-height: 43px;
+  font-size: 13px;
+}
+
+.manager-page #configQuickEditor .config-mode-btn.active {
+  border-color: rgba(87, 152, 255, .5);
+  background: var(--manager-accent);
+  box-shadow: 0 5px 14px rgba(63, 134, 247, .16);
+}
+
+.manager-page #configQuickEditor #config-selector {
+  padding: 11px 22px 18px;
+  border: 0;
+  background: transparent;
+}
+
+.manager-page #configQuickEditor .quick-editor-field {
+  margin-bottom: 12px;
+  gap: 5px;
+  color: var(--manager-text-secondary);
+  font-size: 11px;
+}
+
+.manager-page #configQuickEditor .quick-editor-field input,
+.manager-page #configQuickEditor .quick-editor-field select {
+  min-height: 49px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.manager-page #configQuickEditor .quick-editor-split-row {
+  gap: 8px;
+}
+
+.manager-page #configQuickEditor .quick-editor-note {
+  margin-top: 1px;
+  padding: 9px 11px;
+  color: var(--manager-text-secondary);
+  background: rgba(53, 193, 202, .07);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.manager-page #configQuickEditor .quick-editor-actions {
+  padding: 11px 22px calc(11px + env(safe-area-inset-bottom));
+  border-color: var(--manager-divider);
+  background: var(--manager-surface-raised);
+}
+
+.manager-page #configQuickEditor .quick-editor-actions button {
+  min-height: 46px;
+  font-size: 13px;
+}
+
+@media (max-width: 820px) {
+  .manager-page #beybladeTable tbody,
+  .manager-page #configTable tbody {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .manager-page #partTable tbody {
+    grid-template-columns: 1fr;
+  }
+
+  .manager-page .inventory-toolbar {
+    grid-template-columns: 1fr auto;
+  }
+
+  .manager-page .inventory-search,
+  .manager-page .inventory-filters {
+    grid-column: 1 / -1;
+  }
+
+  .manager-page #configQuickEditor .quick-editor-split-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .manager-page #beybladeTable tbody,
+  .manager-page #configTable tbody {
+    grid-template-columns: 1fr;
+  }
+
+  .manager-page #collectionSection,
+  .manager-page #inventorySection,
+  .manager-page #configSection {
+    padding-top: 20px;
+  }
+
+  .manager-page #beybladeTable tbody tr:not(.editing-row) {
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .manager-page #configTable tbody tr:not(.editing-row) {
+    min-height: 0;
+    padding: 10px 12px;
+  }
+
+  .manager-page #beybladeTable tbody tr:not(.editing-row) td:nth-child(1)::after,
+  .manager-page #configTable tbody tr:not(.editing-row) td:nth-child(1)::after {
+    font-size: 15px;
+  }
+
+  .manager-page #inventorySection .summary-strip > div {
+    min-height: 52px;
+  }
+
+  .manager-page .inventory-toolbar {
+    margin-top: 9px;
+    padding: 8px;
+  }
+
+  .manager-page #partTable tbody tr {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+  }
+
+  .manager-page #partTable td:last-child button {
+    min-height: 40px;
+  }
+
+  .manager-page #configQuickEditor .quick-editor-header {
+    min-height: 78px;
+    padding: calc(14px + env(safe-area-inset-top)) 16px 13px;
+  }
+
+  .manager-page #configQuickEditor .quick-editor-header h2 {
+    font-size: 21px;
+  }
+
+  .manager-page #configQuickEditor .config-mode-switch {
+    margin: 9px 14px 3px;
+  }
+
+  .manager-page #configQuickEditor #config-selector {
+    padding: 9px 14px 15px;
+  }
+
+  .manager-page #configQuickEditor .quick-editor-field {
+    margin-bottom: 10px;
+  }
+
+  .manager-page #configQuickEditor .quick-editor-actions {
+    padding-inline: 14px;
+  }
+}

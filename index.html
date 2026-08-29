@@ -14,7 +14,7 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20260828-reference-only" />
+  <link rel="stylesheet" href="style.css?v=20260829-density1" />
   <link rel="stylesheet" href="site-menu.css?v=20260829-stats1" />
   <style>
 
@@ -209,7 +209,7 @@
     }
   </style>
 </head>
-<body>
+<body class="manager-page">
 
   <button type="button" class="side-menu-button" onclick="openSideMenu()">☰</button>
   <div class="side-menu-backdrop" onclick="closeSideMenu()"></div>
@@ -336,6 +336,21 @@
         <div><span>可用</span><strong class="accent" id="inventoryAvailable">0</strong></div>
       </div>
 
+      <div class="inventory-toolbar" aria-label="庫存搜尋與篩選">
+        <label class="inventory-search">
+          <span class="sr-only">搜尋額外零件</span>
+          <input id="inventorySearchInput" type="search" autocomplete="off" placeholder="搜尋零件名稱">
+        </label>
+        <div class="inventory-filters" role="group" aria-label="依零件分類篩選">
+          <button type="button" class="inventory-filter active" data-inventory-filter="all" aria-pressed="true">全部</button>
+          <button type="button" class="inventory-filter" data-inventory-filter="上蓋" aria-pressed="false">上蓋</button>
+          <button type="button" class="inventory-filter" data-inventory-filter="固鎖" aria-pressed="false">固鎖</button>
+          <button type="button" class="inventory-filter" data-inventory-filter="軸心" aria-pressed="false">軸心</button>
+          <button type="button" class="inventory-filter" data-inventory-filter="CX分件" aria-pressed="false">CX 分件</button>
+        </div>
+        <span id="inventoryFilterStatus" class="inventory-filter-status" aria-live="polite"></span>
+      </div>
+
     <div class="part-input-row entry-panel">
       <select id="partType">
         <option value="上蓋">上蓋</option>
@@ -446,10 +461,7 @@
       </div>
 
       <div id="config-selector" class="quick-editor-form">
-        <label class="quick-editor-field">
-          <span>型號</span>
-          <input type="text" id="confModel" placeholder="例如 UX-03 或 CX-14">
-        </label>
+        <input type="hidden" id="confModel" value="BX-CUSTOM">
 
         <label class="quick-editor-field" data-config-field="bxux">
           <span>上蓋</span>
@@ -507,7 +519,7 @@
           </select>
         </label>
 
-        <div class="quick-editor-note">保留庫存耗盡、Tr、UX-19／UX-20、UX-16 與 CX 二選一防呆。</div>
+        <div class="quick-editor-note">只需選擇實際使用的零件。庫存耗盡、Tr、UX-19／UX-20、UX-16 與 CX 二選一防呆仍會自動檢查。</div>
       </div>
 
       <footer class="quick-editor-actions">
@@ -673,7 +685,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20260829-namecatalog2"></script>
+  <script type="module" src="script.js?v=20260829-density1"></script>
   <script src="site-menu.js?v=20260829-stats1"></script>
 </body>
 </html>
