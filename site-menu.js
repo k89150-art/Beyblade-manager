@@ -8,18 +8,25 @@ const firebaseConfig = {
   appId: "1:488040360398:web:759698c16eb67e14f1639f"
 };
 
+const HELP_NAV_ITEMS = [
+  { href: "home.html", label: "首頁", sideMenu: true },
+  { href: "index.html", label: "開始使用", sideMenu: false },
+  { href: "guide.html", label: "使用教學", sideMenu: true },
+  { href: "changelog.html", label: "更新紀錄", sideMenu: true },
+  { href: "privacy.html", label: "隱私權政策", sideMenu: true },
+  { href: "about.html", label: "關於本站", sideMenu: true },
+  { href: "contact.html", label: "聯絡方式", sideMenu: true }
+];
+
 const SIDE_MENU_ITEMS = [
   { href: "index.html#collectionSection", label: "收藏", symbol: "C", group: "工具", section: "collectionSection", bottom: true },
   { href: "index.html#inventorySection", label: "庫存", symbol: "I", group: "工具", section: "inventorySection", bottom: true },
   { href: "index.html#configSection", label: "配置", symbol: "X", group: "工具", section: "configSection", bottom: true },
   { href: "competition-stats.html", label: "競賽統計", symbol: "S", group: "工具", page: "competition-stats.html", bottom: true },
   { href: "tournament.html", label: "賽事", symbol: "3G", group: "工具", page: "tournament.html", bottom: true },
-  { href: "home.html", label: "首頁", group: "說明" },
-  { href: "guide.html", label: "使用教學", group: "說明" },
-  { href: "changelog.html", label: "更新紀錄", group: "說明" },
-  { href: "privacy.html", label: "隱私權政策", group: "說明" },
-  { href: "about.html", label: "關於本站", group: "說明" },
-  { href: "contact.html", label: "聯絡方式", group: "說明" },
+  ...HELP_NAV_ITEMS
+    .filter(item => item.sideMenu)
+    .map(item => ({ href: item.href, label: item.label, group: "說明" })),
   { href: "admin.html", label: "管理員後台", group: "管理", adminOnly: true }
 ];
 
@@ -168,6 +175,19 @@ function renderBottomNav() {
     .join("");
 }
 
+function renderHelpPageNavigation() {
+  document.querySelectorAll("[data-help-nav]").forEach(nav => {
+    nav.innerHTML = HELP_NAV_ITEMS
+      .map(item => {
+        const active = currentPageName() === item.href;
+        const activeClass = active ? " active" : "";
+        const currentAttribute = active ? ' aria-current="page"' : "";
+        return `<a class="help-nav-link${activeClass}" href="${item.href}"${currentAttribute}>${item.label}</a>`;
+      })
+      .join("");
+  });
+}
+
 function updateNavigationActiveState(sectionId) {
   if (sectionId) activeToolSection = sectionId;
 
@@ -249,6 +269,7 @@ function installAdminMenuGuard() {
 (function initSideMenu() {
   document.body.classList.add("site-shell-ready");
   renderSideMenu();
+  renderHelpPageNavigation();
   restoreDesktopNavState();
   installToolSectionTracking();
   installAdminMenuGuard();

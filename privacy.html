@@ -12,24 +12,16 @@
   <link rel="manifest" href="manifest.json?v=20260715-ui1" />
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" /><title>隱私權政策｜戰鬥陀螺管理表</title>
   <link rel="stylesheet" href="style.css?v=20260828-reference-only" />
-  <link rel="stylesheet" href="site-menu.css?v=20260829-stats1" />
+  <link rel="stylesheet" href="site-menu.css?v=20260830-helpnav1" />
   <style>
-    .site-nav { display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 18px; }
-    .site-nav a { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:9px 12px; }
     .info-card { background:#181818; border:1px solid #333; border-radius:14px; padding:18px; margin-bottom:16px; line-height:1.8; }
     .info-card h3 { margin-top:0; }
-    @media (max-width:600px){ .site-nav{flex-direction:column;} .site-nav a{width:100%; box-sizing:border-box;} }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>隱私權政策</h2>
-    <div class="site-nav">
-      <a class="secondary-btn" href="home.html">首頁</a>
-      <a class="secondary-btn" href="guide.html">使用教學</a>
-      <a class="primary-btn" href="index.html">開始使用</a>
-      <a class="secondary-btn" href="contact.html">聯絡方式</a>
-    </div>
+    <nav class="site-nav help-page-nav" data-help-nav aria-label="說明頁面捷徑"></nav>
 
     <div class="info-card">
       <h3>一、登入資料</h3>
@@ -57,6 +49,6 @@
       <p>若需要刪除帳號相關資料，請透過聯絡方式與網站管理者聯繫。</p>
     </div>
   </div>
-  <script src="site-menu.js?v=20260829-stats1"></script>
+  <script src="site-menu.js?v=20260830-helpnav1"></script>
 </body>
 </html>

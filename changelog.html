@@ -13,10 +13,8 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>更新紀錄｜戰鬥陀螺管理表</title>
   <link rel="stylesheet" href="style.css?v=20260828-reference-only" />
-  <link rel="stylesheet" href="site-menu.css?v=20260829-stats1" />
+  <link rel="stylesheet" href="site-menu.css?v=20260830-helpnav1" />
   <style>
-    .site-nav { display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 18px; }
-    .site-nav a { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:9px 12px; }
     .info-card { background:#181818; border:1px solid #333; border-radius:14px; padding:18px; margin-bottom:16px; line-height:1.8; }
     .version-title { color:#fff; font-size:18px; font-weight:800; margin-bottom:8px; }
     .version-meta { color:#aaa; font-size:13px; margin-bottom:10px; }
@@ -29,19 +27,26 @@
     .version-archive > summary::after { content:"＋"; float:right; color:#7eb0ff; }
     .version-archive[open] > summary { margin-bottom:16px; }
     .version-archive[open] > summary::after { content:"－"; }
-    @media (max-width:600px){ .site-nav{flex-direction:column;} .site-nav a{width:100%; box-sizing:border-box;} }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>更新紀錄</h2>
-    <div class="site-nav">
-      <a class="secondary-btn" href="home.html">首頁</a>
-      <a class="primary-btn" href="index.html">開始使用</a>
-      <a class="secondary-btn" href="guide.html">使用教學</a>
-      <a class="secondary-btn" href="privacy.html">隱私權政策</a>
-    </div>
+    <nav class="site-nav help-page-nav" data-help-nav aria-label="說明頁面捷徑"></nav>
 
+
+    <div class="info-card">
+      <div class="version-title">v1.8.5｜近期功能與操作介面更新</div>
+      <div class="version-meta">2026-08-16～2026-08-30</div>
+      <ul class="update-list">
+        <li><span class="change-tag">賽事</span>新增總人數與直接晉級紀錄，系統會依單敗淘汰賽程自動計算冠軍、亞軍或名次區間。</li>
+        <li><span class="change-tag">競賽</span>新增客觀競賽統計，可查看上蓋、固鎖、軸心、輔助戰刃與完整配置的來源資料。</li>
+        <li><span class="change-tag">整理</span>移除舊版分析與庫存建議功能及其資料，保留收藏、庫存、配置、歷史與賽事資料。</li>
+        <li><span class="change-tag">庫存</span>改為精簡列表，加入名稱搜尋及上蓋、固鎖、軸心、CX 分件分類篩選。</li>
+        <li><span class="change-tag">配置</span>配置卡改為精簡顯示，修改與刪除收進「⋯」選單；建立自訂配置時不再要求輸入產品型號。</li>
+        <li><span class="change-tag">顯示</span>收藏、庫存與配置採用層次更清楚的深色介面，競賽統計與賽事維持原有操作方式。</li>
+      </ul>
+    </div>
 
 
     <div class="info-card">
@@ -233,6 +238,6 @@
     </div>
     </details>
   </div>
-  <script src="site-menu.js?v=20260829-stats1"></script>
+  <script src="site-menu.js?v=20260830-helpnav1"></script>
 </body>
 </html>

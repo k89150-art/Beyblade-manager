@@ -12,10 +12,8 @@
   <link rel="manifest" href="manifest.json?v=20260715-ui1" />
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" /><title>使用教學｜戰鬥陀螺管理表</title>
   <link rel="stylesheet" href="style.css?v=20260828-reference-only" />
-  <link rel="stylesheet" href="site-menu.css?v=20260829-stats1" />
+  <link rel="stylesheet" href="site-menu.css?v=20260830-helpnav1" />
   <style>
-    .site-nav { display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 18px; }
-    .site-nav a { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:9px 12px; }
     .guide-intro { margin-bottom:16px; padding:14px 16px; border-left:3px solid #3d7eff; color:#b8c4d0; background:rgba(61,126,255,.08); line-height:1.7; }
     .guide-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
     .info-card { min-width:0; background:#181818; border:1px solid #333; border-radius:8px; padding:18px; line-height:1.8; }
@@ -24,21 +22,14 @@
     .step-list li { margin-bottom: 8px; }
     .guide-note { color:#9eaab6; font-size:13px; }
     @media (max-width:760px){ .guide-grid{grid-template-columns:1fr;} }
-    @media (max-width:600px){ .site-nav{flex-direction:column;} .site-nav a{width:100%; box-sizing:border-box;} }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>使用教學</h2>
-    <div class="site-nav">
-      <a class="secondary-btn" href="home.html">首頁</a>
-      <a class="primary-btn" href="index.html">陀螺配置</a>
-      <a class="secondary-btn" href="tournament.html">參賽紀錄</a>
-      <a class="secondary-btn" href="privacy.html">隱私權政策</a>
-      <a class="secondary-btn" href="changelog.html">更新紀錄</a>
-    </div>
+    <nav class="site-nav help-page-nav" data-help-nav aria-label="說明頁面捷徑"></nav>
 
-    <div class="guide-intro">網站分為收藏、額外零件庫存、配置與賽事四個主要功能。手機可使用底部導覽，電腦可使用左側欄快速切換。</div>
+    <div class="guide-intro">網站分為收藏、額外零件庫存、配置、競賽統計與賽事五個主要功能。手機可使用底部導覽，電腦可使用左側欄快速切換。</div>
 
     <div class="guide-grid">
       <section class="info-card">
@@ -64,6 +55,7 @@
         <ol class="step-list">
           <li>只需加入原裝收藏以外、另外持有的上蓋、CX 分件、固鎖或軸心。</li>
           <li>選擇類別、輸入名稱與正整數數量後按「新增零件」。</li>
+          <li>可使用名稱搜尋，或依上蓋、固鎖、軸心與 CX 分件快速篩選；紋章鎖與各類戰刃會歸在 CX 分件。</li>
           <li>摘要會顯示持有總數、配置使用中與目前可用數量。</li>
         </ol>
       </section>
@@ -72,6 +64,7 @@
         <h3>四、建立自由配置</h3>
         <ol class="step-list">
           <li>到「配置」按「＋ 建立配置」，選擇 BX／UX 或 CX 模式。</li>
+          <li>自訂配置不需要輸入產品型號；產品型號只用於辨識原裝收藏。</li>
           <li>BX／UX 使用上蓋、固鎖、軸心；CX 依實際結構選主要戰刃，或金屬＋超越戰刃。</li>
           <li>選單只提供持有且尚有數量的零件，儲存前仍會檢查 Tr、UX-16、UX-19／UX-20 等規則。</li>
         </ol>
@@ -80,7 +73,8 @@
       <section class="info-card">
         <h3>五、修改、刪除與歷史</h3>
         <ol class="step-list">
-          <li>配置卡可直接「修改」或「刪除」；刪除時可填寫拆除原因與測試備註。</li>
+          <li>配置列表使用精簡卡片顯示實際零件；按卡片右側「⋯」才會顯示「修改」與「刪除」。</li>
+          <li>刪除前仍會再次確認，並可填寫拆除原因與測試備註。</li>
           <li>保留的資料會進入歷史測試紀錄，之後可還原成配置。</li>
           <li>收藏區為原裝紀錄，因此不提供改裝；需要不同組合請另建配置。</li>
         </ol>
@@ -98,7 +92,16 @@
       </section>
 
       <section class="info-card">
-        <h3>七、常見問題</h3>
+        <h3>七、競賽統計</h3>
+        <ol class="step-list">
+          <li>可查看資料來源記錄的上蓋、固鎖、軸心、輔助戰刃與完整配置統計。</li>
+          <li>搜尋支援中文、英文、日文與零件 ID；排行可展開查看完整資料。</li>
+          <li>統計依來源定義呈現，不等同完整對戰勝率，也不代表本站推薦。</li>
+        </ol>
+      </section>
+
+      <section class="info-card">
+        <h3>八、常見問題</h3>
         <ol class="step-list">
           <li>資料沒立即出現：確認登入帳號並等待同步完成，再重新開啟頁面。</li>
           <li>零件無法選擇：通常代表可用數量已用完，請檢查收藏、額外庫存與現有配置。</li>
@@ -107,6 +110,6 @@
       </section>
     </div>
   </div>
-  <script src="site-menu.js?v=20260829-stats1"></script>
+  <script src="site-menu.js?v=20260830-helpnav1"></script>
 </body>
 </html>
