@@ -117,6 +117,13 @@ test("soft-dark refresh remains scoped to manager sections", () => {
   assert.doesNotMatch(styles, /#competitionStatsSection[\s\S]{0,120}--manager-surface/);
 });
 
+test("tournament date control can shrink inside responsive form columns", () => {
+  const tournament = fs.readFileSync("tournament.html", "utf8");
+  assert.match(tournament, /\.tournament-form input, \.tournament-form button \{ width: 100%; min-width: 0; max-width: 100%; \}/);
+  assert.match(tournament, /\.tournament-form input\[type="date"\] \{ inline-size: 100%; min-inline-size: 0; max-inline-size: 100%; \}/);
+  assert.doesNotMatch(tournament, /\.tournament-form input\[type="date"\][^{]*\{[^}]*overflow:\s*hidden/);
+});
+
 test("internal compatibility model keeps special ratchet protections", () => {
   const start = script.indexOf("function normalizeModel(model)");
   const end = script.indexOf("function getSeriesFromModel(model)");

@@ -54,6 +54,9 @@ test("使用教學符合目前正式操作", () => {
   assert.match(guide, /上蓋、固鎖、軸心與 CX 分件快速篩選/);
   assert.match(guide, /自訂配置不需要輸入產品型號/);
   assert.match(guide, /按卡片右側「⋯」才會顯示「修改」與「刪除」/);
+  assert.match(guide, /原裝收藏、額外零件庫存、自訂配置、歷史測試與參賽紀錄會儲存在自己的帳號/);
+  assert.match(guide, /手機可使用底部五項導覽，也能打開左側選單查看更多頁面/);
+  assert.match(guide, /深色與米色主題，可在左側選單底部切換；選擇後會在同一瀏覽器保存/);
   assert.doesNotMatch(guide, /配置卡可直接「修改」或「刪除」/);
   assert.doesNotMatch(guide, />陀螺配置</);
 });

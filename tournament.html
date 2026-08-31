@@ -32,7 +32,8 @@
     .page-nav { margin: -6px 0 18px 0; display: flex; gap: 8px; flex-wrap: wrap; }
     .nav-link { display: inline-flex; align-items: center; justify-content: center; padding: 9px 14px; text-decoration: none; min-height: 38px; box-sizing: border-box; }
     .tournament-form { display: grid; grid-template-columns: 150px 1fr 1fr 120px 1fr 120px; gap: 8px; background: #181818; padding: 12px; border-radius: 10px; margin-bottom: 16px; border: 1px solid #333; }
-    .tournament-form input, .tournament-form button { width: 100%; }
+    .tournament-form input, .tournament-form button { width: 100%; min-width: 0; max-width: 100%; }
+    .tournament-form input[type="date"] { inline-size: 100%; min-inline-size: 0; max-inline-size: 100%; }
     .tournament-list { display: flex; flex-direction: column; gap: 14px; }
     .tournament-card { background: #181818; border: 1px solid #333; border-radius: 12px; overflow: hidden; }
     .tournament-summary { display: flex; justify-content: space-between; gap: 12px; padding: 14px; background: #1d1d1d; }
