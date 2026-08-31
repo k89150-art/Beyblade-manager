@@ -39,8 +39,8 @@ test("六個說明頁只保留共用捷徑掛載點", () => {
     assert.equal((html.match(/data-help-nav/g) || []).length, 1, `${page} 掛載點數量錯誤`);
     assert.match(html, /class="site-nav help-page-nav" data-help-nav/);
     assert.doesNotMatch(html, /<div class="site-nav">/);
-    assert.match(html, /site-menu\.js\?v=20260830-helpnav1/);
-    assert.match(html, /site-menu\.css\?v=20260830-helpnav1/);
+    assert.match(html, /site-menu\.js\?v=20260831-v190/);
+    assert.match(html, /site-menu\.css\?v=20260831-v190/);
   });
 });
 

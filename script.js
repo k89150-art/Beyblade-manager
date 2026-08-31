@@ -105,6 +105,25 @@ const partTypes = [
   "軸心"
 ];
 
+const inventoryTypeDisplayOrder = [...partTypes].sort((left, right) => {
+  const lengthDifference = Array.from(left).length - Array.from(right).length;
+  if (lengthDifference !== 0) return lengthDifference;
+
+  const shortTypePriority = ["上蓋", "固鎖", "軸心"];
+  const leftPriority = shortTypePriority.includes(left)
+    ? shortTypePriority.indexOf(left)
+    : shortTypePriority.length + partTypes.indexOf(left);
+  const rightPriority = shortTypePriority.includes(right)
+    ? shortTypePriority.indexOf(right)
+    : shortTypePriority.length + partTypes.indexOf(right);
+  return leftPriority - rightPriority;
+});
+
+function getInventoryTypeDisplayRank(type) {
+  const rank = inventoryTypeDisplayOrder.indexOf(type);
+  return rank >= 0 ? rank : inventoryTypeDisplayOrder.length;
+}
+
 const selectorMap = {
   "上蓋": "sel上蓋",
   "紋章鎖": "sel紋章鎖",
@@ -2039,6 +2058,7 @@ function applyInventoryFilters() {
     const matchesQuery = !query || `${type} ${name}`.toLocaleLowerCase("zh-TW").includes(query);
     const visible = matchesType && matchesQuery;
     row.hidden = !visible;
+    row.style.order = String(getInventoryTypeDisplayRank(type));
     if (visible) visibleCount += 1;
   });
 
@@ -2175,7 +2195,6 @@ function updateResponsiveTableCells() {
             compactContent = document.createElement("div");
             compactContent.className = "config-card-compact-content";
             compactContent.innerHTML = `
-              <span class="config-card-series"></span>
               <strong class="config-card-title"></strong>
               <span class="config-card-summary"></span>
             `;
@@ -2187,7 +2206,6 @@ function updateResponsiveTableCells() {
           const layoutKey = [structuralSeries, displayTitle, displaySummary].join("|");
           if (compactContent.dataset.layoutKey !== layoutKey) {
             compactContent.dataset.layoutKey = layoutKey;
-            compactContent.querySelector(".config-card-series").textContent = structuralSeries;
             compactContent.querySelector(".config-card-title").textContent = displayTitle;
             compactContent.querySelector(".config-card-summary").textContent = displaySummary;
           }
@@ -2823,6 +2841,8 @@ function openConfigQuickEditor(editingRow = null) {
   });
 }
 
+window.openConfigQuickEditor = openConfigQuickEditor;
+
 function closeConfigQuickEditor() {
   const editor = document.getElementById("configQuickEditor");
   if (!editor) return;
@@ -3283,6 +3303,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (openConfigEditorBtn) {
     openConfigEditorBtn.addEventListener("click", () => openConfigQuickEditor());
+  }
+
+  if (location.hash === "#configQuickEditor") {
+    openConfigQuickEditor();
   }
 
   [closeConfigEditorBtn, cancelConfigEditorBtn, configEditorBackdrop].forEach(button => {

@@ -36,6 +36,7 @@ test("configuration cards show real parts without repeated type tags", () => {
   assert.doesNotMatch(script, /tagList\.className = "record-card-tags config-card-tags"/);
   assert.match(script, /querySelector\("\.config-card-tags, \.config-card-groups"\)\?\.remove\(\)/);
   assert.match(script, /className = "config-card-compact-content"/);
+  assert.doesNotMatch(script, /<span class="config-card-series"><\/span>/);
   assert.match(styles, /#configTable \.config-card-compact-content \{[\s\S]*?width: calc\(100% - 48px\);[\s\S]*?flex-wrap: wrap;/);
   assert.match(styles, /#configTable \.config-card-summary \{[\s\S]*?white-space: nowrap;/);
 });
@@ -72,7 +73,42 @@ test("CX inventory filter groups every CX component without changing part types"
 });
 
 test("configuration part summary stays readable without changing compact wrapping", () => {
-  assert.match(styles, /#configTable \.config-card-summary \{[\s\S]*?color: #cbd7e0;[\s\S]*?font-size: 13px;[\s\S]*?font-weight: 650;[\s\S]*?white-space: nowrap;/);
+  assert.match(styles, /#configTable \.config-card-summary \{[\s\S]*?color: var\(--manager-text-summary\);[\s\S]*?font-size: 13px;[\s\S]*?font-weight: 700;[\s\S]*?white-space: nowrap;/);
+});
+
+test("inventory display order is deterministic without changing stored part types", () => {
+  assert.match(script, /const inventoryTypeDisplayOrder = \[\.\.\.partTypes\]\.sort/);
+  assert.match(script, /const shortTypePriority = \["上蓋", "固鎖", "軸心"\]/);
+  assert.match(script, /row\.style\.order = String\(getInventoryTypeDisplayRank\(type\)\)/);
+  assert.doesNotMatch(script, /partTypes\s*=\s*\[\s*"上蓋",\s*"固鎖"/);
+});
+
+test("shared theme switch persists locally and includes complete beige tokens", () => {
+  const menuScript = fs.readFileSync("site-menu.js", "utf8");
+  const menuStyles = fs.readFileSync("site-menu.css", "utf8");
+
+  assert.match(menuScript, /const SITE_THEME_STORAGE_KEY = "beybladeSiteTheme"/);
+  assert.match(menuScript, /localStorage\.setItem\(SITE_THEME_STORAGE_KEY, nextTheme\)/);
+  assert.match(menuScript, /data-theme-option="dark"/);
+  assert.match(menuScript, /data-theme-option="beige"/);
+  assert.match(menuScript, /class="theme-segment" role="group"/);
+  assert.doesNotMatch(menuScript, /role="switch"/);
+  assert.match(menuStyles, /html\[data-theme="beige"\]/);
+  assert.match(styles, /--manager-text-summary: #4d5350/);
+  assert.match(styles, /#configTable \.config-action-panel \{[\s\S]*?background-color: var\(--manager-surface-raised\);[\s\S]*?backdrop-filter: none;/);
+});
+
+test("desktop and mobile sidebars share one structured navigation source", () => {
+  const menuScript = fs.readFileSync("site-menu.js", "utf8");
+  const menuStyles = fs.readFileSync("site-menu.css", "utf8");
+
+  assert.match(menuScript, /label: "額外零件庫存", bottomLabel: "庫存"/);
+  assert.match(menuScript, /label: "配置紀錄", bottomLabel: "配置"/);
+  assert.match(menuScript, /label: "Quick Editor"[\s\S]*?group: "工具"/);
+  assert.match(menuScript, /const SITE_VERSION = "v1\.9\.0"/);
+  assert.match(menuScript, /buildMenuLinkInnerHtml\(item, true\)/);
+  assert.match(menuStyles, /body \.side-menu-section\[data-menu-group="說明"\][\s\S]*?border-top:/);
+  assert.match(menuStyles, /body \.side-menu-footer[\s\S]*?flex: 0 0 auto/);
 });
 
 test("soft-dark refresh remains scoped to manager sections", () => {

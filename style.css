@@ -2386,6 +2386,7 @@ body .modal-actions {
   --manager-divider: rgba(74, 93, 111, .5);
   --manager-text: #f3f6f8;
   --manager-text-secondary: #b3c0cb;
+  --manager-text-summary: #d8e1e8;
   --manager-text-muted: #8291a0;
   --manager-accent: #5798ff;
   --manager-accent-soft: rgba(87, 152, 255, .12);
@@ -2622,9 +2623,9 @@ body .modal-actions {
 .manager-page #configTable .config-card-summary {
   max-width: 100%;
   flex: 0 0 auto;
-  color: #cbd7e0;
+  color: var(--manager-text-summary);
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 700;
   line-height: 1.4;
   white-space: nowrap;
 }
@@ -2675,13 +2676,18 @@ body .modal-actions {
   position: absolute;
   top: 44px;
   right: 0;
+  z-index: 2;
   width: 144px;
   padding: 6px;
   display: grid;
   gap: 4px;
   border: 1px solid var(--manager-border);
   border-radius: 8px;
-  background: var(--manager-surface-raised);
+  isolation: isolate;
+  opacity: 1;
+  background-color: var(--manager-surface-raised);
+  background-image: none;
+  backdrop-filter: none;
   box-shadow: 0 16px 34px rgba(0, 0, 0, .34);
 }
 
@@ -3104,5 +3110,248 @@ body .modal-actions {
 
   .manager-page #configQuickEditor .quick-editor-actions {
     padding-inline: 14px;
+  }
+}
+
+/* 2026-08-31: complete warm beige theme tokens. */
+html[data-theme="beige"] {
+  color-scheme: light;
+  --bg: #f1eadf;
+  --surface: #f8f3ea;
+  --surface-2: #ebe2d5;
+  --surface-3: #dfd3c3;
+  --line: #d4c8b7;
+  --line-strong: #b9aa96;
+  --text: #292d2b;
+  --muted: #6e716d;
+  --blue: #3d73b7;
+  --blue-soft: rgba(61, 115, 183, .11);
+  --cyan: #357d80;
+  --green: #39855c;
+  --amber: #9b6e21;
+  --red: #b85058;
+  --shadow: 0 14px 34px rgba(83, 67, 45, .12);
+  --card-bg: #fbf7ef;
+  --card-border: #d4c8b7;
+  --card-shadow: 0 8px 20px rgba(83, 67, 45, .1);
+}
+
+html[data-theme="beige"],
+html[data-theme="beige"] body {
+  background-color: var(--bg);
+}
+
+html[data-theme="beige"] body {
+  background-image:
+    linear-gradient(rgba(74, 63, 48, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 63, 48, .035) 1px, transparent 1px);
+  color: var(--text);
+}
+
+html[data-theme="beige"] h1,
+html[data-theme="beige"] h2,
+html[data-theme="beige"] h3,
+html[data-theme="beige"] h4,
+html[data-theme="beige"] .auth-title,
+html[data-theme="beige"] .auth-user strong,
+html[data-theme="beige"] .count-pill strong,
+html[data-theme="beige"] .summary-strip strong {
+  color: var(--text);
+}
+
+html[data-theme="beige"] .auth-user,
+html[data-theme="beige"] th,
+html[data-theme="beige"] td {
+  color: #4d514e;
+}
+
+html[data-theme="beige"] input,
+html[data-theme="beige"] select,
+html[data-theme="beige"] button,
+html[data-theme="beige"] textarea {
+  border-color: var(--line-strong);
+  color: #303431;
+  background: var(--surface-2);
+}
+
+html[data-theme="beige"] input::placeholder,
+html[data-theme="beige"] textarea::placeholder {
+  color: #88877f;
+}
+
+html[data-theme="beige"] button:hover {
+  border-color: #9d8e7a;
+  background: var(--surface-3);
+}
+
+html[data-theme="beige"] .primary-btn,
+html[data-theme="beige"] .stock-mode-btn.active,
+html[data-theme="beige"] .config-mode-btn.active {
+  border-color: #356bad;
+  color: #ffffff;
+  background: var(--blue);
+}
+
+html[data-theme="beige"] .secondary-btn {
+  border-color: var(--line-strong);
+  color: #454946;
+  background: #eee6da;
+}
+
+html[data-theme="beige"] .danger-btn {
+  border-color: rgba(184,80,88,.38);
+  color: #9d3f47;
+  background: rgba(184,80,88,.07);
+}
+
+html[data-theme="beige"] .entry-panel,
+html[data-theme="beige"] #config-selector,
+html[data-theme="beige"] .summary-strip,
+html[data-theme="beige"] .table-wrap,
+html[data-theme="beige"] .auth-card,
+html[data-theme="beige"] body #deleteConfigModalBox {
+  border-color: var(--card-border);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+html[data-theme="beige"] .stock-mode-switch,
+html[data-theme="beige"] .config-mode-switch {
+  border-color: var(--line);
+  background: #e6ddd0;
+}
+
+html[data-theme="beige"] .stock-model-field,
+html[data-theme="beige"] .quick-editor-field {
+  color: #5d615e;
+}
+
+html[data-theme="beige"] .stock-auto-preview,
+html[data-theme="beige"] .quick-editor-note,
+html[data-theme="beige"] .section-note,
+html[data-theme="beige"] .history-note {
+  color: #626965;
+  background: rgba(53,125,128,.065);
+}
+
+html[data-theme="beige"] .stock-preview-item strong {
+  color: #303431;
+}
+
+html[data-theme="beige"] .stock-preview-item span {
+  color: #71736f;
+}
+
+html[data-theme="beige"] .stock-choice-backdrop,
+html[data-theme="beige"] .quick-editor-backdrop,
+html[data-theme="beige"] body #deleteConfigModalBackdrop {
+  background: rgba(61, 52, 41, .5);
+}
+
+html[data-theme="beige"] .stock-choice-panel,
+html[data-theme="beige"] .quick-editor-panel {
+  border-color: var(--line-strong);
+  background: #f8f3ea;
+  background-image:
+    linear-gradient(rgba(74, 63, 48, .025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 63, 48, .025) 1px, transparent 1px);
+  box-shadow: -18px 0 48px rgba(83, 67, 45, .2);
+}
+
+html[data-theme="beige"] .stock-choice-option {
+  border-color: var(--line);
+  color: #303431;
+  background: #fffaf2;
+}
+
+html[data-theme="beige"] .stock-choice-option:hover,
+html[data-theme="beige"] .stock-choice-option:focus-visible {
+  border-color: rgba(61,115,183,.58);
+  background: #e8f0f7;
+}
+
+html[data-theme="beige"] .quick-editor-actions {
+  border-color: var(--line);
+  background: #eee6da;
+}
+
+html[data-theme="beige"] .manager-page #collectionSection,
+html[data-theme="beige"] .manager-page #inventorySection,
+html[data-theme="beige"] .manager-page #configSection,
+html[data-theme="beige"] .manager-page #configQuickEditor {
+  --manager-surface: #f6f0e7;
+  --manager-surface-raised: #fffaf2;
+  --manager-card: #fbf7ef;
+  --manager-card-hover: #f4ecdf;
+  --manager-input: #fffaf2;
+  --manager-border: #d2c5b3;
+  --manager-divider: rgba(168, 151, 129, .52);
+  --manager-text: #292d2b;
+  --manager-text-secondary: #5d625f;
+  --manager-text-summary: #4d5350;
+  --manager-text-muted: #7a7c76;
+  --manager-accent: #3d73b7;
+  --manager-accent-soft: rgba(61,115,183,.11);
+  --manager-danger: #a9464e;
+  --manager-success: #397f58;
+  --manager-warning: #94691f;
+}
+
+html[data-theme="beige"] .manager-page #collectionSection .entry-panel,
+html[data-theme="beige"] .manager-page #inventorySection .entry-panel,
+html[data-theme="beige"] .manager-page #inventorySection .summary-strip,
+html[data-theme="beige"] .manager-page #beybladeTable tbody tr:not(.editing-row),
+html[data-theme="beige"] .manager-page #configTable tbody tr:not(.editing-row),
+html[data-theme="beige"] .manager-page #partTable tbody tr {
+  border-color: var(--manager-border);
+  background: var(--manager-card);
+  box-shadow: 0 6px 16px rgba(83, 67, 45, .09);
+}
+
+html[data-theme="beige"] .manager-page #beybladeTable tbody tr:not(.editing-row):hover,
+html[data-theme="beige"] .manager-page #configTable tbody tr:not(.editing-row):hover {
+  border-color: #b5a58f;
+  background: var(--manager-card-hover);
+}
+
+html[data-theme="beige"] .manager-page #beybladeTable .record-card-tags span,
+html[data-theme="beige"] .manager-page #partTable td:nth-child(1) {
+  color: #5c6665;
+  background: #e8e1d6;
+}
+
+html[data-theme="beige"] .manager-page #partTable td:nth-child(3) {
+  color: #315f96;
+}
+
+html[data-theme="beige"] .manager-page #partTable td:last-child button,
+html[data-theme="beige"] .manager-page #beybladeTable tbody tr:not(.editing-row) td:last-child button,
+html[data-theme="beige"] .manager-page #configTable .config-action-trigger {
+  border-color: #bcae9a;
+  color: #4c514e;
+  background: transparent;
+}
+
+html[data-theme="beige"] .manager-page .inventory-filter.active {
+  border-color: rgba(61,115,183,.35);
+  color: #285c9c;
+  background: var(--manager-accent-soft);
+}
+
+html[data-theme="beige"] .manager-page #configTable .config-action-panel {
+  border-color: #c5b7a3;
+  color: var(--manager-text);
+  background-color: #fffaf2;
+  box-shadow: 0 16px 34px rgba(83, 67, 45, .22);
+}
+
+html[data-theme="beige"] .manager-page #configTable tbody tr:not(.editing-row) td:last-child .config-action-panel button:hover,
+html[data-theme="beige"] .manager-page #configTable tbody tr:not(.editing-row) td:last-child .config-action-panel button:focus-visible {
+  background: #eee5d8;
+}
+
+@media (max-width: 600px) {
+  html[data-theme="beige"] body.manager-page.config-action-menu-open::after {
+    background: rgba(61, 52, 41, .36);
   }
 }
