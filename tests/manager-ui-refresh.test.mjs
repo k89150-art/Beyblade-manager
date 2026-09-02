@@ -41,6 +41,48 @@ test("configuration cards show real parts without repeated type tags", () => {
   assert.match(styles, /#configTable \.config-card-summary \{[\s\S]*?white-space: nowrap;/);
 });
 
+test("collection cards show typed original parts in a stable BX UX and CX order", () => {
+  const start = script.indexOf("function inventoryTypeMatchesFilter(type, filter)");
+  const end = script.indexOf("function applyInventoryFilters()", start);
+  assert.ok(start >= 0 && end > start);
+
+  const context = {};
+  vm.runInNewContext(
+    `${script.slice(start, end)}\nthis.getCollectionParts = getCollectionCardParts;`,
+    context
+  );
+
+  const bxux = context.getCollectionParts("UX", {
+    layer: "魔導神杖", lock: "-", main: "-", transcend: "-", metal: "-", aux: "-", fix: "5-70", axis: "DB"
+  });
+  assert.equal(JSON.stringify(bxux.map(part => [part.type, part.value])), JSON.stringify([
+    ["上蓋", "魔導神杖"], ["固鎖", "5-70"], ["軸心", "DB"]
+  ]));
+
+  const cx = context.getCollectionParts("CX", {
+    layer: "騎士堡壘GV", lock: "騎士", main: "G/堡壘", transcend: "G", metal: "堡壘", aux: "V", fix: "8-70", axis: "UN"
+  });
+  assert.equal(JSON.stringify(cx.map(part => [part.type, part.value])), JSON.stringify([
+    ["紋章鎖", "騎士"], ["金屬戰刃", "堡壘"], ["超越戰刃", "G"], ["輔助戰刃", "V"], ["固鎖", "8-70"], ["軸心", "UN"]
+  ]));
+  assert.match(script, /class="collection-part-badge" data-part-tone=/);
+  assert.match(script, /class="collection-part-group" data-collection-group=/);
+  assert.match(script, /core: new Set\(\["紋章鎖", "主要戰刃", "金屬戰刃"\]\)/);
+  assert.match(script, /blades: new Set\(\["超越戰刃", "輔助戰刃"\]\)/);
+  assert.match(script, /drive: new Set\(\["固鎖", "軸心"\]\)/);
+  assert.match(styles, /#beybladeTable tbody tr\.has-collection-part-badges:not\(\.editing-row\) td:nth-child\(2\) \{\s*display: none;/);
+  assert.match(styles, /#beybladeTable \.collection-part-group \{[\s\S]*?background: transparent;/);
+  assert.doesNotMatch(styles, /has-collection-card-title td:nth-child\(1\)::before \{[\s\S]*?display: none;/);
+  assert.match(styles, /#beybladeTable tbody tr\[data-series="CX"\] td:nth-child\(1\)::before/);
+  assert.match(styles, /@media \(min-width: 1200px\) \{[\s\S]*?#beybladeTable tbody \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
+  assert.match(styles, /@media \(min-width: 1200px\) \{[\s\S]*?#beybladeTable tbody tr:not\(\.editing-row\) \{[\s\S]*?grid-template-columns: minmax\(240px, 280px\) minmax\(0, 1fr\);/);
+  assert.match(styles, /@media \(min-width: 1200px\) \{[\s\S]*?#beybladeTable tbody tr:not\(\.editing-row\) td:last-child[\s\S]*?grid-template-columns: minmax\(0, 1fr\) max-content;/);
+  assert.match(styles, /@media \(min-width: 1200px\) \{[\s\S]*?\.has-collection-part-groups:not\(\.editing-row\) \.collection-part-group \{[\s\S]*?display: contents;/);
+  assert.match(styles, /@media \(min-width: 768px\) and \(max-width: 1199px\) \{[\s\S]*?#beybladeTable tbody \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
+  assert.match(styles, /@media \(max-width: 767px\) \{[\s\S]*?#beybladeTable tbody \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
+  assert.match(styles, /@media \(max-width: 767px\) \{[\s\S]*?\.has-collection-part-groups:not\(\.editing-row\) \.collection-card-tags \{[\s\S]*?flex-direction: column;/);
+});
+
 test("inventory search and category filters are wired", () => {
   assert.match(html, /id="inventorySearchInput"/);
   assert.match(html, /data-inventory-filter="CX分件"/);
@@ -70,6 +112,43 @@ test("CX inventory filter groups every CX component without changing part types"
   for (const type of ["上蓋", "固鎖", "軸心"]) {
     assert.equal(context.matchesInventoryType(type, "CX分件"), false);
   }
+});
+
+test("inventory type colors reuse existing type groups without changing stored values", () => {
+  const start = script.indexOf("function inventoryTypeMatchesFilter(type, filter)");
+  const end = script.indexOf("function applyInventoryFilters()", start);
+  assert.ok(start >= 0 && end > start);
+
+  const context = {};
+  vm.runInNewContext(
+    `${script.slice(start, end)}\nthis.getInventoryTone = getInventoryTypeTone;`,
+    context
+  );
+
+  assert.equal(context.getInventoryTone("上蓋"), "layer");
+  assert.equal(context.getInventoryTone("固鎖"), "ratchet");
+  assert.equal(context.getInventoryTone("軸心"), "bit");
+  for (const type of ["紋章鎖", "主要戰刃", "超越戰刃", "金屬戰刃", "輔助戰刃"]) {
+    assert.equal(context.getInventoryTone(type), "cx");
+  }
+  assert.match(script, /row\.dataset\.inventoryTone = getInventoryTypeTone\(type\)/);
+  assert.match(styles, /tr\[data-inventory-tone="layer"\] td:nth-child\(1\)/);
+  assert.match(styles, /tr\[data-inventory-tone="ratchet"\] td:nth-child\(1\)/);
+  assert.match(styles, /tr\[data-inventory-tone="bit"\] td:nth-child\(1\)/);
+  assert.match(styles, /tr\[data-inventory-tone="cx"\] td:nth-child\(1\)/);
+});
+
+test("inventory summary stays compact and reuses configuration occupancy", () => {
+  assert.match(html, /id="inventoryKindSummary"/);
+  assert.match(html, /id="inventoryTotal"/);
+  assert.match(html, /id="inventoryUsed"/);
+  assert.match(html, /id="inventoryAvailable"/);
+  assert.match(script, /const usedParts = getUsedParts\(\)/);
+  assert.match(script, /inventoryUsed \+= Math\.min\(count, usedParts\[type\]\?\.\[name\] \|\| 0\)/);
+  assert.match(script, /setUiSummaryValue\("inventoryAvailable", Math\.max\(0, inventoryTotal - inventoryUsed\)\)/);
+  assert.match(styles, /#inventorySection \.summary-strip > div \{[\s\S]*?min-height: 42px;[\s\S]*?padding: 7px 10px;/);
+  assert.match(styles, /@media \(max-width: 600px\) \{[\s\S]*?#inventorySection \.summary-strip \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
+  assert.match(styles, /#inventorySection \.summary-strip > div:nth-child\(-n \+ 2\) \{[\s\S]*?border-bottom: 1px solid var\(--manager-divider\);/);
 });
 
 test("configuration part summary stays readable without changing compact wrapping", () => {
@@ -105,7 +184,7 @@ test("desktop and mobile sidebars share one structured navigation source", () =>
   assert.match(menuScript, /label: "額外零件庫存", bottomLabel: "庫存"/);
   assert.match(menuScript, /label: "配置紀錄", bottomLabel: "配置"/);
   assert.match(menuScript, /label: "Quick Editor"[\s\S]*?group: "工具"/);
-  assert.match(menuScript, /const SITE_VERSION = "v1\.9\.0"/);
+  assert.match(menuScript, /const SITE_VERSION = "v1\.9\.1"/);
   assert.match(menuScript, /buildMenuLinkInnerHtml\(item, true\)/);
   assert.match(menuStyles, /body \.side-menu-section\[data-menu-group="說明"\][\s\S]*?border-top:/);
   assert.match(menuStyles, /body \.side-menu-footer[\s\S]*?flex: 0 0 auto/);

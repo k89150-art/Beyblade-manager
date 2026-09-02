@@ -2045,6 +2045,38 @@ function inventoryTypeMatchesFilter(type, filter) {
   return type === filter;
 }
 
+function getInventoryTypeTone(type) {
+  if (type === "上蓋") return "layer";
+  if (type === "固鎖") return "ratchet";
+  if (type === "軸心") return "bit";
+  if (inventoryTypeMatchesFilter(type, "CX分件")) return "cx";
+  return "neutral";
+}
+
+function getCollectionCardParts(series, parts) {
+  const hasValue = value => value && value !== "-";
+  const cxValues = [parts.lock, parts.main, parts.transcend, parts.metal, parts.aux];
+  const isCxAssembly = series === "CX" && cxValues.some(hasValue);
+  const orderedParts = isCxAssembly
+    ? [
+        ["紋章鎖", parts.lock],
+        [hasValue(parts.metal) ? "金屬戰刃" : "主要戰刃", hasValue(parts.metal) ? parts.metal : parts.main],
+        ["超越戰刃", parts.transcend],
+        ["輔助戰刃", parts.aux],
+        ["固鎖", parts.fix],
+        ["軸心", parts.axis]
+      ]
+    : [
+        ["上蓋", parts.layer],
+        ["固鎖", parts.fix],
+        ["軸心", parts.axis]
+      ];
+
+  return orderedParts
+    .filter(([, value]) => hasValue(value))
+    .map(([type, value]) => ({ type, value, tone: getInventoryTypeTone(type) }));
+}
+
 function applyInventoryFilters() {
   const query = document.getElementById("inventorySearchInput")?.value.trim().toLocaleLowerCase("zh-TW") || "";
   const rows = Array.from(document.querySelectorAll("#partTable tbody tr"));
@@ -2057,6 +2089,7 @@ function applyInventoryFilters() {
     const matchesType = inventoryTypeMatchesFilter(type, inventoryFilterType);
     const matchesQuery = !query || `${type} ${name}`.toLocaleLowerCase("zh-TW").includes(query);
     const visible = matchesType && matchesQuery;
+    row.dataset.inventoryTone = getInventoryTypeTone(type);
     row.hidden = !visible;
     row.style.order = String(getInventoryTypeDisplayRank(type));
     if (visible) visibleCount += 1;
@@ -2110,34 +2143,26 @@ function updateResponsiveTableCells() {
               axisValue
             ]
           : [layerValue, fixValue, axisValue];
-        const cardTags = [];
-        const addCardTag = (value, label) => {
-          if (hasValue(value)) cardTags.push(label);
-        };
+        const cardParts = getCollectionCardParts(series, {
+          layer: layerValue,
+          lock: lockValue,
+          main: mainValue,
+          transcend: transcendValue,
+          metal: metalValue,
+          aux: auxValue,
+          fix: fixValue,
+          axis: axisValue
+        });
 
-        row.classList.toggle("has-collection-card-title", series === "CX" && hasCxParts);
+        const isCxCollectionCard = series === "CX" && hasCxParts;
+        row.classList.toggle("has-collection-card-title", isCxCollectionCard);
+        row.classList.toggle("has-collection-part-badges", cardParts.length > 0);
+        row.classList.toggle("has-collection-part-groups", isCxCollectionCard && cardParts.length > 0);
         if (cells[0]) {
           cells[0].dataset.cardTitle = [model, titleLayer].filter(hasValue).join(" ") || model;
         }
         if (cells[1]) {
           cells[1].dataset.cardSummary = summaryValues.filter(hasValue).join(" ・ ") || "-";
-        }
-
-        if (series === "CX" && hasCxParts) {
-          addCardTag(lockValue, "紋章鎖");
-          if (hasValue(transcendValue) && hasValue(metalValue)) {
-            cardTags.push("金屬+超越");
-          } else if (hasValue(mainValue)) {
-            cardTags.push("主要戰刃");
-          } else {
-            addCardTag(metalValue, "金屬戰刃");
-            addCardTag(transcendValue, "超越戰刃");
-          }
-          addCardTag(auxValue, "輔助");
-        } else {
-          addCardTag(layerValue, "上蓋");
-          addCardTag(fixValue, "固鎖");
-          addCardTag(axisValue, "軸心");
         }
 
         const operationCell = cells[cells.length - 1];
@@ -2148,10 +2173,36 @@ function updateResponsiveTableCells() {
             tagList.className = "record-card-tags collection-card-tags";
             operationCell.prepend(tagList);
           }
-          const tagKey = cardTags.join("|");
+          const tagKey = `${isCxCollectionCard ? "grouped" : "flat"}|${cardParts.map(part => `${part.type}:${part.value}`).join("|")}`;
           if (tagList.dataset.tagKey !== tagKey) {
             tagList.dataset.tagKey = tagKey;
-            tagList.innerHTML = cardTags.map(tag => `<span>${escapeHtml(tag)}</span>`).join("");
+            const renderPartBadge = part => `
+              <span class="collection-part-badge" data-part-tone="${part.tone}">
+                <small>${escapeHtml(part.type)}</small>
+                <strong>${escapeHtml(part.value)}</strong>
+              </span>
+            `;
+
+            if (isCxCollectionCard) {
+              const groupTypes = {
+                core: new Set(["紋章鎖", "主要戰刃", "金屬戰刃"]),
+                blades: new Set(["超越戰刃", "輔助戰刃"]),
+                drive: new Set(["固鎖", "軸心"])
+              };
+              tagList.innerHTML = Object.entries(groupTypes)
+                .map(([groupName, types]) => ({
+                  groupName,
+                  parts: cardParts.filter(part => types.has(part.type))
+                }))
+                .filter(group => group.parts.length > 0)
+                .map(group => `
+                  <span class="collection-part-group" data-collection-group="${group.groupName}">
+                    ${group.parts.map(renderPartBadge).join("")}
+                  </span>
+                `).join("");
+            } else {
+              tagList.innerHTML = cardParts.map(renderPartBadge).join("");
+            }
           }
         }
 

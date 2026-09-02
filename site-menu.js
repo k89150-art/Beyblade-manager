@@ -34,7 +34,7 @@ const SIDE_MENU_ITEMS = [
 const DESKTOP_NAV_STATE_KEY = "beybladeDesktopNavCollapsed";
 const SITE_THEME_STORAGE_KEY = "beybladeSiteTheme";
 const SITE_THEMES = ["dark", "beige"];
-const SITE_VERSION = "v1.9.0";
+const SITE_VERSION = "v1.9.1";
 
 const MENU_ICONS = {
   collection: '<path d="M6 3.75h12v17l-6-3.5-6 3.5z"/>',

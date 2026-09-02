@@ -919,10 +919,6 @@ td select {
   text-align: left;
 }
 
-#beybladeTable tr:not(.editing-row).has-collection-card-title td:nth-child(1)::before {
-  display: none;
-}
-
 #beybladeTable tr:not(.editing-row) td.card-display-suppressed,
 #configTable tr:not(.editing-row) td.card-display-suppressed {
   display: none !important;
@@ -2372,6 +2368,55 @@ body .modal-actions {
   grid-row: 1;
 }
 
+/* Collection cards show the original parts directly without duplicating the old summary. */
+.manager-page #beybladeTable tbody tr.has-collection-part-badges:not(.editing-row) td:nth-child(2) {
+  display: none;
+}
+
+.manager-page #beybladeTable .collection-card-tags {
+  align-items: flex-start;
+}
+
+.manager-page #beybladeTable .collection-part-group {
+  display: contents;
+  min-height: 0;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  white-space: normal;
+}
+
+.manager-page #beybladeTable .collection-part-badge {
+  min-height: 28px;
+  max-width: 100%;
+  padding: 4px 7px;
+  gap: 4px;
+  border: 1px solid transparent;
+  white-space: normal;
+}
+
+.manager-page #beybladeTable .collection-part-badge small {
+  flex: 0 0 auto;
+  color: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  opacity: 1;
+}
+
+.manager-page #beybladeTable .collection-part-badge strong {
+  min-width: 0;
+  color: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
 /* 2026-08-29: scoped density and soft-dark refresh for collection tools only. */
 .manager-page #collectionSection,
 .manager-page #inventorySection,
@@ -2419,6 +2464,31 @@ body .modal-actions {
   border-color: var(--manager-border);
   background: var(--manager-surface);
   box-shadow: 0 10px 24px rgba(0, 0, 0, .16);
+}
+
+.manager-page #inventorySection .summary-strip {
+  margin: 10px 0 11px;
+}
+
+.manager-page #inventorySection .summary-strip > div {
+  min-height: 42px;
+  padding: 7px 10px;
+  gap: 6px;
+}
+
+.manager-page #inventorySection .summary-strip span {
+  color: var(--manager-text-muted);
+  font-size: 10px;
+}
+
+.manager-page #inventorySection .summary-strip strong {
+  color: var(--manager-text);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.manager-page #inventorySection .summary-strip .accent {
+  color: #82b2ff;
 }
 
 .manager-page #collectionSection input,
@@ -2873,12 +2943,41 @@ body .modal-actions {
   padding: 3px 7px;
   display: inline-flex;
   align-items: center;
+  border: 1px solid transparent;
   border-radius: var(--radius-tag);
   color: #a9bbca;
   background: #1d2a36;
   font-size: 9px;
   font-weight: 900;
   white-space: nowrap;
+}
+
+.manager-page #partTable tr[data-inventory-tone="layer"] td:nth-child(1),
+.manager-page #beybladeTable .collection-part-badge[data-part-tone="layer"] {
+  border-color: rgba(91, 151, 218, .24);
+  color: #b8d8fa;
+  background: rgba(72, 130, 191, .18);
+}
+
+.manager-page #partTable tr[data-inventory-tone="ratchet"] td:nth-child(1),
+.manager-page #beybladeTable .collection-part-badge[data-part-tone="ratchet"] {
+  border-color: rgba(151, 118, 196, .24);
+  color: #d5c3ee;
+  background: rgba(128, 91, 174, .18);
+}
+
+.manager-page #partTable tr[data-inventory-tone="bit"] td:nth-child(1),
+.manager-page #beybladeTable .collection-part-badge[data-part-tone="bit"] {
+  border-color: rgba(81, 166, 119, .24);
+  color: #b8e2c8;
+  background: rgba(62, 139, 96, .18);
+}
+
+.manager-page #partTable tr[data-inventory-tone="cx"] td:nth-child(1),
+.manager-page #beybladeTable .collection-part-badge[data-part-tone="cx"] {
+  border-color: rgba(201, 153, 83, .25);
+  color: #ead0a1;
+  background: rgba(169, 119, 53, .18);
 }
 
 .manager-page #partTable td:nth-child(2) {
@@ -3070,8 +3169,30 @@ body .modal-actions {
     font-size: 15px;
   }
 
+  .manager-page #inventorySection .summary-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .manager-page #inventorySection .summary-strip > div {
-    min-height: 52px;
+    min-height: 38px;
+    padding: 4px;
+    gap: 2px;
+  }
+
+  .manager-page #inventorySection .summary-strip > div:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .manager-page #inventorySection .summary-strip > div:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--manager-divider);
+  }
+
+  .manager-page #inventorySection .summary-strip span {
+    font-size: 9px;
+  }
+
+  .manager-page #inventorySection .summary-strip strong {
+    font-size: 16px;
   }
 
   .manager-page .inventory-toolbar {
@@ -3110,6 +3231,122 @@ body .modal-actions {
 
   .manager-page #configQuickEditor .quick-editor-actions {
     padding-inline: 14px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .manager-page #beybladeTable tbody {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+
+  .manager-page #beybladeTable tbody tr:not(.editing-row) {
+    position: relative;
+    min-height: 58px;
+    padding: 9px 12px;
+    display: grid;
+    grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+    overflow: visible;
+    border-radius: 6px;
+    box-shadow: none;
+  }
+
+  .manager-page #beybladeTable tbody tr:not(.editing-row) td:nth-child(1) {
+    width: auto;
+    min-height: 31px;
+    grid-column: 1;
+    align-self: center;
+  }
+
+  .manager-page #beybladeTable tbody tr:not(.editing-row) td:nth-child(1)::after {
+    font-size: 17px;
+  }
+
+  .manager-page #beybladeTable .collection-part-badge {
+    min-height: 28px;
+    padding: 4px 7px;
+  }
+
+  .manager-page #beybladeTable tbody tr:not(.editing-row) td:last-child,
+  .manager-page #beybladeTable tbody tr.has-collection-part-groups:not(.editing-row) td:last-child {
+    width: 100%;
+    min-width: 0;
+    margin-top: 0;
+    padding-right: 0;
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .manager-page #beybladeTable .collection-card-tags,
+  .manager-page #beybladeTable tbody tr.has-collection-part-groups:not(.editing-row) .collection-card-tags {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .manager-page #beybladeTable tbody tr.has-collection-part-groups:not(.editing-row) .collection-part-group {
+    display: contents;
+  }
+
+  .manager-page #beybladeTable tbody tr.has-collection-part-groups:not(.editing-row) .collection-part-group > .collection-part-badge {
+    min-width: 0;
+    flex: 0 0 auto;
+    padding-inline: 5px;
+  }
+
+  .manager-page #beybladeTable tbody tr.has-collection-part-groups:not(.editing-row) .collection-part-group[data-collection-group="blades"],
+  .manager-page #beybladeTable tbody tr.has-collection-part-groups:not(.editing-row) .collection-part-group[data-collection-group="drive"] {
+    gap: var(--space-1);
+  }
+
+  .manager-page #beybladeTable tbody tr.has-collection-part-groups:not(.editing-row) .collection-part-group[data-collection-group="blades"] > .collection-part-badge,
+  .manager-page #beybladeTable tbody tr.has-collection-part-groups:not(.editing-row) .collection-part-group[data-collection-group="drive"] > .collection-part-badge {
+    padding-inline: 2px;
+    gap: 2px;
+  }
+
+  .manager-page #beybladeTable tbody tr.has-collection-part-groups:not(.editing-row) td:last-child > button:last-child {
+    position: static;
+    grid-column: 2;
+    justify-self: end;
+    z-index: 1;
+  }
+
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .manager-page #beybladeTable tbody {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .manager-page #beybladeTable tbody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .manager-page #beybladeTable tbody tr.has-collection-part-groups:not(.editing-row) .collection-card-tags {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .manager-page #beybladeTable tbody tr.has-collection-part-groups:not(.editing-row) .collection-part-group {
+    width: max-content;
+    max-width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--space-1);
   }
 }
 
@@ -3318,6 +3555,50 @@ html[data-theme="beige"] .manager-page #beybladeTable .record-card-tags span,
 html[data-theme="beige"] .manager-page #partTable td:nth-child(1) {
   color: #5c6665;
   background: #e8e1d6;
+}
+
+.manager-page #beybladeTable .record-card-tags > .collection-part-group,
+html[data-theme="beige"] .manager-page #beybladeTable .record-card-tags > .collection-part-group {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+html[data-theme="beige"] .manager-page #partTable tr[data-inventory-tone="layer"] td:nth-child(1),
+html[data-theme="beige"] .manager-page #beybladeTable .collection-part-badge[data-part-tone="layer"] {
+  border-color: #c6d8ea;
+  color: #355f87;
+  background: #e4edf6;
+}
+
+html[data-theme="beige"] .manager-page #partTable tr[data-inventory-tone="ratchet"] td:nth-child(1),
+html[data-theme="beige"] .manager-page #beybladeTable .collection-part-badge[data-part-tone="ratchet"] {
+  border-color: #d8cce6;
+  color: #66527c;
+  background: #eee8f4;
+}
+
+html[data-theme="beige"] .manager-page #partTable tr[data-inventory-tone="bit"] td:nth-child(1),
+html[data-theme="beige"] .manager-page #beybladeTable .collection-part-badge[data-part-tone="bit"] {
+  border-color: #c9ddce;
+  color: #416d50;
+  background: #e5efe7;
+}
+
+html[data-theme="beige"] .manager-page #partTable tr[data-inventory-tone="cx"] td:nth-child(1),
+html[data-theme="beige"] .manager-page #beybladeTable .collection-part-badge[data-part-tone="cx"] {
+  border-color: #dfd0b4;
+  color: #725a32;
+  background: #f1e9da;
+}
+
+html[data-theme="beige"] .manager-page #inventorySection .summary-strip .accent {
+  color: #315f96;
 }
 
 html[data-theme="beige"] .manager-page #partTable td:nth-child(3) {
