@@ -22,9 +22,9 @@
     .update-list { margin:0; padding-left:20px; }
     .update-list li { margin-bottom:6px; }
     .version-archive { margin-top:16px; }
-    .version-archive > summary { cursor:pointer; list-style:none; padding:15px 18px; border:1px solid #333; border-radius:8px; color:#e8eef5; background:#151a20; font-weight:800; }
+    .version-archive > summary { min-height:48px; display:flex; align-items:center; gap:12px; cursor:pointer; list-style:none; padding:12px 18px; border:1px solid #333; border-radius:8px; color:#e8eef5; background:#151a20; font-weight:800; }
     .version-archive > summary::-webkit-details-marker { display:none; }
-    .version-archive > summary::after { content:"＋"; float:right; color:#7eb0ff; }
+    .version-archive > summary::after { content:"＋"; margin-left:auto; color:#7eb0ff; }
     .version-archive[open] > summary { margin-bottom:16px; }
     .version-archive[open] > summary::after { content:"－"; }
   </style>
@@ -38,26 +38,20 @@
       <div class="version-title">v1.9.2｜收藏與文字閱讀體驗改善</div>
       <div class="version-meta">2026-09-02</div>
       <ul class="update-list">
-        <li><span class="change-tag">收藏</span>改善桌面版資訊密度與收藏排列，原裝陀螺可更快速瀏覽。</li>
-        <li><span class="change-tag">收藏</span>原裝零件改以分類色彩標籤顯示，CX 配置依零件結構重新整理顯示順序。</li>
-        <li><span class="change-tag">手機</span>CX 原裝配置改為更清楚的三排零件排列，並改善不同螢幕尺寸的版面一致性。</li>
+        <li><span class="change-tag">收藏</span>桌面版改為高資訊密度排列，手機版維持適合觸控操作的卡片，瀏覽大量收藏更有效率。</li>
+        <li><span class="change-tag">收藏</span>原裝零件改用分類色彩標籤顯示，並統一 BX／UX／CX 系列標籤，提高辨識度。</li>
+        <li><span class="change-tag">CX 收藏</span>依紋章鎖、主要／金屬戰刃、超越戰刃、輔助戰刃、固鎖與軸心的結構順序整理原裝配置。</li>
+        <li><span class="change-tag">手機</span>CX 原裝配置改為更清楚的三排零件排列，固鎖與軸心集中顯示，更容易快速閱讀。</li>
+        <li><span class="change-tag">額外零件</span>改善庫存分類標籤與精簡摘要，持有、使用中與可用數量更容易掌握。</li>
         <li><span class="change-tag">閱讀</span>改善收藏、額外零件庫存與配置紀錄的文字大小及閱讀性，統一主要頁面的文字層級。</li>
-        <li><span class="change-tag">庫存</span>改善長零件名稱顯示，避免影響數量與操作按鈕的位置。</li>
-        <li><span class="change-tag">介面</span>修正響應式版面與橫向溢出問題，深色與米色主題維持一致的文字及版面規格。</li>
+        <li><span class="change-tag">庫存</span>改善長零件名稱顯示，名稱換行時不再影響數量與操作按鈕的位置。</li>
+        <li><span class="change-tag">介面</span>改善不同螢幕尺寸的版面一致性，避免內容橫向溢出。</li>
+        <li><span class="change-tag">主題</span>深色與米色主題維持一致的文字層級、資訊排列與閱讀體驗。</li>
       </ul>
     </div>
 
-    <div class="info-card">
-      <div class="version-title">v1.9.1｜收藏與庫存資訊顯示優化</div>
-      <div class="version-meta">2026-09-02</div>
-      <ul class="update-list">
-        <li><span class="change-tag">收藏</span>桌面版收藏改為高資訊密度長條列表，手機版維持適合觸控操作的卡片式排列。</li>
-        <li><span class="change-tag">收藏</span>原裝零件改以分類色彩標籤呈現，CX 零件依結構順序顯示。</li>
-        <li><span class="change-tag">收藏</span>統一 BX／UX／CX 系列標籤，方便快速辨識不同系列。</li>
-        <li><span class="change-tag">額外零件</span>改善庫存分類標籤與摘要顯示，持有、使用中與可用數量更容易掃視。</li>
-        <li><span class="change-tag">介面</span>米色與深色主題同步調整收藏及庫存資訊層級。</li>
-      </ul>
-    </div>
+    <details class="version-archive">
+      <summary>歷史版本（v1.2.0～v1.9.0）</summary>
 
     <div class="info-card">
       <div class="version-title">v1.9.0｜主題、導覽與管理介面更新</div>
@@ -149,8 +143,6 @@
       </ul>
     </div>
 
-    <details class="version-archive">
-      <summary>查看歷史版本（v1.2.0～v1.7.0）</summary>
     <div class="info-card">
       <div class="version-title">v1.7.0｜2026-07-11 資料更新</div>
       <div class="version-meta">2026-07-11</div>

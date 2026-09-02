@@ -60,3 +60,16 @@ test("使用教學符合目前正式操作", () => {
   assert.doesNotMatch(guide, /配置卡可直接「修改」或「刪除」/);
   assert.doesNotMatch(guide, />陀螺配置</);
 });
+
+test("更新紀錄只直接顯示最新版本，其餘版本集中於歷史版本", () => {
+  const html = readFileSync("changelog.html", "utf8");
+  const latestVersionIndex = html.indexOf("v1.9.2｜收藏與文字閱讀體驗改善");
+  const historyIndex = html.indexOf('<details class="version-archive">');
+  const previousVersionIndex = html.indexOf("v1.9.0｜主題、導覽與管理介面更新");
+
+  assert.equal((html.match(/2026-09-02/g) || []).length, 1);
+  assert.equal((html.match(/class="version-archive"/g) || []).length, 1);
+  assert.ok(latestVersionIndex >= 0 && latestVersionIndex < historyIndex);
+  assert.ok(previousVersionIndex > historyIndex);
+  assert.doesNotMatch(html, /v1\.9\.1｜收藏與庫存資訊顯示優化/);
+});
