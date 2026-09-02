@@ -1,4 +1,29 @@
 :root {
+  --font-ui: Inter, "Segoe UI", "Microsoft JhengHei", Arial, sans-serif;
+  --type-section-title-size: 23px;
+  --type-section-title-weight: 800;
+  --type-section-title-line-height: 1.25;
+  --type-item-primary-size: 16px;
+  --type-item-primary-weight: 900;
+  --type-item-primary-line-height: 1.3;
+  --type-data-label-size: 13.5px;
+  --type-data-label-weight: 600;
+  --type-data-label-line-height: 1.3;
+  --type-secondary-size: 14px;
+  --type-secondary-weight: 700;
+  --type-secondary-line-height: 1.4;
+  --type-metadata-size: 12px;
+  --type-metadata-weight: 700;
+  --type-metadata-line-height: 1.4;
+  --type-button-size: 13px;
+  --type-button-weight: 800;
+  --type-button-line-height: 1.45;
+  --type-navigation-size: 13px;
+  --type-navigation-weight: 750;
+  --type-navigation-line-height: 1.3;
+  --type-input-size: 13px;
+  --type-input-weight: 400;
+  --type-input-line-height: 1.45;
   --nav-width: 252px;
   --nav-collapsed-width: 76px;
   --nav-bg: #10161d;
@@ -9,6 +34,10 @@
   --nav-heading: #f1f4f6;
   --nav-active: #4b91ff;
   --nav-active-bg: rgba(75,145,255,.13);
+}
+
+body {
+  font-family: var(--font-ui);
 }
 
 body.site-shell-ready {
@@ -162,8 +191,9 @@ body .side-menu-link {
   color: var(--nav-text);
   background: transparent;
   text-decoration: none;
-  font-size: 13px;
-  font-weight: 750;
+  font-size: var(--type-navigation-size);
+  font-weight: var(--type-navigation-weight);
+  line-height: var(--type-navigation-line-height);
 }
 
 body .side-menu-link:hover {

@@ -1,6 +1,6 @@
 :root{color-scheme:dark;--stats-bg:#0b1017;--stats-panel:#121b26;--stats-line:#2a394b;--stats-muted:#a9b9cc;--stats-accent:#82b4ff;--stats-control:44px;--stats-panel-head:44px;--stats-table-head:34px;--stats-row:44px;--stats-row-bilingual:50px;--stats-gap:12px}
 *{box-sizing:border-box}
-body.stats-page{margin:0;background:var(--stats-bg);color:#edf4ff;font-family:system-ui,-apple-system,"Segoe UI","Microsoft JhengHei",sans-serif;font-size:15px;line-height:1.5}
+body.stats-page{margin:0;background:var(--stats-bg);color:#edf4ff;font-family:var(--font-ui);font-size:15px;line-height:1.5}
 [hidden]{display:none!important}
 a{color:var(--stats-accent);text-underline-offset:3px}
 button,input{font:inherit}

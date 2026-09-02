@@ -152,7 +152,17 @@ test("inventory summary stays compact and reuses configuration occupancy", () =>
 });
 
 test("configuration part summary stays readable without changing compact wrapping", () => {
-  assert.match(styles, /#configTable \.config-card-summary \{[\s\S]*?color: var\(--manager-text-summary\);[\s\S]*?font-size: 13px;[\s\S]*?font-weight: 700;[\s\S]*?white-space: nowrap;/);
+  assert.match(styles, /#configTable \.config-card-summary \{[\s\S]*?color: var\(--manager-text-summary\);[\s\S]*?font-size: var\(--type-secondary-size\);[\s\S]*?font-weight: var\(--type-secondary-weight\);[\s\S]*?white-space: nowrap;/);
+});
+
+test("manager item names and part badges share the collection typography hierarchy", () => {
+  const menuStyles = fs.readFileSync("site-menu.css", "utf8");
+
+  assert.match(menuStyles, /--type-item-primary-size: 16px;/);
+  assert.match(menuStyles, /--type-data-label-size: 13\.5px;/);
+  assert.match(styles, /#partTable td:nth-child\(1\) \{[\s\S]*?font-size: var\(--type-data-label-size\);[\s\S]*?font-weight: var\(--type-data-label-weight\);/);
+  assert.match(styles, /#partTable td:nth-child\(2\) \{[\s\S]*?font-size: var\(--type-item-primary-size\);[\s\S]*?font-weight: var\(--type-item-primary-weight\);/);
+  assert.match(styles, /#configTable \.config-card-title \{[\s\S]*?font-size: var\(--type-item-primary-size\);[\s\S]*?font-weight: var\(--type-item-primary-weight\);/);
 });
 
 test("inventory display order is deterministic without changing stored part types", () => {
@@ -184,7 +194,7 @@ test("desktop and mobile sidebars share one structured navigation source", () =>
   assert.match(menuScript, /label: "額外零件庫存", bottomLabel: "庫存"/);
   assert.match(menuScript, /label: "配置紀錄", bottomLabel: "配置"/);
   assert.match(menuScript, /label: "Quick Editor"[\s\S]*?group: "工具"/);
-  assert.match(menuScript, /const SITE_VERSION = "v1\.9\.1"/);
+  assert.match(menuScript, /const SITE_VERSION = "v1\.9\.2"/);
   assert.match(menuScript, /buildMenuLinkInnerHtml\(item, true\)/);
   assert.match(menuStyles, /body \.side-menu-section\[data-menu-group="說明"\][\s\S]*?border-top:/);
   assert.match(menuStyles, /body \.side-menu-footer[\s\S]*?flex: 0 0 auto/);
