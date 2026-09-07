@@ -19,9 +19,18 @@ for (const [category, count] of Object.entries(expectedCategories)) {
 }
 const pages = stats.beywatch.blades;
 assert.equal(pages.length, 132, 'Beywatch pages');
-assert.equal(pages.reduce((sum, item) => sum + item.combos.length, 0), 945, 'Beywatch combos');
-assert.equal(pages.reduce((sum, item) => sum + item.ratchets.length, 0), 486, 'Beywatch ratchets');
-assert.equal(pages.reduce((sum, item) => sum + item.bits.length, 0), 508, 'Beywatch bits');
+for (const [status, count] of Object.entries({ranked: 39, unranked_or_insufficient_sample: 77, no_statistics: 16})) {
+  assert.equal(pages.filter(item => item.statisticsStatus === status).length, count, `Beywatch ${status}`);
+}
+for (const [key, count] of Object.entries({combos: 962, ratchets: 491, bits: 517})) {
+  assert.equal(pages.reduce((sum, item) => sum + item[key].length, 0), count, `Beywatch ${key}`);
+}
+const pageUrls = pages.map(item => item.url);
+assert.equal(new Set(pageUrls).size, pages.length, 'Beywatch page URLs must be unique');
+for (const page of pages) {
+  const comboNames = page.combos.map(item => item.combo);
+  assert.equal(new Set(comboNames).size, comboNames.length, `Duplicate combo in ${page.name}`);
+}
 const preservedBefore = structuredClone(db);
 delete preservedBefore.competitionStatistics;
 delete preservedBefore.competitionStatisticsImport;
@@ -56,4 +65,7 @@ const baselineTarget = path.join(baselineDirectory, sourceFileName);
 fs.mkdirSync(baselineDirectory, {recursive: true});
 fs.writeFileSync(baselineTarget, JSON.stringify(incoming, null, 2) + '\n');
 fs.writeFileSync(target, JSON.stringify(db, null, 2) + '\n');
+for (const priorBaseline of priorBaselines) {
+  if (priorBaseline !== sourceFileName) fs.rmSync(path.join(baselineDirectory, priorBaseline));
+}
 console.log(JSON.stringify({baselineTarget, metaBeys: stats.metaBeys.collectionTotals, beywatch: stats.beywatch.collectionTotals, ...db.competitionStatisticsImport}, null, 2));

@@ -2,7 +2,7 @@
 // source blending, or writes to personal storage.
 export const DATABASE_URL = 'beyblade_x_database_v1_zhTW.json';
 export const CATEGORIES = Object.freeze({blades: '上蓋', ratchets: '固鎖', bits: '軸心', assistBlades: '輔助戰刃'});
-export const STATUS = Object.freeze({ranked: '有排名', unranked_or_insufficient_sample: '未排名／樣本不足', no_available_competition_statistics: '目前無可用競賽統計'});
+export const STATUS = Object.freeze({ranked: '有排名', unranked_or_insufficient_sample: '未排名／樣本不足', no_statistics: '目前無可用競賽統計', no_available_competition_statistics: '目前無可用競賽統計'});
 export const normalizeName = value => String(value ?? '').normalize('NFKC').toLocaleLowerCase().replace(/[\s_\-‐‑–—・·]+/gu, '');
 const array = value => Array.isArray(value) ? value : [];
 const keysFor = p => [p?.canonicalId, p?.id, p?.recordId, p?.updateId, p?.model, p?.name, p?.name_en, p?.name_zh, p?.name_ja, p?.displayNameZh, p?.referenceNameEn, p?.referenceNameJa, ...array(p?.aliases), ...array(p?.inventoryIdentityKeys)].filter(x => typeof x === 'string' && x.trim());
