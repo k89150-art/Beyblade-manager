@@ -18,15 +18,16 @@ for (const [category, count] of Object.entries(expectedCategories)) {
   assert.equal(stats.metaBeys.categories[category]?.length, count, category);
 }
 const pages = stats.beywatch.blades;
-assert.equal(pages.length, 132, 'Beywatch pages');
-for (const [status, count] of Object.entries({ranked: 39, unranked_or_insufficient_sample: 77, no_statistics: 16})) {
+assert.equal(pages.length, 134, 'Beywatch pages');
+for (const [status, count] of Object.entries({ranked: 40, unranked_or_insufficient_sample: 79, no_statistics: 15})) {
   assert.equal(pages.filter(item => item.statisticsStatus === status).length, count, `Beywatch ${status}`);
 }
-for (const [key, count] of Object.entries({combos: 962, ratchets: 491, bits: 517})) {
+for (const [key, count] of Object.entries({combos: 973, ratchets: 498, bits: 524})) {
   assert.equal(pages.reduce((sum, item) => sum + item[key].length, 0), count, `Beywatch ${key}`);
 }
 const pageUrls = pages.map(item => item.url);
 assert.equal(new Set(pageUrls).size, pages.length, 'Beywatch page URLs must be unique');
+assert.equal(new Set(pages.map(item => item.name)).size, pages.length, 'Beywatch identities must be unique');
 for (const page of pages) {
   const comboNames = page.combos.map(item => item.combo);
   assert.equal(new Set(comboNames).size, comboNames.length, `Duplicate combo in ${page.name}`);

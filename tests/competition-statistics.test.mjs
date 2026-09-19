@@ -14,7 +14,7 @@ const baseline = JSON.parse(execFileSync('git',['show','7767eb3:beyblade_x_datab
 const DISPLAY_IDENTITY_FIELDS = new Set(['canonicalId','identityMatchStatus','displayNameZh','catalogEnglishName','catalogModels','catalogRecordIds','catalogMatchStatus']);
 const withoutIdentityMetadata = value => Array.isArray(value) ? value.map(withoutIdentityMetadata) : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).filter(([key]) => !DISPLAY_IDENTITY_FIELDS.has(key)).map(([key,item]) => [key,withoutIdentityMetadata(item)])) : value;
 const objectiveStatisticsHash = value => crypto.createHash('sha256').update(JSON.stringify({metaBeys:withoutIdentityMetadata(value.metaBeys),beywatch:withoutIdentityMetadata(value.beywatch)})).digest('hex');
-const OBJECTIVE_STATISTICS_HASH = '322c54ee1a58eaa5cbfc51924f7914854b582acf35920a788d05be98b4808870';
+const OBJECTIVE_STATISTICS_HASH = '00a34e98014d77c98f88d3b597022b12c8e496296630b993b54732cf08dd7dba';
 
 test('快照與匯入附件指紋一致；四類完整 120/33/51/16 筆，來源名次與百分比不變', () => {
   assert.equal(objectiveStatisticsHash(stats),OBJECTIVE_STATISTICS_HASH);
@@ -25,13 +25,13 @@ test('快照與匯入附件指紋一致；四類完整 120/33/51/16 筆，來源
   }
 });
 test('獨立競賽統計基準是網站快照的唯一完整來源', () => {
-  const standalone = JSON.parse(read('competition-statistics/beyblade_x_competition_statistics_2026-09-06.json'));
+  const standalone = JSON.parse(read('competition-statistics/beyblade_x_competition_statistics_2026-09-13.json'));
   assert.equal(standalone.metadata.contentScope,'objective-competition-statistics-only');
   assert.deepEqual(stats,standalone.competitionStatistics);
-  assert.equal(db.competitionStatisticsImport.sourceFileName,'beyblade_x_competition_statistics_2026-09-06.json');
-  assert.equal(db.competitionStatisticsImport.baselineFile,'competition-statistics/beyblade_x_competition_statistics_2026-09-06.json');
+  assert.equal(db.competitionStatisticsImport.sourceFileName,'beyblade_x_competition_statistics_2026-09-13.json');
+  assert.equal(db.competitionStatisticsImport.baselineFile,'competition-statistics/beyblade_x_competition_statistics_2026-09-13.json');
   assert.equal(db.competitionStatisticsImport.sha256,crypto.createHash('sha256').update(JSON.stringify(stats)).digest('hex'));
-  assert.deepEqual(fs.readdirSync('competition-statistics').filter(name=>name.endsWith('.json')),['beyblade_x_competition_statistics_2026-09-06.json']);
+  assert.deepEqual(fs.readdirSync('competition-statistics').filter(name=>name.endsWith('.json')),['beyblade_x_competition_statistics_2026-09-13.json']);
 });
 test('每週匯入器使用日期化唯一基準、先完整驗證，且相同內容不建立新日期檔', () => {
   const importer=read('scripts/import-competition-statistics.mjs');
@@ -39,23 +39,24 @@ test('每週匯入器使用日期化唯一基準、先完整驗證，且相同�
   assert.match(importer,/priorSha256 === snapshotSha256/);
   assert.match(importer,/changed: false, retainedBaseline/);
   assert.match(importer,/fs\.rmSync\(path\.join\(baselineDirectory, priorBaseline\)\)/);
-  assert.ok(importer.indexOf('assert.equal(pages.length, 132') < importer.indexOf('fs.writeFileSync(target'));
+  assert.ok(importer.indexOf('assert.equal(pages.length, 134') < importer.indexOf('fs.writeFileSync(target'));
   assert.ok(importer.indexOf('assert.deepEqual(preservedAfter, preservedBefore') < importer.indexOf('fs.writeFileSync(target'));
   assert.doesNotMatch(importer,/incoming\.blades|incoming\.aliases|recommended|tier|synergy/i);
 });
-test('Beywatch 全部 132 頁、39 排名、77 未排名、16 無資料與 962/491/517 明細完整', () => {
-  assert.equal(stats.beywatch.blades.length,132);
-  for(const [key,n] of Object.entries({ranked:39,unranked_or_insufficient_sample:77,no_statistics:16})) assert.equal(stats.beywatch.blades.filter(x=>x.statisticsStatus===key).length,n);
-  for(const [key,n] of Object.entries({combos:962,ratchets:491,bits:517})) assert.equal(stats.beywatch.blades.reduce((sum,x)=>sum+x[key].length,0),n);
-  assert.equal(new Set(stats.beywatch.blades.map(x=>x.url)).size,132);
+test('Beywatch 全部 134 頁、40 排名、79 未排名、15 無資料與 973/498/524 明細完整', () => {
+  assert.equal(stats.beywatch.blades.length,134);
+  for(const [key,n] of Object.entries({ranked:40,unranked_or_insufficient_sample:79,no_statistics:15})) assert.equal(stats.beywatch.blades.filter(x=>x.statisticsStatus===key).length,n);
+  for(const [key,n] of Object.entries({combos:973,ratchets:498,bits:524})) assert.equal(stats.beywatch.blades.reduce((sum,x)=>sum+x[key].length,0),n);
+  assert.equal(new Set(stats.beywatch.blades.map(x=>x.url)).size,134);
+  assert.equal(new Set(stats.beywatch.blades.map(x=>x.name)).size,134);
   for(const blade of stats.beywatch.blades) assert.equal(new Set(blade.combos.map(x=>x.combo)).size,blade.combos.length,blade.name);
   const ranked=stats.beywatch.blades.filter(x=>x.statisticsStatus==='ranked').sort((a,b)=>Number(a.rank)-Number(b.rank));
-  assert.deepEqual([ranked[0].rank,ranked[0].name,ranked.at(-1).rank,ranked.at(-1).name],['1','Shark Scale','39','Unicorn Sting']);
+  assert.deepEqual([ranked[0].rank,ranked[0].name,ranked.at(-1).rank,ranked.at(-1).name],['1','Shark Scale','40','Unicorn Sting']);
   for(const source of stats.beywatch.blades) assert.equal(store.entries.filter(x=>x.source===source).length,1);
 });
-test('Beywatch canonical 38 筆精確對應、94 筆保持未確認，百分比與缺值不被改寫', () => {
+test('Beywatch canonical 38 筆精確對應、96 筆保持未確認，百分比與缺值不被改寫', () => {
   assert.equal(stats.beywatch.blades.filter(x=>x.canonicalId&&x.identityMatchStatus==='exact').length,38);
-  assert.equal(stats.beywatch.blades.filter(x=>!x.canonicalId).length,94);
+  assert.equal(stats.beywatch.blades.filter(x=>!x.canonicalId).length,96);
   const percentageFields=[];
   for(const blade of stats.beywatch.blades){
     percentageFields.push(blade.usage,blade.firstRate);
@@ -71,11 +72,47 @@ test('Beywatch canonical 38 筆精確對應、94 筆保持未確認，百分比�
   }
 });
 test('MetaBeys 保留完整成功快照的客觀排行範圍', () => {
+  assert.equal(crypto.createHash('sha256').update(JSON.stringify(stats.metaBeys)).digest('hex'),'5b1f55e7300bcc9be9a55265e09f126cedcfa0bf5aecc74a74e4ce062b4c6d83');
   const expected={blades:['Wizard Rod','Wolf Hunt'],ratchets:['1-60','9-90'],bits:['Hexa','Yielding'],assistBlades:['Wheel','Wedge']};
   for(const [key,[first,last]] of Object.entries(expected)){
     const rows=stats.metaBeys.categories[key];
     assert.equal(rows[0].sourcePartName,first);assert.equal(rows.at(-1).sourcePartName,last);
   }
+});
+test('2026-09-13 新增上蓋保留英文、無資料與未確認身分，不虛構中文或數值', () => {
+  assert.equal(stats.beywatch.sourceUpdatedAt,'2026-09-13');
+  for(const [name,slug] of [['Doctor Doom','doctor-doom'],['Mister Fantastic','mister-fantastic']]){
+    const entry=store.blade(slug),source=entry.source;
+    assert.equal(source.name,name);assert.equal(source.canonicalId,null);assert.equal(entry.canonical,null);
+    assert.equal(source.statisticsStatus,'no_statistics');
+    for(const key of ['usage','firstRate','topCuts','rank']) assert.equal(source[key],null);
+    for(const key of ['combos','ratchets','bits']) assert.deepEqual(source[key],[]);
+    assert.deepEqual(resolveBladeDisplayIdentity(entry).primary,name);
+    assert.equal(resolveBladeDisplayIdentity(entry).secondary,'官方中文名待確認');
+    assert.ok(store.search(name).includes(entry));
+    assert.match(detailMarkup(store,entry),/目前無可用競賽統計/);
+  }
+});
+test('Hurricane／Rampart Aegis／Tread 首次各有一筆 Top Cut；Rage 為第 16 名', () => {
+  for(const name of ['Hurricane','Rampart Aegis','Tread']){
+    const source=stats.beywatch.blades.find(x=>x.name===name);
+    assert.equal(source.statisticsStatus,'unranked_or_insufficient_sample');
+    assert.equal(source.rank,null);assert.equal(source.topCuts,'1');
+    assert.equal(source.combos.length,1);assert.equal(source.combos[0].topCuts,'1');
+  }
+  const rage=store.blade('rage');
+  assert.equal(rage.source.rank,'16');assert.equal(entryRank(rage),'16');
+});
+test('來源原名與完整配置原文保留；新快照沒有分析或推薦欄位', () => {
+  const hover=stats.beywatch.blades.find(x=>x.name==='Hover Wyvern');
+  assert.equal(hover.canonicalId,'HOVER_WYVERN');
+  assert.equal(hover.combos[0].combo,'Hover Wyvern 9-60K');
+  assert.equal(store.formatCombo(store.blade('hover-wyvern'),hover.combos[0].combo),'飛龍凌空 9-60 K');
+  assert.equal(stats.metaBeys.categories.blades.find(x=>x.sourcePartName==='Pegasus Blast').canonicalId,'PEGASUS_BLAST');
+  const forbidden=new Set(['tier','independentTier','comboTier','tierScore','score','comboScore','synergy','synergyScore','recommendedCombos','recommendedRatchets','recommendedBits','recommendations','inventoryRecommendations','inventoryRecommendationPolicy','contextualPriority','specializedRoutes']);
+  const found=[];
+  const walk=(value,path='')=>{if(Array.isArray(value))return value.forEach((item,index)=>walk(item,`${path}[${index}]`));if(value&&typeof value==='object')for(const [key,item] of Object.entries(value)){if(forbidden.has(key))found.push(`${path}.${key}`);walk(item,`${path}.${key}`);}};
+  walk(stats);assert.deepEqual(found,[]);
 });
 test('只新增競賽快照及三個明確 canonical 身分；既有主資料、名稱及原裝完整保留', () => {
   const {competitionStatistics,competitionStatisticsImport,...preserved} = structuredClone(db);
@@ -102,7 +139,7 @@ test('魔導神杖：點排行榜與名稱搜尋解析為同一來源頁，不�
   for(const query of ['魔導神杖','Wizard Rod','WIZARD_ROD']) assert.ok(store.search(query).includes(wizard),query);
   assert.equal(entryName(wizard),'魔導神杖');
   assert.equal(entryEnglish(wizard),'Wizard Rod');
-  assert.equal(entryRank(wizard),'3');
+  assert.equal(entryRank(wizard),'2');
   const reversed = createStatisticsStore({...db,competitionStatistics:{...stats,beywatch:{...stats.beywatch,blades:[...stats.beywatch.blades].reverse()}}});
   assert.deepEqual(reversed.blade('wizard-rod').source,wizard.source);
 });
@@ -175,7 +212,7 @@ test('MetaBeys 與 Beywatch 保留來源身分，型錄確認狀態負責中文�
   assert.deepEqual([pegasusMeta.canonicalId,pegasusMeta.identityMatchStatus,pegasusMeta.catalogMatchStatus,pegasusMeta.displayNameZh],['PEGASUS_BLAST','exact','exact','天馬爆擊']);
   assert.deepEqual([hoverWatch.canonicalId,hoverWatch.identityMatchStatus,hoverWatch.catalogMatchStatus,hoverWatch.displayNameZh],['HOVER_WYVERN','exact','exact','飛龍凌空']);
   assert.equal(hoverMeta.sourcePartName,'Hover Wyvern');assert.equal(pegasusMeta.sourcePartName,'Pegasus Blast');assert.equal(hoverWatch.name,'Hover Wyvern');
-  assert.deepEqual([stats.identityReport.exactMatches,stats.identityReport.unresolvedCount],[1154,206]);
+  assert.deepEqual([stats.identityReport.exactMatches,stats.identityReport.unresolvedCount],[1168,208]);
   assert.equal(stats.nameCatalog.matchCounts.user_confirmed,2);
   assert.equal(objectiveStatisticsHash(stats),OBJECTIVE_STATISTICS_HASH);
 });
@@ -277,7 +314,7 @@ test('未排名、无資料及 canonical-only 上蓋可搜尋進入，不以原�
 });
 test('第二層摘要與每一來源配置/固鎖/軸心明細保持來源順序和原數值', () => {
   const markup = detailMarkup(store,wizard);
-  for(const value of ['62.1%','35.4%','5,905','53.2%','52.6%']) assert.ok(markup.includes(value));
+  for(const value of ['62.0%','35.5%','5,952','53.5%','52.7%']) assert.ok(markup.includes(value));
   for(const source of stats.beywatch.blades) for(const kind of ['combos','ratchets','bits']) {
     const html = detailTableMarkup(source[kind],kind,true);
     assert.equal((html.match(/<tbody>[\s\S]*<\/tbody>/)?.[0].match(/<tr>/g)||[]).length,source[kind].length);
