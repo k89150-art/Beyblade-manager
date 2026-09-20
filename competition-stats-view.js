@@ -1,4 +1,4 @@
-import {CATEGORIES, formatValue, formatDate, safeUrl, sourceRows, resolveBladeDisplayIdentity, entryName, entryEnglish, entryRank, entryStatus, bladeHref} from './competition-stats-data.js';
+import {CATEGORIES, formatValue, formatDate, safeUrl, sourceRows, resolveBladeDisplayIdentity, entryName, entryEnglish, entryModel, entryRank, entryStatus, bladeHref} from './competition-stats-data.js';
 
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
 const e = escapeHtml;
@@ -24,7 +24,7 @@ export function categoryMarkup(store, category, expanded = false, active = 'blad
   </section>`;
 }
 export function searchMarkup(entries) {
-  return entries.map(entry => `<li><a href="${e(bladeHref(entry))}" data-blade-link class="search-result"><span><strong>${e(entryName(entry))}</strong><small>${e(entryEnglish(entry))}</small></span><span class="search-state">${e(entryStatus(entry))}${entry.source?.statisticsStatus === 'ranked' ? ` · #${e(entryRank(entry))}` : ''}${entry.source?.usage != null ? `<small>Usage ${e(formatValue(entry.source.usage, true))}</small>` : ''}</span></a></li>`).join('');
+  return entries.map(entry => `<li><a href="${e(bladeHref(entry))}" data-blade-link class="search-result"><span><strong>${e(entryName(entry))}</strong><small>${e(entryEnglish(entry))}${entryModel(entry) ? ` · ${e(entryModel(entry))}` : ''}</small></span><span class="search-state">${e(entryStatus(entry))}${entryStatus(entry) === '有排名' ? ` · #${e(entryRank(entry))}` : ''}${entry.source?.usage != null ? `<small>Usage ${e(formatValue(entry.source.usage, true))}</small>` : ''}</span></a></li>`).join('');
 }
 export function sourceInfo(stats, source, page = null) {
   const isMeta = source === 'metaBeys';
@@ -42,13 +42,13 @@ export function detailTableMarkup(rows, kind, expanded = false, context = {}) {
   const safeRows = Array.isArray(rows) ? rows.filter(Boolean) : [];
   const columns = isCombo ? [['combo','完整配置'],['firstRate','1st Rate'],['topCuts','Top Cuts']] : [['part',DETAIL_TABS[kind]],['pick','Pick %'],['firstRate','1st Rate'],['topCuts','Top Cuts']];
   const display = (row, key) => key === 'combo' && context.entry ? context.store.formatCombo(context.entry, row.combo) : key === 'part' && kind === 'bits' && context.store ? context.store.resolveBitAbbreviation(row) : row[key];
-  return `<header class="panel-heading"><h3 id="detail-heading-${kind}">${title}</h3><span>${safeRows.length} 筆 · 來源順序</span></header>${safeRows.length ? `<table class="detail-table"><caption class="sr-only">${title}，沿用來源順序</caption><thead><tr>${columns.map(([,label]) => `<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${sourceRows(safeRows, expanded).map(row => `<tr>${columns.map(([key,label], i) => `<td${i ? ` class="number" data-label="${label}"` : ' class="row-name"'}>${e(formatValue(display(row,key), ['pick','firstRate'].includes(key)))}</td>`).join('')}</tr>`).join('')}</tbody></table>` : '<p class="empty-state">目前無可用競賽統計</p>'}${safeRows.length > 10 ? `<button class="expand-button" type="button" data-detail-expand="${kind}" aria-expanded="${expanded}">${expanded ? '收合至前 10 筆' : `顯示全部（${safeRows.length} 筆）`}</button>` : ''}`;
+  return `<header class="panel-heading"><h3 id="detail-heading-${kind}">${title}</h3><span>${safeRows.length} 筆 · 來源順序</span></header>${safeRows.length ? `<table class="detail-table"><caption class="sr-only">${title}，沿用來源順序</caption><thead><tr>${columns.map(([,label]) => `<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${sourceRows(safeRows, expanded).map(row => `<tr>${columns.map(([key,label], i) => `<td${i ? ` class="number" data-label="${label}"` : ' class="row-name"'}>${e(formatValue(display(row,key), ['pick','firstRate'].includes(key)))}</td>`).join('')}</tr>`).join('')}</tbody></table>` : `<p class="empty-state">目前無${title}</p>`}${safeRows.length > 10 ? `<button class="expand-button" type="button" data-detail-expand="${kind}" aria-expanded="${expanded}">${expanded ? '收合至前 10 筆' : `顯示全部（${safeRows.length} 筆）`}</button>` : ''}`;
 }
 export function detailMarkup(store, entry) {
   if (!entry) return '<a href="competition-stats.html#/" class="back-link">← 返回排行榜</a><h1 tabindex="-1">找不到這個上蓋</h1><p class="empty-state">請返回排行榜搜尋上蓋。</p>';
   const source = entry.source;
   return `<a href="competition-stats.html#/" class="back-link" data-back>← 返回排行榜</a>
-    <header class="detail-heading"><p class="eyebrow">BEYWATCH / BLADE STATISTICS</p><h1 tabindex="-1">${e(entryName(entry))}</h1><p class="english-name" lang="en">${e(entryEnglish(entry))}</p><p class="status-pill">${source?.statisticsStatus === 'ranked' ? `#${e(entryRank(entry))} · 有排名` : e(entryStatus(entry))}</p></header>
+    <header class="detail-heading"><p class="eyebrow">BEYWATCH / BLADE STATISTICS</p><h1 tabindex="-1">${e(entryName(entry))}</h1><p class="english-name" lang="en">${e(entryEnglish(entry))}</p>${entryModel(entry) ? `<p class="model-name">型號 ${e(entryModel(entry))}</p>` : ''}<p class="status-pill">${entryStatus(entry) === '有排名' ? `#${e(entryRank(entry))} · 有排名` : e(entryStatus(entry))}</p></header>
     <dl class="summary-metrics">${[['usage','Usage'],['firstRate','1st Rate'],['topCuts','Top Cuts']].map(([key,label]) => `<div><dt>${label}</dt><dd>${e(formatValue(source?.[key],key !== 'topCuts'))}</dd></div>`).join('')}</dl>
     <div class="desktop-source">${sourceInfo(store.statistics, 'beywatch', source)}</div>
     ${tabsMarkup(DETAIL_TABS, 'combos', 'detail')}

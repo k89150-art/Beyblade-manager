@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {createStatisticsStore, CATEGORIES, STATUS, normalizeName, formatValue, formatDate, sourceNumber, sourceRows, resolveBladeDisplayIdentity, resolveOfficialBladeDisplayName, formatCompetitionComboDisplayName, entryName, entryEnglish, entryStatus, entryRank, bladeHref, readRoute, makeStatisticsLoader, safeUrl} from '../competition-stats-data.js';
+import {createStatisticsStore, CATEGORIES, STATUS, normalizeName, formatValue, formatDate, sourceNumber, sourceRows, resolveBladeDisplayIdentity, resolveOfficialBladeDisplayName, formatCompetitionComboDisplayName, entryName, entryEnglish, entryModel, entryStatus, entryRank, bladeHref, readRoute, makeStatisticsLoader, safeUrl} from '../competition-stats-data.js';
 import {categoryMarkup, detailMarkup, detailTableMarkup, searchMarkup, tabsMarkup, sourceInfo, WARNING} from '../competition-stats-view.js';
 const read = file => fs.readFileSync(file,'utf8');
 const db = JSON.parse(read('beyblade_x_database_v1_zhTW.json'));
@@ -288,6 +288,65 @@ test('日文、canonicalId、alias、來源名稱均可搜尋；不虛構中文�
   for(const query of ['TYRANNO_BEAT','Tyranno Beat','暴龍霸擊']) assert.ok(store.search(query).some(x=>x.slug==='tyranno-beat'));
   assert.equal(normalizeName('ＴＹＲＡＮＮＯ＿ＢＥＡＴ'),normalizeName('Tyranno Beat'));
   assert.doesNotMatch(entryName(glory[0]),/待確認/);
+});
+test('榮耀戰神的型錄、Beywatch 與 MetaBeys 共用唯一搜尋身分和詳細頁路由', () => {
+  const glory=store.blade('glory-valkyrie');
+  assert.equal(glory.canonical.canonicalId,'GLORY_VALKYRIE');
+  assert.equal(glory.source.name,'Glory Valkyrie');
+  assert.equal(entryName(glory),'榮耀戰神');
+  assert.equal(entryEnglish(glory),'Glory Valkyrie');
+  assert.equal(entryModel(glory),'UX-20');
+  for(const query of ['榮耀戰神','Glory Valkyrie','glory-valkyrie','GLORY_VALKYRIE','UX-20','光榮女武神','グローリーワルキューレ']){
+    assert.deepEqual(store.search(query),[glory],query);
+    assert.equal(store.blade(readRoute(bladeHref(store.search(query)[0]).split('.html')[1])),glory,query);
+  }
+  assert.equal(store.blade('ux-20'),glory);
+  assert.equal(store.blade(readRoute('#/blades/glory-valkyrie')),glory);
+  assert.match(searchMarkup(store.search('榮耀戰神')),/榮耀戰神<\/strong><small>Glory Valkyrie · UX-20[\s\S]*有排名 · #8<small>Usage 1\.4%/);
+  const detail=detailMarkup(store,glory);
+  for(const value of ['型號 UX-20','#8 · 有排名','1.4%','34.3%','137','10 筆 · 來源順序']) assert.ok(detail.includes(value),value);
+  assert.match(detail,/固鎖統計[\s\S]*目前無固鎖統計/);
+  assert.equal(glory.source.ratchets.length,0);
+  assert.equal(glory.source.combos.length,10);
+  assert.equal(entryStatus(glory),'有排名');
+  assert.equal(entryRank(glory),'8');
+  assert.equal(glory.source.combos[0].combo,'Glory Valkyrie K');
+  const meta=store.category('blades').find(x=>x.raw.sourcePartName==='Glory Valkyrie');
+  assert.equal(meta.entry,glory);
+  assert.equal(meta.raw.popularity,0.12);
+  assert.equal(glory.source.usage,'1.4%');
+});
+test('統計狀態不依固鎖陣列推測；有排名或任何客觀統計都不是無資料', () => {
+  for(const source of [
+    {statisticsStatus:'no_data',rank:'8',ratchets:[]},
+    {statisticsStatus:'no_data',usage:'1.4%',ratchets:[]},
+    {statisticsStatus:'no_data',firstRate:'34.3%',ratchets:[]},
+    {statisticsStatus:'no_data',topCuts:'137',ratchets:[]},
+    {statisticsStatus:'no_data',combos:[{combo:'Source combo'}],ratchets:[]},
+    {statisticsStatus:'no_data',bits:[{part:'Kick (K)'}],ratchets:[]}
+  ]) assert.notEqual(entryStatus({source}),STATUS.no_data);
+  assert.equal(entryStatus({source:{statisticsStatus:'no_data',ratchets:[],combos:[],bits:[]}}),STATUS.no_data);
+});
+test('全資料搜尋與來源分類不重複建上蓋；未確認身分不被相似名稱合併', () => {
+  const all=store.search('');
+  assert.equal(all.length,store.entries.length);
+  const names=all.map(entry=>normalizeName(entryName(entry)));
+  assert.equal(new Set(names).size,names.length);
+  const canonicalIds=all.map(entry=>(entry.source?.identityMatchStatus==='exact' && entry.source.canonicalId) || (entry.catalog?.identityMatchStatus==='exact' && entry.catalog.canonicalId) || entry.canonical?.canonicalId || entry.canonical?.updateId).filter(Boolean).map(normalizeName);
+  assert.equal(new Set(canonicalIds).size,canonicalIds.length);
+  for(const row of store.category('blades')) if(row.raw.canonicalId && row.raw.identityMatchStatus==='exact' && ['exact','alias_exact','model_verified_alias','user_confirmed','user_confirmed_alias'].includes(row.raw.catalogMatchStatus)){
+    assert.equal(store.search(row.raw.canonicalId).filter(entry=>entry===row.entry).length,1,row.raw.sourcePartName);
+  }
+  assert.deepEqual(store.search('彈丸獅鷲').map(entry=>entry.slug),['bullet-griffon']);
+  assert.deepEqual(store.search('蒼龍神劍').map(entry=>entry.slug),['dran-sword']);
+  assert.deepEqual(store.search('飛龍凌空').map(entry=>entry.slug),['hover-wyvern']);
+  assert.equal(store.category('blades').find(row=>row.raw.sourcePartName==='Pegaus Blast').entry,store.blade('pegasus-blast'));
+  assert.notEqual(store.blade('wyvern-hover'),store.blade('hover-wyvern'));
+  assert.notEqual(store.blade('aero-pegasus'),store.blade('pegasus-blast'));
+  assert.equal(store.blade('doctor-doom').canonical,null);
+  assert.equal(store.search('Doctor Doom')[0].source.name,'Doctor Doom');
+  assert.match(searchMarkup(store.search('Doctor Doom')),/官方中文名待確認/);
+  assert.equal(objectiveStatisticsHash(stats),OBJECTIVE_STATISTICS_HASH);
 });
 test('相容層明確 ID 橋接合併舊名稱；來源到來源連結不被別名碰撞阻斷', () => {
   const silver=store.blade('silver-wolf');

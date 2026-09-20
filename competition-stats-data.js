@@ -96,6 +96,18 @@ export function createStatisticsStore(database) {
     if (!record) continue;
     for (const key of [alias.referenceEn, alias.referenceJa, ...array(alias.aliases)].filter(Boolean)) { record.keys.add(key); add(identities, key, record); }
   }
+  // The catalog can identify an older model-code record and a newer canonical-ID
+  // record as one blade. Bridge only exact, verified catalog evidence; leave
+  // ambiguous names and unverified aliases separate.
+  const catalogMatches = row => {
+    if (!confirmedCatalogRecord(row) || !hasVerifiedTraditionalChinese(row.displayNameZh)) return [];
+    const matches = new Set();
+    for (const key of [row.displayNameZh, ...array(row.catalogRecordIds), ...array(row.catalogModels)]) {
+      const record = unique(identities.get(normalizeName(key)));
+      if (record && verifiedChineseName(record.part) === row.displayNameZh) matches.add(record);
+    }
+    return [...matches];
+  };
   const partMaps = {};
   for (const [category, parts] of Object.entries({blades: canonical.map(x => x.part), ratchets: [...array(database.ratchets), ...array(database.__v18?.ratchets)], bits: [...array(database.bits), ...array(database.__v18?.bits)], assistBlades: [...array(database.cx?.assistBlades), ...array(database.__v18?.cxAssistBlades)]})) {
     const map = new Map();
@@ -142,7 +154,7 @@ export function createStatisticsStore(database) {
     }
     return fallback;
   }
-  const entries = [], bySlug = new Map(), byCanonicalId = new Map(), byName = new Map(), bySourceName = new Map(), linked = new Set();
+  const entries = [], bySlug = new Map(), byCanonicalId = new Map(), byName = new Map(), bySourceName = new Map(), byConfirmedChinese = new Map(), linked = new Set();
   function addEntry(entry, keys) {
     entry.searchKeys = [...new Set(keys.filter(Boolean).map(normalizeName))];
     entries.push(entry);
@@ -150,17 +162,31 @@ export function createStatisticsStore(database) {
     for (const key of keys) add(byName, key, entry);
     if (entry.canonical) for (const key of keysFor(entry.canonical)) add(byCanonicalId, key, entry);
   }
+  function extendEntryKeys(entry, keys) {
+    entry.searchKeys = [...new Set([...entry.searchKeys, ...keys.filter(Boolean).map(normalizeName)])];
+    for (const key of keys) add(byName,key,entry);
+  }
   for (const source of statistics.beywatch.blades) {
     if (!source || !source.name) continue;
     const catalogBlocked = source.catalogMatchStatus && !CONFIRMED_CATALOG_STATUSES.has(source.catalogMatchStatus);
-    const match = source.identityMatchStatus === 'ambiguous' || catalogBlocked ? null
-      : unique(identities.get(normalizeName(source.canonicalId))) || unique(identities.get(normalizeName(source.name)));
-    if (match) linked.add(match);
+    const exactId = source.identityMatchStatus === 'exact' ? unique(identities.get(normalizeName(source.canonicalId))) : null;
+    const stableIdBridge = exactId && [exactId.part.canonicalId, exactId.part.updateId].includes(source.canonicalId) ? exactId : null;
+    const eligible = source.identityMatchStatus !== 'ambiguous' && !catalogBlocked;
+    const verified = eligible ? catalogMatches(source) : [];
+    const match = eligible ? exactId || unique(identities.get(normalizeName(source.canonicalId)))
+      || unique(identities.get(normalizeName(source.name))) || (verified.length === 1 ? verified[0] : null) : null;
+    const related = match ? new Set([match, ...verified]) : new Set(stableIdBridge && source.catalogMatchStatus === 'unmatched' ? [stableIdBridge] : []);
+    for (const record of related) linked.add(record);
     const entry = {slug: sourceSlug(source), source, canonical: match?.part || null};
-    addEntry(entry, [source.name, sourceSlug(source), ...catalogKeys(source), ...(match ? [...match.keys] : [])]);
+    addEntry(entry, [source.name, sourceSlug(source), ...catalogKeys(source), ...[...related].flatMap(record => [...record.keys])]);
     add(bySourceName,source.name,entry);
     add(bySourceName,sourceSlug(source),entry);
-    if(match)for(const key of match.keys)add(byCanonicalId,key,entry);
+    if (confirmedCatalogRecord(source) && hasVerifiedTraditionalChinese(source.displayNameZh)) add(byConfirmedChinese,source.displayNameZh,entry);
+    for (const record of related) {
+      for (const key of record.keys) add(byCanonicalId,key,entry);
+      const legacySlug = identitySlug(record.part.referenceNameEn || record.part.name_en || record.part.model);
+      if (legacySlug && !bySlug.has(legacySlug)) bySlug.set(legacySlug,entry);
+    }
   }
   for (const record of canonical) if (!linked.has(record)) {
     const preferredSlug = identitySlug(record.part.referenceNameEn || record.part.name_en || record.part.model);
@@ -172,8 +198,10 @@ export function createStatisticsStore(database) {
   for (const category of Object.keys(CATEGORIES)) {
     categories[category] = array(statistics.metaBeys.categories[category]).filter(Boolean).map(row => {
       const catalogBlocked = row.catalogMatchStatus && !CONFIRMED_CATALOG_STATUSES.has(row.catalogMatchStatus);
-      const matched = row.identityMatchStatus === 'ambiguous' || catalogBlocked ? null : category === 'blades'
-        ? (unique(identities.get(normalizeName(row.canonicalId))) || unique(identities.get(normalizeName(row.sourcePartName))))?.part
+      const exactBladeId = category === 'blades' && row.identityMatchStatus === 'exact' ? unique(identities.get(normalizeName(row.canonicalId))) : null;
+      const blocked = row.identityMatchStatus === 'ambiguous' || (catalogBlocked && !(row.catalogMatchStatus === 'unmatched' && exactBladeId));
+      const matched = blocked ? null : category === 'blades'
+        ? (unique(identities.get(normalizeName(row.canonicalId))) || unique(identities.get(normalizeName(row.sourcePartName))) || (catalogMatches(row).length === 1 ? catalogMatches(row)[0] : null))?.part
         : partMaps[category].get(normalizeName(row.canonicalId)) || partMaps[category].get(normalizeName(row.sourcePartName));
       let entry = null;
       if (category === 'blades') {
@@ -181,11 +209,15 @@ export function createStatisticsStore(database) {
         entry = unique(bySourceName.get(normalizeName(row.sourcePartName)));
         if (!entry) entry = unique(byName.get(normalizeName(row.sourcePartName)));
         if (!entry && row.identityMatchStatus === 'exact') entry = unique(byCanonicalId.get(normalizeName(row.canonicalId)));
+        if (!entry && confirmedCatalogRecord(row)) entry = unique(byConfirmedChinese.get(normalizeName(row.displayNameZh)));
+        if (!entry && matched && confirmedCatalogRecord(row)) entry = unique(byCanonicalId.get(normalizeName(identityId(matched))));
         if (!entry) {
           const exactSlug = matched && row.identityMatchStatus === 'exact' ? identitySlug(matched.referenceNameEn || matched.name_en || row.sourcePartName) : '';
           entry = {slug: exactSlug || `metabeys-${encodeURIComponent(row.sourcePartName)}`, source: null, canonical: matched || null, sourceName: row.sourcePartName, catalog: row};
           addEntry(entry, [row.sourcePartName, ...catalogKeys(row), ...(matched ? keysFor(matched) : [])]);
         }
+        if (confirmedCatalogRecord(row)) extendEntryKeys(entry,[row.sourcePartName,...catalogKeys(row)]);
+        if (confirmedCatalogRecord(row) && hasVerifiedTraditionalChinese(row.displayNameZh)) add(byConfirmedChinese,row.displayNameZh,entry);
       }
       return {raw: row, part: matched || null, entry};
     });
@@ -194,7 +226,19 @@ export function createStatisticsStore(database) {
     statistics, entries, bySlug, byCanonicalId, unresolvedBits,
     category: key => categories[key] || [],
     blade: slug => bySlug.get(slug) || null,
-    search: query => { const key = normalizeName(query); return key ? entries.filter(e => e.searchKeys.some(k => k.includes(key))) : entries; },
+    search: query => {
+      const key = normalizeName(query), seen = new Set();
+      return entries.filter(entry => {
+        if (key && !entry.searchKeys.some(value => value.includes(key))) return false;
+        const canonicalId = (entry.source?.identityMatchStatus === 'exact' && entry.source.canonicalId)
+          || (entry.catalog?.identityMatchStatus === 'exact' && entry.catalog.canonicalId)
+          || entry.canonical?.canonicalId || entry.canonical?.updateId;
+        const identity = canonicalId ? `canonical:${normalizeName(canonicalId)}` : `entry:${entry.slug}`;
+        if (seen.has(identity)) return false;
+        seen.add(identity);
+        return true;
+      });
+    },
     resolveBitAbbreviation,
     formatCombo: (entry, combo) => formatCompetitionComboDisplayName(combo, entry, resolveBitAbbreviation, value => {
       let best = null;
@@ -207,6 +251,12 @@ export function createStatisticsStore(database) {
 }
 export function entryName(entry) { return resolveBladeDisplayIdentity(entry).primary; }
 export function entryEnglish(entry) { return resolveBladeDisplayIdentity(entry).secondary; }
+export function entryModel(entry) {
+  const models = array(catalogRecord(entry)?.catalogModels);
+  if (models.length === 1) return models[0];
+  const model = entry?.canonical?.model;
+  return /^(?:BX|UX|CX)-\d+/u.test(String(model || '')) ? model : '';
+}
 export function formatCompetitionComboDisplayName(combo, entry, bitResolver, prefixResolver = null) {
   const original = String(combo ?? '');
   if (!original || !entry || typeof bitResolver !== 'function') return original;
@@ -232,8 +282,14 @@ export function formatCompetitionComboDisplayName(combo, entry, bitResolver, pre
   const middle = String(match[1] || '').trim();
   return `${bladeName}${middle ? ` ${middle}` : ''} ${match[2]} ${bit}`;
 }
-export function entryStatus(entry) { return STATUS[entry.source?.statisticsStatus] || STATUS.no_available_competition_statistics; }
-export function entryRank(entry) { return entry.source?.statisticsStatus === 'ranked' ? formatValue(entry.source.rank) : '未排名'; }
+const hasSourceStatistics = source => Boolean(source && (source.rank != null || [source.usage,source.firstRate,source.topCuts].some(value => value != null && value !== '') || ['combos','ratchets','bits'].some(key => array(source[key]).length)));
+export function entryStatus(entry) {
+  const source = entry.source;
+  if (source?.statisticsStatus === 'ranked' || source?.rank != null) return STATUS.ranked;
+  if (source?.statisticsStatus === 'unranked_or_insufficient_sample' || hasSourceStatistics(source)) return STATUS.unranked_or_insufficient_sample;
+  return STATUS[source?.statisticsStatus] || STATUS.no_available_competition_statistics;
+}
+export function entryRank(entry) { return entry.source?.rank != null ? formatValue(entry.source.rank) : '未排名'; }
 export function bladeHref(entry) { return `competition-stats.html#/blades/${encodeURIComponent(entry.slug)}`; }
 export function readRoute(hash) {
   const match = /^#\/blades\/(.+)$/.exec(hash);
