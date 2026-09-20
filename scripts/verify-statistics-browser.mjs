@@ -57,7 +57,7 @@ export async function checkSize({tab,viewport,width,height,base='http://127.0.0.
     panels:[...document.querySelectorAll('.detail-panel')].filter(x=>getComputedStyle(x).display!=='none').map(x=>x.id),
     overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth
   }));
-  assert.equal(JSON.stringify(detail.values),JSON.stringify(['62.0%','35.5%','5,952']));
+  assert.equal(JSON.stringify(detail.values),JSON.stringify(['62.0%','35.5%','5,987']));
   assert.equal(detail.overflow,false);
   assert.equal(detail.panels.length,width<768?1:3);
   const combos=await tab.playwright.locator('#detail-panel-combos').innerText();

@@ -19,10 +19,10 @@ for (const [category, count] of Object.entries(expectedCategories)) {
 }
 const pages = stats.beywatch.blades;
 assert.equal(pages.length, 134, 'Beywatch pages');
-for (const [status, count] of Object.entries({ranked: 40, unranked_or_insufficient_sample: 79, no_statistics: 15})) {
+for (const [status, count] of Object.entries({ranked: 40, unranked_or_insufficient_sample: 79, no_data: 15})) {
   assert.equal(pages.filter(item => item.statisticsStatus === status).length, count, `Beywatch ${status}`);
 }
-for (const [key, count] of Object.entries({combos: 973, ratchets: 498, bits: 524})) {
+for (const [key, count] of Object.entries({combos: 975, ratchets: 497, bits: 526})) {
   assert.equal(pages.reduce((sum, item) => sum + item[key].length, 0), count, `Beywatch ${key}`);
 }
 const pageUrls = pages.map(item => item.url);
