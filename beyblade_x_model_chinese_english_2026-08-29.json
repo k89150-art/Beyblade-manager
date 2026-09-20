@@ -1,0 +1,1660 @@
+{
+  "metadata": {
+    "title": "Beyblade X 型號／繁體中文名／英文名對照",
+    "basedOn": "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json",
+    "recordCount": 234,
+    "unresolvedCount": 0,
+    "sharedModelRule": "BX-00 與 CX-00 等共用型號保留多筆記錄，以 recordId 區分。",
+    "updated": "2026-09-20",
+    "latestAddition": {
+      "model": "CX-19",
+      "recordIds": [
+        "CX-19-01",
+        "CX-19-02",
+        "CX-19-03"
+      ],
+      "chineseName": "巨鱷碾壓",
+      "englishName": "Croco Tread"
+    }
+  },
+  "records": [
+    {
+      "model": "BX-00",
+      "chineseName": "歐比王肯諾比",
+      "englishName": "Obi-Wan Kenobi",
+      "recordId": "BX-00-01-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-00",
+      "chineseName": "葛里維斯將軍",
+      "englishName": "General Grievous",
+      "recordId": "BX-00-01-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-00",
+      "chineseName": "丘巴卡",
+      "englishName": "Chewbacca",
+      "recordId": "BX-00-02-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-00",
+      "chineseName": "風暴兵",
+      "englishName": "Stormtrooper",
+      "recordId": "BX-00-02-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-00",
+      "chineseName": "美國隊長",
+      "englishName": "Captain America",
+      "recordId": "BX-00-03-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-00",
+      "chineseName": "紅浩克",
+      "englishName": "Red Hulk",
+      "recordId": "BX-00-03-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-00",
+      "chineseName": "終極蜘蛛人",
+      "englishName": "Miles Morales",
+      "recordId": "BX-00-04-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-00",
+      "chineseName": "綠惡魔",
+      "englishName": "Green Goblin",
+      "recordId": "BX-00-04-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-01",
+      "chineseName": "蒼龍神劍",
+      "englishName": "DranSword",
+      "recordId": "BX-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-02",
+      "chineseName": "惡魔紅鐮",
+      "englishName": "HellsScythe",
+      "recordId": "BX-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-03",
+      "chineseName": "魔導幻箭",
+      "englishName": "WizardArrow",
+      "recordId": "BX-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-04",
+      "chineseName": "騎士重盾",
+      "englishName": "KnightShield",
+      "recordId": "BX-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-05",
+      "chineseName": "魔導幻箭",
+      "englishName": "WizardArrow",
+      "recordId": "BX-05",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-06",
+      "chineseName": "騎士重盾",
+      "englishName": "KnightShield",
+      "recordId": "BX-06",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-07",
+      "chineseName": "蒼龍神劍",
+      "englishName": "DranSword",
+      "recordId": "BX-07",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-08-01",
+      "chineseName": "惡魔紅鐮",
+      "englishName": "HellsScythe",
+      "recordId": "BX-08-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-08-02",
+      "chineseName": "騎士重盾",
+      "englishName": "KnightShield",
+      "recordId": "BX-08-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-08-03",
+      "chineseName": "魔導幻箭",
+      "englishName": "WizardArrow",
+      "recordId": "BX-08-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-13",
+      "chineseName": "騎士長槍",
+      "englishName": "KnightLance",
+      "recordId": "BX-13",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-14-01",
+      "chineseName": "鮫鯊鋒鰭",
+      "englishName": "SharkEdge",
+      "recordId": "BX-14-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-14-02",
+      "chineseName": "鮫鯊鋒鰭",
+      "englishName": "SharkEdge",
+      "recordId": "BX-14-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-14-03",
+      "chineseName": "蒼龍神劍",
+      "englishName": "DranSword",
+      "recordId": "BX-14-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-14-04",
+      "chineseName": "惡魔紅鐮",
+      "englishName": "HellsScythe",
+      "recordId": "BX-14-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-14-05",
+      "chineseName": "騎士重盾",
+      "englishName": "KnightShield",
+      "recordId": "BX-14-05",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-14-06",
+      "chineseName": "魔導幻箭",
+      "englishName": "WizardArrow",
+      "recordId": "BX-14-06",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-15",
+      "chineseName": "雄獅獵爪",
+      "englishName": "LeonClaw",
+      "recordId": "BX-15",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-16-01",
+      "chineseName": "王蛇鞭尾",
+      "englishName": "ViperTail",
+      "recordId": "BX-16-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-16-02",
+      "chineseName": "王蛇鞭尾",
+      "englishName": "ViperTail",
+      "recordId": "BX-16-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-16-03",
+      "chineseName": "王蛇鞭尾",
+      "englishName": "ViperTail",
+      "recordId": "BX-16-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-17-01",
+      "chineseName": "蒼龍神劍",
+      "englishName": "DranSword",
+      "recordId": "BX-17-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-17-02",
+      "chineseName": "魔導幻箭",
+      "englishName": "WizardArrow",
+      "recordId": "BX-17-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-19",
+      "chineseName": "戰犀重角",
+      "englishName": "RhinoHorn",
+      "recordId": "BX-19",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-20-01",
+      "chineseName": "蒼龍利刃",
+      "englishName": "DranDagger",
+      "recordId": "BX-20-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-20-02",
+      "chineseName": "鮫鯊鋒鰭",
+      "englishName": "SharkEdge",
+      "recordId": "BX-20-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-20-03",
+      "chineseName": "騎士重盾",
+      "englishName": "KnightShield",
+      "recordId": "BX-20-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-21-01",
+      "chineseName": "惡魔鎖鏈",
+      "englishName": "HellsChain",
+      "recordId": "BX-21-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-21-02",
+      "chineseName": "騎士長槍",
+      "englishName": "KnightLance",
+      "recordId": "BX-21-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-21-03",
+      "chineseName": "魔導幻箭",
+      "englishName": "WizardArrow",
+      "recordId": "BX-21-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-22",
+      "chineseName": "蒼龍神劍",
+      "englishName": "DranSword",
+      "recordId": "BX-22",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-23",
+      "chineseName": "鳳凰飛翼",
+      "englishName": "PhoenixWing",
+      "recordId": "BX-23",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-24-01",
+      "chineseName": "飛龍旋翼",
+      "englishName": "WyvernGale",
+      "recordId": "BX-24-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-24-02",
+      "chineseName": "飛龍旋翼",
+      "englishName": "WyvernGale",
+      "recordId": "BX-24-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-24-03",
+      "chineseName": "騎士長槍",
+      "englishName": "KnightLance",
+      "recordId": "BX-24-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-24-04",
+      "chineseName": "王蛇鞭尾",
+      "englishName": "ViperTail",
+      "recordId": "BX-24-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-24-05",
+      "chineseName": "雄獅獵爪",
+      "englishName": "LeonClaw",
+      "recordId": "BX-24-05",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-24-06",
+      "chineseName": "魔導幻箭",
+      "englishName": "WizardArrow",
+      "recordId": "BX-24-06",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-26",
+      "chineseName": "幻獸刺心",
+      "englishName": "Unicorn Sting",
+      "recordId": "BX-26",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-27-01",
+      "chineseName": "魔獸護甲",
+      "englishName": "Sphinx Cowl",
+      "recordId": "BX-27-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-27-02",
+      "chineseName": "魔獸護甲",
+      "englishName": "Sphinx Cowl",
+      "recordId": "BX-27-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-27-03",
+      "chineseName": "魔獸護甲",
+      "englishName": "Sphinx Cowl",
+      "recordId": "BX-27-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-31-01",
+      "chineseName": "暴龍霸擊",
+      "englishName": "TyrannoBeat",
+      "recordId": "BX-31-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-31-02",
+      "chineseName": "暴龍霸擊",
+      "englishName": "TyrannoBeat",
+      "recordId": "BX-31-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-31-03",
+      "chineseName": "惡魔鎖鏈",
+      "englishName": "HellsChain",
+      "recordId": "BX-31-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-31-04",
+      "chineseName": "蒼龍利刃",
+      "englishName": "DranDagger",
+      "recordId": "BX-31-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-31-05",
+      "chineseName": "鮫鯊鋒鰭",
+      "englishName": "SharkEdge",
+      "recordId": "BX-31-05",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-31-06",
+      "chineseName": "戰犀重角",
+      "englishName": "RhinoHorn",
+      "recordId": "BX-31-06",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-33",
+      "chineseName": "皓戰猛虎",
+      "englishName": "Weiss Tiger",
+      "recordId": "BX-33",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-34",
+      "chineseName": "蒼穹龍騎士",
+      "englishName": "Cobalt Dragoon",
+      "recordId": "BX-34",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-35-01",
+      "chineseName": "玄冥戰甲",
+      "englishName": "Black Shell",
+      "recordId": "BX-35-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-35-02",
+      "chineseName": "玄冥戰甲",
+      "englishName": "Black Shell",
+      "recordId": "BX-35-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-35-03",
+      "chineseName": "幻獸刺心",
+      "englishName": "Unicorn Sting",
+      "recordId": "BX-35-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-35-04",
+      "chineseName": "魔導神杖",
+      "englishName": "WizardRod",
+      "recordId": "BX-35-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-35-05",
+      "chineseName": "鳳凰飛翼",
+      "englishName": "PhoenixWing",
+      "recordId": "BX-35-05",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-35-06",
+      "chineseName": "王蛇鞭尾",
+      "englishName": "ViperTail",
+      "recordId": "BX-35-06",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-36-01",
+      "chineseName": "巨鯨怒濤",
+      "englishName": "WhaleWave",
+      "recordId": "BX-36-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-36-02",
+      "chineseName": "巨鯨怒濤",
+      "englishName": "WhaleWave",
+      "recordId": "BX-36-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-36-03",
+      "chineseName": "巨鯨怒濤",
+      "englishName": "WhaleWave",
+      "recordId": "BX-36-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-37",
+      "chineseName": "悍熊猛爪",
+      "englishName": "BearScratch",
+      "recordId": "BX-37",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-39-01",
+      "chineseName": "護城龍神",
+      "englishName": "Shelter Drake",
+      "recordId": "BX-39-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-39-02",
+      "chineseName": "護城龍神",
+      "englishName": "Shelter Drake",
+      "recordId": "BX-39-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-39-03",
+      "chineseName": "護城龍神",
+      "englishName": "Shelter Drake",
+      "recordId": "BX-39-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-44",
+      "chineseName": "三角強襲",
+      "englishName": "TriceraPress",
+      "recordId": "BX-44",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-45",
+      "chineseName": "武士魂斬",
+      "englishName": "SamuraiCalibur",
+      "recordId": "BX-45",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-46-01",
+      "chineseName": "蒼穹龍神",
+      "englishName": "Cobalt Drake",
+      "recordId": "BX-46-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-46-02",
+      "chineseName": "戰羊阻截",
+      "englishName": "GoatTackle",
+      "recordId": "BX-46-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-48-01",
+      "chineseName": "蒼穹龍騎士",
+      "englishName": "Cobalt Dragoon",
+      "recordId": "BX-48-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-48-02",
+      "chineseName": "鮫鯊鋒鰭",
+      "englishName": "SharkEdge",
+      "recordId": "BX-48-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-48-03",
+      "chineseName": "猛瑪長牙",
+      "englishName": "Mammoth Tusk",
+      "recordId": "BX-48-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-48-04",
+      "chineseName": "惡魔紅鐮",
+      "englishName": "HellsScythe",
+      "recordId": "BX-48-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-48-05",
+      "chineseName": "蒼龍爆刃",
+      "englishName": "DranBuster",
+      "recordId": "BX-48-05",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-49",
+      "chineseName": "蒼龍突擊",
+      "englishName": "DranStrike",
+      "recordId": "BX-49",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-01",
+      "chineseName": "烈焰飛鳳 S",
+      "englishName": "Dranzer Spiral",
+      "recordId": "BXG-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-04",
+      "chineseName": "銀牙烈虎",
+      "englishName": "Driger Slash",
+      "recordId": "BXG-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-07",
+      "chineseName": "雷霆天龍",
+      "englishName": "Lightning L-Drago",
+      "recordId": "BXG-07",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-09",
+      "chineseName": "蒼穹龍騎士",
+      "englishName": "Cobalt Dragoon",
+      "recordId": "BXG-09",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-11",
+      "chineseName": "堅甲戰龜 S",
+      "englishName": "Draciel Shield",
+      "recordId": "BXG-11",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-12-01",
+      "chineseName": "龍騎士 S",
+      "englishName": "Dragoon Storm",
+      "recordId": "BXG-12-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-12-02",
+      "chineseName": "暴風天馬",
+      "englishName": "Storm Pegasis",
+      "recordId": "BXG-12-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-12-03",
+      "chineseName": "天翼戰神",
+      "englishName": "Soar Phoenix",
+      "recordId": "BXG-12-03",
+      "matchSource": "previous_data_crosscheck"
+    },
+    {
+      "model": "BXG-12-04",
+      "chineseName": "蒼龍神劍",
+      "englishName": "DranSword",
+      "recordId": "BXG-12-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-13",
+      "chineseName": "神力聖劍",
+      "englishName": "Xeno Xcalibur",
+      "recordId": "BXG-13",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-14",
+      "chineseName": "蒼龍利刃",
+      "englishName": "DranDagger",
+      "recordId": "BXG-14",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-15",
+      "chineseName": "烈焰飛鳳 S",
+      "englishName": "Dranzer Spiral",
+      "recordId": "BXG-15",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-16",
+      "chineseName": "忍者刺刀",
+      "englishName": "ShinobiKnife",
+      "recordId": "BXG-16",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-20",
+      "chineseName": "巨岩雄獅",
+      "englishName": "Rock Leone",
+      "recordId": "BXG-20",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-21",
+      "chineseName": "暴風巨神",
+      "englishName": "Storm Spriggan",
+      "recordId": "BXG-21",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-22",
+      "chineseName": "龍騎士 S",
+      "englishName": "Dragoon Storm",
+      "recordId": "BXG-22",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-24",
+      "chineseName": "空力天馬",
+      "englishName": "Aero Pegasus",
+      "recordId": "BXG-24",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-29-01",
+      "chineseName": "蜘蛛人",
+      "englishName": "Spiderman",
+      "recordId": "BXG-29-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-29-02",
+      "chineseName": "猛毒",
+      "englishName": "Venom",
+      "recordId": "BXG-29-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-30-01",
+      "chineseName": "鋼鐵人",
+      "englishName": "Ironman",
+      "recordId": "BXG-30-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-30-02",
+      "chineseName": "薩諾斯",
+      "englishName": "Thanos",
+      "recordId": "BXG-30-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-32",
+      "chineseName": "猛瑪長牙",
+      "englishName": "Mammoth Tusk",
+      "recordId": "BXG-32",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-33-01",
+      "chineseName": "路克天行者",
+      "englishName": "Luke Skywalker",
+      "recordId": "BXG-33-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-33-02",
+      "chineseName": "達斯維達",
+      "englishName": "Darth Vader",
+      "recordId": "BXG-33-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-34-01",
+      "chineseName": "曼達洛人",
+      "englishName": "The Mandalorian",
+      "recordId": "BXG-34-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-34-02",
+      "chineseName": "星區長吉迪恩",
+      "englishName": "Moff Gideon",
+      "recordId": "BXG-34-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-36-01",
+      "chineseName": "柯博文",
+      "englishName": "Optimus Prime",
+      "recordId": "BXG-36-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-36-02",
+      "chineseName": "密卡登",
+      "englishName": "Megatron",
+      "recordId": "BXG-36-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-37-01",
+      "chineseName": "金剛王",
+      "englishName": "Optimus Primal",
+      "recordId": "BXG-37-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-37-02",
+      "chineseName": "天王星",
+      "englishName": "Starscream",
+      "recordId": "BXG-37-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-38",
+      "chineseName": "雄獅獠牙",
+      "englishName": "Leon Fang",
+      "recordId": "BXG-38",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "BXG-40-01",
+      "chineseName": "暴龍",
+      "englishName": "T-Rex",
+      "recordId": "BXG-40-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-40-02",
+      "chineseName": "滄龍",
+      "englishName": "Mosasaurus",
+      "recordId": "BXG-40-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-41-01",
+      "chineseName": "翼龍",
+      "englishName": "Ptera Swing",
+      "recordId": "BXG-41-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-41-02",
+      "chineseName": "棘龍",
+      "englishName": "Spinosaurus",
+      "recordId": "BXG-41-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-42",
+      "chineseName": "騎士圓甲",
+      "englishName": "KnightMail",
+      "recordId": "BXG-42",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-43",
+      "chineseName": "魔導至尊",
+      "englishName": "Wizard Arc",
+      "recordId": "BXG-43",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "BXG-45",
+      "chineseName": "天馬爆擊",
+      "englishName": "Pegasus Blast",
+      "recordId": "BXG-45",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "BXG-51",
+      "chineseName": "蒼龍勇氣",
+      "englishName": "Dran Brave",
+      "recordId": "BXG-51",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "BXG-52",
+      "chineseName": "蒼龍神劍",
+      "englishName": "DranSword",
+      "recordId": "BXG-52",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-53",
+      "chineseName": "蒼穹龍騎士",
+      "englishName": "Cobalt Dragoon",
+      "recordId": "BXG-53",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-54",
+      "chineseName": "武士星劍",
+      "englishName": "SamuraiSaber",
+      "recordId": "BXG-54",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-55",
+      "chineseName": "鮫鯊鋒鰭",
+      "englishName": "SharkEdge",
+      "recordId": "BXG-55",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-56",
+      "chineseName": "巨鯨怒濤",
+      "englishName": "WhaleWave",
+      "recordId": "BXG-56",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXG-57-01",
+      "chineseName": "福音戰士至尊",
+      "englishName": "EVA Arc",
+      "recordId": "BXG-57-01",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "BXG-57-02",
+      "chineseName": "福音戰士勇氣",
+      "englishName": "EVA Brave",
+      "recordId": "BXG-57-02",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "BXG-57-03",
+      "chineseName": "福音戰士九尾",
+      "englishName": "EVA Brush",
+      "recordId": "BXG-57-03",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "BXG-61",
+      "chineseName": "天蠍長矛",
+      "englishName": "ScorpioSpear",
+      "recordId": "BXG-61",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXH-10",
+      "chineseName": "空力天馬",
+      "englishName": "Aero Pegasus",
+      "recordId": "BXH-10",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BXH-14",
+      "chineseName": "戰神伏特",
+      "englishName": "Valkyrie Volt",
+      "recordId": "BXH-14",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-01",
+      "chineseName": "蒼龍勇氣",
+      "englishName": "Dran Brave",
+      "recordId": "CX-01",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-02",
+      "chineseName": "魔導至尊",
+      "englishName": "Wizard Arc",
+      "recordId": "CX-02",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-03",
+      "chineseName": "英仙幽冥",
+      "englishName": "Perseus Dark",
+      "recordId": "CX-03",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-04-01",
+      "chineseName": "蒼龍勇氣",
+      "englishName": "Dran Brave",
+      "recordId": "CX-04-01",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-04-02",
+      "chineseName": "英仙幽冥",
+      "englishName": "Perseus Dark",
+      "recordId": "CX-04-02",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-05-01",
+      "chineseName": "惡魔獵魂",
+      "englishName": "Hells Reaper",
+      "recordId": "CX-05-01",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-05-02",
+      "chineseName": "戰犀獵魂",
+      "englishName": "Rhino Reaper",
+      "recordId": "CX-05-02",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-05-03",
+      "chineseName": "惡魔至尊",
+      "englishName": "Hells Arc",
+      "recordId": "CX-05-03",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-05-04",
+      "chineseName": "雄獅巔峰",
+      "englishName": "LeonCrest",
+      "recordId": "CX-05-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-05-05",
+      "chineseName": "鳳凰尾翼",
+      "englishName": "PhoenixRudder",
+      "recordId": "CX-05-05",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-05-06",
+      "chineseName": "巨鯨怒濤",
+      "englishName": "WhaleWave",
+      "recordId": "CX-05-06",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-06-01",
+      "chineseName": "極狐九尾",
+      "englishName": "Fox Brush",
+      "recordId": "CX-06-01",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-06-02",
+      "chineseName": "極狐九尾",
+      "englishName": "Fox Brush",
+      "recordId": "CX-06-02",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-06-03",
+      "chineseName": "極狐九尾",
+      "englishName": "Fox Brush",
+      "recordId": "CX-06-03",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-07",
+      "chineseName": "天馬爆擊",
+      "englishName": "Pegasus Blast",
+      "recordId": "CX-07",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-08-01",
+      "chineseName": "魔犬烈焰",
+      "englishName": "Cerberus Flame",
+      "recordId": "CX-08-01",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-08-02",
+      "chineseName": "巨鯨烈焰",
+      "englishName": "Whale Flame",
+      "recordId": "CX-08-02",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-08-03",
+      "chineseName": "魔犬幽冥",
+      "englishName": "Cerberus Dark",
+      "recordId": "CX-08-03",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-08-04",
+      "chineseName": "蒼龍爆刃",
+      "englishName": "DranBuster",
+      "recordId": "CX-08-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-08-05",
+      "chineseName": "玄冥戰甲",
+      "englishName": "Black Shell",
+      "recordId": "CX-08-05",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-08-06",
+      "chineseName": "蒼穹龍騎士",
+      "englishName": "Cobalt Dragoon",
+      "recordId": "CX-08-06",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-09",
+      "chineseName": "焰神滅世",
+      "englishName": "Sol Eclipse",
+      "recordId": "CX-09",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-10",
+      "chineseName": "銀狼狩獵",
+      "englishName": "Wolf Hunt",
+      "recordId": "CX-10",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-11-01",
+      "chineseName": "帝王威能",
+      "englishName": "Emperor Might",
+      "recordId": "CX-11-01",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-11-02",
+      "chineseName": "魔像奇岩",
+      "englishName": "GolemRock",
+      "recordId": "CX-11-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-11-03",
+      "chineseName": "鮫鯊撕裂",
+      "englishName": "SharkGill",
+      "recordId": "CX-11-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-12",
+      "chineseName": "鳳凰閃焰",
+      "englishName": "Phoenix Flare",
+      "recordId": "CX-12",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-13",
+      "chineseName": "龍王閃擊",
+      "englishName": "Bahamut Blitz",
+      "recordId": "CX-13",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-14",
+      "chineseName": "騎士堡壘",
+      "englishName": "Knight Fortress",
+      "recordId": "CX-14",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-15",
+      "chineseName": "邪神狂怒",
+      "englishName": "Ragna Rage",
+      "recordId": "CX-15",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-16",
+      "chineseName": "龍王閃擊",
+      "englishName": "Bahamut Blitz",
+      "recordId": "CX-16",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-17-01",
+      "chineseName": "獨角極變",
+      "englishName": "Unicorn Delta",
+      "recordId": "CX-17-01",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-17-02",
+      "chineseName": "獨角極變",
+      "englishName": "Unicorn Delta",
+      "recordId": "CX-17-02",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-17-03",
+      "chineseName": "武士星劍",
+      "englishName": "SamuraiSaber",
+      "recordId": "CX-17-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-17-04",
+      "chineseName": "惡魔重錘",
+      "englishName": "HellsHammer",
+      "recordId": "CX-17-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-17-05",
+      "chineseName": "暴龍霸擊",
+      "englishName": "TyrannoBeat",
+      "recordId": "CX-17-05",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-17-06",
+      "chineseName": "赫燃天鳳",
+      "englishName": "Crimson Garuda",
+      "recordId": "CX-17-06",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-18-01",
+      "chineseName": "腕龍鞭擊",
+      "englishName": "Brachio Whip",
+      "recordId": "CX-18-01",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-18-02",
+      "chineseName": "腕龍鞭擊",
+      "englishName": "Brachio Whip",
+      "recordId": "CX-18-02",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-18-03",
+      "chineseName": "腕龍鞭擊",
+      "englishName": "Brachio Whip",
+      "recordId": "CX-18-03",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "UX-00",
+      "chineseName": "蒼龍爆刃",
+      "englishName": "DranBuster",
+      "recordId": "UX-00",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-01",
+      "chineseName": "蒼龍爆刃",
+      "englishName": "DranBuster",
+      "recordId": "UX-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-02",
+      "chineseName": "惡魔重錘",
+      "englishName": "HellsHammer",
+      "recordId": "UX-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-03",
+      "chineseName": "魔導神杖",
+      "englishName": "WizardRod",
+      "recordId": "UX-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-04-01",
+      "chineseName": "蒼龍爆刃",
+      "englishName": "DranBuster",
+      "recordId": "UX-04-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-04-02",
+      "chineseName": "魔導神杖",
+      "englishName": "WizardRod",
+      "recordId": "UX-04-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-05-01",
+      "chineseName": "忍者闇影",
+      "englishName": "ShinobiShadow",
+      "recordId": "UX-05-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-05-02",
+      "chineseName": "忍者闇影",
+      "englishName": "ShinobiShadow",
+      "recordId": "UX-05-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-05-03",
+      "chineseName": "忍者闇影",
+      "englishName": "ShinobiShadow",
+      "recordId": "UX-05-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-06",
+      "chineseName": "雄獅巔峰",
+      "englishName": "LeonCrest",
+      "recordId": "UX-06",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-07-01",
+      "chineseName": "鳳凰尾翼",
+      "englishName": "PhoenixRudder",
+      "recordId": "UX-07-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-07-02",
+      "chineseName": "飛龍旋翼",
+      "englishName": "WyvernGale",
+      "recordId": "UX-07-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-07-03",
+      "chineseName": "魔獸護甲",
+      "englishName": "Sphinx Cowl",
+      "recordId": "UX-07-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-08",
+      "chineseName": "霜輝銀狼",
+      "englishName": "Silver Wolf",
+      "recordId": "UX-08",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-09",
+      "chineseName": "武士星劍",
+      "englishName": "SamuraiSaber",
+      "recordId": "UX-09",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-10-01",
+      "chineseName": "騎士圓甲",
+      "englishName": "KnightMail",
+      "recordId": "UX-10-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-10-02",
+      "chineseName": "暴龍霸擊",
+      "englishName": "TyrannoBeat",
+      "recordId": "UX-10-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-10-03",
+      "chineseName": "翼龍神翼",
+      "englishName": "PteraSwing",
+      "recordId": "UX-10-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-11",
+      "chineseName": "衝擊龍神",
+      "englishName": "Impact Drake",
+      "recordId": "UX-11",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-12-01",
+      "chineseName": "幽靈元魂",
+      "englishName": "GhostCircle",
+      "recordId": "UX-12-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-12-02",
+      "chineseName": "幽靈元魂",
+      "englishName": "GhostCircle",
+      "recordId": "UX-12-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-12-03",
+      "chineseName": "忍者闇影",
+      "englishName": "ShinobiShadow",
+      "recordId": "UX-12-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-12-04",
+      "chineseName": "雄獅獵爪",
+      "englishName": "LeonClaw",
+      "recordId": "UX-12-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-12-05",
+      "chineseName": "鳳凰翔羽",
+      "englishName": "PhoenixFeather",
+      "recordId": "UX-12-05",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-12-06",
+      "chineseName": "飛龍旋翼",
+      "englishName": "WyvernGale",
+      "recordId": "UX-12-06",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-13",
+      "chineseName": "魔像奇岩",
+      "englishName": "GolemRock",
+      "recordId": "UX-13",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-14",
+      "chineseName": "天蠍長矛",
+      "englishName": "ScorpioSpear",
+      "recordId": "UX-14",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-15-01",
+      "chineseName": "鮫鯊狂鱗",
+      "englishName": "SharkScale",
+      "recordId": "UX-15-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-15-02",
+      "chineseName": "暴龍咆哮",
+      "englishName": "TyrannoRoar",
+      "recordId": "UX-15-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-15-03",
+      "chineseName": "惡魔勇氣",
+      "englishName": "Hells Brave",
+      "recordId": "UX-15-03",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "UX-16-01",
+      "chineseName": "時鐘幻象",
+      "englishName": "ClockMirage",
+      "recordId": "UX-16-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-16-02",
+      "chineseName": "時鐘幻象",
+      "englishName": "ClockMirage",
+      "recordId": "UX-16-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-16-03",
+      "chineseName": "時鐘幻象",
+      "englishName": "ClockMirage",
+      "recordId": "UX-16-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-17",
+      "chineseName": "隕星龍騎士",
+      "englishName": "Meteor Dragoon",
+      "recordId": "UX-17",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-18-01",
+      "chineseName": "古屍詛咒",
+      "englishName": "MummyCurse",
+      "recordId": "UX-18-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-18-02",
+      "chineseName": "古屍詛咒",
+      "englishName": "MummyCurse",
+      "recordId": "UX-18-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-18-03",
+      "chineseName": "天馬九尾",
+      "englishName": "Pegasus Brush",
+      "recordId": "UX-18-03",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "UX-18-04",
+      "chineseName": "焰神勇氣",
+      "englishName": "Sol Brave",
+      "recordId": "UX-18-04",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "UX-18-05",
+      "chineseName": "蒼龍利刃",
+      "englishName": "DranDagger",
+      "recordId": "UX-18-05",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-18-06",
+      "chineseName": "皓戰猛虎",
+      "englishName": "Weiss Tiger",
+      "recordId": "UX-18-06",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-19",
+      "chineseName": "彈丸獅鷲",
+      "englishName": "Bullet Griffon",
+      "recordId": "UX-19",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-20",
+      "chineseName": "榮耀戰神",
+      "englishName": "Glory Valkyrie",
+      "recordId": "UX-20",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-21",
+      "chineseName": "惡魔冥界",
+      "englishName": "Hells Nether",
+      "recordId": "UX-21-01",
+      "matchSource": "previous_data_crosscheck"
+    },
+    {
+      "model": "UX-21",
+      "chineseName": "霜輝銀狼",
+      "englishName": "Silver Wolf",
+      "recordId": "UX-21-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "UX-21",
+      "chineseName": "飛龍旋翼",
+      "englishName": "WyvernGale",
+      "recordId": "UX-21-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-00",
+      "chineseName": "EVA至尊",
+      "englishName": "EVA Arc",
+      "recordId": "CX-00-EVA-01",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-00",
+      "chineseName": "EVA勇氣",
+      "englishName": "EVA Brave",
+      "recordId": "CX-00-EVA-02",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-00",
+      "chineseName": "EVA鞭擊",
+      "englishName": "EVA Whip",
+      "recordId": "CX-00-EVA-03",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-00",
+      "chineseName": "迪迦狂怒",
+      "englishName": "Tiga Rage",
+      "recordId": "CX-00-TIGA",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "BX-50-01",
+      "chineseName": "天國日輪",
+      "englishName": "Heaven's Ring",
+      "recordId": "BX-50-01",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-50-02",
+      "chineseName": "天國日輪",
+      "englishName": "Heaven's Ring",
+      "recordId": "BX-50-02",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-50-03",
+      "chineseName": "衝擊龍神",
+      "englishName": "Impact Drake",
+      "recordId": "BX-50-03",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-50-04",
+      "chineseName": "幽靈元魂",
+      "englishName": "GhostCircle",
+      "recordId": "BX-50-04",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "BX-50-05",
+      "chineseName": "銀狼烈焰",
+      "englishName": "Wolf Flame",
+      "recordId": "BX-50-05",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "BX-50-06",
+      "chineseName": "魔犬獵魂",
+      "englishName": "Cerberus Reaper",
+      "recordId": "BX-50-06",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "BX-00",
+      "chineseName": "暴風天馬",
+      "englishName": "Storm Pegasis",
+      "recordId": "BX-00-STORM-PEGASIS",
+      "matchSource": "blade_database"
+    },
+    {
+      "model": "CX-00",
+      "chineseName": "雄鹿鹿角",
+      "englishName": "Bucks Antlers",
+      "recordId": "CX-00-BUCKS-ANTLERS",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-00",
+      "chineseName": "黃蜂要塞",
+      "englishName": "Hornet Fort",
+      "recordId": "CX-00-HORNET-FORT",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-00",
+      "chineseName": "龍神勇氣",
+      "englishName": "Drake Brave",
+      "recordId": "CX-00-DRAKE-BRAVE",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-00",
+      "chineseName": "海怪妞擺",
+      "englishName": "Kraken Riggle",
+      "recordId": "CX-00-KRAKEN-RIGGLE",
+      "matchSource": "cx_component_crosscheck"
+    },
+    {
+      "model": "CX-19-01",
+      "chineseName": "巨鱷碾壓",
+      "englishName": "Croco Tread",
+      "recordId": "CX-19-01",
+      "matchSource": "user_confirmed_official"
+    },
+    {
+      "model": "CX-19-02",
+      "chineseName": "巨鱷碾壓",
+      "englishName": "Croco Tread",
+      "recordId": "CX-19-02",
+      "matchSource": "user_confirmed_official"
+    },
+    {
+      "model": "CX-19-03",
+      "chineseName": "巨鱷碾壓",
+      "englishName": "Croco Tread",
+      "recordId": "CX-19-03",
+      "matchSource": "user_confirmed_official"
+    }
+  ]
+}

@@ -2,11 +2,11 @@
   "metadata": {
     "name": "Beyblade X 原裝配置起始資料",
     "source": "使用者提供：戰鬥陀螺X商品型號整理-更新至20260515.pdf",
-    "sourceUpdatedThrough": "2026-07-29",
+    "sourceUpdatedThrough": "2026-09-20",
     "createdAt": "2026-07-15",
     "purpose": "收藏區輸入商品型號後，自動帶出原裝零件；不供配置區修改或性能評分。",
-    "recordCount": 231,
-    "autoFillSafeCount": 231,
+    "recordCount": 234,
+    "autoFillSafeCount": 234,
     "needsReviewCount": 0,
     "importantRules": [
       "原裝配置只用於收藏登錄，不改變性能評分。",
@@ -14,10 +14,10 @@
       "不得只用型號前綴判斷組裝系統；CX 隨機包內可能是一般 BX/UX 結構。",
       "autoFillEnabled=false 的資料不得自動帶入。"
     ],
-    "version": "2026.07.29-shared-official-code-selection-v3",
-    "updated": "2026-07-29",
-    "totalRecords": 231,
-    "autoFillSafeRecords": 231,
+    "version": "2026.09.20-cx19-user-confirmed",
+    "updated": "2026-09-20",
+    "totalRecords": 234,
+    "autoFillSafeRecords": 234,
     "reviewNeededRecords": 0,
     "confirmedCorrections": {
       "UX-10-03": "翼龍神翼 7-70 B",
@@ -45,76 +45,49 @@
     ],
     "setAutoFillRule": "Shared official codes BX-00 and CX-00 open a candidate picker. Internal recordId/setId values are never required as user input.",
     "dataset": "AUTOFILL_SAFE",
-    "note": "All 231 records are confirmed or otherwise marked safe for original-combo autofill.",
+    "note": "All 234 records are confirmed or otherwise marked safe for original-combo autofill.",
     "multiModelLookupEnabled": true,
     "lookupStrategy": "Normalize the entered official code; when one code maps to multiple records, show every candidate and require user selection.",
-    "exactIndexCount": 214,
-    "baseVariantGroupCount": 42,
-    "parsedRecordCount": 231,
+    "exactIndexCount": 217,
+    "baseVariantGroupCount": 43,
+    "parsedRecordCount": 234,
     "unparsedRecordCount": 0,
     "latestOfficialCheck": {
-      "checkedAt": "2026-07-29",
-      "officialLineupThrough": "CX-00 ティガレイジFT3-60T（2026-09-12発売予定）",
+      "checkedAt": "2026-09-20",
+      "officialLineupThrough": "CX-19 巨鱷碾壓 TQ 5-50 GN（2026-09-12 發售）",
       "addedRecordIds": [
-        "UX-21-01",
-        "UX-21-02",
-        "UX-21-03",
-        "CX-00-EVA-01",
-        "CX-00-EVA-02",
-        "CX-00-EVA-03",
-        "CX-00-TIGA"
-      ],
-      "confirmedButNotDuplicated": [
-        "BX-00 ドランソード3-60F バージョン2.0（既存 BX-01 と同一原裝配置）",
-        "UX-00 グローリーワルキューレLF メタルコート:ブルー（既存 UX-20 と同一原裝配置）"
+        "CX-19-01",
+        "CX-19-02",
+        "CX-19-03"
       ],
       "officialSources": [
-        "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/ux21.html",
-        "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx00-eva.html",
-        "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx00-tiga.html"
-      ],
-      "sharedCodeSelection": {
-        "CX-00": [
-          "CX-00-EVA-01",
-          "CX-00-EVA-02",
-          "CX-00-EVA-03",
-          "CX-00-TIGA",
-          "CX-00-BUCKS-ANTLERS",
-          "CX-00-HORNET-FORT",
-          "CX-00-DRAKE-BRAVE",
-          "CX-00-KRAKEN-RIGGLE"
-        ]
-      }
+        "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx19.html"
+      ]
     },
     "confirmedMultiBeySets": [
       "UX-21",
-      "CX-00-EVA"
+      "CX-00-EVA",
+      "CX-19"
     ],
     "latestUserCorrections": {
-      "correctedAt": "2026-07-29",
+      "correctedAt": "2026-09-20",
       "addedRecordIds": [
-        "BX-50-01",
-        "BX-50-02",
-        "BX-50-03",
-        "BX-50-04",
-        "BX-50-05",
-        "BX-50-06",
-        "BX-00-STORM-PEGASIS",
-        "CX-00-BUCKS-ANTLERS",
-        "CX-00-HORNET-FORT",
-        "CX-00-DRAKE-BRAVE",
-        "CX-00-KRAKEN-RIGGLE"
+        "CX-19-01",
+        "CX-19-02",
+        "CX-19-03"
       ],
-      "sharedCodeSelection": {
-        "BX-00": [
-          "BX-00-STORM-PEGASIS"
-        ],
-        "CX-00": [
-          "CX-00-BUCKS-ANTLERS",
-          "CX-00-HORNET-FORT",
-          "CX-00-DRAKE-BRAVE",
-          "CX-00-KRAKEN-RIGGLE"
-        ]
+      "confirmedName": {
+        "model": "CX-19",
+        "chineseName": "巨鱷碾壓",
+        "englishName": "Croco Tread"
+      },
+      "confirmedParts": {
+        "lockChip": "巨鱷",
+        "metalBlade": "碾壓",
+        "overBlade": "T",
+        "assistBlade": "Q",
+        "ratchet": "5-50",
+        "bit": "GN"
       }
     },
     "sharedOfficialCodeSelection": {
@@ -153,15 +126,6 @@
         }
       },
       "internalIdentityRule": "Use recordId and setId only for internal identity. Never require users to type synthetic suffixes."
-    },
-    "nameCatalogUpdate": {
-      "sourceFile": "beyblade_x_model_chinese_english_2026-08-29.json",
-      "appliedAt": "2026-08-29",
-      "sourceRecords": 231,
-      "matchedByRecordId": 231,
-      "unresolvedRecords": 0,
-      "matchRule": "Exact recordId match with identical model and Traditional Chinese name.",
-      "displayPolicy": "English names are stored as catalog metadata; collection cards remain Chinese-only."
     }
   },
   "stockProducts": [
@@ -210,9 +174,7 @@
       "officialProductCode": "BX-00",
       "selectionRequired": true,
       "selectionGroupCode": "BX-00",
-      "selectionLabel": "歐比王肯諾比 4-60 P",
-      "displayNameEn": "Obi-Wan Kenobi",
-      "referenceNameEn": "Obi-Wan Kenobi"
+      "selectionLabel": "歐比王肯諾比 4-60 P"
     },
     {
       "productCode": "BX-00",
@@ -259,9 +221,7 @@
       "officialProductCode": "BX-00",
       "selectionRequired": true,
       "selectionGroupCode": "BX-00",
-      "selectionLabel": "葛里維斯將軍 3-80 HN",
-      "displayNameEn": "General Grievous",
-      "referenceNameEn": "General Grievous"
+      "selectionLabel": "葛里維斯將軍 3-80 HN"
     },
     {
       "productCode": "BX-00",
@@ -308,9 +268,7 @@
       "officialProductCode": "BX-00",
       "selectionRequired": true,
       "selectionGroupCode": "BX-00",
-      "selectionLabel": "丘巴卡 4-80 LF",
-      "displayNameEn": "Chewbacca",
-      "referenceNameEn": "Chewbacca"
+      "selectionLabel": "丘巴卡 4-80 LF"
     },
     {
       "productCode": "BX-00",
@@ -357,9 +315,7 @@
       "officialProductCode": "BX-00",
       "selectionRequired": true,
       "selectionGroupCode": "BX-00",
-      "selectionLabel": "風暴兵 5-70 B",
-      "displayNameEn": "Stormtrooper",
-      "referenceNameEn": "Stormtrooper"
+      "selectionLabel": "風暴兵 5-70 B"
     },
     {
       "productCode": "BX-00",
@@ -406,9 +362,7 @@
       "officialProductCode": "BX-00",
       "selectionRequired": true,
       "selectionGroupCode": "BX-00",
-      "selectionLabel": "美國隊長 4-70 GB",
-      "displayNameEn": "Captain America",
-      "referenceNameEn": "Captain America"
+      "selectionLabel": "美國隊長 4-70 GB"
     },
     {
       "productCode": "BX-00",
@@ -455,9 +409,7 @@
       "officialProductCode": "BX-00",
       "selectionRequired": true,
       "selectionGroupCode": "BX-00",
-      "selectionLabel": "紅浩克 1-80 R",
-      "displayNameEn": "Red Hulk",
-      "referenceNameEn": "Red Hulk"
+      "selectionLabel": "紅浩克 1-80 R"
     },
     {
       "productCode": "BX-00",
@@ -504,9 +456,7 @@
       "officialProductCode": "BX-00",
       "selectionRequired": true,
       "selectionGroupCode": "BX-00",
-      "selectionLabel": "終極蜘蛛人 1-60 GN",
-      "displayNameEn": "Miles Morales",
-      "referenceNameEn": "Miles Morales"
+      "selectionLabel": "終極蜘蛛人 1-60 GN"
     },
     {
       "productCode": "BX-00",
@@ -553,9 +503,7 @@
       "officialProductCode": "BX-00",
       "selectionRequired": true,
       "selectionGroupCode": "BX-00",
-      "selectionLabel": "綠惡魔 9-80 HT",
-      "displayNameEn": "Green Goblin",
-      "referenceNameEn": "Green Goblin"
+      "selectionLabel": "綠惡魔 9-80 HT"
     },
     {
       "productCode": "BX-01",
@@ -588,9 +536,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "DranSword",
-      "referenceNameEn": "DranSword"
+      "variantCount": 1
     },
     {
       "productCode": "BX-02",
@@ -623,9 +569,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "HellsScythe",
-      "referenceNameEn": "HellsScythe"
+      "variantCount": 1
     },
     {
       "productCode": "BX-03",
@@ -658,9 +602,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "WizardArrow",
-      "referenceNameEn": "WizardArrow"
+      "variantCount": 1
     },
     {
       "productCode": "BX-04",
@@ -693,9 +635,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "KnightShield",
-      "referenceNameEn": "KnightShield"
+      "variantCount": 1
     },
     {
       "productCode": "BX-05",
@@ -728,9 +668,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "WizardArrow",
-      "referenceNameEn": "WizardArrow"
+      "variantCount": 1
     },
     {
       "productCode": "BX-06",
@@ -763,9 +701,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "KnightShield",
-      "referenceNameEn": "KnightShield"
+      "variantCount": 1
     },
     {
       "productCode": "BX-07",
@@ -798,9 +734,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "DranSword",
-      "referenceNameEn": "DranSword"
+      "variantCount": 1
     },
     {
       "productCode": "BX-08-01",
@@ -833,9 +767,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "HellsScythe",
-      "referenceNameEn": "HellsScythe"
+      "variantCount": 3
     },
     {
       "productCode": "BX-08-02",
@@ -868,9 +800,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "KnightShield",
-      "referenceNameEn": "KnightShield"
+      "variantCount": 3
     },
     {
       "productCode": "BX-08-03",
@@ -903,9 +833,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "WizardArrow",
-      "referenceNameEn": "WizardArrow"
+      "variantCount": 3
     },
     {
       "productCode": "BX-13",
@@ -938,9 +866,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "KnightLance",
-      "referenceNameEn": "KnightLance"
+      "variantCount": 1
     },
     {
       "productCode": "BX-14-01",
@@ -973,9 +899,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 6,
-      "displayNameEn": "SharkEdge",
-      "referenceNameEn": "SharkEdge"
+      "variantCount": 6
     },
     {
       "productCode": "BX-14-02",
@@ -1008,9 +932,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 6,
-      "displayNameEn": "SharkEdge",
-      "referenceNameEn": "SharkEdge"
+      "variantCount": 6
     },
     {
       "productCode": "BX-14-03",
@@ -1043,9 +965,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 6,
-      "displayNameEn": "DranSword",
-      "referenceNameEn": "DranSword"
+      "variantCount": 6
     },
     {
       "productCode": "BX-14-04",
@@ -1078,9 +998,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 6,
-      "displayNameEn": "HellsScythe",
-      "referenceNameEn": "HellsScythe"
+      "variantCount": 6
     },
     {
       "productCode": "BX-14-05",
@@ -1113,9 +1031,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 5,
-      "variantCount": 6,
-      "displayNameEn": "KnightShield",
-      "referenceNameEn": "KnightShield"
+      "variantCount": 6
     },
     {
       "productCode": "BX-14-06",
@@ -1148,9 +1064,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 6,
-      "variantCount": 6,
-      "displayNameEn": "WizardArrow",
-      "referenceNameEn": "WizardArrow"
+      "variantCount": 6
     },
     {
       "productCode": "BX-15",
@@ -1183,9 +1097,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "LeonClaw",
-      "referenceNameEn": "LeonClaw"
+      "variantCount": 1
     },
     {
       "productCode": "BX-16-01",
@@ -1218,9 +1130,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "ViperTail",
-      "referenceNameEn": "ViperTail"
+      "variantCount": 3
     },
     {
       "productCode": "BX-16-02",
@@ -1253,9 +1163,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "ViperTail",
-      "referenceNameEn": "ViperTail"
+      "variantCount": 3
     },
     {
       "productCode": "BX-16-03",
@@ -1288,9 +1196,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "ViperTail",
-      "referenceNameEn": "ViperTail"
+      "variantCount": 3
     },
     {
       "productCode": "BX-17-01",
@@ -1323,9 +1229,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "DranSword",
-      "referenceNameEn": "DranSword"
+      "variantCount": 2
     },
     {
       "productCode": "BX-17-02",
@@ -1358,9 +1262,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "WizardArrow",
-      "referenceNameEn": "WizardArrow"
+      "variantCount": 2
     },
     {
       "productCode": "BX-19",
@@ -1395,9 +1297,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "RhinoHorn",
-      "referenceNameEn": "RhinoHorn"
+      "variantCount": 1
     },
     {
       "productCode": "BX-20-01",
@@ -1430,9 +1330,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "DranDagger",
-      "referenceNameEn": "DranDagger"
+      "variantCount": 3
     },
     {
       "productCode": "BX-20-02",
@@ -1465,9 +1363,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "SharkEdge",
-      "referenceNameEn": "SharkEdge"
+      "variantCount": 3
     },
     {
       "productCode": "BX-20-03",
@@ -1500,9 +1396,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "KnightShield",
-      "referenceNameEn": "KnightShield"
+      "variantCount": 3
     },
     {
       "productCode": "BX-21-01",
@@ -1535,9 +1429,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "HellsChain",
-      "referenceNameEn": "HellsChain"
+      "variantCount": 3
     },
     {
       "productCode": "BX-21-02",
@@ -1570,9 +1462,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "KnightLance",
-      "referenceNameEn": "KnightLance"
+      "variantCount": 3
     },
     {
       "productCode": "BX-21-03",
@@ -1605,9 +1495,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "WizardArrow",
-      "referenceNameEn": "WizardArrow"
+      "variantCount": 3
     },
     {
       "productCode": "BX-22",
@@ -1640,9 +1528,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "DranSword",
-      "referenceNameEn": "DranSword"
+      "variantCount": 1
     },
     {
       "productCode": "BX-23",
@@ -1675,9 +1561,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "PhoenixWing",
-      "referenceNameEn": "PhoenixWing"
+      "variantCount": 1
     },
     {
       "productCode": "BX-24-01",
@@ -1710,9 +1594,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 6,
-      "displayNameEn": "WyvernGale",
-      "referenceNameEn": "WyvernGale"
+      "variantCount": 6
     },
     {
       "productCode": "BX-24-02",
@@ -1745,9 +1627,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 6,
-      "displayNameEn": "WyvernGale",
-      "referenceNameEn": "WyvernGale"
+      "variantCount": 6
     },
     {
       "productCode": "BX-24-03",
@@ -1780,9 +1660,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 6,
-      "displayNameEn": "KnightLance",
-      "referenceNameEn": "KnightLance"
+      "variantCount": 6
     },
     {
       "productCode": "BX-24-04",
@@ -1815,9 +1693,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 6,
-      "displayNameEn": "ViperTail",
-      "referenceNameEn": "ViperTail"
+      "variantCount": 6
     },
     {
       "productCode": "BX-24-05",
@@ -1850,9 +1726,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 5,
-      "variantCount": 6,
-      "displayNameEn": "LeonClaw",
-      "referenceNameEn": "LeonClaw"
+      "variantCount": 6
     },
     {
       "productCode": "BX-24-06",
@@ -1885,9 +1759,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 6,
-      "variantCount": 6,
-      "displayNameEn": "WizardArrow",
-      "referenceNameEn": "WizardArrow"
+      "variantCount": 6
     },
     {
       "productCode": "BX-26",
@@ -1920,9 +1792,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Unicorn Sting",
-      "referenceNameEn": "Unicorn Sting"
+      "variantCount": 1
     },
     {
       "productCode": "BX-27-01",
@@ -1955,9 +1825,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "Sphinx Cowl",
-      "referenceNameEn": "Sphinx Cowl"
+      "variantCount": 3
     },
     {
       "productCode": "BX-27-02",
@@ -1990,9 +1858,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "Sphinx Cowl",
-      "referenceNameEn": "Sphinx Cowl"
+      "variantCount": 3
     },
     {
       "productCode": "BX-27-03",
@@ -2025,9 +1891,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "Sphinx Cowl",
-      "referenceNameEn": "Sphinx Cowl"
+      "variantCount": 3
     },
     {
       "productCode": "BX-31-01",
@@ -2060,9 +1924,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 6,
-      "displayNameEn": "TyrannoBeat",
-      "referenceNameEn": "TyrannoBeat"
+      "variantCount": 6
     },
     {
       "productCode": "BX-31-02",
@@ -2095,9 +1957,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 6,
-      "displayNameEn": "TyrannoBeat",
-      "referenceNameEn": "TyrannoBeat"
+      "variantCount": 6
     },
     {
       "productCode": "BX-31-03",
@@ -2130,9 +1990,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 6,
-      "displayNameEn": "HellsChain",
-      "referenceNameEn": "HellsChain"
+      "variantCount": 6
     },
     {
       "productCode": "BX-31-04",
@@ -2165,9 +2023,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 6,
-      "displayNameEn": "DranDagger",
-      "referenceNameEn": "DranDagger"
+      "variantCount": 6
     },
     {
       "productCode": "BX-31-05",
@@ -2200,9 +2056,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 5,
-      "variantCount": 6,
-      "displayNameEn": "SharkEdge",
-      "referenceNameEn": "SharkEdge"
+      "variantCount": 6
     },
     {
       "productCode": "BX-31-06",
@@ -2235,9 +2089,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 6,
-      "variantCount": 6,
-      "displayNameEn": "RhinoHorn",
-      "referenceNameEn": "RhinoHorn"
+      "variantCount": 6
     },
     {
       "productCode": "BX-33",
@@ -2270,9 +2122,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Weiss Tiger",
-      "referenceNameEn": "Weiss Tiger"
+      "variantCount": 1
     },
     {
       "productCode": "BX-34",
@@ -2305,9 +2155,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Cobalt Dragoon",
-      "referenceNameEn": "Cobalt Dragoon"
+      "variantCount": 1
     },
     {
       "productCode": "BX-35-01",
@@ -2340,9 +2188,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 6,
-      "displayNameEn": "Black Shell",
-      "referenceNameEn": "Black Shell"
+      "variantCount": 6
     },
     {
       "productCode": "BX-35-02",
@@ -2375,9 +2221,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 6,
-      "displayNameEn": "Black Shell",
-      "referenceNameEn": "Black Shell"
+      "variantCount": 6
     },
     {
       "productCode": "BX-35-03",
@@ -2410,9 +2254,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 6,
-      "displayNameEn": "Unicorn Sting",
-      "referenceNameEn": "Unicorn Sting"
+      "variantCount": 6
     },
     {
       "productCode": "BX-35-04",
@@ -2445,9 +2287,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 6,
-      "displayNameEn": "WizardRod",
-      "referenceNameEn": "WizardRod"
+      "variantCount": 6
     },
     {
       "productCode": "BX-35-05",
@@ -2480,9 +2320,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 5,
-      "variantCount": 6,
-      "displayNameEn": "PhoenixWing",
-      "referenceNameEn": "PhoenixWing"
+      "variantCount": 6
     },
     {
       "productCode": "BX-35-06",
@@ -2515,9 +2353,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 6,
-      "variantCount": 6,
-      "displayNameEn": "ViperTail",
-      "referenceNameEn": "ViperTail"
+      "variantCount": 6
     },
     {
       "productCode": "BX-36-01",
@@ -2550,9 +2386,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "WhaleWave",
-      "referenceNameEn": "WhaleWave"
+      "variantCount": 3
     },
     {
       "productCode": "BX-36-02",
@@ -2585,9 +2419,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "WhaleWave",
-      "referenceNameEn": "WhaleWave"
+      "variantCount": 3
     },
     {
       "productCode": "BX-36-03",
@@ -2620,9 +2452,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "WhaleWave",
-      "referenceNameEn": "WhaleWave"
+      "variantCount": 3
     },
     {
       "productCode": "BX-37",
@@ -2655,9 +2485,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "BearScratch",
-      "referenceNameEn": "BearScratch"
+      "variantCount": 1
     },
     {
       "productCode": "BX-39-01",
@@ -2690,9 +2518,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "Shelter Drake",
-      "referenceNameEn": "Shelter Drake"
+      "variantCount": 3
     },
     {
       "productCode": "BX-39-02",
@@ -2725,9 +2551,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "Shelter Drake",
-      "referenceNameEn": "Shelter Drake"
+      "variantCount": 3
     },
     {
       "productCode": "BX-39-03",
@@ -2760,9 +2584,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "Shelter Drake",
-      "referenceNameEn": "Shelter Drake"
+      "variantCount": 3
     },
     {
       "productCode": "BX-44",
@@ -2795,9 +2617,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "TriceraPress",
-      "referenceNameEn": "TriceraPress"
+      "variantCount": 1
     },
     {
       "productCode": "BX-45",
@@ -2830,9 +2650,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "SamuraiCalibur",
-      "referenceNameEn": "SamuraiCalibur"
+      "variantCount": 1
     },
     {
       "productCode": "BX-46-01",
@@ -2865,9 +2683,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "Cobalt Drake",
-      "referenceNameEn": "Cobalt Drake"
+      "variantCount": 2
     },
     {
       "productCode": "BX-46-02",
@@ -2900,9 +2716,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "GoatTackle",
-      "referenceNameEn": "GoatTackle"
+      "variantCount": 2
     },
     {
       "productCode": "BX-48-01",
@@ -2935,9 +2749,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 5,
-      "displayNameEn": "Cobalt Dragoon",
-      "referenceNameEn": "Cobalt Dragoon"
+      "variantCount": 5
     },
     {
       "productCode": "BX-48-02",
@@ -2970,9 +2782,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 5,
-      "displayNameEn": "SharkEdge",
-      "referenceNameEn": "SharkEdge"
+      "variantCount": 5
     },
     {
       "productCode": "BX-48-03",
@@ -3005,9 +2815,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 5,
-      "displayNameEn": "Mammoth Tusk",
-      "referenceNameEn": "Mammoth Tusk"
+      "variantCount": 5
     },
     {
       "productCode": "BX-48-04",
@@ -3040,9 +2848,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 5,
-      "displayNameEn": "HellsScythe",
-      "referenceNameEn": "HellsScythe"
+      "variantCount": 5
     },
     {
       "productCode": "BX-48-05",
@@ -3075,9 +2881,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 5,
-      "variantCount": 5,
-      "displayNameEn": "DranBuster",
-      "referenceNameEn": "DranBuster"
+      "variantCount": 5
     },
     {
       "productCode": "BX-49",
@@ -3110,9 +2914,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "DranStrike",
-      "referenceNameEn": "DranStrike"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-01",
@@ -3145,9 +2947,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Dranzer Spiral",
-      "referenceNameEn": "Dranzer Spiral"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-04",
@@ -3180,9 +2980,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Driger Slash",
-      "referenceNameEn": "Driger Slash"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-07",
@@ -3215,9 +3013,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Lightning L-Drago",
-      "referenceNameEn": "Lightning L-Drago"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-09",
@@ -3250,9 +3046,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Cobalt Dragoon",
-      "referenceNameEn": "Cobalt Dragoon"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-11",
@@ -3285,9 +3079,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Draciel Shield",
-      "referenceNameEn": "Draciel Shield"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-12-01",
@@ -3320,9 +3112,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 4,
-      "displayNameEn": "Dragoon Storm",
-      "referenceNameEn": "Dragoon Storm"
+      "variantCount": 4
     },
     {
       "productCode": "BXG-12-02",
@@ -3355,9 +3145,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 4,
-      "displayNameEn": "Storm Pegasis",
-      "referenceNameEn": "Storm Pegasis"
+      "variantCount": 4
     },
     {
       "productCode": "BXG-12-03",
@@ -3390,9 +3178,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 4,
-      "displayNameEn": "Soar Phoenix",
-      "referenceNameEn": "Soar Phoenix"
+      "variantCount": 4
     },
     {
       "productCode": "BXG-12-04",
@@ -3425,9 +3211,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 4,
-      "displayNameEn": "DranSword",
-      "referenceNameEn": "DranSword"
+      "variantCount": 4
     },
     {
       "productCode": "BXG-13",
@@ -3460,9 +3244,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Xeno Xcalibur",
-      "referenceNameEn": "Xeno Xcalibur"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-14",
@@ -3495,9 +3277,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "DranDagger",
-      "referenceNameEn": "DranDagger"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-15",
@@ -3530,9 +3310,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Dranzer Spiral",
-      "referenceNameEn": "Dranzer Spiral"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-16",
@@ -3565,9 +3343,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "ShinobiKnife",
-      "referenceNameEn": "ShinobiKnife"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-20",
@@ -3600,9 +3376,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Rock Leone",
-      "referenceNameEn": "Rock Leone"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-21",
@@ -3635,9 +3409,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Storm Spriggan",
-      "referenceNameEn": "Storm Spriggan"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-22",
@@ -3670,9 +3442,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Dragoon Storm",
-      "referenceNameEn": "Dragoon Storm"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-24",
@@ -3705,9 +3475,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Aero Pegasus",
-      "referenceNameEn": "Aero Pegasus"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-29-01",
@@ -3740,9 +3508,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "Spiderman",
-      "referenceNameEn": "Spiderman"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-29-02",
@@ -3775,9 +3541,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "Venom",
-      "referenceNameEn": "Venom"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-30-01",
@@ -3810,9 +3574,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "Ironman",
-      "referenceNameEn": "Ironman"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-30-02",
@@ -3845,9 +3607,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "Thanos",
-      "referenceNameEn": "Thanos"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-32",
@@ -3880,9 +3640,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Mammoth Tusk",
-      "referenceNameEn": "Mammoth Tusk"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-33-01",
@@ -3915,9 +3673,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "Luke Skywalker",
-      "referenceNameEn": "Luke Skywalker"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-33-02",
@@ -3950,9 +3706,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "Darth Vader",
-      "referenceNameEn": "Darth Vader"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-34-01",
@@ -3985,9 +3739,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "The Mandalorian",
-      "referenceNameEn": "The Mandalorian"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-34-02",
@@ -4020,9 +3772,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "Moff Gideon",
-      "referenceNameEn": "Moff Gideon"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-36-01",
@@ -4055,9 +3805,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "Optimus Prime",
-      "referenceNameEn": "Optimus Prime"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-36-02",
@@ -4090,9 +3838,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "Megatron",
-      "referenceNameEn": "Megatron"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-37-01",
@@ -4125,9 +3871,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "Optimus Primal",
-      "referenceNameEn": "Optimus Primal"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-37-02",
@@ -4160,9 +3904,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "Starscream",
-      "referenceNameEn": "Starscream"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-38",
@@ -4196,9 +3938,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Leon Fang",
-      "referenceNameEn": "Leon Fang"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-40-01",
@@ -4231,9 +3971,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "T-Rex",
-      "referenceNameEn": "T-Rex"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-40-02",
@@ -4266,9 +4004,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "Mosasaurus",
-      "referenceNameEn": "Mosasaurus"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-41-01",
@@ -4301,9 +4037,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "Ptera Swing",
-      "referenceNameEn": "Ptera Swing"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-41-02",
@@ -4336,9 +4070,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "Spinosaurus",
-      "referenceNameEn": "Spinosaurus"
+      "variantCount": 2
     },
     {
       "productCode": "BXG-42",
@@ -4371,9 +4103,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "KnightMail",
-      "referenceNameEn": "KnightMail"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-43",
@@ -4407,9 +4137,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Wizard Arc",
-      "referenceNameEn": "Wizard Arc"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-45",
@@ -4444,9 +4172,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Pegasus Blast",
-      "referenceNameEn": "Pegasus Blast"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-51",
@@ -4480,9 +4206,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Dran Brave",
-      "referenceNameEn": "Dran Brave"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-52",
@@ -4515,9 +4239,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "DranSword",
-      "referenceNameEn": "DranSword"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-53",
@@ -4550,9 +4272,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Cobalt Dragoon",
-      "referenceNameEn": "Cobalt Dragoon"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-54",
@@ -4588,9 +4308,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "SamuraiSaber",
-      "referenceNameEn": "SamuraiSaber"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-55",
@@ -4623,9 +4341,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "SharkEdge",
-      "referenceNameEn": "SharkEdge"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-56",
@@ -4658,9 +4374,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "WhaleWave",
-      "referenceNameEn": "WhaleWave"
+      "variantCount": 1
     },
     {
       "productCode": "BXG-57-01",
@@ -4694,9 +4408,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "EVA Arc",
-      "referenceNameEn": "EVA Arc"
+      "variantCount": 3
     },
     {
       "productCode": "BXG-57-02",
@@ -4730,9 +4442,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "EVA Brave",
-      "referenceNameEn": "EVA Brave"
+      "variantCount": 3
     },
     {
       "productCode": "BXG-57-03",
@@ -4766,9 +4476,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "EVA Brush",
-      "referenceNameEn": "EVA Brush"
+      "variantCount": 3
     },
     {
       "productCode": "BXG-61",
@@ -4801,9 +4509,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "ScorpioSpear",
-      "referenceNameEn": "ScorpioSpear"
+      "variantCount": 1
     },
     {
       "productCode": "BXH-10",
@@ -4836,9 +4542,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Aero Pegasus",
-      "referenceNameEn": "Aero Pegasus"
+      "variantCount": 1
     },
     {
       "productCode": "BXH-14",
@@ -4872,9 +4576,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Valkyrie Volt",
-      "referenceNameEn": "Valkyrie Volt"
+      "variantCount": 1
     },
     {
       "productCode": "CX-01",
@@ -4908,9 +4610,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Dran Brave",
-      "referenceNameEn": "Dran Brave"
+      "variantCount": 1
     },
     {
       "productCode": "CX-02",
@@ -4944,9 +4644,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Wizard Arc",
-      "referenceNameEn": "Wizard Arc"
+      "variantCount": 1
     },
     {
       "productCode": "CX-03",
@@ -4980,9 +4678,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Perseus Dark",
-      "referenceNameEn": "Perseus Dark"
+      "variantCount": 1
     },
     {
       "productCode": "CX-04-01",
@@ -5016,9 +4712,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "Dran Brave",
-      "referenceNameEn": "Dran Brave"
+      "variantCount": 2
     },
     {
       "productCode": "CX-04-02",
@@ -5052,9 +4746,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "Perseus Dark",
-      "referenceNameEn": "Perseus Dark"
+      "variantCount": 2
     },
     {
       "productCode": "CX-05-01",
@@ -5088,9 +4780,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 6,
-      "displayNameEn": "Hells Reaper",
-      "referenceNameEn": "Hells Reaper"
+      "variantCount": 6
     },
     {
       "productCode": "CX-05-02",
@@ -5124,9 +4814,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 6,
-      "displayNameEn": "Rhino Reaper",
-      "referenceNameEn": "Rhino Reaper"
+      "variantCount": 6
     },
     {
       "productCode": "CX-05-03",
@@ -5160,9 +4848,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 6,
-      "displayNameEn": "Hells Arc",
-      "referenceNameEn": "Hells Arc"
+      "variantCount": 6
     },
     {
       "productCode": "CX-05-04",
@@ -5195,9 +4881,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 6,
-      "displayNameEn": "LeonCrest",
-      "referenceNameEn": "LeonCrest"
+      "variantCount": 6
     },
     {
       "productCode": "CX-05-05",
@@ -5230,9 +4914,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 5,
-      "variantCount": 6,
-      "displayNameEn": "PhoenixRudder",
-      "referenceNameEn": "PhoenixRudder"
+      "variantCount": 6
     },
     {
       "productCode": "CX-05-06",
@@ -5265,9 +4947,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 6,
-      "variantCount": 6,
-      "displayNameEn": "WhaleWave",
-      "referenceNameEn": "WhaleWave"
+      "variantCount": 6
     },
     {
       "productCode": "CX-06-01",
@@ -5301,9 +4981,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "Fox Brush",
-      "referenceNameEn": "Fox Brush"
+      "variantCount": 3
     },
     {
       "productCode": "CX-06-02",
@@ -5337,9 +5015,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "Fox Brush",
-      "referenceNameEn": "Fox Brush"
+      "variantCount": 3
     },
     {
       "productCode": "CX-06-03",
@@ -5373,9 +5049,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "Fox Brush",
-      "referenceNameEn": "Fox Brush"
+      "variantCount": 3
     },
     {
       "productCode": "CX-07",
@@ -5410,9 +5084,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Pegasus Blast",
-      "referenceNameEn": "Pegasus Blast"
+      "variantCount": 1
     },
     {
       "productCode": "CX-08-01",
@@ -5446,9 +5118,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 6,
-      "displayNameEn": "Cerberus Flame",
-      "referenceNameEn": "Cerberus Flame"
+      "variantCount": 6
     },
     {
       "productCode": "CX-08-02",
@@ -5482,9 +5152,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 6,
-      "displayNameEn": "Whale Flame",
-      "referenceNameEn": "Whale Flame"
+      "variantCount": 6
     },
     {
       "productCode": "CX-08-03",
@@ -5518,9 +5186,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 6,
-      "displayNameEn": "Cerberus Dark",
-      "referenceNameEn": "Cerberus Dark"
+      "variantCount": 6
     },
     {
       "productCode": "CX-08-04",
@@ -5553,9 +5219,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 6,
-      "displayNameEn": "DranBuster",
-      "referenceNameEn": "DranBuster"
+      "variantCount": 6
     },
     {
       "productCode": "CX-08-05",
@@ -5588,9 +5252,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 5,
-      "variantCount": 6,
-      "displayNameEn": "Black Shell",
-      "referenceNameEn": "Black Shell"
+      "variantCount": 6
     },
     {
       "productCode": "CX-08-06",
@@ -5623,9 +5285,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 6,
-      "variantCount": 6,
-      "displayNameEn": "Cobalt Dragoon",
-      "referenceNameEn": "Cobalt Dragoon"
+      "variantCount": 6
     },
     {
       "productCode": "CX-09",
@@ -5659,9 +5319,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Sol Eclipse",
-      "referenceNameEn": "Sol Eclipse"
+      "variantCount": 1
     },
     {
       "productCode": "CX-10",
@@ -5695,9 +5353,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Wolf Hunt",
-      "referenceNameEn": "Wolf Hunt"
+      "variantCount": 1
     },
     {
       "productCode": "CX-11-01",
@@ -5732,9 +5388,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "Emperor Might",
-      "referenceNameEn": "Emperor Might"
+      "variantCount": 3
     },
     {
       "productCode": "CX-11-02",
@@ -5767,9 +5421,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "GolemRock",
-      "referenceNameEn": "GolemRock"
+      "variantCount": 3
     },
     {
       "productCode": "CX-11-03",
@@ -5802,9 +5454,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "SharkGill",
-      "referenceNameEn": "SharkGill"
+      "variantCount": 3
     },
     {
       "productCode": "CX-12",
@@ -5838,9 +5488,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Phoenix Flare",
-      "referenceNameEn": "Phoenix Flare"
+      "variantCount": 1
     },
     {
       "productCode": "CX-13",
@@ -5874,9 +5522,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Bahamut Blitz",
-      "referenceNameEn": "Bahamut Blitz"
+      "variantCount": 1
     },
     {
       "productCode": "CX-14",
@@ -5910,9 +5556,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Knight Fortress",
-      "referenceNameEn": "Knight Fortress"
+      "variantCount": 1
     },
     {
       "productCode": "CX-15",
@@ -5946,9 +5590,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Ragna Rage",
-      "referenceNameEn": "Ragna Rage"
+      "variantCount": 1
     },
     {
       "productCode": "CX-16",
@@ -5982,9 +5624,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Bahamut Blitz",
-      "referenceNameEn": "Bahamut Blitz"
+      "variantCount": 1
     },
     {
       "productCode": "CX-17-01",
@@ -6018,9 +5658,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 6,
-      "displayNameEn": "Unicorn Delta",
-      "referenceNameEn": "Unicorn Delta"
+      "variantCount": 6
     },
     {
       "productCode": "CX-17-02",
@@ -6054,9 +5692,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 6,
-      "displayNameEn": "Unicorn Delta",
-      "referenceNameEn": "Unicorn Delta"
+      "variantCount": 6
     },
     {
       "productCode": "CX-17-03",
@@ -6089,9 +5725,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 6,
-      "displayNameEn": "SamuraiSaber",
-      "referenceNameEn": "SamuraiSaber"
+      "variantCount": 6
     },
     {
       "productCode": "CX-17-04",
@@ -6124,9 +5758,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 6,
-      "displayNameEn": "HellsHammer",
-      "referenceNameEn": "HellsHammer"
+      "variantCount": 6
     },
     {
       "productCode": "CX-17-05",
@@ -6159,9 +5791,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 5,
-      "variantCount": 6,
-      "displayNameEn": "TyrannoBeat",
-      "referenceNameEn": "TyrannoBeat"
+      "variantCount": 6
     },
     {
       "productCode": "CX-17-06",
@@ -6194,9 +5824,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 6,
-      "variantCount": 6,
-      "displayNameEn": "Crimson Garuda",
-      "referenceNameEn": "Crimson Garuda"
+      "variantCount": 6
     },
     {
       "productCode": "CX-18-01",
@@ -6230,9 +5858,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "Brachio Whip",
-      "referenceNameEn": "Brachio Whip"
+      "variantCount": 3
     },
     {
       "productCode": "CX-18-02",
@@ -6266,9 +5892,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "Brachio Whip",
-      "referenceNameEn": "Brachio Whip"
+      "variantCount": 3
     },
     {
       "productCode": "CX-18-03",
@@ -6302,9 +5926,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "Brachio Whip",
-      "referenceNameEn": "Brachio Whip"
+      "variantCount": 3
     },
     {
       "productCode": "UX-00",
@@ -6337,9 +5959,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "DranBuster",
-      "referenceNameEn": "DranBuster"
+      "variantCount": 1
     },
     {
       "productCode": "UX-01",
@@ -6372,9 +5992,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "DranBuster",
-      "referenceNameEn": "DranBuster"
+      "variantCount": 1
     },
     {
       "productCode": "UX-02",
@@ -6407,9 +6025,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "HellsHammer",
-      "referenceNameEn": "HellsHammer"
+      "variantCount": 1
     },
     {
       "productCode": "UX-03",
@@ -6442,9 +6058,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "WizardRod",
-      "referenceNameEn": "WizardRod"
+      "variantCount": 1
     },
     {
       "productCode": "UX-04-01",
@@ -6477,9 +6091,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 2,
-      "displayNameEn": "DranBuster",
-      "referenceNameEn": "DranBuster"
+      "variantCount": 2
     },
     {
       "productCode": "UX-04-02",
@@ -6512,9 +6124,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 2,
-      "displayNameEn": "WizardRod",
-      "referenceNameEn": "WizardRod"
+      "variantCount": 2
     },
     {
       "productCode": "UX-05-01",
@@ -6547,9 +6157,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "ShinobiShadow",
-      "referenceNameEn": "ShinobiShadow"
+      "variantCount": 3
     },
     {
       "productCode": "UX-05-02",
@@ -6582,9 +6190,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "ShinobiShadow",
-      "referenceNameEn": "ShinobiShadow"
+      "variantCount": 3
     },
     {
       "productCode": "UX-05-03",
@@ -6617,9 +6223,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "ShinobiShadow",
-      "referenceNameEn": "ShinobiShadow"
+      "variantCount": 3
     },
     {
       "productCode": "UX-06",
@@ -6652,9 +6256,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "LeonCrest",
-      "referenceNameEn": "LeonCrest"
+      "variantCount": 1
     },
     {
       "productCode": "UX-07-01",
@@ -6687,9 +6289,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "PhoenixRudder",
-      "referenceNameEn": "PhoenixRudder"
+      "variantCount": 3
     },
     {
       "productCode": "UX-07-02",
@@ -6722,9 +6322,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "WyvernGale",
-      "referenceNameEn": "WyvernGale"
+      "variantCount": 3
     },
     {
       "productCode": "UX-07-03",
@@ -6757,9 +6355,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "Sphinx Cowl",
-      "referenceNameEn": "Sphinx Cowl"
+      "variantCount": 3
     },
     {
       "productCode": "UX-08",
@@ -6792,9 +6388,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Silver Wolf",
-      "referenceNameEn": "Silver Wolf"
+      "variantCount": 1
     },
     {
       "productCode": "UX-09",
@@ -6827,9 +6421,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "SamuraiSaber",
-      "referenceNameEn": "SamuraiSaber"
+      "variantCount": 1
     },
     {
       "productCode": "UX-10-01",
@@ -6862,9 +6454,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "KnightMail",
-      "referenceNameEn": "KnightMail"
+      "variantCount": 3
     },
     {
       "productCode": "UX-10-02",
@@ -6897,9 +6487,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "TyrannoBeat",
-      "referenceNameEn": "TyrannoBeat"
+      "variantCount": 3
     },
     {
       "productCode": "UX-10-03",
@@ -6934,9 +6522,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "PteraSwing",
-      "referenceNameEn": "PteraSwing"
+      "variantCount": 3
     },
     {
       "productCode": "UX-11",
@@ -6969,9 +6555,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Impact Drake",
-      "referenceNameEn": "Impact Drake"
+      "variantCount": 1
     },
     {
       "productCode": "UX-12-01",
@@ -7004,9 +6588,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 6,
-      "displayNameEn": "GhostCircle",
-      "referenceNameEn": "GhostCircle"
+      "variantCount": 6
     },
     {
       "productCode": "UX-12-02",
@@ -7039,9 +6621,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 6,
-      "displayNameEn": "GhostCircle",
-      "referenceNameEn": "GhostCircle"
+      "variantCount": 6
     },
     {
       "productCode": "UX-12-03",
@@ -7074,9 +6654,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 6,
-      "displayNameEn": "ShinobiShadow",
-      "referenceNameEn": "ShinobiShadow"
+      "variantCount": 6
     },
     {
       "productCode": "UX-12-04",
@@ -7109,9 +6687,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 6,
-      "displayNameEn": "LeonClaw",
-      "referenceNameEn": "LeonClaw"
+      "variantCount": 6
     },
     {
       "productCode": "UX-12-05",
@@ -7144,9 +6720,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 5,
-      "variantCount": 6,
-      "displayNameEn": "PhoenixFeather",
-      "referenceNameEn": "PhoenixFeather"
+      "variantCount": 6
     },
     {
       "productCode": "UX-12-06",
@@ -7179,9 +6753,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 6,
-      "variantCount": 6,
-      "displayNameEn": "WyvernGale",
-      "referenceNameEn": "WyvernGale"
+      "variantCount": 6
     },
     {
       "productCode": "UX-13",
@@ -7214,9 +6786,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "GolemRock",
-      "referenceNameEn": "GolemRock"
+      "variantCount": 1
     },
     {
       "productCode": "UX-14",
@@ -7249,9 +6819,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "ScorpioSpear",
-      "referenceNameEn": "ScorpioSpear"
+      "variantCount": 1
     },
     {
       "productCode": "UX-15-01",
@@ -7284,9 +6852,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "SharkScale",
-      "referenceNameEn": "SharkScale"
+      "variantCount": 3
     },
     {
       "productCode": "UX-15-02",
@@ -7319,9 +6885,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "TyrannoRoar",
-      "referenceNameEn": "TyrannoRoar"
+      "variantCount": 3
     },
     {
       "productCode": "UX-15-03",
@@ -7355,9 +6919,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "Hells Brave",
-      "referenceNameEn": "Hells Brave"
+      "variantCount": 3
     },
     {
       "productCode": "UX-16-01",
@@ -7390,9 +6952,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 3,
-      "displayNameEn": "ClockMirage",
-      "referenceNameEn": "ClockMirage"
+      "variantCount": 3
     },
     {
       "productCode": "UX-16-02",
@@ -7425,9 +6985,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 3,
-      "displayNameEn": "ClockMirage",
-      "referenceNameEn": "ClockMirage"
+      "variantCount": 3
     },
     {
       "productCode": "UX-16-03",
@@ -7460,9 +7018,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 3,
-      "displayNameEn": "ClockMirage",
-      "referenceNameEn": "ClockMirage"
+      "variantCount": 3
     },
     {
       "productCode": "UX-17",
@@ -7495,9 +7051,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Meteor Dragoon",
-      "referenceNameEn": "Meteor Dragoon"
+      "variantCount": 1
     },
     {
       "productCode": "UX-18-01",
@@ -7530,9 +7084,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 6,
-      "displayNameEn": "MummyCurse",
-      "referenceNameEn": "MummyCurse"
+      "variantCount": 6
     },
     {
       "productCode": "UX-18-02",
@@ -7565,9 +7117,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 6,
-      "displayNameEn": "MummyCurse",
-      "referenceNameEn": "MummyCurse"
+      "variantCount": 6
     },
     {
       "productCode": "UX-18-03",
@@ -7601,9 +7151,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 6,
-      "displayNameEn": "Pegasus Brush",
-      "referenceNameEn": "Pegasus Brush"
+      "variantCount": 6
     },
     {
       "productCode": "UX-18-04",
@@ -7637,9 +7185,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 6,
-      "displayNameEn": "Sol Brave",
-      "referenceNameEn": "Sol Brave"
+      "variantCount": 6
     },
     {
       "productCode": "UX-18-05",
@@ -7672,9 +7218,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 5,
-      "variantCount": 6,
-      "displayNameEn": "DranDagger",
-      "referenceNameEn": "DranDagger"
+      "variantCount": 6
     },
     {
       "productCode": "UX-18-06",
@@ -7707,9 +7251,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 6,
-      "variantCount": 6,
-      "displayNameEn": "Weiss Tiger",
-      "referenceNameEn": "Weiss Tiger"
+      "variantCount": 6
     },
     {
       "productCode": "UX-19",
@@ -7744,9 +7286,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Bullet Griffon",
-      "referenceNameEn": "Bullet Griffon"
+      "variantCount": 1
     },
     {
       "productCode": "UX-20",
@@ -7783,9 +7323,7 @@
       "lookupMode": "exact_single",
       "variantSelectable": false,
       "variantIndex": null,
-      "variantCount": 1,
-      "displayNameEn": "Glory Valkyrie",
-      "referenceNameEn": "Glory Valkyrie"
+      "variantCount": 1
     },
     {
       "productCode": "UX-21",
@@ -7832,9 +7370,7 @@
       "sourceType": "official",
       "sourcePublisher": "TAKARA TOMY",
       "sourceCheckedAt": "2026-07-29",
-      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/ux21.html",
-      "displayNameEn": "Hells Nether",
-      "referenceNameEn": "Hells Nether"
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/ux21.html"
     },
     {
       "productCode": "UX-21",
@@ -7879,9 +7415,7 @@
       "sourceType": "official",
       "sourcePublisher": "TAKARA TOMY",
       "sourceCheckedAt": "2026-07-29",
-      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/ux21.html",
-      "displayNameEn": "Silver Wolf",
-      "referenceNameEn": "Silver Wolf"
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/ux21.html"
     },
     {
       "productCode": "UX-21",
@@ -7926,9 +7460,7 @@
       "sourceType": "official",
       "sourcePublisher": "TAKARA TOMY",
       "sourceCheckedAt": "2026-07-29",
-      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/ux21.html",
-      "displayNameEn": "WyvernGale",
-      "referenceNameEn": "WyvernGale"
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/ux21.html"
     },
     {
       "productCode": "CX-00",
@@ -7980,9 +7512,7 @@
       "compositionSource": "至尊/B",
       "selectionRequired": true,
       "selectionGroupCode": "CX-00",
-      "selectionLabel": "EVA至尊 0-70 E",
-      "displayNameEn": "EVA Arc",
-      "referenceNameEn": "EVA Arc"
+      "selectionLabel": "EVA至尊 0-70 E"
     },
     {
       "productCode": "CX-00",
@@ -8034,9 +7564,7 @@
       "compositionSource": "勇氣/A",
       "selectionRequired": true,
       "selectionGroupCode": "CX-00",
-      "selectionLabel": "EVA勇氣 1-70 V",
-      "displayNameEn": "EVA Brave",
-      "referenceNameEn": "EVA Brave"
+      "selectionLabel": "EVA勇氣 1-70 V"
     },
     {
       "productCode": "CX-00",
@@ -8088,9 +7616,7 @@
       "compositionSource": "鞭擊/T",
       "selectionRequired": true,
       "selectionGroupCode": "CX-00",
-      "selectionLabel": "EVA鞭擊 2-70 A",
-      "displayNameEn": "EVA Whip",
-      "referenceNameEn": "EVA Whip"
+      "selectionLabel": "EVA鞭擊 2-70 A"
     },
     {
       "productCode": "CX-00",
@@ -8139,9 +7665,7 @@
       "ambiguousCode": true,
       "selectionRequired": true,
       "selectionGroupCode": "CX-00",
-      "selectionLabel": "迪迦狂怒 3-60 T",
-      "displayNameEn": "Tiga Rage",
-      "referenceNameEn": "Tiga Rage"
+      "selectionLabel": "迪迦狂怒 3-60 T"
     },
     {
       "productCode": "BX-50-01",
@@ -8179,9 +7703,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 1,
-      "variantCount": 6,
-      "displayNameEn": "Heaven's Ring",
-      "referenceNameEn": "Heaven's Ring"
+      "variantCount": 6
     },
     {
       "productCode": "BX-50-02",
@@ -8219,9 +7741,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 2,
-      "variantCount": 6,
-      "displayNameEn": "Heaven's Ring",
-      "referenceNameEn": "Heaven's Ring"
+      "variantCount": 6
     },
     {
       "productCode": "BX-50-03",
@@ -8259,9 +7779,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 3,
-      "variantCount": 6,
-      "displayNameEn": "Impact Drake",
-      "referenceNameEn": "Impact Drake"
+      "variantCount": 6
     },
     {
       "productCode": "BX-50-04",
@@ -8299,9 +7817,7 @@
       "lookupMode": "base_variant",
       "variantSelectable": true,
       "variantIndex": 4,
-      "variantCount": 6,
-      "displayNameEn": "GhostCircle",
-      "referenceNameEn": "GhostCircle"
+      "variantCount": 6
     },
     {
       "productCode": "BX-50-05",
@@ -8340,9 +7856,7 @@
       "variantSelectable": true,
       "variantIndex": 5,
       "variantCount": 6,
-      "compositionSource": "烈焰/D",
-      "displayNameEn": "Wolf Flame",
-      "referenceNameEn": "Wolf Flame"
+      "compositionSource": "烈焰/D"
     },
     {
       "productCode": "BX-50-06",
@@ -8381,9 +7895,7 @@
       "variantSelectable": true,
       "variantIndex": 6,
       "variantCount": 6,
-      "compositionSource": "獵魂/B",
-      "displayNameEn": "Cerberus Reaper",
-      "referenceNameEn": "Cerberus Reaper"
+      "compositionSource": "獵魂/B"
     },
     {
       "productCode": "BX-00",
@@ -8428,9 +7940,7 @@
       "ambiguousCode": true,
       "selectionRequired": true,
       "selectionGroupCode": "BX-00",
-      "selectionLabel": "暴風天馬 3-70 RA",
-      "displayNameEn": "Storm Pegasis",
-      "referenceNameEn": "Storm Pegasis"
+      "selectionLabel": "暴風天馬 3-70 RA"
     },
     {
       "productCode": "CX-00",
@@ -8476,9 +7986,7 @@
       "ambiguousCode": true,
       "selectionRequired": true,
       "selectionGroupCode": "CX-00",
-      "selectionLabel": "雄鹿鹿角 2-60 D",
-      "displayNameEn": "Bucks Antlers",
-      "referenceNameEn": "Bucks Antlers"
+      "selectionLabel": "雄鹿鹿角 2-60 D"
     },
     {
       "productCode": "CX-00",
@@ -8524,9 +8032,7 @@
       "ambiguousCode": true,
       "selectionRequired": true,
       "selectionGroupCode": "CX-00",
-      "selectionLabel": "黃蜂要塞 7-60 T",
-      "displayNameEn": "Hornet Fort",
-      "referenceNameEn": "Hornet Fort"
+      "selectionLabel": "黃蜂要塞 7-60 T"
     },
     {
       "productCode": "CX-00",
@@ -8572,9 +8078,7 @@
       "ambiguousCode": true,
       "selectionRequired": true,
       "selectionGroupCode": "CX-00",
-      "selectionLabel": "龍神勇氣 4-70 I",
-      "displayNameEn": "Drake Brave",
-      "referenceNameEn": "Drake Brave"
+      "selectionLabel": "龍神勇氣 4-70 I"
     },
     {
       "productCode": "CX-00",
@@ -8620,9 +8124,142 @@
       "ambiguousCode": true,
       "selectionRequired": true,
       "selectionGroupCode": "CX-00",
-      "selectionLabel": "海怪妞擺 3-70 O",
-      "displayNameEn": "Kraken Riggle",
-      "referenceNameEn": "Kraken Riggle"
+      "selectionLabel": "海怪妞擺 3-70 O"
+    },
+    {
+      "productCode": "CX-19-01",
+      "officialProductCode": "CX-19",
+      "displayNameZh": "巨鱷碾壓",
+      "series": "CX",
+      "assemblySystem": "CX_4P",
+      "ratchetMode": "standard",
+      "autoFillEnabled": true,
+      "needsReview": false,
+      "sourceLine": null,
+      "parts": {
+        "blade": null,
+        "lockChip": "巨鱷",
+        "mainBlade": null,
+        "metalBlade": "碾壓",
+        "overBlade": "T",
+        "assistBlade": "Q",
+        "ratchet": "5-50",
+        "bit": "GN"
+      },
+      "compositionSource": "T/碾壓/Q",
+      "recordId": "CX-19-01",
+      "isSetProduct": false,
+      "confirmationStatus": "user_confirmed_official",
+      "confirmationDate": "2026-09-20",
+      "canonicalProductCode": "CX-19-01",
+      "exactKey": "CX1901",
+      "baseProductCode": "CX-19",
+      "baseKey": "CX19",
+      "hasChildNumber": true,
+      "childNumber": "01",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 1,
+      "variantCount": 3,
+      "sourceType": "official",
+      "sourcePublisher": "TAKARA TOMY",
+      "sourceCheckedAt": "2026-09-20",
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx19.html",
+      "notes": [
+        "TQ 為 T（超越戰刃）＋碾壓（鋼鐵戰刃）＋Q（輔助戰刃）的四層 CX 結構。",
+        "隨機強化組共有三種顏色，原裝配置相同，以 recordId 區分候選。"
+      ]
+    },
+    {
+      "productCode": "CX-19-02",
+      "officialProductCode": "CX-19",
+      "displayNameZh": "巨鱷碾壓",
+      "series": "CX",
+      "assemblySystem": "CX_4P",
+      "ratchetMode": "standard",
+      "autoFillEnabled": true,
+      "needsReview": false,
+      "sourceLine": null,
+      "parts": {
+        "blade": null,
+        "lockChip": "巨鱷",
+        "mainBlade": null,
+        "metalBlade": "碾壓",
+        "overBlade": "T",
+        "assistBlade": "Q",
+        "ratchet": "5-50",
+        "bit": "GN"
+      },
+      "compositionSource": "T/碾壓/Q",
+      "recordId": "CX-19-02",
+      "isSetProduct": false,
+      "confirmationStatus": "user_confirmed_official",
+      "confirmationDate": "2026-09-20",
+      "canonicalProductCode": "CX-19-02",
+      "exactKey": "CX1902",
+      "baseProductCode": "CX-19",
+      "baseKey": "CX19",
+      "hasChildNumber": true,
+      "childNumber": "02",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 2,
+      "variantCount": 3,
+      "sourceType": "official",
+      "sourcePublisher": "TAKARA TOMY",
+      "sourceCheckedAt": "2026-09-20",
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx19.html",
+      "notes": [
+        "TQ 為 T（超越戰刃）＋碾壓（鋼鐵戰刃）＋Q（輔助戰刃）的四層 CX 結構。",
+        "隨機強化組共有三種顏色，原裝配置相同，以 recordId 區分候選。"
+      ]
+    },
+    {
+      "productCode": "CX-19-03",
+      "officialProductCode": "CX-19",
+      "displayNameZh": "巨鱷碾壓",
+      "series": "CX",
+      "assemblySystem": "CX_4P",
+      "ratchetMode": "standard",
+      "autoFillEnabled": true,
+      "needsReview": false,
+      "sourceLine": null,
+      "parts": {
+        "blade": null,
+        "lockChip": "巨鱷",
+        "mainBlade": null,
+        "metalBlade": "碾壓",
+        "overBlade": "T",
+        "assistBlade": "Q",
+        "ratchet": "5-50",
+        "bit": "GN"
+      },
+      "compositionSource": "T/碾壓/Q",
+      "recordId": "CX-19-03",
+      "isSetProduct": false,
+      "confirmationStatus": "user_confirmed_official",
+      "confirmationDate": "2026-09-20",
+      "canonicalProductCode": "CX-19-03",
+      "exactKey": "CX1903",
+      "baseProductCode": "CX-19",
+      "baseKey": "CX19",
+      "hasChildNumber": true,
+      "childNumber": "03",
+      "codeParsingStatus": "parsed",
+      "lookupMode": "base_variant",
+      "variantSelectable": true,
+      "variantIndex": 3,
+      "variantCount": 3,
+      "sourceType": "official",
+      "sourcePublisher": "TAKARA TOMY",
+      "sourceCheckedAt": "2026-09-20",
+      "sourceUrl": "https://beyblade.takaratomy.co.jp/beyblade-x/lineup/cx19.html",
+      "notes": [
+        "TQ 為 T（超越戰刃）＋碾壓（鋼鐵戰刃）＋Q（輔助戰刃）的四層 CX 結構。",
+        "隨機強化組共有三種顏色，原裝配置相同，以 recordId 區分候選。"
+      ]
     }
   ],
   "stockProductSets": [
@@ -9429,6 +9066,15 @@
       ],
       "BX5006": [
         "BX-50-06"
+      ],
+      "CX1901": [
+        "CX-19-01"
+      ],
+      "CX1902": [
+        "CX-19-02"
+      ],
+      "CX1903": [
+        "CX-19-03"
       ]
     },
     "variantsByBaseCode": {
@@ -9673,6 +9319,11 @@
         "BX-50-04",
         "BX-50-05",
         "BX-50-06"
+      ],
+      "CX19": [
+        "CX-19-01",
+        "CX-19-02",
+        "CX-19-03"
       ]
     }
   }

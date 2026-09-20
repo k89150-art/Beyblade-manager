@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+import { attachCatalogNames, getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel } from "./stock-catalog-names.js";
 
 import {
   getAuth,
@@ -45,7 +46,8 @@ let hasPendingCloudSave = false;
 let lastLocalWriteUpdatedAt = 0;
 let lastAppliedRemoteUpdatedAt = 0;
 
-const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260829-namecatalog2";
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260920-cx19";
+const STOCK_NAMES_URL = "beyblade_x_model_chinese_english_2026-08-29.json?v=20260920-cx19";
 let stockInputMode = "auto";
 let stockProductsLoadPromise = null;
 let stockProductsLoaded = false;
@@ -2159,7 +2161,10 @@ function updateResponsiveTableCells() {
         row.classList.toggle("has-collection-part-badges", cardParts.length > 0);
         row.classList.toggle("has-collection-part-groups", isCxCollectionCard && cardParts.length > 0);
         if (cells[0]) {
-          cells[0].dataset.cardTitle = [model, titleLayer].filter(hasValue).join(" ") || model;
+          const product = stockProductsByRecordId.get(row.dataset.stockRecordId);
+          cells[0].dataset.cardTitle = product && getOfficialStockCode(product) === "CX-19"
+            ? `${getStockCatalogLabel(product)}${getStockVariantLabel(product)}`
+            : [model, titleLayer].filter(hasValue).join(" ") || model;
         }
         if (cells[1]) {
           cells[1].dataset.cardSummary = summaryValues.filter(hasValue).join(" ・ ") || "-";
@@ -2457,10 +2462,17 @@ function formatStockProductParts(product) {
 }
 
 function getStockProductDisplayCode(product) {
+  if (getOfficialStockCode(product) === "CX-19") return "CX-19";
   if (product?.selectionRequired && product.productCode) {
     return product.productCode;
   }
   return product?.recordId || product?.productCode || "";
+}
+
+function getStockProductChoiceLabel(product) {
+  return getOfficialStockCode(product) === "CX-19"
+    ? getStockCatalogLabel(product) + getStockVariantLabel(product)
+    : `${getStockProductDisplayCode(product)} ${product.displayNameZh}`;
 }
 
 function renderStockAutoPreview() {
@@ -2491,7 +2503,7 @@ function renderStockAutoPreview() {
 
   const items = products.map(product => `
     <div class="stock-preview-item">
-      <strong>${escapeHtml(getStockProductDisplayCode(product))} ${escapeHtml(product.displayNameZh)}</strong>
+      <strong>${escapeHtml(getStockProductChoiceLabel(product))}</strong>
       <span>${escapeHtml(formatStockProductParts(product))}</span>
     </div>
   `).join("");
@@ -2514,21 +2526,22 @@ function renderStockAutoPreview() {
 async function loadStockProducts() {
   if (stockProductsLoadPromise) return stockProductsLoadPromise;
 
-  stockProductsLoadPromise = fetch(STOCK_PRODUCTS_URL)
-    .then(response => {
+  stockProductsLoadPromise = Promise.all([STOCK_PRODUCTS_URL, STOCK_NAMES_URL].map(url =>
+    fetch(url).then(response => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     })
-    .then(data => {
+  ))
+    .then(([data, nameCatalog]) => {
       if (!Array.isArray(data.stockProducts)) {
         throw new Error("stockProducts 格式不正確");
       }
-
-      const { exactIndex, baseIndex, unparseableCodes } = buildStockProductIndexes(data.stockProducts);
+      const products = attachCatalogNames(data.stockProducts, nameCatalog.records);
+      const { exactIndex, baseIndex, unparseableCodes } = buildStockProductIndexes(products);
       stockProductsByExactCode = exactIndex;
       stockProductsByBaseCode = baseIndex;
       stockProductsByRecordId = new Map(
-        data.stockProducts
+        products
           .filter(product => product.autoFillEnabled && !product.needsReview && product.recordId)
           .map(product => [String(product.recordId).trim(), product])
       );
@@ -2591,7 +2604,7 @@ function getStockProductRowData(product) {
     cells: [
       product.isSetProduct && !product.selectionRequired
         ? product.recordId
-        : product.productCode,
+        : getOfficialStockCode(product),
       layer,
       valueOrDash(parts.lockChip),
       mainPart,
@@ -2719,7 +2732,7 @@ function openStockProductChoice(products, productCode) {
   addAllButton.disabled = false;
   list.innerHTML = products.map((product, index) => `
     <button type="button" class="stock-choice-option" data-stock-choice-index="${index}">
-      <strong>${escapeHtml(getStockProductDisplayCode(product))} ${escapeHtml(product.displayNameZh)}</strong>
+      <strong>${escapeHtml(getStockProductChoiceLabel(product))}</strong>
       <span>${escapeHtml(formatStockProductParts(product))}</span>
     </button>
   `).join("");

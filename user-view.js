@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+import { attachCatalogNames, getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel } from "./stock-catalog-names.js";
 
 import {
   getAuth,
@@ -24,7 +25,8 @@ const firebaseConfig = {
 };
 
 const ADMIN_UID = "SesDhvXG6MUT38YhqGl0N6lVgMz1";
-const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260829-namecatalog2";
+const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260920-cx19";
+const STOCK_NAMES_URL = "beyblade_x_model_chinese_english_2026-08-29.json?v=20260920-cx19";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -99,14 +101,15 @@ function addCatalogEntry(map, key, product) {
 async function loadStockCatalog() {
   if (stockCatalogPromise) return stockCatalogPromise;
 
-  stockCatalogPromise = fetch(STOCK_PRODUCTS_URL)
-    .then(response => {
+  stockCatalogPromise = Promise.all([STOCK_PRODUCTS_URL, STOCK_NAMES_URL].map(url =>
+    fetch(url).then(response => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     })
-    .then(data => {
+  ))
+    .then(([data, nameCatalog]) => {
       const products = Array.isArray(data.stockProducts)
-        ? data.stockProducts.filter(product => product.autoFillEnabled && !product.needsReview)
+        ? attachCatalogNames(data.stockProducts, nameCatalog.records).filter(product => product.autoFillEnabled && !product.needsReview)
         : [];
 
       stockCatalogByExactCode = new Map();
@@ -144,7 +147,7 @@ function getCatalogRowData(product) {
   return [
     product.isSetProduct && !product.selectionRequired
       ? product.recordId
-      : product.productCode,
+      : getOfficialStockCode(product),
     layer,
     valueOrDash(parts.lockChip),
     hasSplitBlade ? `${parts.overBlade}/${parts.metalBlade}` : valueOrDash(parts.mainBlade),
@@ -184,7 +187,13 @@ function enrichOriginalStockItem(item) {
     }
   }
 
-  return product ? { ...item, cells: getCatalogRowData(product) } : item;
+  return product ? {
+    ...item,
+    cells: getCatalogRowData(product),
+    stockDisplayLabel: getOfficialStockCode(product) === "CX-19"
+      ? getStockCatalogLabel(product) + getStockVariantLabel(product)
+      : ""
+  } : item;
 }
 
 function setSyncStatus(text, type = "muted") {
@@ -303,7 +312,7 @@ function getConfigCardData(item) {
 
   return {
     series,
-    title: [model, titlePart].filter(hasDisplayValue).join(" ") || "未命名配置",
+    title: item?.stockDisplayLabel || [model, titlePart].filter(hasDisplayValue).join(" ") || "未命名配置",
     summary: summaryParts.filter(hasDisplayValue).join(" ・ ") || "尚無零件資料",
     tags
   };

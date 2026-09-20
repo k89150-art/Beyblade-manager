@@ -62,21 +62,27 @@ test('所有零件身分、名稱、別名、官方原裝與 CX 結構逐筆完�
     assert.deepEqual(standalone[key].map(project), oldStandalone[key].map(project));
   }
 });
-test('231 筆官方產品、套組及查詢索引不變，只補完整型錄英文名稱', () => {
+test('既有 231 筆官方產品與套組不變，新增 CX-19 三筆', () => {
   const file = 'stock_products_AUTOFILL_SAFE_2026-07-29-v3.json';
   const stock = JSON.parse(read(file));
   const oldStock = JSON.parse(previous(file));
   const withoutCatalogNames = data => {
     const copy = structuredClone(data);
-    if (copy.metadata) delete copy.metadata.nameCatalogUpdate;
     for (const product of copy.stockProducts) {
       delete product.displayNameEn;
       delete product.referenceNameEn;
     }
     return copy;
   };
-  assert.deepEqual(withoutCatalogNames(stock), withoutCatalogNames(oldStock));
-  assert.equal(stock.stockProducts.length, 231);
+  assert.deepEqual(withoutCatalogNames({stockProducts: stock.stockProducts.slice(0, 231)}).stockProducts,
+    withoutCatalogNames(oldStock).stockProducts);
+  assert.deepEqual(stock.stockProductSets, oldStock.stockProductSets);
+  for (const [indexName, index] of Object.entries(oldStock.lookupIndexes)) {
+    for (const [key, ids] of Object.entries(index)) {
+      assert.deepEqual(stock.lookupIndexes[indexName][key].slice(0, ids.length), ids);
+    }
+  }
+  assert.equal(stock.stockProducts.length, 234);
   const ids = new Set(stock.stockProducts.map(x => x.recordId));
   for (const entries of Object.values(stock.lookupIndexes)) for (const values of Object.values(entries)) {
     for (const id of values) assert.ok(ids.has(id), id);
@@ -95,11 +101,7 @@ test('使用者資料契約、雲端同步與賽事流程保持相容', () => {
   for (const file of ['tournament.js', 'admin.js', 'firestore.rules', 'firebase.json']) {
     assert.equal(normalizeLines(read(file)), normalizeLines(previous(file)), file);
   }
-  assert.equal(
-    normalizeLines(read('user-view.js')),
-    normalizeLines(previous('user-view.js')).replace('?v=20260729-stock3', '?v=20260829-namecatalog2'),
-    'user-view.js'
-  );
+  assert.match(read('user-view.js'), /getCatalogRowData\(product\)/);
 });
 test('客觀案例、前段次數、Beywatch 比例及 MetaBeys 使用占比保留', () => {
   for (let i = 0; i < oldDb.featuredBladeProfiles.length; i++) {
