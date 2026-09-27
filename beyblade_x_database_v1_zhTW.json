@@ -5903,7 +5903,7 @@
   ],
   "competitionStatistics": {
     "schemaVersion": "1.0",
-    "capturedAt": "2026-09-20",
+    "capturedAt": "2026-09-27",
     "displayStatus": "latest_successful_snapshot",
     "definitions": {
       "partPopularity": "MetaBeys 原站 Part Popularity；保留原始定義，不等同實際對戰勝率。",
@@ -10524,7 +10524,7 @@
     },
     "beywatch": {
       "sourceUrl": "https://beywatch.gg/",
-      "sourceUpdatedAt": "2026-09-20",
+      "sourceUpdatedAt": "2026-09-25",
       "scope": "all_time_world_all_rulesets_all_formats",
       "blades": [
         {
@@ -10532,33 +10532,33 @@
             {
               "firstRate": "36.3%",
               "part": "Low Rush (LR)",
-              "pick": "43.9%",
+              "pick": "43.7%",
               "canonicalId": "LR",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "35.4%",
+              "firstRate": "35.3%",
               "part": "Rush (R)",
               "pick": "13.9%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "33.9%",
+              "firstRate": "34.1%",
               "part": "Free Ball (FB)",
-              "pick": "10.9%",
+              "pick": "11.1%",
               "canonicalId": "FB",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "30.1%",
+              "firstRate": "29.8%",
               "part": "Kick (K)",
               "pick": "6.6%",
               "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "28.7%",
+              "firstRate": "28.9%",
               "part": "Level (L)",
               "pick": "6.2%",
               "canonicalId": "L",
@@ -10570,7 +10570,7 @@
               "combo": "Shark Scale 1-70LR",
               "firstRate": "38.3%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "810"
+              "topCuts": "811"
             },
             {
               "combo": "Shark Scale 3-60LR",
@@ -10580,15 +10580,15 @@
             },
             {
               "combo": "Shark Scale 1-60LR",
-              "firstRate": "32.9%",
+              "firstRate": "32.7%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "216"
+              "topCuts": "217"
             },
             {
               "combo": "Shark Scale 9-60FB",
-              "firstRate": "32.7%",
+              "firstRate": "33.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "211"
+              "topCuts": "212"
             },
             {
               "combo": "Shark Scale 4-50LR",
@@ -10604,15 +10604,15 @@
             },
             {
               "combo": "Shark Scale 3-60R",
-              "firstRate": "33.5%",
+              "firstRate": "33.8%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "158"
+              "topCuts": "160"
             },
             {
               "combo": "Shark Scale 3-60FB",
-              "firstRate": "33.9%",
+              "firstRate": "32.8%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "118"
+              "topCuts": "122"
             },
             {
               "combo": "Shark Scale 1-70R",
@@ -10622,9 +10622,9 @@
             },
             {
               "combo": "Shark Scale 1-50LR",
-              "firstRate": "32.3%",
+              "firstRate": "32.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "99"
+              "topCuts": "100"
             }
           ],
           "firstRate": "35.8%",
@@ -10634,42 +10634,42 @@
             {
               "firstRate": "36.3%",
               "part": "1-70",
-              "pick": "24.8%",
+              "pick": "24.6%",
               "canonicalId": "1-70",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "34.6%",
+              "firstRate": "34.5%",
               "part": "3-60",
-              "pick": "21.6%",
+              "pick": "21.7%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "33.6%",
+              "firstRate": "33.8%",
               "part": "1-60",
               "pick": "14.5%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "31.9%",
+              "firstRate": "32.2%",
               "part": "9-60",
               "pick": "11.4%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "31.8%",
+              "firstRate": "32.0%",
               "part": "4-50",
               "pick": "8.3%",
               "canonicalId": "4-50",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "4,335",
+          "topCuts": "4,365",
           "url": "https://beywatch.gg/blades/shark-scale",
-          "usage": "44.9%",
+          "usage": "45.0%",
           "statisticsStatus": "ranked",
           "canonicalId": "SHARK_SCALE",
           "identityMatchStatus": "exact",
@@ -10686,28 +10686,28 @@
         {
           "bits": [
             {
-              "firstRate": "35.0%",
+              "firstRate": "35.1%",
               "part": "Hexa (H)",
-              "pick": "52.7%",
+              "pick": "52.8%",
               "canonicalId": "H",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "35.7%",
               "part": "Ball (B)",
-              "pick": "18.4%",
+              "pick": "18.3%",
               "canonicalId": "B",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "34.1%",
+              "firstRate": "34.0%",
               "part": "Free Ball (FB)",
               "pick": "10.8%",
               "canonicalId": "FB",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "32.7%",
+              "firstRate": "32.6%",
               "part": "Low Orb (LO)",
               "pick": "3.4%",
               "canonicalId": "LO",
@@ -10724,27 +10724,27 @@
           "combos": [
             {
               "combo": "Wizard Rod 1-60H",
-              "firstRate": "35.2%",
+              "firstRate": "35.3%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "2,540"
+              "topCuts": "2,560"
             },
             {
               "combo": "Wizard Rod 9-60B",
               "firstRate": "36.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "713"
+              "topCuts": "714"
             },
             {
               "combo": "Wizard Rod 1-60FB",
-              "firstRate": "38.9%",
+              "firstRate": "38.7%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "342"
+              "topCuts": "344"
             },
             {
               "combo": "Wizard Rod 9-60FB",
               "firstRate": "30.6%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "245"
+              "topCuts": "248"
             },
             {
               "combo": "Wizard Rod 3-60B",
@@ -10790,7 +10790,7 @@
             {
               "firstRate": "35.3%",
               "part": "1-60",
-              "pick": "53.6%",
+              "pick": "53.7%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
@@ -10804,12 +10804,12 @@
             {
               "firstRate": "36.8%",
               "part": "3-60",
-              "pick": "8.4%",
+              "pick": "8.3%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "29.7%",
+              "firstRate": "30.1%",
               "part": "7-60",
               "pick": "3.0%",
               "canonicalId": "7-60",
@@ -10823,7 +10823,7 @@
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "5,987",
+          "topCuts": "6,021",
           "url": "https://beywatch.gg/blades/wizard-rod",
           "usage": "62.0%",
           "statisticsStatus": "ranked",
@@ -10846,14 +10846,14 @@
         {
           "bits": [
             {
-              "firstRate": "38.1%",
+              "firstRate": "38.4%",
               "part": "Rush (R)",
               "pick": "43.6%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "34.7%",
+              "firstRate": "34.6%",
               "part": "Low Rush (LR)",
               "pick": "14.8%",
               "canonicalId": "LR",
@@ -10862,12 +10862,12 @@
             {
               "firstRate": "36.9%",
               "part": "Kick (K)",
-              "pick": "14.5%",
+              "pick": "14.4%",
               "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "27.0%",
+              "firstRate": "26.9%",
               "part": "Level (L)",
               "pick": "14.0%",
               "canonicalId": "L",
@@ -10884,15 +10884,15 @@
           "combos": [
             {
               "combo": "Aero Pegasus 1-60R",
-              "firstRate": "37.3%",
+              "firstRate": "37.5%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "322"
+              "topCuts": "323"
             },
             {
               "combo": "Aero Pegasus 1-50R",
-              "firstRate": "38.0%",
+              "firstRate": "39.1%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "179"
+              "topCuts": "184"
             },
             {
               "combo": "Aero Pegasus 7-60R",
@@ -10943,35 +10943,35 @@
               "topCuts": "62"
             }
           ],
-          "firstRate": "35.7%",
+          "firstRate": "35.8%",
           "name": "Aero Pegasus",
           "rank": "3",
           "ratchets": [
             {
-              "firstRate": "34.4%",
+              "firstRate": "34.5%",
               "part": "1-60",
-              "pick": "33.7%",
+              "pick": "33.6%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "34.4%",
+              "firstRate": "34.3%",
               "part": "3-60",
               "pick": "14.2%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "36.3%",
+              "firstRate": "36.2%",
               "part": "7-60",
               "pick": "14.0%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "39.9%",
+              "firstRate": "40.6%",
               "part": "1-50",
-              "pick": "12.5%",
+              "pick": "12.7%",
               "canonicalId": "1-50",
               "identityMatchStatus": "exact"
             },
@@ -10983,7 +10983,7 @@
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "2,028",
+          "topCuts": "2,036",
           "url": "https://beywatch.gg/blades/aero-pegasus",
           "usage": "21.0%",
           "statisticsStatus": "ranked",
@@ -11004,14 +11004,14 @@
         {
           "bits": [
             {
-              "firstRate": "36.0%",
+              "firstRate": "35.9%",
               "part": "Low Rush (LR)",
               "pick": "26.1%",
               "canonicalId": "LR",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "37.6%",
+              "firstRate": "37.5%",
               "part": "Kick (K)",
               "pick": "21.9%",
               "canonicalId": "K",
@@ -11020,21 +11020,21 @@
             {
               "firstRate": "35.4%",
               "part": "Rush (R)",
-              "pick": "13.6%",
+              "pick": "13.5%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "31.1%",
               "part": "Level (L)",
-              "pick": "9.5%",
+              "pick": "9.4%",
               "canonicalId": "L",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "27.0%",
+              "firstRate": "26.5%",
               "part": "Hexa (H)",
-              "pick": "8.9%",
+              "pick": "9.1%",
               "canonicalId": "H",
               "identityMatchStatus": "exact"
             }
@@ -11042,9 +11042,9 @@
           "combos": [
             {
               "combo": "Emperor Blast Heavy 9-60K",
-              "firstRate": "39.2%",
+              "firstRate": "38.5%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "51"
+              "topCuts": "52"
             },
             {
               "combo": "Pegasus Blast Heavy 9-60K",
@@ -11077,13 +11077,13 @@
               "topCuts": "20"
             },
             {
-              "combo": "Wolf Blast Heavy 9-60LR",
-              "firstRate": "35.3%",
+              "combo": "Emperor Blast Wheel 9-60H",
+              "firstRate": "33.3%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "17"
+              "topCuts": "18"
             },
             {
-              "combo": "Emperor Blast Wheel 9-60H",
+              "combo": "Wolf Blast Heavy 9-60LR",
               "firstRate": "35.3%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "17"
@@ -11101,19 +11101,19 @@
               "topCuts": "16"
             }
           ],
-          "firstRate": "35.4%",
+          "firstRate": "35.3%",
           "name": "Blast",
           "rank": "4",
           "ratchets": [
             {
-              "firstRate": "33.8%",
+              "firstRate": "33.7%",
               "part": "9-60",
               "pick": "40.7%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "32.8%",
+              "firstRate": "32.7%",
               "part": "3-60",
               "pick": "20.6%",
               "canonicalId": "3-60",
@@ -11141,9 +11141,9 @@
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "1,214",
+          "topCuts": "1,218",
           "url": "https://beywatch.gg/blades/blast",
-          "usage": "12.6%",
+          "usage": "12.5%",
           "statisticsStatus": "ranked",
           "canonicalId": "爆擊",
           "identityMatchStatus": "exact",
@@ -11194,15 +11194,15 @@
           "combos": [
             {
               "combo": "Cobalt Dragoon 5-60E",
-              "firstRate": "34.7%",
+              "firstRate": "34.8%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "1,036"
+              "topCuts": "1,038"
             },
             {
               "combo": "Cobalt Dragoon 9-60E",
-              "firstRate": "35.7%",
+              "firstRate": "35.6%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "521"
+              "topCuts": "522"
             },
             {
               "combo": "Cobalt Dragoon 1-60E",
@@ -11265,7 +11265,7 @@
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "34.6%",
+              "firstRate": "34.5%",
               "part": "9-60",
               "pick": "24.0%",
               "canonicalId": "9-60",
@@ -11293,9 +11293,9 @@
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "2,277",
+          "topCuts": "2,281",
           "url": "https://beywatch.gg/blades/cobalt-dragoon",
-          "usage": "23.6%",
+          "usage": "23.5%",
           "statisticsStatus": "ranked",
           "canonicalId": "蒼穹龍騎士",
           "identityMatchStatus": "exact",
@@ -11320,16 +11320,16 @@
         {
           "bits": [
             {
-              "firstRate": "32.9%",
+              "firstRate": "32.8%",
               "part": "Level (L)",
-              "pick": "69.4%",
+              "pick": "69.3%",
               "canonicalId": "L",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "31.1%",
+              "firstRate": "31.4%",
               "part": "Elevate (E)",
-              "pick": "17.0%",
+              "pick": "17.2%",
               "canonicalId": "E",
               "identityMatchStatus": "exact"
             },
@@ -11358,9 +11358,9 @@
           "combos": [
             {
               "combo": "Meteor Dragoon 7-60L",
-              "firstRate": "33.8%",
+              "firstRate": "33.5%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "234"
+              "topCuts": "236"
             },
             {
               "combo": "Meteor Dragoon 7-70L",
@@ -11370,9 +11370,9 @@
             },
             {
               "combo": "Meteor Dragoon 9-60E",
-              "firstRate": "39.0%",
+              "firstRate": "39.2%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "77"
+              "topCuts": "79"
             },
             {
               "combo": "Meteor Dragoon 9-60L",
@@ -11422,23 +11422,23 @@
           "rank": "6",
           "ratchets": [
             {
-              "firstRate": "32.8%",
+              "firstRate": "32.6%",
               "part": "7-60",
-              "pick": "37.0%",
+              "pick": "37.1%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "33.1%",
               "part": "7-70",
-              "pick": "22.9%",
+              "pick": "22.7%",
               "canonicalId": "7-70",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "32.4%",
+              "firstRate": "32.7%",
               "part": "9-60",
-              "pick": "15.4%",
+              "pick": "15.6%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
@@ -11457,7 +11457,7 @@
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "662",
+          "topCuts": "666",
           "url": "https://beywatch.gg/blades/meteor-dragoon",
           "usage": "6.9%",
           "statisticsStatus": "ranked",
@@ -11476,16 +11476,16 @@
         {
           "bits": [
             {
-              "firstRate": "32.7%",
+              "firstRate": "32.8%",
               "part": "Kick (K)",
               "pick": "42.2%",
               "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "32.0%",
+              "firstRate": "31.8%",
               "part": "Rush (R)",
-              "pick": "16.3%",
+              "pick": "16.4%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
@@ -11504,9 +11504,9 @@
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "34.3%",
+              "firstRate": "33.9%",
               "part": "Level (L)",
-              "pick": "5.3%",
+              "pick": "5.4%",
               "canonicalId": "L",
               "identityMatchStatus": "exact"
             }
@@ -11514,15 +11514,15 @@
           "combos": [
             {
               "combo": "Hover Wyvern 9-60K",
-              "firstRate": "35.0%",
+              "firstRate": "34.9%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "540"
+              "topCuts": "541"
             },
             {
               "combo": "Hover Wyvern 9-60R",
-              "firstRate": "35.7%",
+              "firstRate": "35.4%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "157"
+              "topCuts": "158"
             },
             {
               "combo": "Hover Wyvern 1-60K",
@@ -11556,9 +11556,9 @@
             },
             {
               "combo": "Hover Wyvern 3-60K",
-              "firstRate": "30.4%",
+              "firstRate": "31.6%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "56"
+              "topCuts": "57"
             },
             {
               "combo": "Hover Wyvern 3-60LR",
@@ -11578,28 +11578,28 @@
           "rank": "7",
           "ratchets": [
             {
-              "firstRate": "34.5%",
+              "firstRate": "34.4%",
               "part": "9-60",
               "pick": "50.7%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "30.7%",
+              "firstRate": "30.6%",
               "part": "1-60",
               "pick": "18.6%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "30.5%",
+              "firstRate": "30.8%",
               "part": "3-60",
-              "pick": "8.2%",
+              "pick": "8.3%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "26.4%",
+              "firstRate": "26.2%",
               "part": "7-60",
               "pick": "6.9%",
               "canonicalId": "7-60",
@@ -11613,9 +11613,9 @@
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "1,930",
+          "topCuts": "1,937",
           "url": "https://beywatch.gg/blades/hover-wyvern",
-          "usage": "20.0%",
+          "usage": "19.9%",
           "statisticsStatus": "ranked",
           "canonicalId": "HOVER_WYVERN",
           "identityMatchStatus": "exact",
@@ -11628,121 +11628,159 @@
         {
           "bits": [
             {
-              "firstRate": "39.5%",
-              "part": "Kick (K)",
-              "pick": "29.5%",
-              "canonicalId": "K",
+              "firstRate": "31.3%",
+              "part": "Free Ball (FB)",
+              "pick": "40.9%",
+              "canonicalId": "FB",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "45.8%",
-              "part": "Rush (R)",
-              "pick": "16.4%",
-              "canonicalId": "R",
+              "firstRate": "34.2%",
+              "part": "Hexa (H)",
+              "pick": "22.6%",
+              "canonicalId": "H",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "15.4%",
-              "part": "Low Rush (LR)",
-              "pick": "8.9%",
-              "canonicalId": "LR",
+              "firstRate": "31.9%",
+              "part": "Low Orb (LO)",
+              "pick": "11.0%",
+              "canonicalId": "LO",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "40.0%",
-              "part": "Level (L)",
-              "pick": "6.8%",
-              "canonicalId": "L",
+              "firstRate": "26.4%",
+              "part": "Ball (B)",
+              "pick": "9.8%",
+              "canonicalId": "B",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "33.3%",
-              "part": "Rubber Accel (RA)",
-              "pick": "4.1%",
-              "canonicalId": "RA",
+              "firstRate": "32.9%",
+              "part": "Wedge (W)",
+              "pick": "4.6%",
+              "canonicalId": "W",
               "identityMatchStatus": "exact"
             }
           ],
           "combos": [
             {
-              "combo": "Glory Valkyrie K",
-              "firstRate": "39.5%",
+              "combo": "Silver Wolf 9-60FB",
+              "firstRate": "28.7%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "43"
+              "topCuts": "359"
             },
             {
-              "combo": "Glory Valkyrie R",
-              "firstRate": "45.8%",
+              "combo": "Silver Wolf 9-60LO",
+              "firstRate": "30.4%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "24"
+              "topCuts": "102"
             },
             {
-              "combo": "Glory Valkyrie LR",
-              "firstRate": "15.4%",
+              "combo": "Silver Wolf 9-60H",
+              "firstRate": "34.4%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "13"
+              "topCuts": "93"
             },
             {
-              "combo": "Glory Valkyrie L",
-              "firstRate": "40.0%",
+              "combo": "Silver Wolf 9-70FB",
+              "firstRate": "35.9%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "10"
+              "topCuts": "92"
             },
             {
-              "combo": "Glory Valkyrie RA",
+              "combo": "Silver Wolf 9-60B",
+              "firstRate": "27.1%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "85"
+            },
+            {
+              "combo": "Silver Wolf 3-60FB",
               "firstRate": "33.3%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "6"
+              "topCuts": "60"
             },
             {
-              "combo": "Glory Valkyrie E",
-              "firstRate": "33.3%",
+              "combo": "Silver Wolf 9-60W",
+              "firstRate": "36.6%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "6"
+              "topCuts": "41"
             },
             {
-              "combo": "Glory Valkyrie Nr",
-              "firstRate": "16.7%",
+              "combo": "Silver Wolf 9-70H",
+              "firstRate": "30.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "6"
+              "topCuts": "40"
             },
             {
-              "combo": "Glory Valkyrie LO",
-              "firstRate": "50.0%",
+              "combo": "Silver Wolf 7-60H",
+              "firstRate": "38.5%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
+              "topCuts": "39"
             },
             {
-              "combo": "Glory Valkyrie T",
-              "firstRate": "50.0%",
+              "combo": "Silver Wolf 3-60H",
+              "firstRate": "28.9%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            },
-            {
-              "combo": "Glory Valkyrie DB",
-              "firstRate": "25.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
+              "topCuts": "38"
             }
           ],
-          "firstRate": "34.3%",
-          "name": "Glory Valkyrie",
+          "firstRate": "32.2%",
+          "name": "Silver Wolf",
           "rank": "8",
-          "ratchets": [],
-          "topCuts": "137",
-          "url": "https://beywatch.gg/blades/glory-valkyrie",
-          "usage": "1.4%",
+          "ratchets": [
+            {
+              "firstRate": "30.5%",
+              "part": "9-60",
+              "pick": "45.8%",
+              "canonicalId": "9-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "33.5%",
+              "part": "9-70",
+              "pick": "11.9%",
+              "canonicalId": "9-70",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "27.6%",
+              "part": "3-60",
+              "pick": "11.2%",
+              "canonicalId": "3-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "36.3%",
+              "part": "7-60",
+              "pick": "4.8%",
+              "canonicalId": "7-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "34.8%",
+              "part": "5-60",
+              "pick": "4.0%",
+              "canonicalId": "5-60",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "topCuts": "1,598",
+          "url": "https://beywatch.gg/blades/silver-wolf",
+          "usage": "16.5%",
           "statisticsStatus": "ranked",
-          "canonicalId": "GLORY_VALKYRIE",
+          "canonicalId": "SILVER_WOLF",
           "identityMatchStatus": "exact",
           "catalogMatchStatus": "exact",
-          "displayNameZh": "榮耀戰神",
-          "catalogEnglishName": "Glory Valkyrie",
+          "displayNameZh": "霜輝銀狼",
+          "catalogEnglishName": "Silver Wolf",
           "catalogModels": [
-            "UX-20"
+            "UX-08",
+            "UX-21"
           ],
           "catalogRecordIds": [
-            "UX-20"
+            "UX-08",
+            "UX-21-02"
           ]
         },
         {
@@ -11912,164 +11950,6 @@
         {
           "bits": [
             {
-              "firstRate": "31.0%",
-              "part": "Free Ball (FB)",
-              "pick": "40.9%",
-              "canonicalId": "FB",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "34.1%",
-              "part": "Hexa (H)",
-              "pick": "22.6%",
-              "canonicalId": "H",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "32.0%",
-              "part": "Low Orb (LO)",
-              "pick": "11.0%",
-              "canonicalId": "LO",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "26.5%",
-              "part": "Ball (B)",
-              "pick": "9.8%",
-              "canonicalId": "B",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "33.3%",
-              "part": "Wedge (W)",
-              "pick": "4.6%",
-              "canonicalId": "W",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "combos": [
-            {
-              "combo": "Silver Wolf 9-60FB",
-              "firstRate": "28.2%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "355"
-            },
-            {
-              "combo": "Silver Wolf 9-60LO",
-              "firstRate": "30.4%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "102"
-            },
-            {
-              "combo": "Silver Wolf 9-60H",
-              "firstRate": "34.4%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "93"
-            },
-            {
-              "combo": "Silver Wolf 9-70FB",
-              "firstRate": "35.9%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "92"
-            },
-            {
-              "combo": "Silver Wolf 9-60B",
-              "firstRate": "27.4%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "84"
-            },
-            {
-              "combo": "Silver Wolf 3-60FB",
-              "firstRate": "33.3%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "60"
-            },
-            {
-              "combo": "Silver Wolf 9-60W",
-              "firstRate": "37.5%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "40"
-            },
-            {
-              "combo": "Silver Wolf 9-70H",
-              "firstRate": "30.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "40"
-            },
-            {
-              "combo": "Silver Wolf 7-60H",
-              "firstRate": "38.5%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "39"
-            },
-            {
-              "combo": "Silver Wolf 3-60H",
-              "firstRate": "28.9%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "38"
-            }
-          ],
-          "firstRate": "32.1%",
-          "name": "Silver Wolf",
-          "rank": "10",
-          "ratchets": [
-            {
-              "firstRate": "30.3%",
-              "part": "9-60",
-              "pick": "45.7%",
-              "canonicalId": "9-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "33.5%",
-              "part": "9-70",
-              "pick": "12.0%",
-              "canonicalId": "9-70",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "27.6%",
-              "part": "3-60",
-              "pick": "11.2%",
-              "canonicalId": "3-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "36.3%",
-              "part": "7-60",
-              "pick": "4.9%",
-              "canonicalId": "7-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "34.8%",
-              "part": "5-60",
-              "pick": "4.0%",
-              "canonicalId": "5-60",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "topCuts": "1,589",
-          "url": "https://beywatch.gg/blades/silver-wolf",
-          "usage": "16.5%",
-          "statisticsStatus": "ranked",
-          "canonicalId": "SILVER_WOLF",
-          "identityMatchStatus": "exact",
-          "catalogMatchStatus": "exact",
-          "displayNameZh": "霜輝銀狼",
-          "catalogEnglishName": "Silver Wolf",
-          "catalogModels": [
-            "UX-08",
-            "UX-21"
-          ],
-          "catalogRecordIds": [
-            "UX-08",
-            "UX-21-02"
-          ]
-        },
-        {
-          "bits": [
-            {
               "firstRate": "35.5%",
               "part": "Rush (R)",
               "pick": "40.8%",
@@ -12077,7 +11957,7 @@
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "31.9%",
+              "firstRate": "32.0%",
               "part": "Low Rush (LR)",
               "pick": "19.3%",
               "canonicalId": "LR",
@@ -12093,7 +11973,7 @@
             {
               "firstRate": "30.3%",
               "part": "Kick (K)",
-              "pick": "4.8%",
+              "pick": "4.7%",
               "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
@@ -12126,9 +12006,9 @@
             },
             {
               "combo": "Phoenix Wing 1-60LR",
-              "firstRate": "29.7%",
+              "firstRate": "30.1%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "185"
+              "topCuts": "186"
             },
             {
               "combo": "Phoenix Wing 9-60R",
@@ -12150,9 +12030,9 @@
             },
             {
               "combo": "Phoenix Wing 7-60R",
-              "firstRate": "34.9%",
+              "firstRate": "34.6%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "106"
+              "topCuts": "107"
             },
             {
               "combo": "Phoenix Wing 1-60P",
@@ -12169,7 +12049,7 @@
           ],
           "firstRate": "33.2%",
           "name": "Phoenix Wing",
-          "rank": "11",
+          "rank": "10",
           "ratchets": [
             {
               "firstRate": "32.5%",
@@ -12179,7 +12059,7 @@
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "32.5%",
+              "firstRate": "32.6%",
               "part": "1-60",
               "pick": "27.2%",
               "canonicalId": "1-60",
@@ -12188,7 +12068,7 @@
             {
               "firstRate": "33.8%",
               "part": "9-60",
-              "pick": "15.9%",
+              "pick": "15.8%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
@@ -12200,16 +12080,16 @@
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "32.1%",
+              "firstRate": "31.9%",
               "part": "7-60",
               "pick": "7.2%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "2,815",
+          "topCuts": "2,818",
           "url": "https://beywatch.gg/blades/phoenix-wing",
-          "usage": "29.1%",
+          "usage": "29.0%",
           "statisticsStatus": "ranked",
           "canonicalId": "PHOENIX_WING",
           "identityMatchStatus": "exact",
@@ -12228,37 +12108,37 @@
         {
           "bits": [
             {
-              "firstRate": "29.6%",
+              "firstRate": "29.7%",
               "part": "Kick (K)",
-              "pick": "35.1%",
+              "pick": "35.4%",
               "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "30.0%",
               "part": "Low Rush (LR)",
-              "pick": "17.9%",
+              "pick": "17.5%",
               "canonicalId": "LR",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "32.6%",
               "part": "Rush (R)",
-              "pick": "15.4%",
+              "pick": "15.1%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "35.0%",
               "part": "Jolt (J)",
-              "pick": "7.2%",
+              "pick": "7.0%",
               "canonicalId": "J",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "31.6%",
+              "firstRate": "30.0%",
               "part": "Level (L)",
-              "pick": "6.8%",
+              "pick": "7.0%",
               "canonicalId": "L",
               "identityMatchStatus": "exact"
             }
@@ -12266,15 +12146,15 @@
           "combos": [
             {
               "combo": "Dran Strike 9-60K",
-              "firstRate": "31.6%",
+              "firstRate": "32.5%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "38"
+              "topCuts": "40"
             },
             {
               "combo": "Dran Strike 3-60K",
-              "firstRate": "28.6%",
+              "firstRate": "27.3%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "21"
+              "topCuts": "22"
             },
             {
               "combo": "Dran Strike 3-60LR",
@@ -12325,49 +12205,49 @@
               "topCuts": "5"
             }
           ],
-          "firstRate": "32.2%",
+          "firstRate": "32.3%",
           "name": "Dran Strike",
-          "rank": "12",
+          "rank": "11",
           "ratchets": [
             {
-              "firstRate": "28.8%",
+              "firstRate": "28.9%",
               "part": "3-60",
-              "pick": "26.2%",
+              "pick": "26.7%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "30.4%",
+              "firstRate": "31.0%",
               "part": "9-60",
-              "pick": "20.1%",
+              "pick": "20.4%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "30.4%",
+              "firstRate": "29.2%",
               "part": "7-60",
-              "pick": "8.2%",
+              "pick": "8.4%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "36.8%",
               "part": "6-60",
-              "pick": "6.8%",
+              "pick": "6.7%",
               "canonicalId": "6-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "33.3%",
               "part": "1-50",
-              "pick": "6.5%",
+              "pick": "6.3%",
               "canonicalId": "1-50",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "264",
+          "topCuts": "269",
           "url": "https://beywatch.gg/blades/dran-strike",
-          "usage": "2.7%",
+          "usage": "2.8%",
           "statisticsStatus": "ranked",
           "canonicalId": "BX49_DRAN_STRIKE",
           "identityMatchStatus": "exact",
@@ -12384,37 +12264,157 @@
         {
           "bits": [
             {
-              "firstRate": "32.4%",
+              "firstRate": "37.5%",
+              "part": "Kick (K)",
+              "pick": "30.0%",
+              "canonicalId": "K",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "44.0%",
+              "part": "Rush (R)",
+              "pick": "15.6%",
+              "canonicalId": "R",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "14.3%",
               "part": "Low Rush (LR)",
-              "pick": "38.6%",
+              "pick": "8.8%",
+              "canonicalId": "LR",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "40.0%",
+              "part": "Level (L)",
+              "pick": "6.3%",
+              "canonicalId": "L",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "33.3%",
+              "part": "Rubber Accel (RA)",
+              "pick": "3.8%",
+              "canonicalId": "RA",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "combos": [
+            {
+              "combo": "Glory Valkyrie K",
+              "firstRate": "37.5%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "48"
+            },
+            {
+              "combo": "Glory Valkyrie R",
+              "firstRate": "44.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "25"
+            },
+            {
+              "combo": "Glory Valkyrie LR",
+              "firstRate": "14.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "14"
+            },
+            {
+              "combo": "Glory Valkyrie L",
+              "firstRate": "40.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "10"
+            },
+            {
+              "combo": "Glory Valkyrie RA",
+              "firstRate": "33.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "6"
+            },
+            {
+              "combo": "Glory Valkyrie E",
+              "firstRate": "33.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "6"
+            },
+            {
+              "combo": "Glory Valkyrie Nr",
+              "firstRate": "16.7%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "6"
+            },
+            {
+              "combo": "Glory Valkyrie T",
+              "firstRate": "40.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "5"
+            },
+            {
+              "combo": "Glory Valkyrie FF",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "5"
+            },
+            {
+              "combo": "Glory Valkyrie P",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "5"
+            }
+          ],
+          "firstRate": "32.7%",
+          "name": "Glory Valkyrie",
+          "rank": "12",
+          "ratchets": [],
+          "topCuts": "147",
+          "url": "https://beywatch.gg/blades/glory-valkyrie",
+          "usage": "1.5%",
+          "statisticsStatus": "ranked",
+          "canonicalId": "GLORY_VALKYRIE",
+          "identityMatchStatus": "exact",
+          "catalogMatchStatus": "exact",
+          "displayNameZh": "榮耀戰神",
+          "catalogEnglishName": "Glory Valkyrie",
+          "catalogModels": [
+            "UX-20"
+          ],
+          "catalogRecordIds": [
+            "UX-20"
+          ]
+        },
+        {
+          "bits": [
+            {
+              "firstRate": "31.4%",
+              "part": "Low Rush (LR)",
+              "pick": "39.3%",
               "canonicalId": "LR",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "28.6%",
               "part": "Kick (K)",
-              "pick": "15.9%",
+              "pick": "15.7%",
               "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "53.8%",
               "part": "Rush (R)",
-              "pick": "14.8%",
+              "pick": "14.6%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "44.4%",
               "part": "Level (L)",
-              "pick": "10.2%",
+              "pick": "10.1%",
               "canonicalId": "L",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "28.6%",
               "part": "Jolt (J)",
-              "pick": "8.0%",
+              "pick": "7.9%",
               "canonicalId": "J",
               "identityMatchStatus": "exact"
             }
@@ -12481,47 +12481,47 @@
               "topCuts": "2"
             }
           ],
-          "firstRate": "34.1%",
+          "firstRate": "33.7%",
           "name": "Blitz",
           "rank": "13",
           "ratchets": [
             {
               "firstRate": "42.5%",
               "part": "1-50",
-              "pick": "45.5%",
+              "pick": "44.9%",
               "canonicalId": "1-50",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "20.0%",
               "part": "1-60",
-              "pick": "17.0%",
+              "pick": "16.9%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "40.0%",
+              "firstRate": "36.4%",
               "part": "9-60",
-              "pick": "11.4%",
+              "pick": "12.4%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "33.3%",
               "part": "7-60",
-              "pick": "10.2%",
+              "pick": "10.1%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "20.0%",
               "part": "1-70",
-              "pick": "5.7%",
+              "pick": "5.6%",
               "canonicalId": "1-70",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "85",
+          "topCuts": "86",
           "url": "https://beywatch.gg/blades/blitz",
           "usage": "0.9%",
           "statisticsStatus": "ranked",
@@ -12538,21 +12538,21 @@
             {
               "firstRate": "32.4%",
               "part": "Hexa (H)",
-              "pick": "36.6%",
+              "pick": "36.5%",
               "canonicalId": "H",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "25.6%",
+              "firstRate": "25.0%",
               "part": "Jolt (J)",
-              "pick": "19.3%",
+              "pick": "19.7%",
               "canonicalId": "J",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "33.3%",
               "part": "Merge (M)",
-              "pick": "11.9%",
+              "pick": "11.8%",
               "canonicalId": "M",
               "identityMatchStatus": "exact"
             },
@@ -12580,9 +12580,9 @@
             },
             {
               "combo": "Bullet Griffon J",
-              "firstRate": "25.6%",
+              "firstRate": "25.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "39"
+              "topCuts": "40"
             },
             {
               "combo": "Bullet Griffon M",
@@ -12633,11 +12633,11 @@
               "topCuts": "2"
             }
           ],
-          "firstRate": "31.5%",
+          "firstRate": "31.3%",
           "name": "Bullet Griffon",
           "rank": "14",
           "ratchets": [],
-          "topCuts": "197",
+          "topCuts": "198",
           "url": "https://beywatch.gg/blades/bullet-griffon",
           "usage": "2.0%",
           "statisticsStatus": "ranked",
@@ -12670,7 +12670,7 @@
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "31.5%",
+              "firstRate": "31.2%",
               "part": "Kick (K)",
               "pick": "9.8%",
               "canonicalId": "K",
@@ -12736,9 +12736,9 @@
             },
             {
               "combo": "Tyranno Beat 1-70K",
-              "firstRate": "36.7%",
+              "firstRate": "35.5%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "30"
+              "topCuts": "31"
             },
             {
               "combo": "Tyranno Beat 9-70R",
@@ -12753,7 +12753,7 @@
               "topCuts": "23"
             }
           ],
-          "firstRate": "31.4%",
+          "firstRate": "31.3%",
           "name": "Tyranno Beat",
           "rank": "15",
           "ratchets": [
@@ -12781,19 +12781,19 @@
             {
               "firstRate": "28.6%",
               "part": "5-60",
-              "pick": "10.8%",
+              "pick": "10.7%",
               "canonicalId": "5-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "28.3%",
+              "firstRate": "28.0%",
               "part": "1-70",
-              "pick": "9.6%",
+              "pick": "9.7%",
               "canonicalId": "1-70",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "1,055",
+          "topCuts": "1,056",
           "url": "https://beywatch.gg/blades/tyranno-beat",
           "usage": "10.9%",
           "statisticsStatus": "ranked",
@@ -12976,317 +12976,6 @@
         {
           "bits": [
             {
-              "firstRate": "29.3%",
-              "part": "Low Orb (LO)",
-              "pick": "42.5%",
-              "canonicalId": "LO",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "32.9%",
-              "part": "Under Needle (UN)",
-              "pick": "25.6%",
-              "canonicalId": "UN",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "26.5%",
-              "part": "Free Ball (FB)",
-              "pick": "17.9%",
-              "canonicalId": "FB",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "35.7%",
-              "part": "Ball (B)",
-              "pick": "5.1%",
-              "canonicalId": "B",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "20.0%",
-              "part": "Wedge (W)",
-              "pick": "1.8%",
-              "canonicalId": "W",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "combos": [
-            {
-              "combo": "Clock Mirage 4-55LO",
-              "firstRate": "30.6%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "72"
-            },
-            {
-              "combo": "Clock Mirage 4-55UN",
-              "firstRate": "29.5%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "44"
-            },
-            {
-              "combo": "Clock Mirage 7-55LO",
-              "firstRate": "27.3%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "44"
-            },
-            {
-              "combo": "Clock Mirage 7-55FB",
-              "firstRate": "21.4%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "28"
-            },
-            {
-              "combo": "Clock Mirage 7-55UN",
-              "firstRate": "40.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "20"
-            },
-            {
-              "combo": "Clock Mirage 4-55FB",
-              "firstRate": "31.6%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "19"
-            },
-            {
-              "combo": "Clock Mirage 4-55B",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "6"
-            },
-            {
-              "combo": "Clock Mirage 4-55W",
-              "firstRate": "20.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "5"
-            },
-            {
-              "combo": "Clock Mirage M-85UN",
-              "firstRate": "25.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            },
-            {
-              "combo": "Clock Mirage 7-55E",
-              "firstRate": "25.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            }
-          ],
-          "firstRate": "30.6%",
-          "name": "Clock Mirage",
-          "rank": "17",
-          "ratchets": [
-            {
-              "firstRate": "32.0%",
-              "part": "4-55",
-              "pick": "56.0%",
-              "canonicalId": "4-55",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "27.3%",
-              "part": "7-55",
-              "pick": "36.3%",
-              "canonicalId": "7-55",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "14.3%",
-              "part": "3-85",
-              "pick": "2.6%",
-              "canonicalId": "3-85",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "33.3%",
-              "part": "9-65",
-              "pick": "2.2%",
-              "canonicalId": "9-65",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "topCuts": "268",
-          "url": "https://beywatch.gg/blades/clock-mirage",
-          "usage": "2.8%",
-          "statisticsStatus": "ranked",
-          "canonicalId": "CLOCK_MIRAGE",
-          "identityMatchStatus": "exact",
-          "catalogMatchStatus": "exact",
-          "displayNameZh": "時鐘幻象",
-          "catalogEnglishName": "ClockMirage",
-          "catalogModels": [
-            "UX-16-01",
-            "UX-16-02",
-            "UX-16-03"
-          ],
-          "catalogRecordIds": [
-            "UX-16-01",
-            "UX-16-02",
-            "UX-16-03"
-          ]
-        },
-        {
-          "bits": [
-            {
-              "firstRate": "31.1%",
-              "part": "Free Ball (FB)",
-              "pick": "22.9%",
-              "canonicalId": "FB",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "32.1%",
-              "part": "Kick (K)",
-              "pick": "12.4%",
-              "canonicalId": "K",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "32.4%",
-              "part": "Hexa (H)",
-              "pick": "8.2%",
-              "canonicalId": "H",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "31.4%",
-              "part": "Level (L)",
-              "pick": "7.8%",
-              "canonicalId": "L",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "25.0%",
-              "part": "Rush (R)",
-              "pick": "7.1%",
-              "canonicalId": "R",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "combos": [
-            {
-              "combo": "Scorpio Spear 9-60FB",
-              "firstRate": "40.9%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "66"
-            },
-            {
-              "combo": "Scorpio Spear 9-60K",
-              "firstRate": "42.9%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "28"
-            },
-            {
-              "combo": "Scorpio Spear 3-60FB",
-              "firstRate": "10.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "20"
-            },
-            {
-              "combo": "Scorpio Spear 9-60P",
-              "firstRate": "6.3%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "16"
-            },
-            {
-              "combo": "Scorpio Spear 7-60L",
-              "firstRate": "35.7%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "14"
-            },
-            {
-              "combo": "Scorpio Spear 9-60E",
-              "firstRate": "15.4%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "13"
-            },
-            {
-              "combo": "Scorpio Spear 9-60W",
-              "firstRate": "33.3%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "12"
-            },
-            {
-              "combo": "Scorpio Spear 9-60R",
-              "firstRate": "16.7%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "12"
-            },
-            {
-              "combo": "Scorpio Spear 9-60H",
-              "firstRate": "8.3%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "12"
-            },
-            {
-              "combo": "Scorpio Spear 9-60B",
-              "firstRate": "36.4%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "11"
-            }
-          ],
-          "firstRate": "30.4%",
-          "name": "Scorpio Spear",
-          "rank": "18",
-          "ratchets": [
-            {
-              "firstRate": "31.4%",
-              "part": "9-60",
-              "pick": "46.0%",
-              "canonicalId": "9-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "18.7%",
-              "part": "3-60",
-              "pick": "16.7%",
-              "canonicalId": "3-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "37.7%",
-              "part": "7-60",
-              "pick": "11.8%",
-              "canonicalId": "7-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "31.6%",
-              "part": "1-60",
-              "pick": "8.4%",
-              "canonicalId": "1-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "38.9%",
-              "part": "9-70",
-              "pick": "4.0%",
-              "canonicalId": "9-70",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "topCuts": "427",
-          "url": "https://beywatch.gg/blades/scorpio-spear",
-          "usage": "4.4%",
-          "statisticsStatus": "ranked",
-          "canonicalId": "SCORPIO_SPEAR",
-          "identityMatchStatus": "exact",
-          "catalogMatchStatus": "exact",
-          "displayNameZh": "天蠍長矛",
-          "catalogEnglishName": "ScorpioSpear",
-          "catalogModels": [
-            "BXG-61",
-            "UX-14"
-          ],
-          "catalogRecordIds": [
-            "BXG-61",
-            "UX-14"
-          ]
-        },
-        {
-          "bits": [
-            {
               "firstRate": "45.8%",
               "part": "Low Rush (LR)",
               "pick": "36.9%",
@@ -13386,7 +13075,7 @@
           ],
           "firstRate": "32.3%",
           "name": "Rage",
-          "rank": "19",
+          "rank": "17",
           "ratchets": [
             {
               "firstRate": "37.0%",
@@ -13439,159 +13128,319 @@
         {
           "bits": [
             {
-              "firstRate": "31.3%",
-              "part": "Hexa (H)",
-              "pick": "19.2%",
-              "canonicalId": "H",
+              "firstRate": "29.3%",
+              "part": "Low Orb (LO)",
+              "pick": "42.3%",
+              "canonicalId": "LO",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "34.4%",
+              "firstRate": "32.9%",
+              "part": "Under Needle (UN)",
+              "pick": "25.5%",
+              "canonicalId": "UN",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "26.0%",
               "part": "Free Ball (FB)",
-              "pick": "15.5%",
+              "pick": "18.2%",
               "canonicalId": "FB",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "20.5%",
+              "firstRate": "35.7%",
+              "part": "Ball (B)",
+              "pick": "5.1%",
+              "canonicalId": "B",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "20.0%",
               "part": "Wedge (W)",
-              "pick": "13.8%",
+              "pick": "1.8%",
               "canonicalId": "W",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "23.9%",
-              "part": "Low Rush (LR)",
-              "pick": "11.2%",
-              "canonicalId": "LR",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "22.9%",
-              "part": "Under Needle (UN)",
-              "pick": "8.0%",
-              "canonicalId": "UN",
               "identityMatchStatus": "exact"
             }
           ],
           "combos": [
             {
-              "combo": "Golem Rock 9-60FB",
-              "firstRate": "31.5%",
+              "combo": "Clock Mirage 4-55LO",
+              "firstRate": "30.6%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "54"
+              "topCuts": "72"
             },
             {
-              "combo": "Golem Rock 1-60H",
-              "firstRate": "41.4%",
+              "combo": "Clock Mirage 4-55UN",
+              "firstRate": "29.5%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "29"
+              "topCuts": "44"
             },
             {
-              "combo": "Golem Rock 7-60LR",
+              "combo": "Clock Mirage 7-55LO",
+              "firstRate": "27.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "44"
+            },
+            {
+              "combo": "Clock Mirage 7-55FB",
+              "firstRate": "21.4%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "28"
+            },
+            {
+              "combo": "Clock Mirage 7-55UN",
+              "firstRate": "40.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "20"
+            },
+            {
+              "combo": "Clock Mirage 4-55FB",
+              "firstRate": "30.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "20"
+            },
+            {
+              "combo": "Clock Mirage 4-55B",
+              "firstRate": "50.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "6"
+            },
+            {
+              "combo": "Clock Mirage 4-55W",
               "firstRate": "20.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "25"
+              "topCuts": "5"
             },
             {
-              "combo": "Golem Rock 6-60H",
+              "combo": "Clock Mirage M-85UN",
               "firstRate": "25.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "24"
+              "topCuts": "4"
             },
             {
-              "combo": "Golem Rock 7-60H",
-              "firstRate": "26.1%",
+              "combo": "Clock Mirage 7-55E",
+              "firstRate": "25.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "23"
+              "topCuts": "4"
+            }
+          ],
+          "firstRate": "30.5%",
+          "name": "Clock Mirage",
+          "rank": "18",
+          "ratchets": [
+            {
+              "firstRate": "31.8%",
+              "part": "4-55",
+              "pick": "56.2%",
+              "canonicalId": "4-55",
+              "identityMatchStatus": "exact"
             },
             {
-              "combo": "Golem Rock 1-60UN",
+              "firstRate": "27.3%",
+              "part": "7-55",
+              "pick": "36.1%",
+              "canonicalId": "7-55",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "42.9%",
+              "part": "M-85",
+              "pick": "2.6%",
+              "canonicalId": "M-85",
+              "identityMatchStatus": "unmatched"
+            },
+            {
+              "firstRate": "14.3%",
+              "part": "3-85",
+              "pick": "2.6%",
+              "canonicalId": "3-85",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "33.3%",
+              "part": "9-65",
+              "pick": "2.2%",
+              "canonicalId": "9-65",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "topCuts": "269",
+          "url": "https://beywatch.gg/blades/clock-mirage",
+          "usage": "2.8%",
+          "statisticsStatus": "ranked",
+          "canonicalId": "CLOCK_MIRAGE",
+          "identityMatchStatus": "exact",
+          "catalogMatchStatus": "exact",
+          "displayNameZh": "時鐘幻象",
+          "catalogEnglishName": "ClockMirage",
+          "catalogModels": [
+            "UX-16-01",
+            "UX-16-02",
+            "UX-16-03"
+          ],
+          "catalogRecordIds": [
+            "UX-16-01",
+            "UX-16-02",
+            "UX-16-03"
+          ]
+        },
+        {
+          "bits": [
+            {
+              "firstRate": "31.1%",
+              "part": "Free Ball (FB)",
+              "pick": "22.8%",
+              "canonicalId": "FB",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "32.1%",
+              "part": "Kick (K)",
+              "pick": "12.4%",
+              "canonicalId": "K",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "32.4%",
+              "part": "Hexa (H)",
+              "pick": "8.2%",
+              "canonicalId": "H",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "30.6%",
+              "part": "Level (L)",
+              "pick": "8.0%",
+              "canonicalId": "L",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "25.0%",
+              "part": "Rush (R)",
+              "pick": "7.1%",
+              "canonicalId": "R",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "combos": [
+            {
+              "combo": "Scorpio Spear 9-60FB",
+              "firstRate": "40.9%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "66"
+            },
+            {
+              "combo": "Scorpio Spear 9-60K",
               "firstRate": "42.9%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "21"
+              "topCuts": "28"
             },
             {
-              "combo": "Golem Rock 6-60W",
-              "firstRate": "9.5%",
+              "combo": "Scorpio Spear 3-60FB",
+              "firstRate": "10.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "21"
+              "topCuts": "20"
             },
             {
-              "combo": "Golem Rock 9-60W",
-              "firstRate": "25.0%",
+              "combo": "Scorpio Spear 9-60P",
+              "firstRate": "6.3%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "16"
             },
             {
-              "combo": "Golem Rock 9-60LO",
-              "firstRate": "46.2%",
+              "combo": "Scorpio Spear 7-60L",
+              "firstRate": "33.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "15"
+            },
+            {
+              "combo": "Scorpio Spear 9-60E",
+              "firstRate": "15.4%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "13"
             },
             {
-              "combo": "Golem Rock 1-60R",
-              "firstRate": "23.1%",
+              "combo": "Scorpio Spear 9-60W",
+              "firstRate": "33.3%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "13"
+              "topCuts": "12"
+            },
+            {
+              "combo": "Scorpio Spear 9-60R",
+              "firstRate": "16.7%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "12"
+            },
+            {
+              "combo": "Scorpio Spear 9-60H",
+              "firstRate": "8.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "12"
+            },
+            {
+              "combo": "Scorpio Spear 9-60B",
+              "firstRate": "36.4%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "11"
             }
           ],
-          "firstRate": "28.5%",
-          "name": "Golem Rock",
-          "rank": "20",
+          "firstRate": "30.4%",
+          "name": "Scorpio Spear",
+          "rank": "19",
           "ratchets": [
             {
-              "firstRate": "30.3%",
+              "firstRate": "31.4%",
               "part": "9-60",
-              "pick": "22.0%",
+              "pick": "45.9%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "36.1%",
-              "part": "1-60",
-              "pick": "18.0%",
-              "canonicalId": "1-60",
+              "firstRate": "18.7%",
+              "part": "3-60",
+              "pick": "16.6%",
+              "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "21.2%",
+              "firstRate": "37.0%",
               "part": "7-60",
-              "pick": "16.5%",
+              "pick": "12.0%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "19.8%",
-              "part": "6-60",
-              "pick": "13.5%",
-              "canonicalId": "6-60",
+              "firstRate": "31.6%",
+              "part": "1-60",
+              "pick": "8.4%",
+              "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "33.8%",
-              "part": "3-60",
-              "pick": "10.8%",
-              "canonicalId": "3-60",
+              "firstRate": "38.9%",
+              "part": "9-70",
+              "pick": "4.0%",
+              "canonicalId": "9-70",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "582",
-          "url": "https://beywatch.gg/blades/golem-rock",
-          "usage": "6.0%",
+          "topCuts": "428",
+          "url": "https://beywatch.gg/blades/scorpio-spear",
+          "usage": "4.4%",
           "statisticsStatus": "ranked",
-          "canonicalId": "GOLEM_ROCK",
+          "canonicalId": "SCORPIO_SPEAR",
           "identityMatchStatus": "exact",
           "catalogMatchStatus": "exact",
-          "displayNameZh": "魔像奇岩",
-          "catalogEnglishName": "GolemRock",
+          "displayNameZh": "天蠍長矛",
+          "catalogEnglishName": "ScorpioSpear",
           "catalogModels": [
-            "CX-11-02",
-            "UX-13"
+            "BXG-61",
+            "UX-14"
           ],
           "catalogRecordIds": [
-            "CX-11-02",
-            "UX-13"
+            "BXG-61",
+            "UX-14"
           ]
         },
         {
@@ -13696,7 +13545,7 @@
           ],
           "firstRate": "31.0%",
           "name": "Mummy Curse",
-          "rank": "21",
+          "rank": "20",
           "ratchets": [
             {
               "firstRate": "25.0%",
@@ -13750,6 +13599,164 @@
           "catalogRecordIds": [
             "UX-18-01",
             "UX-18-02"
+          ]
+        },
+        {
+          "bits": [
+            {
+              "firstRate": "31.3%",
+              "part": "Hexa (H)",
+              "pick": "19.1%",
+              "canonicalId": "H",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "34.4%",
+              "part": "Free Ball (FB)",
+              "pick": "15.4%",
+              "canonicalId": "FB",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "20.5%",
+              "part": "Wedge (W)",
+              "pick": "13.8%",
+              "canonicalId": "W",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "23.9%",
+              "part": "Low Rush (LR)",
+              "pick": "11.1%",
+              "canonicalId": "LR",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "22.4%",
+              "part": "Under Needle (UN)",
+              "pick": "8.1%",
+              "canonicalId": "UN",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "combos": [
+            {
+              "combo": "Golem Rock 9-60FB",
+              "firstRate": "31.5%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "54"
+            },
+            {
+              "combo": "Golem Rock 1-60H",
+              "firstRate": "41.4%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "29"
+            },
+            {
+              "combo": "Golem Rock 7-60LR",
+              "firstRate": "20.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "25"
+            },
+            {
+              "combo": "Golem Rock 6-60H",
+              "firstRate": "25.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "24"
+            },
+            {
+              "combo": "Golem Rock 7-60H",
+              "firstRate": "26.1%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "23"
+            },
+            {
+              "combo": "Golem Rock 1-60UN",
+              "firstRate": "42.9%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "21"
+            },
+            {
+              "combo": "Golem Rock 6-60W",
+              "firstRate": "9.5%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "21"
+            },
+            {
+              "combo": "Golem Rock 9-60W",
+              "firstRate": "25.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "16"
+            },
+            {
+              "combo": "Golem Rock 9-60LO",
+              "firstRate": "42.9%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "14"
+            },
+            {
+              "combo": "Golem Rock 1-60R",
+              "firstRate": "23.1%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "13"
+            }
+          ],
+          "firstRate": "28.4%",
+          "name": "Golem Rock",
+          "rank": "21",
+          "ratchets": [
+            {
+              "firstRate": "30.1%",
+              "part": "9-60",
+              "pick": "22.1%",
+              "canonicalId": "9-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "36.1%",
+              "part": "1-60",
+              "pick": "17.9%",
+              "canonicalId": "1-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "21.2%",
+              "part": "7-60",
+              "pick": "16.4%",
+              "canonicalId": "7-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "19.8%",
+              "part": "6-60",
+              "pick": "13.5%",
+              "canonicalId": "6-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "33.8%",
+              "part": "3-60",
+              "pick": "10.8%",
+              "canonicalId": "3-60",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "topCuts": "584",
+          "url": "https://beywatch.gg/blades/golem-rock",
+          "usage": "6.0%",
+          "statisticsStatus": "ranked",
+          "canonicalId": "GOLEM_ROCK",
+          "identityMatchStatus": "exact",
+          "catalogMatchStatus": "exact",
+          "displayNameZh": "魔像奇岩",
+          "catalogEnglishName": "GolemRock",
+          "catalogModels": [
+            "CX-11-02",
+            "UX-13"
+          ],
+          "catalogRecordIds": [
+            "CX-11-02",
+            "UX-13"
           ]
         },
         {
@@ -13923,164 +13930,6 @@
         {
           "bits": [
             {
-              "firstRate": "34.0%",
-              "part": "Kick (K)",
-              "pick": "43.8%",
-              "canonicalId": "K",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "30.8%",
-              "part": "Low Rush (LR)",
-              "pick": "21.5%",
-              "canonicalId": "LR",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "22.2%",
-              "part": "Jolt (J)",
-              "pick": "7.4%",
-              "canonicalId": "J",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "20.0%",
-              "part": "Orb (O)",
-              "pick": "4.1%",
-              "canonicalId": "O",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "0.0%",
-              "part": "Free Ball (FB)",
-              "pick": "4.1%",
-              "canonicalId": "FB",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "combos": [
-            {
-              "combo": "Unicorn Delta Peak Heavy 3-60LR",
-              "firstRate": "15.4%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "13"
-            },
-            {
-              "combo": "Emperor Delta Peak Heavy 9-60K",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "12"
-            },
-            {
-              "combo": "Unicorn Delta Peak Heavy 3-60K",
-              "firstRate": "37.5%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "8"
-            },
-            {
-              "combo": "Unicorn Delta Peak Heavy 1-50K",
-              "firstRate": "33.3%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "6"
-            },
-            {
-              "combo": "Valkyrie Delta Peak Heavy 9-60K",
-              "firstRate": "20.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "5"
-            },
-            {
-              "combo": "Unicorn Delta Peak Jaggy 9-60O",
-              "firstRate": "25.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            },
-            {
-              "combo": "Unicorn Delta Peak Heavy 9-60K",
-              "firstRate": "25.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            },
-            {
-              "combo": "Emperor Delta Peak Heavy 3-60LR",
-              "firstRate": "66.7%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "3"
-            },
-            {
-              "combo": "Emperor Delta Peak Heavy 9-60J",
-              "firstRate": "0.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "3"
-            },
-            {
-              "combo": "Emperor Delta Peak Heavy 3-60K",
-              "firstRate": "0.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "3"
-            }
-          ],
-          "firstRate": "29.9%",
-          "name": "Delta",
-          "rank": "23",
-          "ratchets": [
-            {
-              "firstRate": "32.6%",
-              "part": "9-60",
-              "pick": "35.5%",
-              "canonicalId": "9-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "26.2%",
-              "part": "3-60",
-              "pick": "34.7%",
-              "canonicalId": "3-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "21.4%",
-              "part": "1-50",
-              "pick": "11.6%",
-              "canonicalId": "1-50",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "33.3%",
-              "part": "1-60",
-              "pick": "7.4%",
-              "canonicalId": "1-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "66.7%",
-              "part": "7-60",
-              "pick": "2.5%",
-              "canonicalId": "7-60",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "topCuts": "117",
-          "url": "https://beywatch.gg/blades/delta",
-          "usage": "1.2%",
-          "statisticsStatus": "ranked",
-          "canonicalId": null,
-          "identityMatchStatus": "unmatched",
-          "catalogMatchStatus": "model_verified_alias",
-          "displayNameZh": "獨角極變",
-          "catalogEnglishName": "Unicorn Delta",
-          "catalogModels": [
-            "CX-17-01",
-            "CX-17-02"
-          ],
-          "catalogRecordIds": [
-            "CX-17-01",
-            "CX-17-02"
-          ]
-        },
-        {
-          "bits": [
-            {
               "firstRate": "36.1%",
               "part": "Ball (B)",
               "pick": "44.5%",
@@ -14180,7 +14029,7 @@
           ],
           "firstRate": "32.7%",
           "name": "Hells Scythe",
-          "rank": "24",
+          "rank": "23",
           "ratchets": [
             {
               "firstRate": "30.8%",
@@ -14238,6 +14087,164 @@
             "BX-08-01",
             "BX-14-04",
             "BX-48-04"
+          ]
+        },
+        {
+          "bits": [
+            {
+              "firstRate": "34.0%",
+              "part": "Kick (K)",
+              "pick": "43.4%",
+              "canonicalId": "K",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "30.8%",
+              "part": "Low Rush (LR)",
+              "pick": "21.3%",
+              "canonicalId": "LR",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "22.2%",
+              "part": "Jolt (J)",
+              "pick": "7.4%",
+              "canonicalId": "J",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "0.0%",
+              "part": "Free Ball (FB)",
+              "pick": "4.9%",
+              "canonicalId": "FB",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "20.0%",
+              "part": "Orb (O)",
+              "pick": "4.1%",
+              "canonicalId": "O",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "combos": [
+            {
+              "combo": "Unicorn Delta Peak Heavy 3-60LR",
+              "firstRate": "15.4%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "13"
+            },
+            {
+              "combo": "Emperor Delta Peak Heavy 9-60K",
+              "firstRate": "50.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "12"
+            },
+            {
+              "combo": "Unicorn Delta Peak Heavy 3-60K",
+              "firstRate": "37.5%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "8"
+            },
+            {
+              "combo": "Unicorn Delta Peak Heavy 1-50K",
+              "firstRate": "33.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "6"
+            },
+            {
+              "combo": "Valkyrie Delta Peak Heavy 9-60K",
+              "firstRate": "20.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "5"
+            },
+            {
+              "combo": "Unicorn Delta Peak Jaggy 9-60O",
+              "firstRate": "25.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            },
+            {
+              "combo": "Unicorn Delta Peak Heavy 9-60K",
+              "firstRate": "25.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            },
+            {
+              "combo": "Emperor Delta Peak Heavy 3-60LR",
+              "firstRate": "66.7%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "3"
+            },
+            {
+              "combo": "Emperor Delta Peak Heavy 9-60J",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "3"
+            },
+            {
+              "combo": "Emperor Delta Peak Heavy 3-60K",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "3"
+            }
+          ],
+          "firstRate": "29.7%",
+          "name": "Delta",
+          "rank": "24",
+          "ratchets": [
+            {
+              "firstRate": "25.6%",
+              "part": "3-60",
+              "pick": "35.2%",
+              "canonicalId": "3-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "32.6%",
+              "part": "9-60",
+              "pick": "35.2%",
+              "canonicalId": "9-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "21.4%",
+              "part": "1-50",
+              "pick": "11.5%",
+              "canonicalId": "1-50",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "33.3%",
+              "part": "1-60",
+              "pick": "7.4%",
+              "canonicalId": "1-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "66.7%",
+              "part": "7-60",
+              "pick": "2.5%",
+              "canonicalId": "7-60",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "topCuts": "118",
+          "url": "https://beywatch.gg/blades/delta",
+          "usage": "1.2%",
+          "statisticsStatus": "ranked",
+          "canonicalId": null,
+          "identityMatchStatus": "unmatched",
+          "catalogMatchStatus": "model_verified_alias",
+          "displayNameZh": "獨角極變",
+          "catalogEnglishName": "Unicorn Delta",
+          "catalogModels": [
+            "CX-17-01",
+            "CX-17-02"
+          ],
+          "catalogRecordIds": [
+            "CX-17-01",
+            "CX-17-02"
           ]
         },
         {
@@ -14397,35 +14404,35 @@
             {
               "firstRate": "42.9%",
               "part": "Kick (K)",
-              "pick": "12.6%",
+              "pick": "12.3%",
               "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "14.3%",
               "part": "Point (P)",
-              "pick": "12.6%",
+              "pick": "12.3%",
               "canonicalId": "P",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "8.3%",
+              "firstRate": "7.7%",
               "part": "Hexa (H)",
-              "pick": "10.8%",
+              "pick": "11.4%",
               "canonicalId": "H",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "27.3%",
               "part": "Rush (R)",
-              "pick": "9.9%",
+              "pick": "9.6%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "37.5%",
               "part": "Level (L)",
-              "pick": "7.2%",
+              "pick": "7.0%",
               "canonicalId": "L",
               "identityMatchStatus": "exact"
             }
@@ -14480,59 +14487,59 @@
               "topCuts": "4"
             },
             {
+              "combo": "Hells Hammer 3-60H",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            },
+            {
               "combo": "Hells Hammer 9-70K",
               "firstRate": "66.7%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "3"
-            },
-            {
-              "combo": "Hells Hammer 3-60J",
-              "firstRate": "33.3%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "3"
             }
           ],
-          "firstRate": "27.1%",
+          "firstRate": "26.9%",
           "name": "Hells Hammer",
           "rank": "26",
           "ratchets": [
             {
-              "firstRate": "25.7%",
+              "firstRate": "25.0%",
               "part": "3-60",
-              "pick": "31.5%",
+              "pick": "31.6%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "18.8%",
               "part": "3-70",
-              "pick": "14.4%",
+              "pick": "14.0%",
               "canonicalId": "3-70",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "20.0%",
               "part": "9-60",
-              "pick": "13.5%",
+              "pick": "13.2%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "42.9%",
               "part": "9-70",
-              "pick": "6.3%",
+              "pick": "6.1%",
               "canonicalId": "9-70",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "50.0%",
-              "part": "7-60",
-              "pick": "5.4%",
-              "canonicalId": "7-60",
-              "identityMatchStatus": "exact"
+              "firstRate": "14.3%",
+              "part": "1-60",
+              "pick": "6.1%",
+              "canonicalId": "1-60",
+              "identityMatchStatus": "unmatched"
             }
           ],
-          "topCuts": "107",
+          "topCuts": "108",
           "url": "https://beywatch.gg/blades/hells-hammer",
           "usage": "1.1%",
           "statisticsStatus": "ranked",
@@ -14555,14 +14562,14 @@
             {
               "firstRate": "23.1%",
               "part": "Rush (R)",
-              "pick": "22.8%",
+              "pick": "22.6%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "27.8%",
               "part": "Low Rush (LR)",
-              "pick": "15.8%",
+              "pick": "15.7%",
               "canonicalId": "LR",
               "identityMatchStatus": "exact"
             },
@@ -14574,17 +14581,17 @@
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "44.4%",
-              "part": "Flat (F)",
-              "pick": "7.9%",
-              "canonicalId": "F",
+              "firstRate": "11.1%",
+              "part": "Elevate (E)",
+              "pick": "7.8%",
+              "canonicalId": "E",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "12.5%",
-              "part": "Elevate (E)",
-              "pick": "7.0%",
-              "canonicalId": "E",
+              "firstRate": "44.4%",
+              "part": "Flat (F)",
+              "pick": "7.8%",
+              "canonicalId": "F",
               "identityMatchStatus": "exact"
             }
           ],
@@ -14650,28 +14657,28 @@
               "topCuts": "3"
             }
           ],
-          "firstRate": "31.4%",
+          "firstRate": "31.1%",
           "name": "Cobalt Drake",
           "rank": "27",
           "ratchets": [
             {
               "firstRate": "23.8%",
               "part": "9-60",
-              "pick": "36.8%",
+              "pick": "36.5%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "20.0%",
+              "firstRate": "19.2%",
               "part": "5-60",
-              "pick": "21.9%",
+              "pick": "22.6%",
               "canonicalId": "5-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "40.0%",
               "part": "3-60",
-              "pick": "13.2%",
+              "pick": "13.0%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
@@ -14685,12 +14692,12 @@
             {
               "firstRate": "50.0%",
               "part": "4-60",
-              "pick": "5.3%",
+              "pick": "5.2%",
               "canonicalId": "4-60",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "105",
+          "topCuts": "106",
           "url": "https://beywatch.gg/blades/cobalt-drake",
           "usage": "1.1%",
           "statisticsStatus": "ranked",
@@ -15039,158 +15046,6 @@
         {
           "bits": [
             {
-              "firstRate": "25.6%",
-              "part": "Rush (R)",
-              "pick": "26.9%",
-              "canonicalId": "R",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "30.8%",
-              "part": "Point (P)",
-              "pick": "17.9%",
-              "canonicalId": "P",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "29.4%",
-              "part": "Low Rush (LR)",
-              "pick": "11.7%",
-              "canonicalId": "LR",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "36.4%",
-              "part": "Taper (T)",
-              "pick": "7.6%",
-              "canonicalId": "T",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "22.2%",
-              "part": "Low Flat (LF)",
-              "pick": "6.2%",
-              "canonicalId": "LF",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "combos": [
-            {
-              "combo": "Roar Tyranno 1-60R",
-              "firstRate": "30.8%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "13"
-            },
-            {
-              "combo": "Roar Tyranno 3-60R",
-              "firstRate": "23.1%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "13"
-            },
-            {
-              "combo": "Roar Tyranno 5-60P",
-              "firstRate": "0.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "7"
-            },
-            {
-              "combo": "Roar Tyranno 9-60R",
-              "firstRate": "16.7%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "6"
-            },
-            {
-              "combo": "Roar Tyranno 1-60LR",
-              "firstRate": "20.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "5"
-            },
-            {
-              "combo": "Roar Tyranno 3-60T",
-              "firstRate": "75.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            },
-            {
-              "combo": "Roar Tyranno 9-60H",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            },
-            {
-              "combo": "Roar Tyranno 1-60LF",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            },
-            {
-              "combo": "Roar Tyranno 3-60LR",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            },
-            {
-              "combo": "Roar Tyranno 3-60P",
-              "firstRate": "25.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            }
-          ],
-          "firstRate": "28.4%",
-          "name": "Roar Tyranno",
-          "rank": "30",
-          "ratchets": [
-            {
-              "firstRate": "29.7%",
-              "part": "1-60",
-              "pick": "25.5%",
-              "canonicalId": "1-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "34.3%",
-              "part": "3-60",
-              "pick": "24.1%",
-              "canonicalId": "3-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "30.8%",
-              "part": "9-60",
-              "pick": "17.9%",
-              "canonicalId": "9-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "0.0%",
-              "part": "5-60",
-              "pick": "6.9%",
-              "canonicalId": "5-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "22.2%",
-              "part": "3-70",
-              "pick": "6.2%",
-              "canonicalId": "3-70",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "topCuts": "141",
-          "url": "https://beywatch.gg/blades/roar-tyranno",
-          "usage": "1.5%",
-          "statisticsStatus": "ranked",
-          "canonicalId": "暴龍咆哮",
-          "identityMatchStatus": "exact",
-          "catalogMatchStatus": "unmatched",
-          "displayNameZh": null,
-          "catalogEnglishName": null,
-          "catalogModels": [],
-          "catalogRecordIds": []
-        },
-        {
-          "bits": [
-            {
               "firstRate": "15.4%",
               "part": "Low Rush (LR)",
               "pick": "14.2%",
@@ -15290,7 +15145,7 @@
           ],
           "firstRate": "26.5%",
           "name": "Samurai Calibur",
-          "rank": "31",
+          "rank": "30",
           "ratchets": [
             {
               "firstRate": "34.0%",
@@ -15343,6 +15198,316 @@
           "catalogRecordIds": [
             "BX-45"
           ]
+        },
+        {
+          "bits": [
+            {
+              "firstRate": "40.0%",
+              "part": "Ball (B)",
+              "pick": "25.2%",
+              "canonicalId": "B",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "25.0%",
+              "part": "Orb (O)",
+              "pick": "20.2%",
+              "canonicalId": "O",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "44.4%",
+              "part": "Hexa (H)",
+              "pick": "7.6%",
+              "canonicalId": "H",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "12.5%",
+              "part": "High Taper (HT)",
+              "pick": "6.7%",
+              "canonicalId": "HT",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "28.6%",
+              "part": "Point (P)",
+              "pick": "5.9%",
+              "canonicalId": "P",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "combos": [
+            {
+              "combo": "Hells Chain 9-60B",
+              "firstRate": "53.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "15"
+            },
+            {
+              "combo": "Hells Chain 9-60O",
+              "firstRate": "25.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "8"
+            },
+            {
+              "combo": "Hells Chain 5-60B",
+              "firstRate": "14.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "7"
+            },
+            {
+              "combo": "Hells Chain 5-60O",
+              "firstRate": "16.7%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "6"
+            },
+            {
+              "combo": "Hells Chain 5-60HT",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "6"
+            },
+            {
+              "combo": "Hells Chain 5-60P",
+              "firstRate": "40.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "5"
+            },
+            {
+              "combo": "Hells Chain 4-60B",
+              "firstRate": "75.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            },
+            {
+              "combo": "Hells Chain 3-60O",
+              "firstRate": "50.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            },
+            {
+              "combo": "Hells Chain 5-60F",
+              "firstRate": "25.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            },
+            {
+              "combo": "Hells Chain 5-60H",
+              "firstRate": "25.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            }
+          ],
+          "firstRate": "30.4%",
+          "name": "Hells Chain",
+          "rank": "31",
+          "ratchets": [
+            {
+              "firstRate": "19.1%",
+              "part": "5-60",
+              "pick": "39.5%",
+              "canonicalId": "5-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "42.9%",
+              "part": "9-60",
+              "pick": "23.5%",
+              "canonicalId": "9-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "30.0%",
+              "part": "3-60",
+              "pick": "8.4%",
+              "canonicalId": "3-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "37.5%",
+              "part": "1-60",
+              "pick": "6.7%",
+              "canonicalId": "1-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "0.0%",
+              "part": "5-80",
+              "pick": "4.2%",
+              "canonicalId": "5-80",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "topCuts": "115",
+          "url": "https://beywatch.gg/blades/hells-chain",
+          "usage": "1.2%",
+          "statisticsStatus": "ranked",
+          "canonicalId": "BX21_HELLS_CHAIN",
+          "identityMatchStatus": "exact",
+          "catalogMatchStatus": "exact",
+          "displayNameZh": "惡魔鎖鏈",
+          "catalogEnglishName": "HellsChain",
+          "catalogModels": [
+            "BX-21-01",
+            "BX-31-03"
+          ],
+          "catalogRecordIds": [
+            "BX-21-01",
+            "BX-31-03"
+          ]
+        },
+        {
+          "bits": [
+            {
+              "firstRate": "25.6%",
+              "part": "Rush (R)",
+              "pick": "26.7%",
+              "canonicalId": "R",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "30.8%",
+              "part": "Point (P)",
+              "pick": "17.8%",
+              "canonicalId": "P",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "29.4%",
+              "part": "Low Rush (LR)",
+              "pick": "11.6%",
+              "canonicalId": "LR",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "36.4%",
+              "part": "Taper (T)",
+              "pick": "7.5%",
+              "canonicalId": "T",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "22.2%",
+              "part": "Low Flat (LF)",
+              "pick": "6.2%",
+              "canonicalId": "LF",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "combos": [
+            {
+              "combo": "Roar Tyranno 1-60R",
+              "firstRate": "30.8%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "13"
+            },
+            {
+              "combo": "Roar Tyranno 3-60R",
+              "firstRate": "23.1%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "13"
+            },
+            {
+              "combo": "Roar Tyranno 5-60P",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "7"
+            },
+            {
+              "combo": "Roar Tyranno 9-60R",
+              "firstRate": "16.7%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "6"
+            },
+            {
+              "combo": "Roar Tyranno 1-60LR",
+              "firstRate": "20.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "5"
+            },
+            {
+              "combo": "Roar Tyranno 3-60T",
+              "firstRate": "75.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            },
+            {
+              "combo": "Roar Tyranno 9-60H",
+              "firstRate": "50.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            },
+            {
+              "combo": "Roar Tyranno 1-60LF",
+              "firstRate": "50.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            },
+            {
+              "combo": "Roar Tyranno 3-60LR",
+              "firstRate": "50.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            },
+            {
+              "combo": "Roar Tyranno 3-60P",
+              "firstRate": "25.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "4"
+            }
+          ],
+          "firstRate": "28.2%",
+          "name": "Roar Tyranno",
+          "rank": "32",
+          "ratchets": [
+            {
+              "firstRate": "29.7%",
+              "part": "1-60",
+              "pick": "25.3%",
+              "canonicalId": "1-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "34.3%",
+              "part": "3-60",
+              "pick": "24.0%",
+              "canonicalId": "3-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "30.8%",
+              "part": "9-60",
+              "pick": "17.8%",
+              "canonicalId": "9-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "0.0%",
+              "part": "5-60",
+              "pick": "7.5%",
+              "canonicalId": "5-60",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "22.2%",
+              "part": "3-70",
+              "pick": "6.2%",
+              "canonicalId": "3-70",
+              "identityMatchStatus": "exact"
+            }
+          ],
+          "topCuts": "142",
+          "url": "https://beywatch.gg/blades/roar-tyranno",
+          "usage": "1.5%",
+          "statisticsStatus": "ranked",
+          "canonicalId": "暴龍咆哮",
+          "identityMatchStatus": "exact",
+          "catalogMatchStatus": "unmatched",
+          "displayNameZh": null,
+          "catalogEnglishName": null,
+          "catalogModels": [],
+          "catalogRecordIds": []
         },
         {
           "bits": [
@@ -15446,7 +15611,7 @@
           ],
           "firstRate": "31.9%",
           "name": "Dran Buster",
-          "rank": "32",
+          "rank": "33",
           "ratchets": [
             {
               "firstRate": "32.1%",
@@ -15513,7 +15678,7 @@
             {
               "firstRate": "27.7%",
               "part": "Rush (R)",
-              "pick": "29.6%",
+              "pick": "29.5%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
@@ -15610,19 +15775,19 @@
           ],
           "firstRate": "27.6%",
           "name": "Knight Mail",
-          "rank": "33",
+          "rank": "34",
           "ratchets": [
             {
-              "firstRate": "28.6%",
+              "firstRate": "28.4%",
               "part": "1-60",
-              "pick": "34.7%",
+              "pick": "34.9%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "30.4%",
               "part": "3-60",
-              "pick": "17.6%",
+              "pick": "17.5%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
@@ -15648,7 +15813,7 @@
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "507",
+          "topCuts": "508",
           "url": "https://beywatch.gg/blades/knight-mail",
           "usage": "5.2%",
           "statisticsStatus": "ranked",
@@ -15768,7 +15933,7 @@
           ],
           "firstRate": "27.3%",
           "name": "Shark Edge",
-          "rank": "34",
+          "rank": "35",
           "ratchets": [
             {
               "firstRate": "30.7%",
@@ -15837,14 +16002,14 @@
             {
               "firstRate": "37.5%",
               "part": "Level (L)",
-              "pick": "23.1%",
+              "pick": "23.0%",
               "canonicalId": "L",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "35.0%",
               "part": "Hexa (H)",
-              "pick": "19.2%",
+              "pick": "19.1%",
               "canonicalId": "H",
               "identityMatchStatus": "exact"
             },
@@ -15932,28 +16097,28 @@
               "topCuts": "5"
             }
           ],
-          "firstRate": "29.9%",
+          "firstRate": "29.8%",
           "name": "Samurai Saber",
-          "rank": "35",
+          "rank": "36",
           "ratchets": [
             {
-              "firstRate": "27.7%",
+              "firstRate": "27.3%",
               "part": "9-60",
-              "pick": "31.3%",
+              "pick": "31.6%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "34.2%",
               "part": "3-60",
-              "pick": "18.3%",
+              "pick": "18.2%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "32.3%",
               "part": "1-60",
-              "pick": "14.9%",
+              "pick": "14.8%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
@@ -15972,7 +16137,7 @@
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "204",
+          "topCuts": "205",
           "url": "https://beywatch.gg/blades/samurai-saber",
           "usage": "2.1%",
           "statisticsStatus": "ranked",
@@ -16094,7 +16259,7 @@
           ],
           "firstRate": "26.9%",
           "name": "Brave",
-          "rank": "36",
+          "rank": "37",
           "ratchets": [
             {
               "firstRate": "20.6%",
@@ -16148,162 +16313,6 @@
           "catalogRecordIds": [
             "BXG-51",
             "CX-01"
-          ]
-        },
-        {
-          "bits": [
-            {
-              "firstRate": "30.8%",
-              "part": "Kick (K)",
-              "pick": "17.6%",
-              "canonicalId": "K",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "7.7%",
-              "part": "Low Rush (LR)",
-              "pick": "17.6%",
-              "canonicalId": "LR",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "20.0%",
-              "part": "Rush (R)",
-              "pick": "13.5%",
-              "canonicalId": "R",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "12.5%",
-              "part": "Taper (T)",
-              "pick": "10.8%",
-              "canonicalId": "T",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "50.0%",
-              "part": "Unite (U)",
-              "pick": "8.1%",
-              "canonicalId": "U",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "combos": [
-            {
-              "combo": "Crimson Garuda 7-60K",
-              "firstRate": "25.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            },
-            {
-              "combo": "Crimson Garuda 1-60LR",
-              "firstRate": "0.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
-            },
-            {
-              "combo": "Crimson Garuda 9-70K",
-              "firstRate": "66.7%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "3"
-            },
-            {
-              "combo": "Crimson Garuda 1-60R",
-              "firstRate": "33.3%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "3"
-            },
-            {
-              "combo": "Crimson Garuda 9-70U",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "2"
-            },
-            {
-              "combo": "Crimson Garuda 7-60P",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "2"
-            },
-            {
-              "combo": "Crimson Garuda 9-60P",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "2"
-            },
-            {
-              "combo": "Crimson Garuda 9-60L",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "2"
-            },
-            {
-              "combo": "Crimson Garuda 7-60R",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "2"
-            },
-            {
-              "combo": "Crimson Garuda 5-60LR",
-              "firstRate": "0.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "2"
-            }
-          ],
-          "firstRate": "26.4%",
-          "name": "Crimson Garuda",
-          "rank": "37",
-          "ratchets": [
-            {
-              "firstRate": "28.6%",
-              "part": "9-60",
-              "pick": "18.9%",
-              "canonicalId": "9-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "27.3%",
-              "part": "7-60",
-              "pick": "14.9%",
-              "canonicalId": "7-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "20.0%",
-              "part": "1-60",
-              "pick": "13.5%",
-              "canonicalId": "1-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "42.9%",
-              "part": "9-70",
-              "pick": "9.5%",
-              "canonicalId": "9-70",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "50.0%",
-              "part": "5-60",
-              "pick": "8.1%",
-              "canonicalId": "5-60",
-              "identityMatchStatus": "exact"
-            }
-          ],
-          "topCuts": "72",
-          "url": "https://beywatch.gg/blades/crimson-garuda",
-          "usage": "0.7%",
-          "statisticsStatus": "ranked",
-          "canonicalId": "CRIMSON_GARUDA",
-          "identityMatchStatus": "exact",
-          "catalogMatchStatus": "exact",
-          "displayNameZh": "赫燃天鳳",
-          "catalogEnglishName": "Crimson Garuda",
-          "catalogModels": [
-            "CX-17-06"
-          ],
-          "catalogRecordIds": [
-            "CX-17-06"
           ]
         },
         {
@@ -16473,159 +16482,157 @@
         {
           "bits": [
             {
-              "firstRate": "40.0%",
-              "part": "Ball (B)",
-              "pick": "25.4%",
-              "canonicalId": "B",
+              "firstRate": "30.8%",
+              "part": "Kick (K)",
+              "pick": "17.3%",
+              "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "25.0%",
-              "part": "Orb (O)",
-              "pick": "20.3%",
-              "canonicalId": "O",
+              "firstRate": "7.7%",
+              "part": "Low Rush (LR)",
+              "pick": "17.3%",
+              "canonicalId": "LR",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "20.0%",
+              "part": "Rush (R)",
+              "pick": "13.3%",
+              "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "12.5%",
-              "part": "High Taper (HT)",
-              "pick": "6.8%",
-              "canonicalId": "HT",
+              "part": "Taper (T)",
+              "pick": "10.7%",
+              "canonicalId": "T",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "37.5%",
-              "part": "Hexa (H)",
-              "pick": "6.8%",
-              "canonicalId": "H",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "28.6%",
-              "part": "Point (P)",
-              "pick": "5.9%",
-              "canonicalId": "P",
+              "firstRate": "50.0%",
+              "part": "Unite (U)",
+              "pick": "8.0%",
+              "canonicalId": "U",
               "identityMatchStatus": "exact"
             }
           ],
           "combos": [
             {
-              "combo": "Hells Chain 9-60B",
-              "firstRate": "53.3%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "15"
-            },
-            {
-              "combo": "Hells Chain 9-60O",
+              "combo": "Crimson Garuda 7-60K",
               "firstRate": "25.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "8"
+              "topCuts": "4"
             },
             {
-              "combo": "Hells Chain 5-60B",
-              "firstRate": "14.3%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "7"
-            },
-            {
-              "combo": "Hells Chain 5-60O",
-              "firstRate": "16.7%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "6"
-            },
-            {
-              "combo": "Hells Chain 5-60HT",
+              "combo": "Crimson Garuda 1-60LR",
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "6"
-            },
-            {
-              "combo": "Hells Chain 5-60P",
-              "firstRate": "40.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "5"
-            },
-            {
-              "combo": "Hells Chain 4-60B",
-              "firstRate": "75.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "4"
             },
             {
-              "combo": "Hells Chain 3-60O",
+              "combo": "Crimson Garuda 9-70K",
+              "firstRate": "66.7%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "3"
+            },
+            {
+              "combo": "Crimson Garuda 1-60R",
+              "firstRate": "33.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "3"
+            },
+            {
+              "combo": "Crimson Garuda 9-70U",
               "firstRate": "50.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
+              "topCuts": "2"
             },
             {
-              "combo": "Hells Chain 5-60F",
-              "firstRate": "25.0%",
+              "combo": "Crimson Garuda 7-60P",
+              "firstRate": "50.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
+              "topCuts": "2"
             },
             {
-              "combo": "Hells Chain 5-60H",
-              "firstRate": "25.0%",
+              "combo": "Crimson Garuda 9-60P",
+              "firstRate": "50.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
+              "topCuts": "2"
+            },
+            {
+              "combo": "Crimson Garuda 9-60L",
+              "firstRate": "50.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "2"
+            },
+            {
+              "combo": "Crimson Garuda 7-60R",
+              "firstRate": "50.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "2"
+            },
+            {
+              "combo": "Crimson Garuda 5-60LR",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "2"
             }
           ],
-          "firstRate": "29.8%",
-          "name": "Hells Chain",
+          "firstRate": "26.0%",
+          "name": "Crimson Garuda",
           "rank": "39",
           "ratchets": [
             {
-              "firstRate": "19.1%",
-              "part": "5-60",
-              "pick": "39.8%",
-              "canonicalId": "5-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "42.9%",
+              "firstRate": "26.7%",
               "part": "9-60",
-              "pick": "23.7%",
+              "pick": "20.0%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "30.0%",
-              "part": "3-60",
-              "pick": "8.5%",
-              "canonicalId": "3-60",
+              "firstRate": "27.3%",
+              "part": "7-60",
+              "pick": "14.7%",
+              "canonicalId": "7-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "28.6%",
+              "firstRate": "20.0%",
               "part": "1-60",
-              "pick": "5.9%",
+              "pick": "13.3%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "0.0%",
-              "part": "5-80",
-              "pick": "4.2%",
-              "canonicalId": "5-80",
+              "firstRate": "42.9%",
+              "part": "9-70",
+              "pick": "9.3%",
+              "canonicalId": "9-70",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "50.0%",
+              "part": "5-60",
+              "pick": "8.0%",
+              "canonicalId": "5-60",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "114",
-          "url": "https://beywatch.gg/blades/hells-chain",
-          "usage": "1.2%",
+          "topCuts": "73",
+          "url": "https://beywatch.gg/blades/crimson-garuda",
+          "usage": "0.8%",
           "statisticsStatus": "ranked",
-          "canonicalId": "BX21_HELLS_CHAIN",
+          "canonicalId": "CRIMSON_GARUDA",
           "identityMatchStatus": "exact",
           "catalogMatchStatus": "exact",
-          "displayNameZh": "惡魔鎖鏈",
-          "catalogEnglishName": "HellsChain",
+          "displayNameZh": "赫燃天鳳",
+          "catalogEnglishName": "Crimson Garuda",
           "catalogModels": [
-            "BX-21-01",
-            "BX-31-03"
+            "CX-17-06"
           ],
           "catalogRecordIds": [
-            "BX-21-01",
-            "BX-31-03"
+            "CX-17-06"
           ]
         },
         {
@@ -16633,21 +16640,21 @@
             {
               "firstRate": "26.5%",
               "part": "Orb (O)",
-              "pick": "15.1%",
+              "pick": "15.0%",
               "canonicalId": "O",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "32.4%",
               "part": "Point (P)",
-              "pick": "15.1%",
+              "pick": "15.0%",
               "canonicalId": "P",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "22.6%",
               "part": "Ball (B)",
-              "pick": "13.8%",
+              "pick": "13.7%",
               "canonicalId": "B",
               "identityMatchStatus": "exact"
             },
@@ -16661,7 +16668,7 @@
             {
               "firstRate": "33.3%",
               "part": "Taper (T)",
-              "pick": "6.7%",
+              "pick": "6.6%",
               "canonicalId": "T",
               "identityMatchStatus": "exact"
             }
@@ -16728,47 +16735,47 @@
               "topCuts": "4"
             }
           ],
-          "firstRate": "28.6%",
+          "firstRate": "28.5%",
           "name": "Unicorn Sting",
           "rank": "40",
           "ratchets": [
             {
               "firstRate": "28.6%",
               "part": "9-60",
-              "pick": "34.2%",
+              "pick": "34.1%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "31.0%",
               "part": "5-60",
-              "pick": "25.8%",
+              "pick": "25.7%",
               "canonicalId": "5-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "25.0%",
               "part": "3-60",
-              "pick": "10.7%",
+              "pick": "10.6%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "21.4%",
+              "firstRate": "20.0%",
               "part": "1-60",
-              "pick": "6.2%",
+              "pick": "6.6%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "12.5%",
               "part": "7-60",
-              "pick": "3.6%",
+              "pick": "3.5%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "213",
+          "topCuts": "214",
           "url": "https://beywatch.gg/blades/unicorn-sting",
           "usage": "2.2%",
           "statisticsStatus": "ranked",
@@ -17703,6 +17710,7 @@
               "firstRate": "0.0%",
               "part": "Disk Spike (DS)",
               "pick": "50.0%",
+              "canonicalId": "DS",
               "identityMatchStatus": "unmatched"
             }
           ],
@@ -18170,37 +18178,37 @@
         {
           "bits": [
             {
-              "firstRate": "28.6%",
+              "firstRate": "26.7%",
               "part": "Elevate (E)",
-              "pick": "50.0%",
+              "pick": "51.7%",
               "canonicalId": "E",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "20.0%",
               "part": "Level (L)",
-              "pick": "17.9%",
+              "pick": "17.2%",
               "canonicalId": "L",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "100.0%",
               "part": "High Needle (HN)",
-              "pick": "3.6%",
+              "pick": "3.4%",
               "canonicalId": "HN",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "100.0%",
               "part": "Gear Point (GP)",
-              "pick": "3.6%",
+              "pick": "3.4%",
               "canonicalId": "GP",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "100.0%",
               "part": "Merge (M)",
-              "pick": "3.6%",
+              "pick": "3.4%",
               "canonicalId": "M",
               "identityMatchStatus": "exact"
             }
@@ -18214,9 +18222,9 @@
             },
             {
               "combo": "Dragoon Storm 9-60E",
-              "firstRate": "50.0%",
+              "firstRate": "40.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
+              "topCuts": "5"
             },
             {
               "combo": "Dragoon Storm 4-50L",
@@ -18267,47 +18275,47 @@
               "topCuts": "1"
             }
           ],
-          "firstRate": "28.6%",
+          "firstRate": "27.6%",
           "name": "Dragoon Storm",
           "rank": null,
           "ratchets": [
             {
               "firstRate": "9.1%",
               "part": "5-60",
-              "pick": "39.3%",
+              "pick": "37.9%",
               "canonicalId": "5-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "50.0%",
+              "firstRate": "40.0%",
               "part": "9-60",
-              "pick": "14.3%",
+              "pick": "17.2%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "4-50",
-              "pick": "10.7%",
+              "pick": "10.3%",
               "canonicalId": "4-50",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "50.0%",
               "part": "3-85",
-              "pick": "7.1%",
+              "pick": "6.9%",
               "canonicalId": "3-85",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "50.0%",
               "part": "6-60",
-              "pick": "7.1%",
+              "pick": "6.9%",
               "canonicalId": "6-60",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "28",
+          "topCuts": "29",
           "url": "https://beywatch.gg/blades/dragoon-storm",
           "usage": "0.3%",
           "statisticsStatus": "unranked_or_insufficient_sample",
@@ -19899,6 +19907,7 @@
               "firstRate": "0.0%",
               "part": "Free Flat (FF)",
               "pick": "20.0%",
+              "canonicalId": "FF",
               "identityMatchStatus": "unmatched"
             },
             {
@@ -19996,42 +20005,48 @@
         {
           "bits": [
             {
-              "firstRate": "45.5%",
+              "firstRate": "41.7%",
               "part": "Hexa (H)",
-              "pick": "34.4%",
+              "pick": "32.4%",
               "canonicalId": "H",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "0.0%",
+              "firstRate": "14.3%",
               "part": "Free Ball (FB)",
-              "pick": "15.6%",
+              "pick": "18.9%",
               "canonicalId": "FB",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "0.0%",
+              "firstRate": "20.0%",
               "part": "Level (L)",
-              "pick": "12.5%",
+              "pick": "13.5%",
               "canonicalId": "L",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "Operate (Op)",
-              "pick": "6.3%",
+              "pick": "5.4%",
               "canonicalId": "Op",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "Taper (T)",
-              "pick": "6.3%",
+              "pick": "5.4%",
               "canonicalId": "T",
               "identityMatchStatus": "exact"
             }
           ],
           "combos": [
+            {
+              "combo": "Heavens Ring 9-60FB",
+              "firstRate": "33.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "3"
+            },
             {
               "combo": "Heavens Ring 1-70L",
               "firstRate": "0.0%",
@@ -20085,57 +20100,51 @@
               "firstRate": "100.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "1"
-            },
-            {
-              "combo": "Heavens Ring 0-60H",
-              "firstRate": "100.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "1"
             }
           ],
-          "firstRate": "21.9%",
+          "firstRate": "24.3%",
           "name": "Heavens Ring",
           "rank": null,
           "ratchets": [
             {
+              "firstRate": "28.6%",
+              "part": "9-60",
+              "pick": "18.9%",
+              "canonicalId": "9-60",
+              "identityMatchStatus": "exact"
+            },
+            {
               "firstRate": "16.7%",
               "part": "1-70",
-              "pick": "18.8%",
+              "pick": "16.2%",
               "canonicalId": "1-70",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "20.0%",
-              "part": "9-60",
-              "pick": "15.6%",
-              "canonicalId": "9-60",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "25.0%",
               "part": "1-60",
-              "pick": "12.5%",
+              "pick": "13.5%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "3-60",
-              "pick": "6.3%",
+              "pick": "5.4%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "0.0%",
-              "part": "7-70",
-              "pick": "6.3%",
-              "canonicalId": "7-70",
-              "identityMatchStatus": "exact"
+              "firstRate": "100.0%",
+              "part": "7-60",
+              "pick": "5.4%",
+              "canonicalId": "7-60",
+              "identityMatchStatus": "unmatched"
             }
           ],
-          "topCuts": "32",
+          "topCuts": "37",
           "url": "https://beywatch.gg/blades/heavens-ring",
-          "usage": "0.3%",
+          "usage": "0.4%",
           "statisticsStatus": "unranked_or_insufficient_sample",
           "canonicalId": null,
           "identityMatchStatus": "unmatched",
@@ -20156,35 +20165,35 @@
             {
               "firstRate": "12.5%",
               "part": "Kick (K)",
-              "pick": "25.8%",
+              "pick": "19.5%",
               "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "20.0%",
+              "firstRate": "33.3%",
               "part": "Rush (R)",
-              "pick": "16.1%",
+              "pick": "14.6%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "25.0%",
+              "firstRate": "33.3%",
               "part": "Free Ball (FB)",
-              "pick": "12.9%",
+              "pick": "14.6%",
               "canonicalId": "FB",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "66.7%",
+              "firstRate": "40.0%",
               "part": "Narrow (Nr)",
-              "pick": "9.7%",
+              "pick": "12.2%",
               "canonicalId": "Nr",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "Hexa (H)",
-              "pick": "9.7%",
+              "pick": "9.8%",
               "canonicalId": "H",
               "identityMatchStatus": "exact"
             }
@@ -20198,33 +20207,45 @@
             },
             {
               "combo": "Hells Nether R",
-              "firstRate": "20.0%",
+              "firstRate": "33.3%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "5"
+              "topCuts": "6"
             },
             {
               "combo": "Hells Nether FB",
-              "firstRate": "25.0%",
+              "firstRate": "33.3%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "4"
+              "topCuts": "6"
             },
             {
               "combo": "Hells Nether Nr",
-              "firstRate": "66.7%",
+              "firstRate": "40.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "3"
+              "topCuts": "5"
             },
             {
               "combo": "Hells Nether H",
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "3"
+              "topCuts": "4"
             },
             {
               "combo": "Hells Nether L",
+              "firstRate": "33.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "3"
+            },
+            {
+              "combo": "Hells Nether E",
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "2"
+            },
+            {
+              "combo": "Hells Nether WB",
+              "firstRate": "100.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "1"
             },
             {
               "combo": "Hells Nether B",
@@ -20237,27 +20258,15 @@
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "1"
-            },
-            {
-              "combo": "Hells Nether FF",
-              "firstRate": "0.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "1"
-            },
-            {
-              "combo": "Hells Nether J",
-              "firstRate": "0.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "1"
             }
           ],
-          "firstRate": "16.7%",
+          "firstRate": "23.7%",
           "name": "Hells Nether",
           "rank": null,
           "ratchets": [],
-          "topCuts": "30",
+          "topCuts": "38",
           "url": "https://beywatch.gg/blades/hells-nether",
-          "usage": "0.3%",
+          "usage": "0.4%",
           "statisticsStatus": "unranked_or_insufficient_sample",
           "canonicalId": null,
           "identityMatchStatus": "unmatched",
@@ -20874,36 +20883,36 @@
             {
               "firstRate": "20.0%",
               "part": "Point (P)",
-              "pick": "23.8%",
+              "pick": "21.7%",
               "canonicalId": "P",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "Taper (T)",
-              "pick": "14.3%",
+              "pick": "13.0%",
               "canonicalId": "T",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "33.3%",
               "part": "Rush (R)",
-              "pick": "14.3%",
+              "pick": "13.0%",
               "canonicalId": "R",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "0.0%",
+              "part": "Kick (K)",
+              "pick": "8.7%",
+              "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "100.0%",
               "part": "Flat (F)",
-              "pick": "4.8%",
+              "pick": "4.3%",
               "canonicalId": "F",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "100.0%",
-              "part": "Free Ball (FB)",
-              "pick": "4.8%",
-              "canonicalId": "FB",
               "identityMatchStatus": "exact"
             }
           ],
@@ -20916,6 +20925,12 @@
             },
             {
               "combo": "Leon Claw 3-60T",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "2"
+            },
+            {
+              "combo": "Leon Claw 5-60K",
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "2"
@@ -20939,7 +20954,13 @@
               "topCuts": "1"
             },
             {
-              "combo": "Leon Claw 3-60Nr",
+              "combo": "Leon Claw 3-60 Narrow",
+              "firstRate": "100.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "1"
+            },
+            {
+              "combo": "Leon Claw 9-70GP",
               "firstRate": "100.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "1"
@@ -20955,61 +20976,49 @@
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "1"
-            },
-            {
-              "combo": "Leon Claw 9-60R",
-              "firstRate": "0.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "1"
-            },
-            {
-              "combo": "Leon Claw 5-80H",
-              "firstRate": "0.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "1"
             }
           ],
-          "firstRate": "23.8%",
+          "firstRate": "26.1%",
           "name": "Leon Claw",
           "rank": null,
           "ratchets": [
             {
-              "firstRate": "10.0%",
+              "firstRate": "9.1%",
               "part": "5-60",
-              "pick": "47.6%",
+              "pick": "47.8%",
               "canonicalId": "5-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "33.3%",
               "part": "3-60",
-              "pick": "14.3%",
+              "pick": "13.0%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "66.7%",
               "part": "9-60",
-              "pick": "14.3%",
+              "pick": "13.0%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "100.0%",
               "part": "1-60",
-              "pick": "4.8%",
+              "pick": "4.3%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "0.0%",
-              "part": "5-80",
-              "pick": "4.8%",
-              "canonicalId": "5-80",
-              "identityMatchStatus": "exact"
+              "firstRate": "100.0%",
+              "part": "9-70",
+              "pick": "4.3%",
+              "canonicalId": "9-70",
+              "identityMatchStatus": "unmatched"
             }
           ],
-          "topCuts": "21",
+          "topCuts": "23",
           "url": "https://beywatch.gg/blades/leon-claw",
           "usage": "0.2%",
           "statisticsStatus": "unranked_or_insufficient_sample",
@@ -21380,6 +21389,21 @@
           "catalogRecordIds": [
             "BXG-33-01"
           ]
+        },
+        {
+          "bits": [],
+          "combos": [],
+          "firstRate": null,
+          "name": "Luster Dragoon",
+          "rank": null,
+          "ratchets": [],
+          "topCuts": null,
+          "url": "https://beywatch.gg/blades/luster-dragoon",
+          "usage": null,
+          "statisticsStatus": "no_data",
+          "canonicalId": null,
+          "identityMatchStatus": "unmatched",
+          "catalogMatchStatus": "unmatched"
         },
         {
           "bits": [
@@ -22231,35 +22255,35 @@
             {
               "firstRate": "25.0%",
               "part": "Low Rush (LR)",
-              "pick": "27.6%",
+              "pick": "26.7%",
               "canonicalId": "LR",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "Low Flat (LF)",
-              "pick": "13.8%",
+              "pick": "13.3%",
               "canonicalId": "LF",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "25.0%",
               "part": "Rush (R)",
-              "pick": "13.8%",
+              "pick": "13.3%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "25.0%",
               "part": "Point (P)",
-              "pick": "13.8%",
+              "pick": "13.3%",
               "canonicalId": "P",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "Level (L)",
-              "pick": "10.3%",
+              "pick": "10.0%",
               "canonicalId": "L",
               "identityMatchStatus": "exact"
             }
@@ -22326,47 +22350,47 @@
               "topCuts": "1"
             }
           ],
-          "firstRate": "14.3%",
+          "firstRate": "13.8%",
           "name": "Phoenix Feather",
           "rank": null,
           "ratchets": [
             {
               "firstRate": "0.0%",
               "part": "3-60",
-              "pick": "24.1%",
+              "pick": "26.7%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "1-60",
-              "pick": "17.2%",
+              "pick": "16.7%",
               "canonicalId": "1-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "20.0%",
               "part": "9-60",
-              "pick": "17.2%",
+              "pick": "16.7%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "66.7%",
               "part": "3-70",
-              "pick": "10.3%",
+              "pick": "10.0%",
               "canonicalId": "3-70",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "100.0%",
               "part": "7-60",
-              "pick": "6.9%",
+              "pick": "6.7%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "28",
+          "topCuts": "29",
           "url": "https://beywatch.gg/blades/phoenix-feather",
           "usage": "0.3%",
           "statisticsStatus": "unranked_or_insufficient_sample",
@@ -22387,36 +22411,36 @@
             {
               "firstRate": "25.0%",
               "part": "Hexa (H)",
-              "pick": "15.7%",
+              "pick": "15.4%",
               "canonicalId": "H",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "80.0%",
               "part": "Rush (R)",
-              "pick": "9.8%",
+              "pick": "9.6%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "40.0%",
               "part": "Taper (T)",
-              "pick": "9.8%",
+              "pick": "9.6%",
               "canonicalId": "T",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "25.0%",
               "part": "Ball (B)",
-              "pick": "7.8%",
+              "pick": "7.7%",
               "canonicalId": "B",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "0.0%",
-              "part": "Under Needle (UN)",
-              "pick": "7.8%",
-              "canonicalId": "UN",
+              "firstRate": "25.0%",
+              "part": "Wedge (W)",
+              "pick": "7.7%",
+              "canonicalId": "W",
               "identityMatchStatus": "exact"
             }
           ],
@@ -22458,6 +22482,12 @@
               "topCuts": "2"
             },
             {
+              "combo": "Phoenix Rudder 3-60W",
+              "firstRate": "50.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "2"
+            },
+            {
               "combo": "Phoenix Rudder 3-60P",
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
@@ -22474,55 +22504,49 @@
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "2"
-            },
-            {
-              "combo": "Phoenix Rudder 1-60T",
-              "firstRate": "100.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "1"
             }
           ],
-          "firstRate": "34.0%",
+          "firstRate": "33.3%",
           "name": "Phoenix Rudder",
           "rank": null,
           "ratchets": [
             {
               "firstRate": "63.6%",
               "part": "9-60",
-              "pick": "21.6%",
+              "pick": "21.2%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "22.2%",
               "part": "9-70",
-              "pick": "17.6%",
+              "pick": "17.3%",
               "canonicalId": "9-70",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "28.6%",
+              "firstRate": "25.0%",
               "part": "3-60",
-              "pick": "13.7%",
+              "pick": "15.4%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "66.7%",
               "part": "1-50",
-              "pick": "5.9%",
+              "pick": "5.8%",
               "canonicalId": "1-50",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "7-60",
-              "pick": "5.9%",
+              "pick": "5.8%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "47",
+          "topCuts": "48",
           "url": "https://beywatch.gg/blades/phoenix-rudder",
           "usage": "0.5%",
           "statisticsStatus": "unranked_or_insufficient_sample",
@@ -23144,6 +23168,13 @@
               "pick": "11.1%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "0.0%",
+              "part": "M-85",
+              "pick": "11.1%",
+              "canonicalId": "M-85",
+              "identityMatchStatus": "unmatched"
             },
             {
               "firstRate": "0.0%",
@@ -24464,29 +24495,36 @@
             {
               "firstRate": "0.0%",
               "part": "Rush (R)",
-              "pick": "25.0%",
+              "pick": "15.4%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "Kick (K)",
-              "pick": "25.0%",
+              "pick": "15.4%",
               "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "0.0%",
-              "part": "Level (L)",
-              "pick": "25.0%",
-              "canonicalId": "L",
+              "firstRate": "50.0%",
+              "part": "Jolt (J)",
+              "pick": "15.4%",
+              "canonicalId": "J",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
-              "part": "Jolt (J)",
-              "pick": "25.0%",
-              "canonicalId": "J",
+              "part": "Low Rush (LR)",
+              "pick": "15.4%",
+              "canonicalId": "LR",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "100.0%",
+              "part": "Taper (T)",
+              "pick": "7.7%",
+              "canonicalId": "T",
               "identityMatchStatus": "exact"
             }
           ],
@@ -24495,11 +24533,23 @@
               "combo": "Suppress Superion 1-50R",
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "1"
+              "topCuts": "2"
             },
             {
               "combo": "Suppress Superion 9-60K",
               "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "2"
+            },
+            {
+              "combo": "Suppress Superion 9-60T",
+              "firstRate": "100.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "1"
+            },
+            {
+              "combo": "Suppress Superion 3-60J",
+              "firstRate": "100.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "1"
             },
@@ -24514,44 +24564,75 @@
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "1"
+            },
+            {
+              "combo": "Suppress Superion 7-70LR",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "1"
+            },
+            {
+              "combo": "Suppress Superion 1-60LR",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "1"
+            },
+            {
+              "combo": "Suppress Superion 9-60FB",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "1"
+            },
+            {
+              "combo": "Suppress Superion 1-70LP",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "1"
             }
           ],
-          "firstRate": "0.0%",
+          "firstRate": "18.2%",
           "name": "Suppress Superion",
           "rank": null,
           "ratchets": [
             {
-              "firstRate": "0.0%",
-              "part": "1-50",
-              "pick": "25.0%",
-              "canonicalId": "1-50",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "0.0%",
+              "firstRate": "25.0%",
               "part": "9-60",
-              "pick": "25.0%",
+              "pick": "30.8%",
               "canonicalId": "9-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
+              "part": "1-50",
+              "pick": "15.4%",
+              "canonicalId": "1-50",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "50.0%",
               "part": "3-60",
-              "pick": "25.0%",
+              "pick": "15.4%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "7-60",
-              "pick": "25.0%",
+              "pick": "15.4%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "0.0%",
+              "part": "7-70",
+              "pick": "7.7%",
+              "canonicalId": "7-70",
+              "identityMatchStatus": "unmatched"
             }
           ],
-          "topCuts": "4",
+          "topCuts": "11",
           "url": "https://beywatch.gg/blades/suppress-superion",
-          "usage": "0.0%",
+          "usage": "0.1%",
           "statisticsStatus": "unranked_or_insufficient_sample",
           "canonicalId": null,
           "identityMatchStatus": "unmatched",
@@ -24787,7 +24868,7 @@
               "topCuts": "1"
             },
             {
-              "combo": "Talon Ptera 9-60Nr",
+              "combo": "Talon Ptera 9-60 Narrow",
               "firstRate": "100.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "1"
@@ -25180,6 +25261,13 @@
           "rank": null,
           "ratchets": [
             {
+              "firstRate": "33.3%",
+              "part": "M-85",
+              "pick": "37.5%",
+              "canonicalId": "M-85",
+              "identityMatchStatus": "unmatched"
+            },
+            {
               "firstRate": "0.0%",
               "part": "3-60",
               "pick": "25.0%",
@@ -25402,36 +25490,36 @@
             {
               "firstRate": "33.3%",
               "part": "Kick (K)",
-              "pick": "13.6%",
+              "pick": "12.0%",
               "canonicalId": "K",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "33.3%",
               "part": "Hexa (H)",
-              "pick": "13.6%",
+              "pick": "12.0%",
               "canonicalId": "H",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "0.0%",
-              "part": "Jolt (J)",
-              "pick": "13.6%",
-              "canonicalId": "J",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "50.0%",
-              "part": "Rubber Accel (RA)",
-              "pick": "9.1%",
-              "canonicalId": "RA",
-              "identityMatchStatus": "exact"
-            },
-            {
-              "firstRate": "50.0%",
+              "firstRate": "33.3%",
               "part": "Ball (B)",
-              "pick": "9.1%",
+              "pick": "12.0%",
               "canonicalId": "B",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "33.3%",
+              "part": "Free Ball (FB)",
+              "pick": "12.0%",
+              "canonicalId": "FB",
+              "identityMatchStatus": "exact"
+            },
+            {
+              "firstRate": "0.0%",
+              "part": "Level (L)",
+              "pick": "12.0%",
+              "canonicalId": "L",
               "identityMatchStatus": "exact"
             }
           ],
@@ -25449,6 +25537,24 @@
               "topCuts": "3"
             },
             {
+              "combo": "Valor Bison B",
+              "firstRate": "33.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "3"
+            },
+            {
+              "combo": "Valor Bison FB",
+              "firstRate": "33.3%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "3"
+            },
+            {
+              "combo": "Valor Bison L",
+              "firstRate": "0.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "3"
+            },
+            {
               "combo": "Valor Bison J",
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
@@ -25461,26 +25567,8 @@
               "topCuts": "2"
             },
             {
-              "combo": "Valor Bison B",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "2"
-            },
-            {
               "combo": "Valor Bison LR",
               "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "2"
-            },
-            {
-              "combo": "Valor Bison FB",
-              "firstRate": "50.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "2"
-            },
-            {
-              "combo": "Valor Bison L",
-              "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "2"
             },
@@ -25497,13 +25585,13 @@
               "topCuts": "1"
             }
           ],
-          "firstRate": "31.8%",
+          "firstRate": "28.0%",
           "name": "Valor Bison",
           "rank": null,
           "ratchets": [],
-          "topCuts": "22",
+          "topCuts": "25",
           "url": "https://beywatch.gg/blades/valor-bison",
-          "usage": "0.2%",
+          "usage": "0.3%",
           "statisticsStatus": "unranked_or_insufficient_sample",
           "canonicalId": null,
           "identityMatchStatus": "unmatched",
@@ -25674,35 +25762,35 @@
             {
               "firstRate": "20.0%",
               "part": "Low Rush (LR)",
-              "pick": "45.5%",
+              "pick": "41.7%",
               "canonicalId": "LR",
               "identityMatchStatus": "exact"
             },
             {
-              "firstRate": "0.0%",
+              "firstRate": "33.3%",
               "part": "Unite (U)",
-              "pick": "18.2%",
+              "pick": "25.0%",
               "canonicalId": "U",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "100.0%",
               "part": "Rush (R)",
-              "pick": "9.1%",
+              "pick": "8.3%",
               "canonicalId": "R",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "Level (L)",
-              "pick": "9.1%",
+              "pick": "8.3%",
               "canonicalId": "L",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "Gear Flat (GF)",
-              "pick": "9.1%",
+              "pick": "8.3%",
               "canonicalId": "GF",
               "identityMatchStatus": "exact"
             }
@@ -25722,6 +25810,12 @@
             },
             {
               "combo": "Victory Valkyrie 7-60R",
+              "firstRate": "100.0%",
+              "identityMatchStatus": "source_combo_text_preserved",
+              "topCuts": "1"
+            },
+            {
+              "combo": "Victory Valkyrie 3-60U",
               "firstRate": "100.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "1"
@@ -25761,55 +25855,49 @@
               "firstRate": "0.0%",
               "identityMatchStatus": "source_combo_text_preserved",
               "topCuts": "1"
-            },
-            {
-              "combo": "Victory Valkyrie 7-60DB",
-              "firstRate": "0.0%",
-              "identityMatchStatus": "source_combo_text_preserved",
-              "topCuts": "1"
             }
           ],
-          "firstRate": "18.2%",
+          "firstRate": "25.0%",
           "name": "Victory Valkyrie",
           "rank": null,
           "ratchets": [
             {
-              "firstRate": "0.0%",
+              "firstRate": "25.0%",
               "part": "3-60",
-              "pick": "27.3%",
+              "pick": "33.3%",
               "canonicalId": "3-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "66.7%",
               "part": "7-60",
-              "pick": "27.3%",
+              "pick": "25.0%",
               "canonicalId": "7-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "4-55",
-              "pick": "9.1%",
+              "pick": "8.3%",
               "canonicalId": "4-55",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "6-60",
-              "pick": "9.1%",
+              "pick": "8.3%",
               "canonicalId": "6-60",
               "identityMatchStatus": "exact"
             },
             {
               "firstRate": "0.0%",
               "part": "1-80",
-              "pick": "9.1%",
+              "pick": "8.3%",
               "canonicalId": "1-80",
               "identityMatchStatus": "exact"
             }
           ],
-          "topCuts": "11",
+          "topCuts": "12",
           "url": "https://beywatch.gg/blades/victory-valkyrie",
           "usage": "0.1%",
           "statisticsStatus": "unranked_or_insufficient_sample",
@@ -26333,6 +26421,7 @@
               "firstRate": "100.0%",
               "part": "Wall Wedge (WW)",
               "pick": "7.1%",
+              "canonicalId": "WW",
               "identityMatchStatus": "unmatched"
             }
           ],
@@ -27008,19 +27097,19 @@
         }
       ],
       "collectionTotals": {
-        "sourceBladePages": 134,
+        "sourceBladePages": 135,
         "pagesWithStatistics": 119,
         "rankedBlades": 40,
         "unrankedOrInsufficientSampleBlades": 79,
-        "pagesWithoutStatistics": 15,
-        "comboRows": 975,
-        "ratchetRows": 497,
-        "bitRows": 526
+        "pagesWithoutStatistics": 16,
+        "comboRows": 981,
+        "ratchetRows": 501,
+        "bitRows": 527
       }
     },
     "identityReport": {
       "exactMatches": 1169,
-      "unresolvedCount": 208,
+      "unresolvedCount": 216,
       "unresolved": [
         {
           "sourceName": "Valkyrie Blast",
@@ -27573,6 +27662,11 @@
           "sourceUrl": "https://beywatch.gg/blades/bullet-griffon"
         },
         {
+          "sourceName": "M-85",
+          "status": "unmatched",
+          "sourceUrl": "https://beywatch.gg/blades/clock-mirage"
+        },
+        {
           "sourceName": "Delta",
           "status": "unmatched",
           "sourceUrl": "https://beywatch.gg/blades/delta"
@@ -27581,6 +27675,11 @@
           "sourceName": "Eclipse",
           "status": "unmatched",
           "sourceUrl": "https://beywatch.gg/blades/eclipse"
+        },
+        {
+          "sourceName": "1-60",
+          "status": "unmatched",
+          "sourceUrl": "https://beywatch.gg/blades/hells-hammer"
         },
         {
           "sourceName": "Cobalt Drake",
@@ -27758,6 +27857,11 @@
           "sourceUrl": "https://beywatch.gg/blades/heavens-ring"
         },
         {
+          "sourceName": "7-60",
+          "status": "unmatched",
+          "sourceUrl": "https://beywatch.gg/blades/heavens-ring"
+        },
+        {
           "sourceName": "Hells Nether",
           "status": "unmatched",
           "sourceUrl": "https://beywatch.gg/blades/hells-nether"
@@ -27798,6 +27902,11 @@
           "sourceUrl": "https://beywatch.gg/blades/leon-claw"
         },
         {
+          "sourceName": "9-70",
+          "status": "unmatched",
+          "sourceUrl": "https://beywatch.gg/blades/leon-claw"
+        },
+        {
           "sourceName": "Lightning L-Drago (Rapid-Hit Type)",
           "status": "unmatched",
           "sourceUrl": "https://beywatch.gg/blades/lightning-l-drago-rapid-hit-type"
@@ -27811,6 +27920,11 @@
           "sourceName": "Luke Skywalker",
           "status": "unmatched",
           "sourceUrl": "https://beywatch.gg/blades/luke-skywalker"
+        },
+        {
+          "sourceName": "Luster Dragoon",
+          "status": "unmatched",
+          "sourceUrl": "https://beywatch.gg/blades/luster-dragoon"
         },
         {
           "sourceName": "Megatron",
@@ -27888,6 +28002,11 @@
           "sourceUrl": "https://beywatch.gg/blades/rock-leone"
         },
         {
+          "sourceName": "M-85",
+          "status": "unmatched",
+          "sourceUrl": "https://beywatch.gg/blades/rock-leone"
+        },
+        {
           "sourceName": "Savage Bear",
           "status": "unmatched",
           "sourceUrl": "https://beywatch.gg/blades/savage-bear"
@@ -27958,6 +28077,11 @@
           "sourceUrl": "https://beywatch.gg/blades/suppress-superion"
         },
         {
+          "sourceName": "7-70",
+          "status": "unmatched",
+          "sourceUrl": "https://beywatch.gg/blades/suppress-superion"
+        },
+        {
           "sourceName": "Tackle Goat",
           "status": "unmatched",
           "sourceUrl": "https://beywatch.gg/blades/tackle-goat"
@@ -27989,6 +28113,11 @@
         },
         {
           "sourceName": "Tricera Spiky",
+          "status": "unmatched",
+          "sourceUrl": "https://beywatch.gg/blades/tricera-spiky"
+        },
+        {
+          "sourceName": "M-85",
           "status": "unmatched",
           "sourceUrl": "https://beywatch.gg/blades/tricera-spiky"
         },
@@ -28651,9 +28780,9 @@
     }
   },
   "competitionStatisticsImport": {
-    "capturedAt": "2026-09-20",
-    "sha256": "95ed5ce92067ef63c98261a14d273e41c30e7e86a7be0b14eb435b6c79517f29",
-    "sourceFileName": "beyblade_x_competition_statistics_2026-09-20.json",
-    "baselineFile": "competition-statistics/beyblade_x_competition_statistics_2026-09-20.json"
+    "capturedAt": "2026-09-27",
+    "sha256": "3029b255561de656cd9b5c279d9cb3bd9f00454106a9c3e25ff6ced3498d34ae",
+    "sourceFileName": "beyblade_x_competition_statistics_2026-09-27.json",
+    "baselineFile": "competition-statistics/beyblade_x_competition_statistics_2026-09-27.json"
   }
 }
