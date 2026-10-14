@@ -31,7 +31,8 @@ export function sourceInfo(stats, source, page = null) {
   const data = stats[source];
   const first = isMeta ? data.categories.blades?.[0] : null;
   const scope = page?.sourceScope ?? data.scope;
-  const scopeLabel = scope === 'all_time' ? '所有期間' : scope === 'all_time_world_all_rulesets_all_formats' ? '所有期間 · 所有規則與賽制' : scope || '來源未提供範圍';
+  const completeCombos = isMeta ? Number(data.sourceTotals?.leaderboardCompleteCombos) : null;
+  const scopeLabel = Number.isFinite(completeCombos) ? `${completeCombos.toLocaleString('en-US')} 筆完整 Top-cut 配置` : scope === 'all_time' ? '所有期間' : scope === 'all_time_world_all_rulesets_all_formats' ? '所有期間 · 所有規則與賽制' : scope || '來源未提供範圍';
   const region = page?.region || data.region || (scope === 'all_time_world_all_rulesets_all_formats' ? '全球' : '來源未提供地區');
   const updatedAt = page && 'sourceUpdatedAt' in page ? page.sourceUpdatedAt : data.sourceUpdatedAt ?? first?.sourceUpdatedAt;
   return `<div class="source-info"><span>資料範圍：${e(scopeLabel)}</span><span>地區：${e(region)}</span><span>網站更新：${e(formatDate(updatedAt))}</span><span>擷取日期：${e(formatDate(page?.capturedAt ?? stats.capturedAt, '未提供'))}</span><span>資料來源：${link(page?.url || data.sourceUrl, isMeta ? 'MetaBeys' : 'Beywatch')}</span></div>`;

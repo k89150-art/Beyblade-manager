@@ -199,14 +199,17 @@ export function createStatisticsStore(database) {
     categories[category] = array(statistics.metaBeys.categories[category]).filter(Boolean).map(row => {
       const catalogBlocked = row.catalogMatchStatus && !CONFIRMED_CATALOG_STATUSES.has(row.catalogMatchStatus);
       const exactBladeId = category === 'blades' && row.identityMatchStatus === 'exact' ? unique(identities.get(normalizeName(row.canonicalId))) : null;
-      const blocked = row.identityMatchStatus === 'ambiguous' || (catalogBlocked && !(row.catalogMatchStatus === 'unmatched' && exactBladeId));
+      const explicitAlias = category === 'blades' && row.identityMatchStatus === 'alias_exact' && row.sourceAliasOf ? row.sourceAliasOf : '';
+      const aliasRecord = explicitAlias ? unique(identities.get(normalizeName(explicitAlias))) : null;
+      const blocked = row.identityMatchStatus === 'ambiguous' || (catalogBlocked && !explicitAlias && !(row.catalogMatchStatus === 'unmatched' && exactBladeId));
       const matched = blocked ? null : category === 'blades'
-        ? (unique(identities.get(normalizeName(row.canonicalId))) || unique(identities.get(normalizeName(row.sourcePartName))) || (catalogMatches(row).length === 1 ? catalogMatches(row)[0] : null))?.part
+        ? (unique(identities.get(normalizeName(row.canonicalId))) || unique(identities.get(normalizeName(row.sourcePartName))) || aliasRecord || (catalogMatches(row).length === 1 ? catalogMatches(row)[0] : null))?.part
         : partMaps[category].get(normalizeName(row.canonicalId)) || partMaps[category].get(normalizeName(row.sourcePartName));
       let entry = null;
       if (category === 'blades') {
-        // The source-to-source link is independent of canonical name ambiguity.
-        entry = unique(bySourceName.get(normalizeName(row.sourcePartName)));
+        // Only an explicit sourceAliasOf bridge may merge a source spelling variant.
+        entry = explicitAlias ? unique(bySourceName.get(normalizeName(explicitAlias))) || unique(byName.get(normalizeName(explicitAlias))) : null;
+        if (!entry) entry = unique(bySourceName.get(normalizeName(row.sourcePartName)));
         if (!entry) entry = unique(byName.get(normalizeName(row.sourcePartName)));
         if (!entry && row.identityMatchStatus === 'exact') entry = unique(byCanonicalId.get(normalizeName(row.canonicalId)));
         if (!entry && confirmedCatalogRecord(row)) entry = unique(byConfirmedChinese.get(normalizeName(row.displayNameZh)));
@@ -216,7 +219,7 @@ export function createStatisticsStore(database) {
           entry = {slug: exactSlug || `metabeys-${encodeURIComponent(row.sourcePartName)}`, source: null, canonical: matched || null, sourceName: row.sourcePartName, catalog: row};
           addEntry(entry, [row.sourcePartName, ...catalogKeys(row), ...(matched ? keysFor(matched) : [])]);
         }
-        if (confirmedCatalogRecord(row)) extendEntryKeys(entry,[row.sourcePartName,...catalogKeys(row)]);
+        if (confirmedCatalogRecord(row) || explicitAlias) extendEntryKeys(entry,[row.sourcePartName,explicitAlias,...catalogKeys(row)]);
         if (confirmedCatalogRecord(row) && hasVerifiedTraditionalChinese(row.displayNameZh)) add(byConfirmedChinese,row.displayNameZh,entry);
       }
       return {raw: row, part: matched || null, entry};
