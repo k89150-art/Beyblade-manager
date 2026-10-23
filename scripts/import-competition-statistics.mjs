@@ -13,6 +13,21 @@ const db = JSON.parse(fs.readFileSync(target, 'utf8'));
 const stats = incoming.competitionStatistics;
 assert.equal(incoming.metadata?.contentScope, 'objective-competition-statistics-only', 'Input is not the objective-only competition baseline');
 assert.ok(stats?.metaBeys?.categories && Array.isArray(stats?.beywatch?.blades), 'Missing competitionStatistics');
+const timestamp = value => {
+  const parsed = Date.parse(value ?? '');
+  return Number.isFinite(parsed) ? parsed : null;
+};
+const assertNotOlder = (currentValue, incomingValue, label) => {
+  const currentTime = timestamp(currentValue);
+  const incomingTime = timestamp(incomingValue);
+  if (currentTime !== null) {
+    assert.notEqual(incomingTime, null, `${label} is missing while the current database has ${currentValue}`);
+    assert.ok(incomingTime >= currentTime, `${label} regressed from ${currentValue} to ${incomingValue}`);
+  }
+};
+assertNotOlder(db.competitionStatistics?.capturedAt, stats.capturedAt, 'competition snapshot date');
+assertNotOlder(db.competitionStatistics?.metaBeys?.capturedAt, stats.metaBeys.capturedAt, 'MetaBeys capturedAt');
+assertNotOlder(db.competitionStatistics?.beywatch?.sourceUpdatedAt, stats.beywatch.sourceUpdatedAt, 'Beywatch sourceUpdatedAt');
 const expectedCategories = {blades: 123, ratchets: 34, bits: 50, assistBlades: 14};
 for (const [category, count] of Object.entries(expectedCategories)) {
   const rows = stats.metaBeys.categories[category];
@@ -40,16 +55,16 @@ assert.deepEqual(stats.metaBeys.sourceTotals, {
   completedEventsShownOnHomepage: 268
 });
 const pages = stats.beywatch.blades;
-assert.equal(pages.length, 135, 'Beywatch pages');
-for (const [status, count] of Object.entries({ranked: 40, unranked_or_insufficient_sample: 79, no_data: 16})) {
+assert.equal(pages.length, 136, 'Beywatch pages');
+for (const [status, count] of Object.entries({ranked: 40, unranked_or_insufficient_sample: 80, no_data: 16})) {
   assert.equal(pages.filter(item => item.statisticsStatus === status).length, count, `Beywatch ${status}`);
 }
-for (const [key, count] of Object.entries({combos: 989, ratchets: 504, bits: 530})) {
+for (const [key, count] of Object.entries({combos: 998, ratchets: 510, bits: 535})) {
   assert.equal(pages.reduce((sum, item) => sum + item[key].length, 0), count, `Beywatch ${key}`);
 }
 const hash = value => crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
-assert.equal(hash(stats.beywatch), '94116ed47b542a050a0ba1830f587a064c86d4cb419382e6557e4d606f0f1d05', 'Beywatch snapshot changed');
-assert.equal(hash(stats.identityReport), 'e92256b110397b8004d9503e54d6604cd9b396d847efb161d83dd8b43165e84e', 'identityReport changed');
+assert.equal(hash(stats.beywatch), '0492107eae64da9f7f35a71f69d15021a9e218bdbe1e6d4b7372d11f25d12b20', 'Beywatch snapshot changed');
+assert.equal(hash(stats.identityReport), 'b0883ef2adf28e06c3949bb2f71d93fdc2f21ccc1b4fc972ddd6b26de45ece29', 'identityReport changed');
 assert.equal(hash(stats.nameCatalog), '745b938e3750d8bed555e18d26d56331b020ac00bb59a0f878eeabddfaa2a943', 'nameCatalog changed');
 const expectedAliases = new Map([
   ['Glary Valkyrie','Glory Valkyrie'], ['WizardRod','Wizard Rod'], ['SharkScale','Shark Scale'], ['Scale Shark','Shark Scale'],
@@ -68,6 +83,15 @@ for (const [sourceName, canonicalName] of expectedAliases) {
 const pageUrls = pages.map(item => item.url);
 assert.equal(new Set(pageUrls).size, pages.length, 'Beywatch page URLs must be unique');
 assert.equal(new Set(pages.map(item => item.name)).size, pages.length, 'Beywatch identities must be unique');
+const priorPagesByUrl = new Map((db.competitionStatistics?.beywatch?.blades ?? []).map(item => [item.url, item]));
+for (const page of pages) {
+  const prior = priorPagesByUrl.get(page.url);
+  if (prior?.canonicalId && prior.identityMatchStatus === 'exact') {
+    assert.equal(page.canonicalId, prior.canonicalId, `canonicalId regressed for ${page.name}`);
+    assert.equal(page.identityMatchStatus, 'exact', `identity match regressed for ${page.name}`);
+    assert.equal(page.displayNameZh, prior.displayNameZh, `confirmed Chinese name regressed for ${page.name}`);
+  }
+}
 for (const page of pages) {
   const comboNames = page.combos.map(item => item.combo);
   assert.equal(new Set(comboNames).size, comboNames.length, `Duplicate combo in ${page.name}`);
