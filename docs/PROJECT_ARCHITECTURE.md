@@ -1,6 +1,6 @@
 # 專案架構
 
-最後核對日期：2026-10-28
+最後核對日期：2026-10-29
 
 本文件描述目前程式碼實際狀態，不是未來藍圖。架構變更後應同步更新。
 
@@ -75,6 +75,10 @@ Firebase Web SDK 目前由 `https://www.gstatic.com/firebasejs/11.2.0/` 載入�
 
 `beyblade_x_database_v1_zhTW.json` 包含零件主資料、別名、競賽統計及部分來源／研究 metadata。正式競賽統計 UI 只使用其客觀統計契約。
 
+- MetaBeys `Part Popularity`：上蓋、固鎖、軸心、輔助戰刃。
+- Beywatch：上蓋使用率與來源已提供的競賽配置統計。
+- 軸心在統計頁維持經驗證的英文縮寫；不自行補造排名、使用率或中文名稱。
+
 `competition-statistics/` 與 `scripts/` 內有競賽資料匯入、稽核與名稱整理工具。`beyblade_x_codex_database_v1_8_ASCII_SAFE.json` 為歷史／參考資料，不代表退役分析功能仍可接回正式 UI。
 
 ## 4. 收藏、庫存與配置規則
@@ -98,7 +102,13 @@ Firebase Web SDK 目前由 `https://www.gstatic.com/firebasejs/11.2.0/` 載入�
 
 ### 配置紀錄
 
-配置卡維持 compact 結構，顯示主要名稱與零件摘要；管理操作收在 `⋯` 選單。配置庫存占用由 `getUsedParts()` 等既有邏輯計算，不得另建一套計算規則。
+配置卡維持 compact 結構，顯示主要名稱與零件摘要；不顯示 BX／UX／CX 裝飾性系列 Badge，管理操作收在 `⋯` 選單。配置庫存占用由 `getUsedParts()` 等既有邏輯計算，不得另建一套計算規則。
+
+### 資料更新流程
+
+- **官方原裝配置**：每週檢查 TAKARA TOMY 官方型號、官方名稱與原裝零件，去重後與 `stock_products_AUTOFILL_SAFE_2026-07-29-v3.json` 及名稱基準對照。
+- **競賽統計**：獨立處理 MetaBeys 與 Beywatch 快照，保留歷史基準、來源時間、canonical 對應與現有 schema。`scripts/import-competition-statistics.mjs` 只能明確手動執行，不會在網站啟動或 build 時自動匯入。
+- 兩條更新的週排程是 repository 之外的運作設定；本 repository 沒有對應的 schedule workflow。未經使用者授權，AI 不得重建、變更或執行排程。
 
 ## 5. Authentication 與 Firestore
 

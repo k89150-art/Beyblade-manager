@@ -33,8 +33,10 @@
 3. 閱讀 `docs/AI_HANDOFF.md` 最新紀錄。
 4. 依任務需要閱讀 `docs/PROJECT_ARCHITECTURE.md` 與 `docs/PROJECT_DECISIONS.md`。
 5. 執行 `git status --short --branch`，確認工作樹狀態。
-6. 明確界定本次允許修改的頁面、功能與檔案。
-7. 確認沒有其他 AI 或使用者正在同一工作樹寫入。
+6. 執行 `git worktree list`，確認沒有未知的平行工作樹或重複檢出。
+7. 檢查 OneDrive 同步衝突副本與異常檔名；發現時先保留並回報，不自動覆蓋。
+8. 明確界定本次允許修改的頁面、功能與檔案。
+9. 確認沒有其他 AI 或使用者正在同一工作樹寫入。
 
 `docs/AI_HANDOFF.md` 中的「目前執行者」只供協調，不是可靠的檔案鎖。若 Git 狀態、檔案時間或使用者訊息顯示另一位執行者正在修改同一工作樹，必須停止寫入並要求協調。
 
@@ -47,7 +49,8 @@
 - 保留已確認的 UI、資料契約、命名與操作流程；不得因個人偏好重做設計。
 - 不確定是否涉及架構決策、資料相容性或正式權限時，先提出影響與最小方案並詢問。
 - 發現其他 AI 或使用者的未提交修改時，不得覆蓋、還原、格式化掉或清除。
-- 禁止未經明確要求執行 `git reset --hard`、`git clean -fd`、強制推送或其他破壞性操作。
+- 未經使用者明確授權，禁止執行 `git reset --hard`、任何 `git clean`、強制 checkout（包含用 `git checkout --` 覆蓋檔案）、commit、push、force push、merge、tag、deploy、正式資料庫 migration，或修改 GitHub repository 設定。
+- 不得刪除重要資料、修改正式 Firebase 資料或 Security Rules，也不得將 API Key 以外的 Token、私鑰、Service Account 或個人資料寫入文件、日誌與 Git。
 
 ## 5. UI / UX 規範
 
@@ -87,6 +90,12 @@
 - 不重新加入 Tier、主觀配置推薦、推估勝率或已退役分析 UI。
 - `retire-analysis-cache.js` 僅清理退役分析介面的舊網址／快取標記，不得擴大成清除使用者資料。
 - 歷史或參考 JSON 中仍可能存在研究欄位，不代表可重新接回正式 UI。
+
+## 8.1 資料更新界線
+
+- 官方原裝配置與競賽統計是兩條獨立更新流程：前者檢查 TAKARA TOMY 官方型號、名稱與原裝配置；後者匯入 MetaBeys 與 Beywatch 客觀統計。
+- 現有週六／週日排程屬 repository 之外的運作設定，不是 `.github/workflows` 內可重建的一般 CI。未經明確授權，不得執行、新增、重建或修改這些排程。
+- 資料更新必須保留日期化快照、來源時間、canonical 主資料、已確認繁中名稱與現有 JSON schema；軸心縮寫維持英文。
 
 ## 9. 測試與驗收
 
