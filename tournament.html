@@ -155,6 +155,7 @@
       </div>
 
       <div class="auth-actions">
+        <button id="retryDataLoadBtn" type="button" class="secondary-btn" hidden>重新載入</button>
         <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
         <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
       </div>
@@ -176,7 +177,7 @@
       <input type="text" id="tournamentLocation" placeholder="地點">
       <input type="number" id="tournamentParticipantCount" min="2" step="1" inputmode="numeric" placeholder="總人數（含自己）">
       <input type="text" id="tournamentNote" placeholder="備註">
-      <button type="button" onclick="addTournament()" class="primary-btn">新增比賽</button>
+      <button type="button" data-write-action disabled onclick="addTournament()" class="primary-btn">新增比賽</button>
     </div>
 
     <h3>比賽列表</h3>
@@ -192,7 +193,7 @@
       document.body.classList.remove("side-menu-open");
     }
   </script>
-  <script type="module" src="tournament.js?v=20260816-auto-standing1"></script>
+  <script type="module" src="tournament.js?v=20261029-phase1c"></script>
 <script src="site-menu.js?v=20260902-v192"></script>
 </body>
 </html>

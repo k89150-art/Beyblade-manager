@@ -250,6 +250,7 @@
     </div>
 
     <div class="auth-actions">
+      <button id="retryDataLoadBtn" type="button" class="secondary-btn" hidden>重新載入</button>
       <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
       <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
     </div>
@@ -298,7 +299,7 @@
         <input type="text" id="axis" placeholder="軸心">
       </div>
 
-      <button id="addCollectionBtn" type="button" onclick="addRow()">加入原裝收藏</button>
+      <button id="addCollectionBtn" type="button" data-write-action disabled onclick="addRow()">加入原裝收藏</button>
     </div>
 
     <div class="table-wrap record-card-wrap collection-card-wrap">
@@ -365,7 +366,7 @@
 
       <input type="text" id="partName" placeholder="零件名稱">
       <input type="number" id="partCount" min="1" step="1" inputmode="numeric" placeholder="數量">
-      <button onclick="addPart()">新增零件</button>
+      <button data-write-action disabled onclick="addPart()">新增零件</button>
     </div>
 
     <div class="table-wrap">
@@ -388,7 +389,7 @@
         <div><span class="eyebrow">BUILD SETUPS</span><h2>配置紀錄</h2></div>
         <div class="section-heading-actions">
           <span class="count-pill"><strong id="configCount">0</strong> 組</span>
-          <button id="openConfigEditorBtn" type="button" class="primary-btn">＋ 建立配置</button>
+          <button id="openConfigEditorBtn" type="button" class="primary-btn" data-write-action disabled>＋ 建立配置</button>
         </div>
       </div>
       <p class="section-note">從收藏與額外庫存挑選零件。已用完的零件仍會由既有數量防呆阻擋。</p>
@@ -524,7 +525,7 @@
 
       <footer class="quick-editor-actions">
         <button id="cancelConfigEditorBtn" type="button" class="secondary-btn">取消</button>
-        <button id="saveConfigEditorBtn" type="button" class="primary-btn" onclick="addConfig()">儲存</button>
+        <button id="saveConfigEditorBtn" type="button" class="primary-btn" data-write-action disabled onclick="addConfig()">儲存</button>
       </footer>
     </section>
   </div>
@@ -543,7 +544,7 @@
       <div id="stockChoiceList" class="stock-choice-list"></div>
       <footer class="stock-choice-actions">
         <button id="cancelStockChoiceBtn" type="button" class="secondary-btn">取消</button>
-        <button id="addAllStockChoicesBtn" type="button" class="primary-btn">全部加入</button>
+        <button id="addAllStockChoicesBtn" type="button" class="primary-btn" data-write-action disabled>全部加入</button>
       </footer>
     </section>
   </div>
@@ -569,7 +570,7 @@
       </div>
       <div class="modal-actions">
         <button id="deleteConfigCancelBtn" class="danger-btn">取消</button>
-        <button id="deleteConfigConfirmBtn" class="primary-btn">確認刪除</button>
+        <button id="deleteConfigConfirmBtn" class="primary-btn" data-write-action disabled>確認刪除</button>
       </div>
     </div>
   </div>
@@ -685,7 +686,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20260920-cx19"></script>
+  <script type="module" src="script.js?v=20261029-phase2"></script>
   <script src="site-menu.js?v=20260902-v192"></script>
 </body>
 </html>

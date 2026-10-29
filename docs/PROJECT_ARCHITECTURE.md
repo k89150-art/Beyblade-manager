@@ -21,6 +21,8 @@
 
 Firebase Web SDK 目前由 `https://www.gstatic.com/firebasejs/11.2.0/` 載入。Firebase 初始化分散在數個頁面模組中；若要集中化，必須另立任務並完整驗證，不能順手重構。
 
+`data-session-guard.js`（由 `script.js`、`tournament.js` 以帶版本號的 import 載入，與兩頁 HTML 的 script 版本一致）提供主頁與賽事頁共用的資料載入 session 狀態、待處理互動取消、snapshot 去重與首次文件安全建立工具。寫入與非同步操作必須綁定已完成伺服器讀取的 UID、target UID 與 generation；登入、登出、帳號切換或管理員切換檢視都會使舊 session 失效。
+
 ## 2. 頁面與功能
 
 ### 主管理頁 `index.html`
@@ -89,6 +91,13 @@ Firebase Web SDK 目前由 `https://www.gstatic.com/firebasejs/11.2.0/` 載入�
 - CX：紋章鎖 → 金屬戰刃（存在時）或主要戰刃 → 超越戰刃 → 輔助戰刃 → 固鎖 → 軸心。
 - 不存在的零件不建立空標籤。
 
+### 收藏型錄升級（D-015）
+
+- 載入時只有 `stockAutoFilled` 明確為 `true`（或本站儲存的字串 `"true"`）的收藏，會由 `upgradeStoredStockItem()` 依官方型錄更新；其餘收藏原樣顯示、原樣存回，不觸發自動寫回。
+- 有 `stockRecordId` 時以 recordId 識別商品；recordId 不存在於型錄、或沒有 recordId 且型號對應多筆候選時，不升級。
+- 手動新增寫入 `stockAutoFilled: "false"`；官方商品選擇寫入 `"true"` 與 recordId。收藏列以 `row._storedItemExtras` 保留本頁不管理的欄位。
+- 管理員檢視 `user-view.js` 套用相同規則。
+
 ### 額外零件庫存
 
 顯示分類為：全部、上蓋、固鎖、軸心、CX 分件。CX 分件由實際 type 判斷，包含紋章鎖、主要戰刃、金屬戰刃、超越戰刃、輔助戰刃，不以零件名稱猜測。
@@ -131,7 +140,7 @@ users/{uid}/appData/main
 - `tournamentRecords`：賽事紀錄。
 - `ownerUid`、`ownerEmail`、`updatedAt`：擁有者與同步 metadata。
 
-`script.js` 以 `onSnapshot` 監聽並以 `setDoc(..., { merge: true })` 保存主頁資料。`tournament.js` 僅 merge 自己擁有的 `tournamentRecords` 欄位。新增模組時必須明確定義欄位所有權，避免 stale state 覆蓋其他頁面資料。
+`script.js` 以 `onSnapshot` 監聽並以 merge 保存主頁資料；只有取得非 cache 的首次 snapshot 後才允許寫入。Cache metadata（例如短暫斷線）不會重建已確認的畫面，也不會關閉已開啟的 Quick Editor 或刪除 dialog，但在伺服器再次確認前會暫停寫入；相同 cache／server 內容不會重複套用；若伺服器確認文件不存在，第一次寫入會使用 Firestore transaction 的 create-only 檢查，避免兩個分頁同時以空白或預設資料初始化。`tournament.js` 使用伺服器單次讀取確認資料存在狀態，並僅 merge 自己擁有的 `tournamentRecords` 欄位。兩頁在 loading、error、readonly 或 session 失效時都會阻止寫入並取消舊 session 的待處理 dialog；新增模組時必須明確定義欄位所有權，避免 stale state 覆蓋其他頁面資料。
 
 ### 本機資料
 

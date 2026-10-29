@@ -1,4 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+import {
+  DATA_SESSION_STATES,
+  createDataSessionGuard,
+  createPendingInteractionRegistry
+} from "./data-session-guard.js?v=20261029-phase1c";
 
 import {
   getAuth,
@@ -11,7 +16,7 @@ import {
 import {
   getFirestore,
   doc,
-  getDoc,
+  getDocFromServer,
   setDoc
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
@@ -46,6 +51,8 @@ let mainData = {};
 let tournamentRecords = [];
 let configOptions = [];
 const openedTournamentIds = new Set();
+const dataSessionGuard = createDataSessionGuard();
+const pendingTournamentInteractions = createPendingInteractionRegistry();
 
 const ADMIN_UID = "SesDhvXG6MUT38YhqGl0N6lVgMz1";
 
@@ -72,9 +79,9 @@ function setAdminMenuVisibility(show) {
   });
 }
 
-function getUserDocRef() {
-  if (!currentUser) return null;
-  return doc(db, "users", currentUser.uid, "appData", "main");
+function getUserDocRef(targetUid) {
+  if (!targetUid) return null;
+  return doc(db, "users", targetUid, "appData", "main");
 }
 
 function setSyncStatus(text, type = "muted") {
@@ -113,9 +120,46 @@ function updateAuthUI(user) {
   }
 }
 
+function updateDataAccessUi() {
+  const session = dataSessionGuard.snapshot();
+  const writable = session.state === DATA_SESSION_STATES.READY;
+  document.body.dataset.dataState = session.state;
+  document.body.setAttribute("aria-busy", String(session.state === DATA_SESSION_STATES.LOADING));
+
+  document.querySelectorAll("[data-write-action]").forEach(control => {
+    control.disabled = !writable;
+    control.setAttribute("aria-disabled", String(!writable));
+  });
+
+  const retryButton = document.getElementById("retryDataLoadBtn");
+  if (retryButton) retryButton.hidden = session.state !== DATA_SESSION_STATES.ERROR || !currentUser;
+}
+
+function beginTournamentDataSession() {
+  pendingTournamentInteractions.cancelAll();
+  const token = dataSessionGuard.begin({ ownerUid: currentUser.uid, targetUid: currentUser.uid });
+  updateDataAccessUi();
+  return token;
+}
+
+function getDataWriteBlockMessage() {
+  const { state } = dataSessionGuard.snapshot();
+  if (state === DATA_SESSION_STATES.LOADING) return "參賽紀錄仍在載入，請稍候。";
+  if (state === DATA_SESSION_STATES.ERROR) return "參賽紀錄讀取失敗，請先按「重新載入」再操作。";
+  return "請先使用 Google 登入，並等待參賽紀錄載入完成。";
+}
+
 function requireLogin() {
   if (!currentUser) {
     alert("請先使用 Google 登入。");
+    return false;
+  }
+
+  const writeSession = dataSessionGuard.captureWriteSession();
+  if (!writeSession || writeSession.ownerUid !== currentUser.uid) {
+    const message = getDataWriteBlockMessage();
+    alert(message);
+    setSyncStatus(message, dataSessionGuard.snapshot().state === DATA_SESSION_STATES.ERROR ? "error" : "muted");
     return false;
   }
   return true;
@@ -317,11 +361,26 @@ function renderTournamentList() {
 
   if (!currentUser) {
     list.innerHTML = `<div class="empty-state">請先登入後查看參賽紀錄。</div>`;
+    updateDataAccessUi();
+    return;
+  }
+
+  const { state } = dataSessionGuard.snapshot();
+  if (state === DATA_SESSION_STATES.LOADING) {
+    list.innerHTML = `<div class="empty-state">正在安全載入參賽紀錄，完成前不會寫入資料。</div>`;
+    updateDataAccessUi();
+    return;
+  }
+
+  if (state === DATA_SESSION_STATES.ERROR) {
+    list.innerHTML = `<div class="empty-state">參賽紀錄讀取失敗，已停止修改功能。請使用上方「重新載入」。</div>`;
+    updateDataAccessUi();
     return;
   }
 
   if (!tournamentRecords.length) {
     list.innerHTML = `<div class="empty-state">目前沒有參賽紀錄。</div>`;
+    updateDataAccessUi();
     return;
   }
 
@@ -330,6 +389,7 @@ function renderTournamentList() {
   });
 
   list.innerHTML = sortedRecords.map(record => renderTournamentCard(record)).join("");
+  updateDataAccessUi();
 }
 
 function renderTournamentCard(record) {
@@ -360,9 +420,9 @@ function renderTournamentCard(record) {
           <button type="button" onclick="toggleTournamentDetail('${escapeHtml(record.id)}')">
             ${isOpen ? "收合" : "展開"}
           </button>
-          ${!isFinished ? `<button type="button" onclick="finishTournament('${escapeHtml(record.id)}')" class="primary-btn">完成</button>` : ""}
-          <button type="button" onclick="editTournament('${escapeHtml(record.id)}')">修改</button>
-          <button type="button" onclick="deleteTournament('${escapeHtml(record.id)}')" class="danger-btn">刪除</button>
+          ${!isFinished ? `<button type="button" data-write-action onclick="finishTournament('${escapeHtml(record.id)}')" class="primary-btn">完成</button>` : ""}
+          <button type="button" data-write-action onclick="editTournament('${escapeHtml(record.id)}')">修改</button>
+          <button type="button" data-write-action onclick="deleteTournament('${escapeHtml(record.id)}')" class="danger-btn">刪除</button>
         </div>
       </div>
 
@@ -394,8 +454,8 @@ function renderAddMatchForm(tournamentId) {
   return `
     <div class="match-form">
       <div class="direct-advance-actions">
-        <button type="button" onclick="addDirectAdvance('${escapeHtml(tournamentId)}', 'bye')">輪空／種子，直接晉級</button>
-        <button type="button" onclick="addDirectAdvance('${escapeHtml(tournamentId)}', 'walkover')">對手棄權／未到，直接晉級</button>
+        <button type="button" data-write-action onclick="addDirectAdvance('${escapeHtml(tournamentId)}', 'bye')">輪空／種子，直接晉級</button>
+        <button type="button" data-write-action onclick="addDirectAdvance('${escapeHtml(tournamentId)}', 'walkover')">對手棄權／未到，直接晉級</button>
       </div>
       <div class="direct-advance-note">直接晉級會計入一輪晉級，但不會建立比分或回合紀錄。</div>
 
@@ -419,7 +479,7 @@ function renderAddMatchForm(tournamentId) {
         <input type="text" data-deck-custom="3" placeholder="或手動輸入陀螺 3">
       </div>
 
-      <button type="button" onclick="addMatch('${escapeHtml(tournamentId)}')" class="primary-btn">新增對局</button>
+      <button type="button" data-write-action onclick="addMatch('${escapeHtml(tournamentId)}')" class="primary-btn">新增對局</button>
     </div>
   `;
 }
@@ -441,8 +501,8 @@ function renderMatchCard(tournamentId, match, isFinished, matchNumber) {
             : `<div class="match-score">比分：我方 ${score.myScore} : ${score.opponentScore} 對手 <span class="${statusClass}">${status}</span></div>`}
         </div>
         <div class="match-actions">
-          ${!isFinished && !directAdvance ? `<button type="button" onclick="editMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')">修改對局</button>` : ""}
-          ${!isFinished ? `<button type="button" onclick="deleteMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')" class="danger-btn">刪除對局</button>` : ""}
+          ${!isFinished && !directAdvance ? `<button type="button" data-write-action onclick="editMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')">修改對局</button>` : ""}
+          ${!isFinished ? `<button type="button" data-write-action onclick="deleteMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')" class="danger-btn">刪除對局</button>` : ""}
         </div>
       </div>
 
@@ -504,7 +564,7 @@ function renderAddRoundForm(tournamentId, match) {
       </select>
 
       <input type="text" data-round-note placeholder="回合備註">
-      <button type="button" onclick="addRound('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')" class="primary-btn">新增回合</button>
+      <button type="button" data-write-action onclick="addRound('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')" class="primary-btn">新增回合</button>
     </div>
   `;
 }
@@ -523,22 +583,23 @@ function renderRoundRow(tournamentId, matchId, round, isFinished) {
       <td>${escapeHtml(round.point || scoreInfo.point || "-")}</td>
       <td>${escapeHtml(round.note || "-")}</td>
       <td class="${isFinished ? "round-action-empty" : ""}">
-        ${!isFinished ? `<button type="button" onclick="deleteRound('${escapeHtml(tournamentId)}', '${escapeHtml(matchId)}', '${escapeHtml(round.id)}')" class="danger-btn">刪除</button>` : ""}
+        ${!isFinished ? `<button type="button" data-write-action onclick="deleteRound('${escapeHtml(tournamentId)}', '${escapeHtml(matchId)}', '${escapeHtml(round.id)}')" class="danger-btn">刪除</button>` : ""}
       </td>
     </tr>
   `;
 }
 
-async function loadTournamentData() {
-  if (!currentUser) return;
+async function loadTournamentData(sessionToken) {
+  if (!currentUser || !dataSessionGuard.isCurrent(sessionToken)) return;
 
-  const userDocRef = getUserDocRef();
+  const userDocRef = getUserDocRef(sessionToken.targetUid);
   if (!userDocRef) return;
 
   try {
     setSyncStatus("載入參賽紀錄中...", "login");
 
-    const snapshot = await getDoc(userDocRef);
+    const snapshot = await getDocFromServer(userDocRef);
+    if (!dataSessionGuard.isCurrent(sessionToken)) return;
 
     if (snapshot.exists()) {
       mainData = snapshot.data() || {};
@@ -550,21 +611,27 @@ async function loadTournamentData() {
       tournamentRecords = [];
     }
 
+    if (!dataSessionGuard.markReady(sessionToken)) return;
     rebuildConfigOptions();
     renderTournamentList();
     setSyncStatus("參賽紀錄已同步", "saved");
   } catch (error) {
+    if (!dataSessionGuard.isCurrent(sessionToken)) return;
+    dataSessionGuard.markError(sessionToken);
+    pendingTournamentInteractions.cancelAll();
+    updateDataAccessUi();
+    renderTournamentList();
     console.error("參賽紀錄讀取失敗：", error);
-    alert("參賽紀錄讀取失敗：" + error.message);
-    setSyncStatus("讀取失敗", "error");
+    alert("參賽紀錄讀取失敗，已停止資料修改。請按「重新載入」再試一次。\n\n" + error.message);
+    setSyncStatus("讀取失敗，已停止寫入", "error");
   }
 }
 
-async function saveTournamentData() {
-  if (!requireLogin()) return;
-
-  const userDocRef = getUserDocRef();
-  if (!userDocRef) return;
+async function saveTournamentData(operationSession = null) {
+  const writeSession = operationSession || dataSessionGuard.captureWriteSession();
+  if (!writeSession || !dataSessionGuard.isWriteSessionCurrent(writeSession)) return false;
+  const userDocRef = getUserDocRef(writeSession.targetUid);
+  if (!userDocRef) return false;
 
   try {
     setSyncStatus("儲存參賽紀錄中...", "saving");
@@ -572,21 +639,38 @@ async function saveTournamentData() {
     const updatedAt = Date.now();
     mainData = { ...mainData, tournamentRecords, updatedAt };
 
+    if (!dataSessionGuard.isWriteSessionCurrent(writeSession)) return false;
+
     // Only update tournament-owned fields so stale page data cannot overwrite
     // collection, inventory, configuration, or history records.
     await setDoc(userDocRef, { tournamentRecords, updatedAt }, { merge: true });
 
+    if (!dataSessionGuard.isWriteSessionCurrent(writeSession)) return false;
     rebuildConfigOptions();
     setSyncStatus("參賽紀錄已儲存", "saved");
+    return true;
   } catch (error) {
     console.error("參賽紀錄儲存失敗：", error);
-    alert("參賽紀錄儲存失敗：" + error.message);
-    setSyncStatus("儲存失敗", "error");
+    if (dataSessionGuard.isCurrent(writeSession)) {
+      alert("參賽紀錄儲存失敗：" + error.message);
+      setSyncStatus("儲存失敗", "error");
+    }
+    return false;
   }
+}
+
+function retryTournamentDataLoad() {
+  if (!currentUser) return;
+  const sessionToken = beginTournamentDataSession();
+  setSyncStatus("重新載入參賽紀錄中...", "login");
+  renderTournamentList();
+  void loadTournamentData(sessionToken);
 }
 
 window.addTournament = async function () {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   const dateInput = document.getElementById("tournamentDate");
   const nameInput = document.getElementById("tournamentName");
@@ -637,7 +721,8 @@ window.addTournament = async function () {
   participantCountInput.value = "";
   noteInput.value = "";
 
-  await saveTournamentData();
+  if (!await saveTournamentData(operationSession)) return;
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
   renderTournamentList();
 };
 
@@ -653,6 +738,8 @@ window.toggleTournamentDetail = function (tournamentId) {
 
 window.finishTournament = async function (tournamentId) {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   if (!record) return;
@@ -666,11 +753,13 @@ window.finishTournament = async function (tournamentId) {
 
   record.isFinished = true;
 
-  await saveTournamentData();
+  if (!await saveTournamentData(operationSession)) return;
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
   renderTournamentList();
 };
 
-function openTournamentEditDialog(record) {
+function openTournamentEditDialog(record, operationSession) {
+  pendingTournamentInteractions.cancelAll();
   return new Promise(resolve => {
     const oldOverlay = document.getElementById("tournamentEditOverlay");
     if (oldOverlay) oldOverlay.remove();
@@ -709,12 +798,13 @@ function openTournamentEditDialog(record) {
 
         <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
           <button type="button" id="cancelTournamentEditBtn">取消</button>
-          <button type="button" id="saveTournamentEditBtn" class="primary-btn">保存並進入編輯</button>
+          <button type="button" id="saveTournamentEditBtn" class="primary-btn" data-write-action>保存並進入編輯</button>
         </div>
       </div>
     `;
 
     document.body.appendChild(overlay);
+    updateDataAccessUi();
 
     const nameInput = overlay.querySelector("#editTournamentName");
     const dateInput = overlay.querySelector("#editTournamentDate");
@@ -724,7 +814,13 @@ function openTournamentEditDialog(record) {
     const cancelBtn = overlay.querySelector("#cancelTournamentEditBtn");
     const saveBtn = overlay.querySelector("#saveTournamentEditBtn");
 
+    let settled = false;
+    let unregisterCancel = () => {};
+
     function close(value) {
+      if (settled) return;
+      settled = true;
+      unregisterCancel();
       overlay.remove();
       resolve(value);
     }
@@ -732,6 +828,10 @@ function openTournamentEditDialog(record) {
     cancelBtn.onclick = () => close(null);
 
     saveBtn.onclick = () => {
+      if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) {
+        close(null);
+        return;
+      }
       const tournamentName = nameInput.value.trim();
       const date = dateInput.value;
 
@@ -759,33 +859,43 @@ function openTournamentEditDialog(record) {
         note: noteInput.value.trim()
       });
     };
+    unregisterCancel = pendingTournamentInteractions.register(() => close(null));
   });
 }
 
 window.editTournament = async function (tournamentId) {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   if (!record) return;
 
-  const edited = await openTournamentEditDialog(record);
+  const edited = await openTournamentEditDialog(record, operationSession);
   if (!edited) return;
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
 
-  record.tournamentName = edited.tournamentName;
-  record.date = edited.date;
-  record.location = edited.location;
-  record.participantCount = edited.participantCount;
-  record.note = edited.note;
-  record.isFinished = false;
+  const currentRecord = tournamentRecords.find(item => item.id === tournamentId);
+  if (!currentRecord) return;
+
+  currentRecord.tournamentName = edited.tournamentName;
+  currentRecord.date = edited.date;
+  currentRecord.location = edited.location;
+  currentRecord.participantCount = edited.participantCount;
+  currentRecord.note = edited.note;
+  currentRecord.isFinished = false;
 
   openedTournamentIds.add(tournamentId);
 
-  await saveTournamentData();
+  if (!await saveTournamentData(operationSession)) return;
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
   renderTournamentList();
 };
 
 window.deleteTournament = async function (tournamentId) {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   if (!record) return;
@@ -796,12 +906,15 @@ window.deleteTournament = async function (tournamentId) {
   tournamentRecords = tournamentRecords.filter(item => item.id !== tournamentId);
   openedTournamentIds.delete(tournamentId);
 
-  await saveTournamentData();
+  if (!await saveTournamentData(operationSession)) return;
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
   renderTournamentList();
 };
 
 window.addMatch = async function (tournamentId) {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   if (!record) return;
@@ -844,12 +957,15 @@ window.addMatch = async function (tournamentId) {
 
   openedTournamentIds.add(tournamentId);
 
-  await saveTournamentData();
+  if (!await saveTournamentData(operationSession)) return;
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
   renderTournamentList();
 };
 
 window.addDirectAdvance = async function (tournamentId, advancementType) {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   const advanceInfo = DIRECT_ADVANCE_TYPES[advancementType];
@@ -877,12 +993,15 @@ window.addDirectAdvance = async function (tournamentId, advancementType) {
 
   openedTournamentIds.add(tournamentId);
 
-  await saveTournamentData();
+  if (!await saveTournamentData(operationSession)) return;
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
   renderTournamentList();
 };
 
 window.editMatch = async function (tournamentId, matchId) {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   const match = record?.matches?.find(item => item.id === matchId);
@@ -921,12 +1040,15 @@ window.editMatch = async function (tournamentId, matchId) {
   match.opponentName = opponentName.trim();
   match.deck = newDeck;
 
-  await saveTournamentData();
+  if (!await saveTournamentData(operationSession)) return;
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
   renderTournamentList();
 };
 
 window.deleteMatch = async function (tournamentId, matchId) {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   if (!record) return;
@@ -941,12 +1063,15 @@ window.deleteMatch = async function (tournamentId, matchId) {
 
   record.matches = (record.matches || []).filter(item => item.id !== matchId);
 
-  await saveTournamentData();
+  if (!await saveTournamentData(operationSession)) return;
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
   renderTournamentList();
 };
 
 window.addRound = async function (tournamentId, matchId) {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   const match = record?.matches?.find(item => item.id === matchId);
@@ -991,12 +1116,15 @@ window.addRound = async function (tournamentId, matchId) {
     note
   });
 
-  await saveTournamentData();
+  if (!await saveTournamentData(operationSession)) return;
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
   renderTournamentList();
 };
 
 window.deleteRound = async function (tournamentId, matchId, roundId) {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   const record = tournamentRecords.find(item => item.id === tournamentId);
   const match = record?.matches?.find(item => item.id === matchId);
@@ -1017,13 +1145,15 @@ window.deleteRound = async function (tournamentId, matchId, roundId) {
       roundNumber: index + 1
     }));
 
-  await saveTournamentData();
+  if (!await saveTournamentData(operationSession)) return;
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
   renderTournamentList();
 };
 
 document.addEventListener("DOMContentLoaded", function () {
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
+  const retryDataLoadBtn = document.getElementById("retryDataLoadBtn");
 
   if (googleLoginBtn) {
     googleLoginBtn.addEventListener("click", loginWithGoogle);
@@ -1033,20 +1163,30 @@ document.addEventListener("DOMContentLoaded", function () {
     logoutBtn.addEventListener("click", logoutGoogle);
   }
 
+  if (retryDataLoadBtn) {
+    retryDataLoadBtn.addEventListener("click", retryTournamentDataLoad);
+  }
+
   renderTournamentList();
   setSyncStatus("請先使用 Google 登入", "muted");
 
   onAuthStateChanged(auth, user => {
+    pendingTournamentInteractions.cancelAll();
     currentUser = user;
     updateAuthUI(user);
+    dataSessionGuard.reset();
+    mainData = {};
+    tournamentRecords = [];
+    configOptions = [];
+    openedTournamentIds.clear();
+    updateDataAccessUi();
 
     if (user) {
-      loadTournamentData();
+      const sessionToken = beginTournamentDataSession();
+      setSyncStatus("已登入，正在載入參賽紀錄...", "login");
+      renderTournamentList();
+      void loadTournamentData(sessionToken);
     } else {
-      mainData = {};
-      tournamentRecords = [];
-      configOptions = [];
-      openedTournamentIds.clear();
       renderTournamentList();
       setSyncStatus("尚未登入", "muted");
     }

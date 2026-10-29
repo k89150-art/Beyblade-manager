@@ -90,7 +90,8 @@ test('既有 231 筆官方產品與套組不變，新增 CX-19 三筆', () => {
 });
 test('使用者資料契約、雲端同步與賽事流程保持相容', () => {
   const managerScript = normalizeLines(read('script.js'));
-  assert.match(managerScript, /doc\(db, "users", uid, "appData", "main"\)/);
+  assert.match(managerScript, /doc\(db, "users", targetUid, "appData", "main"\)/);
+  assert.match(managerScript, /dataSessionGuard\.captureWriteSession\(\)/);
   assert.match(managerScript, /beybladeTable: getTableData\("beybladeTable", true\)/);
   assert.match(managerScript, /partTable: getTableData\("partTable", false\)/);
   assert.match(managerScript, /configTable: getTableData\("configTable", true\)/);
@@ -98,7 +99,10 @@ test('使用者資料契約、雲端同步與賽事流程保持相容', () => {
   assert.match(managerScript, /ownerUid: currentUser \? currentUser\.uid : ""/);
   assert.match(managerScript, /ownerEmail: currentUser \? currentUser\.email \|\| "" : ""/);
   assert.match(managerScript, /for \(let index = 0; index < 10; index \+= 1\) row\.insertCell\(index\)/);
-  for (const file of ['tournament.js', 'admin.js', 'firestore.rules', 'firebase.json']) {
+  const tournamentScript = normalizeLines(read('tournament.js'));
+  assert.match(tournamentScript, /getDocFromServer\(userDocRef\)/);
+  assert.match(tournamentScript, /await setDoc\(userDocRef, \{ tournamentRecords, updatedAt \}, \{ merge: true \}\)/);
+  for (const file of ['admin.js', 'firestore.rules', 'firebase.json']) {
     assert.equal(normalizeLines(read(file)), normalizeLines(previous(file)), file);
   }
   assert.match(read('user-view.js'), /getCatalogRowData\(product\)/);

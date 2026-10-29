@@ -99,6 +99,40 @@
 - 更新必須保留歷史快照、來源時間、canonical 主資料、現有 JSON schema 與已確認繁中名稱。
 - 週排程是 repository 之外的運作設定。未經明確授權，Codex 與 Claude 不得執行、重建、修改或取代。
 
+## D-015：舊收藏的手動內容優先保留
+
+> 狀態：**已實作，待正式部署**（Phase 2，2026-10-29，本機工作樹未 commit）。正式網站在部署前仍為舊行為，尚未受到此保護。
+
+### 已確認的正式資料政策
+
+- 只有 `stockAutoFilled` 明確為 `true` 的收藏，才可依官方型錄自動升級。本站自身儲存的字串 `"true"` 視為同一個明確標記；其他任何值都不是。
+- `stockAutoFilled` 為 `false`、缺少、無效或無法判定時，一律保留原始內容，不得自動升級，也不得補成 `true`。
+- 不得只因型號唯一匹配、零件名稱相似或其他推測，把手動資料視為自動填入。
+- 只有使用者明確選擇官方商品，或原資料已有明確自動填入標記，才可套用官方配置。
+- 不執行任何收藏批次 migration；未來若需要升級或復原流程，必須另行核准。
+
+### 目前程式實作（本機工作樹，待部署）
+
+- `chooseStockProductForStoredItem()` 與 `upgradeStoredStockItem()` 先檢查 `isExplicitStockAutoFilled()`；未明確為 `true` 的收藏不選任何型錄商品、不改內容、不計入自動回寫。
+- 明確自動填入的收藏：有 `stockRecordId` 時只以 recordId 識別（BX-00、CX-00 等共用型號），recordId 已不存在於型錄時不改用型號推測；沒有 recordId 的舊自動資料，只有型號唯一對應一筆商品時才升級，多筆候選一律不處理。
+- 手動新增的收藏會寫入 `stockAutoFilled: "false"`；從官方型錄選擇的商品維持 `stockAutoFilled: "true"` 與 `stockRecordId`。
+- 收藏列保留本頁不管理的欄位（使用者自訂欄位、`stockAutoFilled: false` 等 falsy metadata），存檔時原樣寫回。
+- 管理員唯讀檢視 `user-view.js` 採相同規則，手動收藏顯示原始資料。
+- 自動升級後的 `saveData()` 仍受 Phase 1 的 ready、UID、generation、readonly 防護；cache snapshot 不會觸發寫入。
+- 行為測試：`tests/collection-autofill-safety.test.mjs`（實際執行 `script.js`／`user-view.js` 程式與正式型錄 JSON，含 mutation 檢查）。
+
+### 尚未處理與殘留風險
+
+- 部署前正式網站仍會改寫手動收藏；若部署延後，期間開啟主頁的使用者仍可能受影響。
+- 過去可能已被舊版改寫的收藏，本階段不辨識、不復原；需要歷史備份才能比對，另案授權處理。
+- `stockAutoFilled` 若為非字串的 truthy 值（例如數字 `1`），使用者之後手動存檔時會以字串形式寫回；值本身不會被視為 `true`。
+
+## D-016：競賽統計歷史快照保留於 Git
+
+- 日期化競賽統計 JSON 必須保留在 Git 專案中；新版統計新增快照，不覆蓋或自動刪除既有歷史快照。
+- 不另建與現有 canonical 主資料及競賽統計契約互不相干的第二套統計資料庫。
+- 現有匯入腳本尚未依此決策調整；修改腳本與對應測試必須另立任務。
+
 ## 現況與舊描述的差異
 
 以下差異已依目前程式碼確認，不應自行「修回」舊描述：

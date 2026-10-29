@@ -160,11 +160,15 @@ function getCatalogRowData(product) {
 }
 
 function enrichOriginalStockItem(item) {
+  // D-015: the admin view shows stored collection data as-is unless the row is
+  // explicitly auto-filled; the same identification rules as script.js apply.
+  if (!(item?.stockAutoFilled === true || item?.stockAutoFilled === "true")) return item;
+
   const cells = Array.isArray(item?.cells) ? item.cells : [];
   const recordId = String(item?.stockRecordId || "").trim();
-  let product = recordId ? stockCatalogByRecordId.get(recordId) : null;
+  let product = recordId ? stockCatalogByRecordId.get(recordId) || null : null;
 
-  if (!product) {
+  if (!product && !recordId) {
     const parsed = parseStockProductCode(item?.stockProductCode || cells[0]);
     if (!parsed) return item;
     const exact = stockCatalogByExactCode.get(parsed.exactKey) || [];
@@ -172,19 +176,7 @@ function enrichOriginalStockItem(item) {
       ? exact
       : (!parsed.hasChildNumber ? stockCatalogByBaseCode.get(parsed.baseKey) || [] : []);
 
-    if (candidates.length === 1) {
-      product = candidates[0];
-    } else if (candidates.length > 1) {
-      const currentModel = String(cells[0] || "").trim();
-      const currentLayer = String(cells[1] || "").trim();
-      const matched = candidates.filter(candidate => {
-        const catalogCells = getCatalogRowData(candidate);
-        return String(candidate.recordId || "").trim() === currentModel ||
-          String(candidate.displayNameZh || "").trim() === currentLayer ||
-          String(catalogCells[1] || "").trim() === currentLayer;
-      });
-      if (matched.length === 1) product = matched[0];
-    }
+    if (candidates.length === 1) product = candidates[0];
   }
 
   return product ? {

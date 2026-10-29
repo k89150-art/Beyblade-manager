@@ -2,10 +2,122 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
+import { DATA_SESSION_STATES, createDataSessionGuard } from "../data-session-guard.js";
 
 const html = fs.readFileSync("index.html", "utf8");
 const script = fs.readFileSync("script.js", "utf8");
 const styles = fs.readFileSync("style.css", "utf8");
+const tournamentScript = fs.readFileSync("tournament.js", "utf8");
+const tournamentHtml = fs.readFileSync("tournament.html", "utf8");
+
+test("data session guard blocks writes until the current UID is loaded", () => {
+  const guard = createDataSessionGuard();
+  assert.equal(guard.snapshot().state, DATA_SESSION_STATES.UNAUTHENTICATED);
+  assert.equal(guard.captureWriteSession(), null);
+
+  const loading = guard.begin({ ownerUid: "user-a" });
+  assert.equal(guard.snapshot().state, DATA_SESSION_STATES.LOADING);
+  assert.equal(guard.captureWriteSession(), null);
+
+  assert.equal(guard.markReady(loading), true);
+  assert.deepEqual(guard.captureWriteSession(), {
+    state: DATA_SESSION_STATES.READY,
+    ownerUid: "user-a",
+    targetUid: "user-a",
+    generation: loading.generation,
+    readOnly: false
+  });
+});
+
+test("failed, switched and readonly sessions cannot write", () => {
+  const guard = createDataSessionGuard();
+  const failed = guard.begin({ ownerUid: "user-a" });
+  assert.equal(guard.markError(failed), true);
+  assert.equal(guard.captureWriteSession(), null);
+
+  const oldSession = guard.begin({ ownerUid: "user-a" });
+  guard.markReady(oldSession);
+  const oldWrite = guard.captureWriteSession();
+  const nextSession = guard.begin({ ownerUid: "user-b" });
+  assert.equal(guard.isWriteSessionCurrent(oldWrite), false);
+  assert.equal(guard.captureWriteSession(), null);
+  guard.markReady(nextSession);
+  assert.equal(guard.captureWriteSession().targetUid, "user-b");
+
+  const readonly = guard.begin({ ownerUid: "admin", targetUid: "user-a", readOnly: true });
+  assert.equal(guard.markReady(readonly), true);
+  assert.equal(guard.snapshot().state, DATA_SESSION_STATES.READONLY);
+  assert.equal(guard.captureWriteSession(), null);
+
+  const backToSelf = guard.begin({ ownerUid: "admin" });
+  assert.equal(guard.captureWriteSession(), null);
+  guard.markReady(backToSelf);
+  assert.equal(guard.captureWriteSession().targetUid, "admin");
+});
+
+test("failed loads recover only through the same current session", () => {
+  const guard = createDataSessionGuard();
+  const failed = guard.begin({ ownerUid: "user-a" });
+  assert.equal(guard.markError(failed), true);
+  assert.equal(guard.captureWriteSession(), null);
+
+  assert.equal(guard.markReady(failed), true);
+  assert.equal(guard.captureWriteSession().targetUid, "user-a");
+
+  const staleWrite = guard.captureWriteSession();
+  const retry = guard.begin({ ownerUid: "user-a" });
+  assert.equal(guard.isWriteSessionCurrent(staleWrite), false);
+  assert.equal(guard.markReady(failed), false);
+  assert.equal(guard.captureWriteSession(), null);
+  assert.equal(guard.markReady(retry), true);
+});
+
+test("main page binds snapshots and saves to immutable session tokens", () => {
+  assert.match(script, /onSnapshot\(\s*userDocRef,\s*\{ includeMetadataChanges: true \}/);
+  assert.match(script, /dataSnapshotGate\.acceptCache\(sessionToken, snapshotData\)[\s\S]*?完成前僅供檢視/);
+  assert.match(script, /dataSnapshotGate\.acceptServer\(sessionToken, snapshotData\)/);
+  assert.match(script, /if \(!snapshot\.exists\(\)\) \{[\s\S]*?dataSessionGuard\.markReady\(sessionToken\)/);
+  assert.match(script, /dataSessionGuard\.markError\(sessionToken\)[\s\S]*?cancelPendingCloudSaves\(\)/);
+  assert.match(script, /const userDocRef = getUserDocRef\(activeWriteSession\.targetUid\)/);
+  assert.match(script, /if \(!dataSessionGuard\.isWriteSessionCurrent\(activeWriteSession\)\)[\s\S]*?await writeDocumentSafely\(\{/);
+  assert.match(script, /runTransaction\(db, async transaction =>[\s\S]*?transaction\.set\(userDocRef, data, \{ merge: true \}\)/);
+  assert.doesNotMatch(script, /getUserDocRef\(\)\s*;[\s\S]{0,250}await setDoc/);
+});
+
+test("main page preserves every manager-owned field during a guarded merge", () => {
+  assert.match(script, /return \{\s*beybladeTable: getTableData\("beybladeTable", true\),\s*partTable: getTableData\("partTable", false\),\s*configTable: getTableData\("configTable", true\),\s*historyTable: getHistoryData\(\),\s*ownerUid:/);
+  assert.match(script, /merge: \(\) => setDoc\(userDocRef, data, \{ merge: true \}\)/);
+  assert.match(script, /Keep data owned by other pages, such as tournamentRecords/);
+});
+
+test("async collection and configuration interactions revalidate their captured session", () => {
+  assert.match(script, /window\.addRow = async function \(\) \{[\s\S]*?const operationSession = dataSessionGuard\.captureWriteSession\(\)/);
+  assert.match(script, /await loadStockProducts\(\)[\s\S]*?isWriteSessionCurrent\(operationSession\)/);
+  assert.match(script, /await openStockProductChoice\([\s\S]*?isWriteSessionCurrent\(operationSession\)/);
+  assert.match(script, /await askDeleteReasonForConfig\(row\)[\s\S]*?isWriteSessionCurrent\(operationSession\)/);
+  assert.match(script, /pendingSessionInteractions\.register\(\(\) => closeStockProductChoice\(null\)\)/);
+  assert.match(script, /pendingSessionInteractions\.register\(\(\) => settle\(null\)\)/);
+  assert.match(script, /configEditorSessionToken[\s\S]*?isWriteSessionCurrent\(configEditorSessionToken\)/);
+});
+
+test("tournament page requires a server read before enabling writes", () => {
+  assert.match(tournamentScript, /getDocFromServer\(userDocRef\)/);
+  assert.match(tournamentScript, /if \(!dataSessionGuard\.isCurrent\(sessionToken\)\) return;[\s\S]*?dataSessionGuard\.markReady\(sessionToken\)/);
+  assert.match(tournamentScript, /dataSessionGuard\.markError\(sessionToken\)/);
+  assert.match(tournamentScript, /const userDocRef = getUserDocRef\(writeSession\.targetUid\)/);
+  assert.match(tournamentScript, /dataSessionGuard\.reset\(\);[\s\S]*?tournamentRecords = \[\];[\s\S]*?beginTournamentDataSession\(\)/);
+  assert.match(tournamentHtml, /id="retryDataLoadBtn"/);
+  assert.match(tournamentHtml, /data-write-action disabled onclick="addTournament\(\)"/);
+  assert.match(tournamentScript, /openTournamentEditDialog\(record, operationSession\)/);
+  assert.match(tournamentScript, /pendingTournamentInteractions\.register\(\(\) => close\(null\)\)/);
+  assert.match(tournamentScript, /if \(!await saveTournamentData\(operationSession\)\) return/);
+});
+
+test("tournament writes remain isolated to tournament-owned fields", () => {
+  assert.match(tournamentScript, /await setDoc\(userDocRef, \{ tournamentRecords, updatedAt \}, \{ merge: true \}\)/);
+  assert.match(tournamentScript, /if \(!dataSessionGuard\.isWriteSessionCurrent\(writeSession\)\) return false;[\s\S]*?await setDoc/);
+  assert.doesNotMatch(tournamentScript, /await setDoc\(userDocRef, mainData/);
+});
 
 test("configuration model stays internal and is no longer user input", () => {
   assert.match(html, /<input type="hidden" id="confModel" value="BX-CUSTOM">/);

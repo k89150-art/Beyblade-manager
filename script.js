@@ -1,5 +1,13 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { attachCatalogNames, getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel } from "./stock-catalog-names.js";
+import {
+  DATA_SESSION_STATES,
+  INITIAL_DOCUMENT_CONFLICT_CODE,
+  createDataSessionGuard,
+  createPendingInteractionRegistry,
+  createSessionSnapshotGate,
+  writeDocumentSafely
+} from "./data-session-guard.js?v=20261029-phase1c";
 
 import {
   getAuth,
@@ -13,7 +21,8 @@ import {
   getFirestore,
   doc,
   setDoc,
-  onSnapshot
+  onSnapshot,
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
 
@@ -45,6 +54,17 @@ let isSavingCloudData = false;
 let hasPendingCloudSave = false;
 let lastLocalWriteUpdatedAt = 0;
 let lastAppliedRemoteUpdatedAt = 0;
+const dataSessionGuard = createDataSessionGuard();
+const pendingSessionInteractions = createPendingInteractionRegistry();
+const dataSnapshotGate = createSessionSnapshotGate({
+  selectData: data => ({
+    beybladeTable: data?.beybladeTable || [],
+    partTable: data?.partTable || [],
+    configTable: data?.configTable || [],
+    historyTable: data?.historyTable || []
+  })
+});
+let initialDocumentMissingGeneration = null;
 
 const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260920-cx19";
 const STOCK_NAMES_URL = "beyblade_x_model_chinese_english_2026-08-29.json?v=20260920-cx19";
@@ -57,6 +77,7 @@ let stockProductsByRecordId = new Map();
 let stockChoiceResolve = null;
 let stockChoiceProducts = [];
 let configEditorRow = null;
+let configEditorSessionToken = null;
 let configEditorMode = "bxux";
 let inventoryFilterType = "all";
 
@@ -76,9 +97,65 @@ function isReadOnly() {
 }
 
 function getUserDocRef(targetUid) {
-  if (!currentUser) return null;
-  const uid = targetUid || viewingUserId || currentUser.uid;
-  return doc(db, "users", uid, "appData", "main");
+  if (!targetUid) return null;
+  return doc(db, "users", targetUid, "appData", "main");
+}
+
+function updateDataAccessUi() {
+  const session = dataSessionGuard.snapshot();
+  const writable = session.state === DATA_SESSION_STATES.READY;
+  document.body.dataset.dataState = session.state;
+  document.body.setAttribute("aria-busy", String(session.state === DATA_SESSION_STATES.LOADING));
+
+  document.querySelectorAll("[data-write-action]").forEach(control => {
+    control.disabled = !writable;
+    control.setAttribute("aria-disabled", String(!writable));
+  });
+
+  const retryButton = document.getElementById("retryDataLoadBtn");
+  if (retryButton) retryButton.hidden = session.state !== DATA_SESSION_STATES.ERROR || !currentUser;
+}
+
+function cancelPendingCloudSaves() {
+  hasPendingCloudSave = false;
+}
+
+function cancelSessionInteractions() {
+  pendingSessionInteractions.cancelAll();
+  closeConfigQuickEditor({ restoreFocus: false });
+}
+
+function hasUnsavedDomInteraction() {
+  const configEditor = document.getElementById("configQuickEditor");
+  const stockChoiceDialog = document.getElementById("stockChoiceDialog");
+  return Boolean(
+    document.querySelector(".editing-row") ||
+    (configEditor && !configEditor.hidden) ||
+    document.getElementById("deleteConfigModal")?.style.display === "block" ||
+    (stockChoiceDialog && !stockChoiceDialog.hidden)
+  );
+}
+
+function beginDataSession(targetUid, readOnly = false) {
+  cancelSessionInteractions();
+  cancelPendingCloudSaves();
+  const token = dataSessionGuard.begin({
+    ownerUid: currentUser.uid,
+    targetUid,
+    readOnly
+  });
+  initialDocumentMissingGeneration = null;
+  dataSnapshotGate.begin(token);
+  updateDataAccessUi();
+  return token;
+}
+
+function getDataWriteBlockMessage() {
+  const { state } = dataSessionGuard.snapshot();
+  if (state === DATA_SESSION_STATES.LOADING) return "雲端資料仍在載入，請稍候。";
+  if (state === DATA_SESSION_STATES.ERROR) return "雲端資料讀取失敗，請先按「重新載入」再操作。";
+  if (state === DATA_SESSION_STATES.READONLY) return "目前是瀏覽模式，無法修改其他使用者的資料。";
+  return "請先使用 Google 登入，並等待雲端資料載入完成。";
 }
 
 function requireLogin() {
@@ -90,6 +167,14 @@ function requireLogin() {
 
   if (isReadOnly()) {
     alert("目前是瀏覽模式，無法修改其他使用者的資料。");
+    return false;
+  }
+
+  const writeSession = dataSessionGuard.captureWriteSession();
+  if (!writeSession || writeSession.ownerUid !== currentUser.uid) {
+    const message = getDataWriteBlockMessage();
+    alert(message);
+    setSyncStatus(message, dataSessionGuard.snapshot().state === DATA_SESSION_STATES.ERROR ? "error" : "muted");
     return false;
   }
 
@@ -511,9 +596,10 @@ function escapeHtml(text) {
 
 function getOperationButtons(tableType) {
   if (isReadOnly()) return "";
+  const disabled = dataSessionGuard.captureWriteSession() ? "" : " disabled";
 
   if (tableType === "beyblade") {
-    return '<button onclick="deleteRow(this)">刪除</button>';
+    return `<button data-write-action${disabled} onclick="deleteRow(this)">刪除</button>`;
   }
 
   if (tableType === "config") {
@@ -522,22 +608,24 @@ function getOperationButtons(tableType) {
         <button
           type="button"
           class="config-action-trigger"
+          data-write-action
+          ${disabled}
           aria-label="開啟配置操作"
           aria-haspopup="menu"
           aria-expanded="false"
           onclick="toggleConfigActionMenu(event, this)"
         >⋯</button>
         <div class="config-action-panel" role="menu" hidden>
-          <button type="button" role="menuitem" onclick="runConfigCardAction(event, this, 'edit')">修改</button>
-          <button type="button" role="menuitem" class="danger-action" onclick="runConfigCardAction(event, this, 'delete')">刪除</button>
+          <button type="button" role="menuitem" data-write-action ${disabled} onclick="runConfigCardAction(event, this, 'edit')">修改</button>
+          <button type="button" role="menuitem" data-write-action ${disabled} class="danger-action" onclick="runConfigCardAction(event, this, 'delete')">刪除</button>
         </div>
       </div>
     `;
   }
 
   return `
-    <button onclick="editRow(this, '${tableType}')">修改</button>
-    <button onclick="deleteRow(this)">刪除</button>
+    <button data-write-action ${disabled} onclick="editRow(this, '${tableType}')">修改</button>
+    <button data-write-action ${disabled} onclick="deleteRow(this)">刪除</button>
   `;
 }
 
@@ -595,8 +683,9 @@ document.addEventListener("keydown", event => {
 });
 
 function getEditingButtons(tableType) {
+  const disabled = dataSessionGuard.captureWriteSession() ? "" : " disabled";
   return `
-    <button onclick="saveEditRow(this, '${tableType}')">保存</button>
+    <button data-write-action ${disabled} onclick="saveEditRow(this, '${tableType}')">保存</button>
     <button onclick="cancelEditRow(this, '${tableType}')">取消</button>
   `;
 }
@@ -702,9 +791,10 @@ function createHistoryRow(record) {
   row.insertCell(4).innerText = record.result || "-";
   row.insertCell(5).innerText = record.note || "-";
   row.insertCell(6).innerText = record.date || "-";
+  const disabled = dataSessionGuard.captureWriteSession() ? "" : " disabled";
   row.insertCell(7).innerHTML = isReadOnly() ? "" :
-    '<button onclick="restoreHistoryRow(this)">還原</button>' +
-    '<button onclick="deleteHistoryRow(this)">刪除</button>';
+    `<button data-write-action ${disabled} onclick="restoreHistoryRow(this)">還原</button>` +
+    `<button data-write-action ${disabled} onclick="deleteHistoryRow(this)">刪除</button>`;
 }
 
 function findHistoryByComboKey(comboKey) {
@@ -744,11 +834,22 @@ function askDeleteReasonForConfig(row) {
     reasonSelect.style.borderColor = "";
     modal.style.display = "block";
 
+    let settled = false;
+    let unregisterCancel = () => {};
+
     function cleanup() {
       modal.style.display = "none";
       confirmBtn.removeEventListener("click", onConfirm);
       cancelBtn.removeEventListener("click", onCancel);
       backdrop.removeEventListener("click", onCancel);
+      unregisterCancel();
+    }
+
+    function settle(value) {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(value);
     }
 
     function onConfirm() {
@@ -759,20 +860,19 @@ function askDeleteReasonForConfig(row) {
         return;
       }
       reasonSelect.style.borderColor = "";
-      cleanup();
       if (reason === "打錯，不記錄") {
-        resolve(false);
+        settle(false);
         return;
       }
       const note = noteInput.value.trim();
-      resolve(buildHistoryRecordFromConfigRow(row, reason, note));
+      settle(buildHistoryRecordFromConfigRow(row, reason, note));
     }
 
     function onCancel() {
-      cleanup();
-      resolve(null);
+      settle(null);
     }
 
+    unregisterCancel = pendingSessionInteractions.register(() => settle(null));
     confirmBtn.addEventListener("click", onConfirm);
     cancelBtn.addEventListener("click", onCancel);
     backdrop.addEventListener("click", onCancel);
@@ -881,6 +981,8 @@ window.deleteHistoryRow = function (button) {
 
 window.deleteRow = async function (button) {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   const row = button.closest("tr");
   if (!row) return;
@@ -928,9 +1030,11 @@ window.deleteRow = async function (button) {
   else if (tableId === "configTable") {
     const historyRecord = await askDeleteReasonForConfig(row);
     if (historyRecord === null) return;
+    if (!dataSessionGuard.isWriteSessionCurrent(operationSession) || !row.isConnected) return;
     if (historyRecord) createHistoryRow(historyRecord);
   }
 
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession) || !row.isConnected) return;
   row.remove();
   sortBeybladeTable();
   refreshSelectors();
@@ -1420,20 +1524,16 @@ function getTableData(tableId, hasStockName = false) {
     }
 
     if (tableId === "beybladeTable") {
-      [
-        "stockAutoFilled",
-        "stockRecordId",
-        "stockProductCode",
-        "stockSetId",
-        "stockSetInstanceId",
-        "stockAssemblySystem",
-        "stockRatchetMode"
-      ].forEach(key => {
+      STOCK_ROW_METADATA_KEYS.forEach(key => {
         if (row.dataset[key]) item[key] = row.dataset[key];
       });
     }
 
-    data.push(item);
+    // D-015: fields this page does not manage (custom fields, falsy metadata
+    // such as stockAutoFilled:false) are written back exactly as loaded.
+    data.push(tableId === "beybladeTable" && row._storedItemExtras
+      ? { ...row._storedItemExtras, ...item }
+      : item);
   });
 
   return data;
@@ -1476,44 +1576,82 @@ function getHistoryData() {
 async function saveData() {
   if (isApplyingRemoteData) return;
 
-  hasPendingCloudSave = true;
-  if (isSavingCloudData) return;
-
-  const initialUserDocRef = getUserDocRef();
-  if (!initialUserDocRef) {
+  const requestedSession = dataSessionGuard.captureWriteSession();
+  if (!requestedSession || !currentUser || requestedSession.ownerUid !== currentUser.uid) {
     hasPendingCloudSave = false;
-    console.log("尚未登入，暫不儲存");
-    setSyncStatus("尚未登入，資料不會儲存到雲端", "muted");
+    console.warn("資料尚未安全載入，已阻止雲端寫入");
     return;
   }
 
+  hasPendingCloudSave = true;
+  if (isSavingCloudData) return;
+
   isSavingCloudData = true;
   setSyncStatus("儲存中...", "saving");
+  let activeWriteSession = requestedSession;
 
   try {
     while (hasPendingCloudSave) {
-      hasPendingCloudSave = false;
-
-      const userDocRef = getUserDocRef();
-      if (!userDocRef) {
-        setSyncStatus("尚未登入，資料不會儲存到雲端", "muted");
-        return;
+      activeWriteSession = dataSessionGuard.captureWriteSession();
+      if (!activeWriteSession || !dataSessionGuard.isWriteSessionCurrent(activeWriteSession)) {
+        hasPendingCloudSave = false;
+        break;
       }
 
+      hasPendingCloudSave = false;
+      const userDocRef = getUserDocRef(activeWriteSession.targetUid);
       const data = collectCurrentData();
       data.updatedAt = Math.max(Number(data.updatedAt) || 0, lastLocalWriteUpdatedAt + 1);
+
+      if (!dataSessionGuard.isWriteSessionCurrent(activeWriteSession)) {
+        hasPendingCloudSave = false;
+        break;
+      }
+
       lastLocalWriteUpdatedAt = data.updatedAt;
       lastAppliedRemoteUpdatedAt = data.updatedAt;
-      // Keep data owned by other pages, such as tournamentRecords.
-      await setDoc(userDocRef, data, { merge: true });
+      const requiresCreate = initialDocumentMissingGeneration === activeWriteSession.generation;
+
+      // Keep data owned by other pages, such as tournamentRecords. A confirmed
+      // missing document uses an atomic create-only transaction so two tabs
+      // cannot initialize the same user with competing empty/default data.
+      await writeDocumentSafely({
+        requiresCreate,
+        createOnly: () => runTransaction(db, async transaction => {
+          const latestSnapshot = await transaction.get(userDocRef);
+          if (latestSnapshot.exists()) {
+            const conflict = new Error("另一個分頁已建立雲端資料，請重新載入後再操作。");
+            conflict.code = INITIAL_DOCUMENT_CONFLICT_CODE;
+            throw conflict;
+          }
+          transaction.set(userDocRef, data, { merge: true });
+        }),
+        merge: () => setDoc(userDocRef, data, { merge: true })
+      });
+
+      if (!dataSessionGuard.isWriteSessionCurrent(activeWriteSession)) break;
+      if (requiresCreate) initialDocumentMissingGeneration = null;
+      dataSnapshotGate.noteApplied(activeWriteSession, data);
     }
 
-    setSyncStatus("已儲存", "saved");
+    if (dataSessionGuard.isWriteSessionCurrent(activeWriteSession)) {
+      setSyncStatus("已儲存", "saved");
+    }
   } catch (error) {
     hasPendingCloudSave = false;
     console.error("Firestore 儲存失敗：", error);
-    alert("Firestore 儲存失敗：" + error.message);
-    setSyncStatus("儲存失敗", "error");
+    if (dataSessionGuard.isCurrent(activeWriteSession)) {
+      if (error?.code === INITIAL_DOCUMENT_CONFLICT_CODE) {
+        dataSessionGuard.markError(activeWriteSession);
+        cancelSessionInteractions();
+        updateDataAccessUi();
+        alert(error.message);
+        setSyncStatus("其他分頁已建立資料，請重新載入", "error");
+      } else {
+        alert("Firestore 儲存失敗：" + error.message);
+        setSyncStatus("儲存失敗", "error");
+      }
+    }
   } finally {
     isSavingCloudData = false;
 
@@ -1525,16 +1663,37 @@ async function saveData() {
 
 /* ====== 載入資料 ====== */
 
+const STOCK_ROW_METADATA_KEYS = Object.freeze([
+  "stockAutoFilled",
+  "stockRecordId",
+  "stockProductCode",
+  "stockSetId",
+  "stockSetInstanceId",
+  "stockAssemblySystem",
+  "stockRatchetMode"
+]);
+
+// D-015: only an explicit marker may enable catalog upgrades. "true" is the
+// value this page itself stores (dataset strings); everything else, including
+// a missing, false or malformed marker, keeps the stored collection unchanged.
+function isExplicitStockAutoFilled(value) {
+  return value === true || value === "true";
+}
+
+function getStoredItemExtras(item) {
+  if (!item || typeof item !== "object") return null;
+  const extras = {};
+  Object.keys(item).forEach(key => {
+    if (key === "cells" || key === "mainStockName") return;
+    const value = item[key];
+    if (STOCK_ROW_METADATA_KEYS.includes(key) && (value === undefined || value === "" || value)) return;
+    if (value !== undefined) extras[key] = value;
+  });
+  return Object.keys(extras).length ? extras : null;
+}
+
 function applyBeybladeRowMetadata(row, metadata = {}) {
-  [
-    "stockAutoFilled",
-    "stockRecordId",
-    "stockProductCode",
-    "stockSetId",
-    "stockSetInstanceId",
-    "stockAssemblySystem",
-    "stockRatchetMode"
-  ].forEach(key => {
+  STOCK_ROW_METADATA_KEYS.forEach(key => {
     if (metadata[key]) row.dataset[key] = String(metadata[key]);
   });
 }
@@ -1553,6 +1712,7 @@ function createBeybladeRow(cells, mainStockName, metadata = {}) {
   });
 
   applyBeybladeRowMetadata(row, metadata);
+  row._storedItemExtras = getStoredItemExtras(metadata);
   row.insertCell(9).innerHTML = getOperationButtons("beyblade");
 }
 
@@ -1637,12 +1797,13 @@ function applyDataToTables(data) {
     isApplyingRemoteData = false;
   }
 
+  updateDataAccessUi();
   return upgradedStockCount;
 }
 
-function startCloudListener() {
-  const userDocRef = getUserDocRef();
-
+function startCloudListener(sessionToken) {
+  if (!dataSessionGuard.isCurrent(sessionToken)) return;
+  const userDocRef = getUserDocRef(sessionToken.targetUid);
   if (!userDocRef) return;
 
   if (unsubscribeCloudData) {
@@ -1654,38 +1815,96 @@ function startCloudListener() {
 
   unsubscribeCloudData = onSnapshot(
     userDocRef,
+    { includeMetadataChanges: true },
     snapshot => {
+      if (!dataSessionGuard.isCurrent(sessionToken)) return;
       if (snapshot.metadata?.hasPendingWrites) return;
 
+      const snapshotData = snapshot.exists() ? snapshot.data() : null;
+
+      if (snapshot.metadata?.fromCache) {
+        const cacheDecision = dataSnapshotGate.acceptCache(sessionToken, snapshotData);
+        // Only a DOM rebuild invalidates open editors. A metadata-only cache
+        // event, such as a brief network drop, keeps unsaved input on screen;
+        // writes still stay locked until the server confirms this session again.
+        if (cacheDecision.apply) {
+          cancelSessionInteractions();
+          applyDataToTables(snapshotData);
+        }
+        dataSessionGuard.markError(sessionToken);
+        cancelPendingCloudSaves();
+        updateDataAccessUi();
+        setSyncStatus(
+          cacheDecision.apply
+            ? "尚未確認雲端最新資料，完成前僅供檢視"
+            : "連線中斷，恢復前暫停儲存；尚未儲存的編輯會保留",
+          "error"
+        );
+        return;
+      }
+
+      const serverDecision = dataSnapshotGate.acceptServer(sessionToken, snapshotData);
+      if (!serverDecision.current) return;
+
       if (!snapshot.exists()) {
-        clearAllTables();
-        refreshSelectors();
+        initialDocumentMissingGeneration = sessionToken.generation;
+        if (serverDecision.apply) applyDataToTables(null);
+        dataSessionGuard.markReady(sessionToken);
+        updateDataAccessUi();
         setSyncStatus("目前沒有資料，可以開始新增", "muted");
         return;
       }
 
-      const snapshotData = snapshot.data();
       const remoteUpdatedAt = Number(snapshotData.updatedAt) || 0;
+      initialDocumentMissingGeneration = null;
+      lastAppliedRemoteUpdatedAt = remoteUpdatedAt;
+      const hadUnsavedInteraction = serverDecision.apply && hasUnsavedDomInteraction();
+      if (serverDecision.apply) cancelSessionInteractions();
+      const upgradedStockCount = serverDecision.apply ? applyDataToTables(snapshotData) : 0;
+      if (!dataSessionGuard.markReady(sessionToken) && !dataSessionGuard.isCurrent(sessionToken)) return;
+      updateDataAccessUi();
+      setSyncStatus(sessionToken.readOnly ? "瀏覽資料已同步" : "資料已同步", "saved");
 
-      if (remoteUpdatedAt && remoteUpdatedAt <= lastAppliedRemoteUpdatedAt) {
-        if (!isSavingCloudData) setSyncStatus("已儲存", "saved");
-        return;
+      if (hadUnsavedInteraction) {
+        alert("偵測到較新的雲端資料，尚未儲存的編輯已取消，請重新操作。");
       }
 
-      lastAppliedRemoteUpdatedAt = remoteUpdatedAt;
-      const upgradedStockCount = applyDataToTables(snapshotData);
-      setSyncStatus("資料已同步", "saved");
-
-      if (upgradedStockCount > 0 && !viewingUserId) {
+      if (upgradedStockCount > 0 && dataSessionGuard.captureWriteSession()) {
         void saveData();
       }
     },
     error => {
+      if (!dataSessionGuard.isCurrent(sessionToken)) return;
+      dataSessionGuard.markError(sessionToken);
+      cancelPendingCloudSaves();
+      cancelSessionInteractions();
+      updateDataAccessUi();
       console.error("Firestore 讀取失敗：", error);
-      alert("Firestore 讀取失敗：" + error.message);
-      setSyncStatus("讀取失敗", "error");
+      alert("Firestore 讀取失敗，已停止資料修改。請按「重新載入」再試一次。\n\n" + error.message);
+      setSyncStatus("讀取失敗，已停止寫入", "error");
     }
   );
+}
+
+function loadCloudDataForCurrentTarget({ clearExisting = false } = {}) {
+  if (!currentUser) return;
+
+  if (unsubscribeCloudData) {
+    unsubscribeCloudData();
+    unsubscribeCloudData = null;
+  }
+
+  const targetUid = viewingUserId || currentUser.uid;
+  const sessionToken = beginDataSession(targetUid, Boolean(viewingUserId));
+  lastAppliedRemoteUpdatedAt = 0;
+
+  if (clearExisting) {
+    clearAllTables();
+    refreshSelectors();
+  }
+
+  setSyncStatus(viewingUserId ? `正在載入瀏覽資料：${targetUid}` : "正在載入雲端資料...", "login");
+  startCloudListener(sessionToken);
 }
 
 
@@ -1780,6 +1999,8 @@ function addManualStockRow() {
   }
 
   const row = tbody.insertRow();
+  // D-015: manual entries are never upgraded from the catalog.
+  row.dataset.stockAutoFilled = "false";
 
   row.insertCell(0).innerText = model;
   row.insertCell(1).innerText = layer;
@@ -1818,8 +2039,11 @@ function finishStockAdd() {
 
 window.addRow = async function () {
   if (!requireLogin()) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   if (stockInputMode === "manual") {
+    if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
     addManualStockRow();
     return;
   }
@@ -1836,9 +2060,12 @@ window.addRow = async function () {
   try {
     await loadStockProducts();
   } catch (error) {
+    if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
     alert("原裝配置資料載入失敗，請重新整理頁面或切換為手動輸入。");
     return;
   }
+
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
 
   const exactMatches = stockProductsByExactCode.get(parsedInput.exactKey) || [];
   const variantMatches = !parsedInput.hasChildNumber && !exactMatches.length
@@ -1858,13 +2085,15 @@ window.addRow = async function () {
     );
 
     if (addAllAsSet || exactMatches.length === 1) {
+      if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
       addAutoFilledStockProducts(exactMatches);
       finishStockAdd();
       return;
     }
 
-    const selectedProducts = await openStockProductChoice(exactMatches, parsedInput.canonical);
+    const selectedProducts = await openStockProductChoice(exactMatches, parsedInput.canonical, operationSession);
     if (!selectedProducts?.length) return;
+    if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
 
     addAutoFilledStockProducts(selectedProducts);
     finishStockAdd();
@@ -1872,14 +2101,16 @@ window.addRow = async function () {
   }
 
   if (variantMatches.length === 1) {
+    if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
     addAutoFilledStockProducts(variantMatches);
     finishStockAdd();
     return;
   }
 
   if (variantMatches.length > 1) {
-    const selectedProducts = await openStockProductChoice(variantMatches, parsedInput.baseCode);
+    const selectedProducts = await openStockProductChoice(variantMatches, parsedInput.baseCode, operationSession);
     if (!selectedProducts?.length) return;
+    if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
 
     addAutoFilledStockProducts(selectedProducts);
     finishStockAdd();
@@ -2627,31 +2858,25 @@ function getStockProductRowData(product) {
 }
 
 function chooseStockProductForStoredItem(item) {
-  const recordId = String(item?.stockRecordId || "").trim();
-  if (recordId && stockProductsByRecordId.has(recordId)) {
-    return stockProductsByRecordId.get(recordId);
-  }
+  // D-015: a missing, false or malformed marker never selects a catalog product.
+  if (!isExplicitStockAutoFilled(item?.stockAutoFilled)) return null;
 
+  // A stored recordId is authoritative (BX-00, CX-00 and other shared codes).
+  // An unknown recordId is not replaced by a guess from the model code.
+  const recordId = String(item?.stockRecordId || "").trim();
+  if (recordId) return stockProductsByRecordId.get(recordId) || null;
+
+  // Older explicit auto-filled rows without recordId may only use an
+  // unambiguous product code; several candidates are never resolved by name.
   const cells = Array.isArray(item?.cells) ? item.cells : [];
   const storedCode = item?.stockProductCode || cells[0] || "";
   const { exactMatches, variantMatches } = getStockProductLookup(storedCode);
   const candidates = exactMatches.length ? exactMatches : variantMatches;
-  if (candidates.length === 1) return candidates[0];
-  if (!candidates.length) return null;
-
-  const currentModel = String(cells[0] || "").trim();
-  const currentLayer = String(cells[1] || "").trim();
-  const matched = candidates.filter(product => {
-    const rowData = getStockProductRowData(product);
-    return String(product.recordId || "").trim() === currentModel ||
-      String(product.displayNameZh || "").trim() === currentLayer ||
-      String(rowData.cells[1] || "").trim() === currentLayer;
-  });
-
-  return matched.length === 1 ? matched[0] : null;
+  return candidates.length === 1 ? candidates[0] : null;
 }
 
 function upgradeStoredStockItem(item) {
+  if (!isExplicitStockAutoFilled(item?.stockAutoFilled)) return { item, changed: false };
   const product = chooseStockProductForStoredItem(item);
   if (!product) return { item, changed: false };
 
@@ -2715,7 +2940,7 @@ function closeStockProductChoice(selectedProducts = null) {
   if (resolve) resolve(selectedProducts);
 }
 
-function openStockProductChoice(products, productCode) {
+function openStockProductChoice(products, productCode, operationSession) {
   const dialog = document.getElementById("stockChoiceDialog");
   const list = document.getElementById("stockChoiceList");
   const description = document.getElementById("stockChoiceDescription");
@@ -2729,9 +2954,10 @@ function openStockProductChoice(products, productCode) {
   stockChoiceProducts = [...products];
   description.textContent = `${productCode} 查到 ${products.length} 顆原裝配置，請選擇你擁有的陀螺。`;
   addAllButton.textContent = `全部加入（${products.length} 顆）`;
-  addAllButton.disabled = false;
+  addAllButton.disabled = !dataSessionGuard.captureWriteSession();
+  const disabled = dataSessionGuard.captureWriteSession() ? "" : " disabled";
   list.innerHTML = products.map((product, index) => `
-    <button type="button" class="stock-choice-option" data-stock-choice-index="${index}">
+    <button type="button" class="stock-choice-option" data-write-action data-stock-choice-index="${index}"${disabled}>
       <strong>${escapeHtml(getStockProductChoiceLabel(product))}</strong>
       <span>${escapeHtml(formatStockProductParts(product))}</span>
     </button>
@@ -2742,7 +2968,15 @@ function openStockProductChoice(products, productCode) {
   requestAnimationFrame(() => list.querySelector(".stock-choice-option")?.focus());
 
   return new Promise(resolve => {
-    stockChoiceResolve = resolve;
+    let settled = false;
+    let unregisterCancel = () => {};
+    stockChoiceResolve = selectedProducts => {
+      if (settled) return;
+      settled = true;
+      unregisterCancel();
+      resolve(dataSessionGuard.isWriteSessionCurrent(operationSession) ? selectedProducts : null);
+    };
+    unregisterCancel = pendingSessionInteractions.register(() => closeStockProductChoice(null));
   });
 }
 
@@ -2874,8 +3108,11 @@ function populateConfigEditorFromRow(row) {
 function openConfigQuickEditor(editingRow = null) {
   const editor = document.getElementById("configQuickEditor");
   if (!editor) return;
+  const operationSession = dataSessionGuard.captureWriteSession();
+  if (!operationSession) return;
 
   configEditorRow = editingRow;
+  configEditorSessionToken = operationSession;
   clearConfigEditorFields();
   refreshSelectors(editingRow);
 
@@ -2907,14 +3144,15 @@ function openConfigQuickEditor(editingRow = null) {
 
 window.openConfigQuickEditor = openConfigQuickEditor;
 
-function closeConfigQuickEditor() {
+function closeConfigQuickEditor({ restoreFocus = true } = {}) {
   const editor = document.getElementById("configQuickEditor");
   if (!editor) return;
 
   editor.hidden = true;
   document.body.classList.remove("config-editor-open");
   configEditorRow = null;
-  document.getElementById("openConfigEditorBtn")?.focus();
+  configEditorSessionToken = null;
+  if (restoreFocus) document.getElementById("openConfigEditorBtn")?.focus();
 }
 
 window.refreshSelectors = function (editingRow = null) {
@@ -2982,6 +3220,10 @@ function checkStock(type, name, total, used) {
 
 window.addConfig = function () {
   if (!requireLogin()) return;
+  if (!configEditorSessionToken || !dataSessionGuard.isWriteSessionCurrent(configEditorSessionToken)) {
+    closeConfigQuickEditor({ restoreFocus: false });
+    return;
+  }
 
   const modelInput = document.getElementById("confModel");
   const layerSel = document.getElementById("sel上蓋").value;
@@ -3222,13 +3464,7 @@ window.adminViewUser = async function () {
 
   const returnBtn = document.getElementById("adminReturnBtn");
   if (returnBtn) returnBtn.style.display = "inline-block";
-
-  if (unsubscribeCloudData) {
-    unsubscribeCloudData();
-    unsubscribeCloudData = null;
-  }
-
-  startCloudListener();
+  loadCloudDataForCurrentTarget({ clearExisting: true });
 };
 
 window.adminViewSelf = function () {
@@ -3243,13 +3479,7 @@ window.adminViewSelf = function () {
   if (uidInput) uidInput.value = "";
 
   setSyncStatus("已回到自己的資料", "saved");
-
-  if (unsubscribeCloudData) {
-    unsubscribeCloudData();
-    unsubscribeCloudData = null;
-  }
-
-  startCloudListener();
+  loadCloudDataForCurrentTarget({ clearExisting: true });
 };
 
 /* ====== Google 登入 / 登出 ====== */
@@ -3276,6 +3506,7 @@ async function logoutGoogle() {
 document.addEventListener("DOMContentLoaded", function () {
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
+  const retryDataLoadBtn = document.getElementById("retryDataLoadBtn");
   const partCountInput = document.getElementById("partCount");
   const stockModelInput = document.getElementById("model");
   const configModelInput = document.getElementById("confModel");
@@ -3400,6 +3631,12 @@ document.addEventListener("DOMContentLoaded", function () {
     logoutBtn.addEventListener("click", logoutGoogle);
   }
 
+  if (retryDataLoadBtn) {
+    retryDataLoadBtn.addEventListener("click", () => {
+      loadCloudDataForCurrentTarget({ clearExisting: false });
+    });
+  }
+
   clearAllTables();
   refreshSelectors();
   installUiSummaryObservers();
@@ -3407,7 +3644,9 @@ document.addEventListener("DOMContentLoaded", function () {
   installConfigSort();
 
   onAuthStateChanged(auth, async user => {
+    cancelSessionInteractions();
     currentUser = user;
+    viewingUserId = null;
     updateAuthUI(user);
 
     if (unsubscribeCloudData) {
@@ -3415,14 +3654,20 @@ document.addEventListener("DOMContentLoaded", function () {
       unsubscribeCloudData = null;
     }
 
+    cancelPendingCloudSaves();
+    dataSessionGuard.reset();
+    initialDocumentMissingGeneration = null;
+    clearAllTables();
+    refreshSelectors();
+    updateDataAccessUi();
+
     if (user) {
       setSyncStatus("已登入，正在載入雲端資料...", "login");
+      const sessionToken = beginDataSession(user.uid, false);
       await loadStockProducts().catch(() => {});
-      if (currentUser !== user) return;
-      startCloudListener();
+      if (currentUser !== user || !dataSessionGuard.isCurrent(sessionToken)) return;
+      startCloudListener(sessionToken);
     } else {
-      clearAllTables();
-      refreshSelectors();
       setSyncStatus("尚未登入", "muted");
     }
   });
