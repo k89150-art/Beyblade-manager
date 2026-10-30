@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Claude 完成 Phase 2 H-1，等待使用者確認是否 commit）
+- 目前執行者：無（Claude 完成 Phase 4B-1 H-2 安全補強，等待使用者驗收與是否 commit）
 - 寫入範圍：目前沒有進行中的寫入任務
-- Git 狀態（開始時）：`main` / `1120d859f7a1741d79c1db4225b852d76866c6ff`，與 `origin/main` 同步，工作樹乾淨
+- Git 狀態（開始時）：`main` / `f9c9ea8833ae0415fbe7c66bc723c70a91d00818`，與 `origin/main` 同步，已追蹤檔案與 HEAD 一致
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
 
@@ -31,6 +31,36 @@
 ```
 
 ## 最新紀錄
+
+### 2026-10-29 — Claude（Phase 4B-1）
+
+- 任務：依 Phase 4C 審查修正 H1、M1、M2、L2、L4、L5，並提出 H2 部署方案。
+- 根本原因：H1：SDK 預設自行重試，回應遺失後重跑時把自己剛寫入的資料當成他人修改，回報「沒有儲存」並誘發重複新增。M1：修改對局草稿沒有保存基準值。M2：mock 不依 SDK 重試規則。L2：延遲完成的 `onSaved` 不辨識草稿身分。L4：修改比賽一律寫入 `isFinished: false`。L5：同 ID 但內容不同時判定衝突，導致改用新 ID。
+- 主要內容：`runTransaction` 改為 `maxAttempts: 1`，由 `tournament-sync.js` 自行重試並記錄 commit 是否結果不明；新增操作以自身 ID 辨識已套用，無 ID 操作以「已是預期結果」不重寫且不宣稱由本次寫入；提交結果分為已確認已提交、已確認未提交、結果不明；逾時時若尚未送出 commit，直接確認未儲存；對局草稿與比賽 dialog 逐欄位合併並列出雙方都改的欄位；延遲完成只清除自己的草稿；只有對已完成比賽開啟修改才重新開啟；結果不明後換新 ID 需確認；賽事頁顯示新版版本列。
+- 修改檔案（相對 Phase 4B）：`tournament.js`、`tournament.html`（版本 `?v=20261029-phase4b1`、版本列）、`tournament-sync.js`、`tests/helpers/mock-firestore.mjs`、`tests/helpers/tournament-page-harness.mjs`、`tests/tournament-sync.test.mjs`、`tests/tournament-page-sync.test.mjs`、`tests/tournament-sync-regression.test.mjs`（新增）、`docs/PROJECT_DECISIONS.md`、`docs/PROJECT_ARCHITECTURE.md`、`docs/AI_HANDOFF.md`。
+- 測試（Claude 雲端隔離環境，非使用者 Windows 本機）：全部 10 個測試檔 221/221 PASS（Phase 4B 194 → 221）；JavaScript syntax、網站結構、Build（32 files）、`git diff --check` PASS；Playwright 390／1440 各 17 項 PASS；mutation 23 項（Node 19＋瀏覽器 4）皆被測到；Phase 4C 的 R1、R2 重現腳本已不再重現，R3（舊版分頁覆寫）仍可重現，屬部署殘餘風險。
+- Branch / HEAD：`main` / `f9c9ea8833ae0415fbe7c66bc723c70a91d00818`。
+- Git status：未 stage；8 份已追蹤修改＋6 份新增（`tournament-sync.js`、`tests/tournament-sync.test.mjs`、`tests/tournament-page-sync.test.mjs`、`tests/tournament-sync-regression.test.mjs`、`tests/helpers/mock-firestore.mjs`、`tests/helpers/tournament-page-harness.mjs`）。
+- 未完成事項：Firestore Emulator 驗證（本環境無法下載 Emulator）；`AGENTS.md`／`README.md` 測試指令；Phase 4C 的 L1、L3 未在本階段要求內（L1 已順帶改善：逾時且未送出 commit 時確認未儲存）。
+- 已知問題：修改類操作在結果不明且他人又改同一場時，只能顯示結果不明；修改比賽 dialog 在手機寬度訊息較長，需在 dialog 內捲動才看到按鈕。
+- 資料庫／部署風險：未修改 Rules、Schema 或正式資料；部署必須依 D-017「部署前必須遵守」程序處理舊版分頁。
+- 下一位注意：建議由 Codex 獨立審查 `startTournamentTransaction()` 的重試與分類，以及部署程序。
+- Commit / Deploy：未 commit、未 push、未部署。
+
+### 2026-10-29 — Claude（Phase 4B）
+
+- 任務：H-2 賽事並行寫入安全修正（D-017）。
+- 根本原因：`saveTournamentData()` 以 `setDoc(..., { tournamentRecords, updatedAt }, { merge: true })` 寫入整個陣列；`merge` 只合併最上層欄位，陣列整欄取代，多分頁／多裝置後寫者覆蓋。各操作又先修改記憶體再存檔，失敗的變更會被下一次成功存檔帶出。
+- 主要內容：新增 `tournament-sync.js`（純函式操作、單場賽事基準指紋比對、冪等新增／刪除、結果判定與分類）；`tournament.js` 十個寫入操作改為 transaction 內以最新資料重新計算，只 `update` `tournamentRecords` 與 `updatedAt`，移除 `setDoc`；成功後才以交易結果更新記憶體與畫面；離線直接拒絕、15 秒逾時或提交中斷時重新讀取確認；同頁一次一個交易；新增／對局／回合表單、修改比賽 dialog、修改對局 prompt 的草稿保留，切換帳號清除；修改比賽衝突時保留使用者輸入、未修改欄位更新為雲端最新值。`tournament.html` 版本改為 `?v=20261029-phase4b`。
+- 修改檔案：`tournament.js`、`tournament.html`、`tournament-sync.js`（新增）、`tests/tournament-sync.test.mjs`（新增）、`tests/tournament-page-sync.test.mjs`（新增）、`tests/helpers/mock-firestore.mjs`（新增）、`tests/helpers/tournament-page-harness.mjs`（新增）、`tests/data-session-safety.test.mjs`、`tests/manager-ui-refresh.test.mjs`、`tests/retirement.test.mjs`、`docs/PROJECT_DECISIONS.md`、`docs/PROJECT_ARCHITECTURE.md`、`docs/AI_HANDOFF.md`。`script.js`、`data-session-guard.js`、Rules、型錄、統計與備份工具未修改。
+- 測試（Claude 雲端隔離環境，非使用者 Windows 本機）：全部 9 個測試檔 194/194 PASS（原 140 + 新增 54）；JavaScript syntax PASS；網站結構 PASS；production build PASS（32 files）；`git diff --check` PASS；Playwright 以 Firestore stub 在 390×844／1440×900 驗證 13 項 × 2（草稿跨重新渲染保留、同場衝突提示、衝突後重新操作、dialog 衝突與已刪除、儲存中停用、離線不送出、帳號切換清除草稿、收藏欄位不變、無 overflow、Console Error 0）；mutation 16 項（基準比對、刪除比對、交易內使用最新資料、交易外 ID、重送沿用 ID、callback 內與完成後 Session 檢查、失敗不修改記憶體、表單／對局草稿、切換帳號清草稿、逾時確認、放棄後停止重試、重新渲染保留草稿、衝突時更新未修改欄位）皆會被測到。
+- Branch / HEAD：`main` / `f9c9ea8833ae0415fbe7c66bc723c70a91d00818`。
+- Git status：未 stage；13 份未提交（8 份已追蹤修改＋5 份新增）。
+- 未完成事項：真實 Firebase SDK 交易行為尚未以 Emulator 或正式環境驗證；沒有即時監聽（Phase 4C 可評估）；`AGENTS.md`／`README.md` 測試指令尚未納入新測試檔。
+- 已知問題：已送出的 commit 無法取消（固定 UID＋Rules 確保不會跨帳號）；同一場賽事不同對局同時修改也會衝突（D-017 刻意保守）；D-015 段落的「待正式部署」狀態文字未在本階段更新。
+- 資料庫／部署風險：未修改 Rules、schema 或正式資料；部署後已開啟的舊版分頁仍會用舊程式整份覆寫，所有裝置需重新整理賽事頁。
+- 下一位注意：建議由另一位執行者獨立審查 `tournament-sync.js` 與 `submitTournamentOperation()`；部署前先以 Phase 2.5 備份工具做快照。
+- Commit / Deploy：未 commit、未 push、未部署。
 
 ### 2026-10-29 — Claude（Phase 2）
 

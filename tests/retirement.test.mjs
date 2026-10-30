@@ -101,7 +101,9 @@ test('使用者資料契約、雲端同步與賽事流程保持相容', () => {
   assert.match(managerScript, /for \(let index = 0; index < 10; index \+= 1\) row\.insertCell\(index\)/);
   const tournamentScript = normalizeLines(read('tournament.js'));
   assert.match(tournamentScript, /getDocFromServer\(userDocRef\)/);
-  assert.match(tournamentScript, /await setDoc\(userDocRef, \{ tournamentRecords, updatedAt \}, \{ merge: true \}\)/);
+  assert.match(tournamentScript, /runTransaction\(db, transaction => updateFunction\(/);
+  assert.match(tournamentScript, /transaction\.update\(userDocRef, fields\)/);
+  assert.doesNotMatch(tournamentScript, /\bsetDoc\b/);
   for (const file of ['admin.js', 'firestore.rules', 'firebase.json']) {
     assert.equal(normalizeLines(read(file)), normalizeLines(previous(file)), file);
   }

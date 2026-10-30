@@ -10,8 +10,9 @@ import {
   createSessionSnapshotGate,
   writeDocumentSafely
 } from "../data-session-guard.js";
+import { createMockFirestore, userDocPath } from "./helpers/mock-firestore.mjs";
+import { createTournamentPage } from "./helpers/tournament-page-harness.mjs";
 
-const tournamentSource = fs.readFileSync("tournament.js", "utf8");
 const managerSource = fs.readFileSync("script.js", "utf8");
 
 function sourceBetween(source, startMarker, endMarker) {
@@ -19,50 +20,6 @@ function sourceBetween(source, startMarker, endMarker) {
   const end = source.indexOf(endMarker, start);
   assert.ok(start >= 0 && end > start, `missing source range: ${startMarker}`);
   return source.slice(start, end);
-}
-
-function createTournamentHarness({ editResult } = {}) {
-  const guard = createDataSessionGuard();
-  const token = readySession(guard, "account-a");
-  const inputs = {
-    tournamentDate: { value: "2026-10-29" },
-    tournamentName: { value: "初賽" },
-    tournamentLocation: { value: "台北" },
-    tournamentParticipantCount: { value: "16" },
-    tournamentNote: { value: "測試" }
-  };
-  const saveCalls = [];
-  const context = {
-    window: {},
-    document: { getElementById: id => inputs[id] || null },
-    tournamentRecords: [],
-    openedTournamentIds: new Set(),
-    dataSessionGuard: guard,
-    requireLogin: () => true,
-    normalizeParticipantCount: value => Number(value),
-    generateId: () => "event-1",
-    saveTournamentData: async operationToken => {
-      saveCalls.push(operationToken);
-      return guard.isWriteSessionCurrent(operationToken);
-    },
-    renderTournamentList: () => {},
-    openTournamentEditDialog: async () => editResult || {
-      tournamentName: "決賽",
-      date: "2026-10-30",
-      location: "新北",
-      participantCount: 32,
-      note: "已修改"
-    },
-    confirm: () => true,
-    alert: () => {}
-  };
-  vm.createContext(context);
-  vm.runInContext([
-    sourceBetween(tournamentSource, "window.addTournament =", "window.toggleTournamentDetail ="),
-    sourceBetween(tournamentSource, "window.editTournament =", "window.deleteTournament ="),
-    sourceBetween(tournamentSource, "window.deleteTournament =", "window.addMatch =")
-  ].join("\n"), context);
-  return { context, guard, token, inputs, saveCalls };
 }
 
 function createStockAddHarness({ loadPromise, exactMatches = [], choicePromise, source = managerSource } = {}) {
@@ -356,48 +313,67 @@ test("a ready session performs a normal merge against its fixed UID", async () =
   assert.deepEqual(writes, ["account-a"]);
 });
 
+// D-017: the real tournament.js runs against a mock Firestore transaction
+// (tests/helpers/tournament-page-harness.mjs); see tournament-page-sync.test.mjs
+// for the concurrency, offline and account-switch matrix.
+async function createTournamentHarness() {
+  const mock = createMockFirestore();
+  mock.seed(userDocPath("account-a"), { tournamentRecords: [], updatedAt: 1 });
+  mock.seed(userDocPath("account-b"), { tournamentRecords: [], updatedAt: 1 });
+  const page = await createTournamentPage({ mock });
+  await page.signIn("account-a");
+  page.setAddForm({
+    tournamentDate: "2026-10-29",
+    tournamentName: "初賽",
+    tournamentLocation: "台北",
+    tournamentParticipantCount: "16",
+    tournamentNote: "測試"
+  });
+  return { page, mock };
+}
+
 test("the actual tournament handlers still add, edit and delete in a ready session", async () => {
-  const { context, saveCalls } = createTournamentHarness();
+  const { page, mock } = await createTournamentHarness();
+  const saved = () => mock.read(userDocPath("account-a")).tournamentRecords;
 
-  await context.window.addTournament();
-  assert.equal(context.tournamentRecords.length, 1);
-  assert.equal(context.tournamentRecords[0].tournamentName, "初賽");
+  await page.window.addTournament();
+  assert.equal(saved().length, 1);
+  assert.equal(saved()[0].tournamentName, "初賽");
+  const id = saved()[0].id;
 
-  await context.window.editTournament("event-1");
-  assert.equal(context.tournamentRecords[0].tournamentName, "決賽");
-  assert.equal(context.tournamentRecords[0].participantCount, 32);
+  page.useEditDialog({ tournamentName: "決賽", date: "2026-10-30", location: "新北", participantCount: 32, note: "已修改" });
+  await page.window.editTournament(id);
+  assert.equal(saved()[0].tournamentName, "決賽");
+  assert.equal(saved()[0].participantCount, 32);
 
-  await context.window.deleteTournament("event-1");
-  assert.equal(context.tournamentRecords.length, 0);
-  assert.equal(saveCalls.length, 3);
+  await page.window.deleteTournament(id);
+  assert.equal(saved().length, 0);
+  assert.equal(page.api.records.length, 0);
+  assert.equal(mock.stats.commits, 3);
 });
 
 test("the actual tournament edit handler drops a dialog result after account switch", async () => {
+  const { page, mock } = await createTournamentHarness();
+  mock.seed(userDocPath("account-a"), {
+    tournamentRecords: [{ id: "event-1", tournamentName: "A 的比賽", date: "2026-10-29", location: "台北", participantCount: 16, note: "", isFinished: false, matches: [] }],
+    updatedAt: 2
+  });
+  await page.signIn("account-a-reload");
+  await page.signIn("account-a");
   const edit = deferred();
-  const { context, guard } = createTournamentHarness({ editResult: edit.promise });
-  context.tournamentRecords.push({
-    id: "event-1",
-    tournamentName: "A 的比賽",
-    date: "2026-10-29",
-    location: "台北",
-    participantCount: 16,
-    note: "",
-    isFinished: false,
-    matches: []
+  page.api.setEditDialog(async (record, session, submitEdit) => {
+    const values = await edit.promise;
+    return submitEdit(values, record);
   });
 
-  const operation = context.window.editTournament("event-1");
-  readySession(guard, "account-b");
-  edit.resolve({
-    tournamentName: "不應套用",
-    date: "2026-11-01",
-    location: "高雄",
-    participantCount: 64,
-    note: "stale"
-  });
+  const operation = page.window.editTournament("event-1");
+  await page.signIn("account-b");
+  edit.resolve({ tournamentName: "不應套用", date: "2026-11-01", location: "高雄", participantCount: 64, note: "stale" });
   await operation;
 
-  assert.equal(context.tournamentRecords[0].tournamentName, "A 的比賽");
+  assert.equal(mock.read(userDocPath("account-a")).tournamentRecords[0].tournamentName, "A 的比賽");
+  assert.deepEqual(mock.read(userDocPath("account-b")).tournamentRecords, []);
+  assert.equal(mock.stats.transactions, 0);
 });
 
 // ---------------------------------------------------------------------------

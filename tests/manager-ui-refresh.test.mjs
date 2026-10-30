@@ -9,6 +9,7 @@ const script = fs.readFileSync("script.js", "utf8");
 const styles = fs.readFileSync("style.css", "utf8");
 const tournamentScript = fs.readFileSync("tournament.js", "utf8");
 const tournamentHtml = fs.readFileSync("tournament.html", "utf8");
+const tournamentSync = fs.readFileSync("tournament-sync.js", "utf8");
 
 test("data session guard blocks writes until the current UID is loaded", () => {
   const guard = createDataSessionGuard();
@@ -104,19 +105,22 @@ test("tournament page requires a server read before enabling writes", () => {
   assert.match(tournamentScript, /getDocFromServer\(userDocRef\)/);
   assert.match(tournamentScript, /if \(!dataSessionGuard\.isCurrent\(sessionToken\)\) return;[\s\S]*?dataSessionGuard\.markReady\(sessionToken\)/);
   assert.match(tournamentScript, /dataSessionGuard\.markError\(sessionToken\)/);
-  assert.match(tournamentScript, /const userDocRef = getUserDocRef\(writeSession\.targetUid\)/);
+  assert.match(tournamentScript, /const userDocRef = getUserDocRef\(operationSession\.targetUid\)/);
   assert.match(tournamentScript, /dataSessionGuard\.reset\(\);[\s\S]*?tournamentRecords = \[\];[\s\S]*?beginTournamentDataSession\(\)/);
   assert.match(tournamentHtml, /id="retryDataLoadBtn"/);
   assert.match(tournamentHtml, /data-write-action disabled onclick="addTournament\(\)"/);
-  assert.match(tournamentScript, /openTournamentEditDialog\(record, operationSession\)/);
+  assert.match(tournamentScript, /openTournamentEditDialog\(record, operationSession, /);
   assert.match(tournamentScript, /pendingTournamentInteractions\.register\(\(\) => close\(null\)\)/);
-  assert.match(tournamentScript, /if \(!await saveTournamentData\(operationSession\)\) return/);
+  assert.match(tournamentScript, /await submitTournamentOperation\(operationSession, createTournamentOperation\(/);
+  assert.match(tournamentScript, /canContinue: \(\) => !saveToken\.abandoned && dataSessionGuard\.isWriteSessionCurrent\(operationSession\)/);
 });
 
 test("tournament writes remain isolated to tournament-owned fields", () => {
-  assert.match(tournamentScript, /await setDoc\(userDocRef, \{ tournamentRecords, updatedAt \}, \{ merge: true \}\)/);
-  assert.match(tournamentScript, /if \(!dataSessionGuard\.isWriteSessionCurrent\(writeSession\)\) return false;[\s\S]*?await setDoc/);
-  assert.doesNotMatch(tournamentScript, /await setDoc\(userDocRef, mainData/);
+  // D-017: only tournamentRecords and updatedAt, recomputed inside a transaction.
+  assert.doesNotMatch(tournamentScript, /\bsetDoc\b/);
+  assert.match(tournamentScript, /transaction\.update\(userDocRef, fields\)/);
+  assert.match(tournamentSync, /const fields = \{ tournamentRecords: result\.records, updatedAt \};/);
+  assert.match(tournamentSync, /applyTournamentOperation\(readTournamentRecordsField\(data\), operation\)/);
 });
 
 test("configuration model stays internal and is no longer user input", () => {

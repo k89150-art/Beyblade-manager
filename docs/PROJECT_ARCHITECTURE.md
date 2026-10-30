@@ -49,7 +49,7 @@ Firebase Web SDK 目前由 `https://www.gstatic.com/firebasejs/11.2.0/` 載入�
 
 ### 賽事 `tournament.html`
 
-由 `tournament.js` 管理比賽基本資料、輪次、對戰、輪空／不戰晉級與最終成績。它會讀取同一位使用者的 `configTable`，並只以 merge 更新 `tournamentRecords`，避免覆蓋主頁其他欄位。
+由 `tournament.js` 管理比賽基本資料、輪次、對戰、輪空／不戰晉級與最終成績。它會讀取同一位使用者的 `configTable`，並依 D-017 以 Firestore transaction 寫入：每次操作在交易內讀取最新文件，經 `tournament-sync.js` 只套用到目標賽事，再以 `transaction.update` 只寫 `tournamentRecords` 與 `updatedAt`，避免覆蓋主頁其他欄位或其他分頁／裝置的賽事變更。
 
 ### 管理員與使用者檢視
 
@@ -140,7 +140,7 @@ users/{uid}/appData/main
 - `tournamentRecords`：賽事紀錄。
 - `ownerUid`、`ownerEmail`、`updatedAt`：擁有者與同步 metadata。
 
-`script.js` 以 `onSnapshot` 監聽並以 merge 保存主頁資料；只有取得非 cache 的首次 snapshot 後才允許寫入。Cache metadata（例如短暫斷線）不會重建已確認的畫面，也不會關閉已開啟的 Quick Editor 或刪除 dialog，但在伺服器再次確認前會暫停寫入；相同 cache／server 內容不會重複套用；若伺服器確認文件不存在，第一次寫入會使用 Firestore transaction 的 create-only 檢查，避免兩個分頁同時以空白或預設資料初始化。`tournament.js` 使用伺服器單次讀取確認資料存在狀態，並僅 merge 自己擁有的 `tournamentRecords` 欄位。兩頁在 loading、error、readonly 或 session 失效時都會阻止寫入並取消舊 session 的待處理 dialog；新增模組時必須明確定義欄位所有權，避免 stale state 覆蓋其他頁面資料。
+`script.js` 以 `onSnapshot` 監聽並以 merge 保存主頁資料；只有取得非 cache 的首次 snapshot 後才允許寫入。Cache metadata（例如短暫斷線）不會重建已確認的畫面，也不會關閉已開啟的 Quick Editor 或刪除 dialog，但在伺服器再次確認前會暫停寫入；相同 cache／server 內容不會重複套用；若伺服器確認文件不存在，第一次寫入會使用 Firestore transaction 的 create-only 檢查，避免兩個分頁同時以空白或預設資料初始化。`tournament.js` 使用伺服器單次讀取確認資料存在狀態；寫入改為 transaction（D-017），以 `maxAttempts: 1` 單次嘗試並由 `tournament-sync.js` 自行重試，以區分已提交、未提交與結果不明；在交易內以最新的 `tournamentRecords` 重新計算，單場賽事基準不同即拒絕，只更新 `tournamentRecords` 與 `updatedAt`，離線時不送出、不排隊。兩頁在 loading、error、readonly 或 session 失效時都會阻止寫入並取消舊 session 的待處理 dialog；新增模組時必須明確定義欄位所有權，避免 stale state 覆蓋其他頁面資料。
 
 ### 本機資料
 
@@ -174,12 +174,13 @@ Rules 的任何變更都屬高風險操作，必須經明確批准與 Emulator�
 
 ```powershell
 node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs
+node --test tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs
 node --experimental-vm-modules scripts/validate-site.mjs
 node scripts/build-site.mjs
 git diff --check
 ```
 
-`scripts/validate-site.mjs` 驗證 JavaScript、inline script、本機資源、JSON 與退役功能界線。`scripts/build-site.mjs` 先執行驗證，再將允許的靜態資源複製到 `.site-build/`。
+`scripts/validate-site.mjs` 驗證 JavaScript、inline script、本機資源、JSON 與退役功能界線。`tests/helpers/` 是測試輔助模組（依 Firebase SDK 11.2.0 交易重試規則撰寫的 Firestore mock，與執行實際 `tournament.js` 的 VM harness），不屬於正式網站，也不能取代 Emulator 驗證。`scripts/build-site.mjs` 先執行驗證，再將允許的靜態資源複製到 `.site-build/`。
 
 ### GitHub Pages
 

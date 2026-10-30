@@ -2,7 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebas
 import {
   DATA_SESSION_STATES,
   createDataSessionGuard,
-  createPendingInteractionRegistry
+  createPendingInteractionRegistry,
+  createStableDataFingerprint
 } from "./data-session-guard.js?v=20261029-phase1c";
 
 import {
@@ -17,8 +18,21 @@ import {
   getFirestore,
   doc,
   getDocFromServer,
-  setDoc
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+import {
+  TOURNAMENT_APPLIED,
+  TOURNAMENT_OPERATION_TYPES,
+  TOURNAMENT_SYNC_CODES,
+  TOURNAMENT_SYNC_MESSAGES,
+  classifyTournamentSaveFailure,
+  createTournamentOperation,
+  isTournamentCommitUnresolved,
+  isTournamentOperationApplied,
+  startTournamentTransaction,
+  waitForTournamentTransaction
+} from "./tournament-sync.js?v=20261029-phase4b1";
 
 const firebaseConfig = {
   apiKey: "AIzaSyABQadKr-Am-55GgFJmhZ0tkRY-joARNAQ",
@@ -55,6 +69,9 @@ const dataSessionGuard = createDataSessionGuard();
 const pendingTournamentInteractions = createPendingInteractionRegistry();
 
 const ADMIN_UID = "SesDhvXG6MUT38YhqGl0N6lVgMz1";
+// H2: shown on the page by this script, so a device that displays it is
+// running the transaction-protected tournament code (old code shows nothing).
+const TOURNAMENT_CLIENT_VERSION = "賽事儲存版本：4B-1（交易保護）";
 
 function escapeHtml(text) {
   return String(text ?? "")
@@ -122,7 +139,8 @@ function updateAuthUI(user) {
 
 function updateDataAccessUi() {
   const session = dataSessionGuard.snapshot();
-  const writable = session.state === DATA_SESSION_STATES.READY;
+  // A running tournament transaction keeps every write control disabled.
+  const writable = session.state === DATA_SESSION_STATES.READY && !isTournamentSaveBusy();
   document.body.dataset.dataState = session.state;
   document.body.setAttribute("aria-busy", String(session.state === DATA_SESSION_STATES.LOADING));
 
@@ -359,6 +377,9 @@ function renderTournamentList() {
   const list = document.getElementById("tournamentList");
   if (!list) return;
 
+  // Unsaved match/round inputs survive every re-render of the list.
+  captureTournamentFormDrafts();
+
   if (!currentUser) {
     list.innerHTML = `<div class="empty-state">請先登入後查看參賽紀錄。</div>`;
     updateDataAccessUi();
@@ -389,6 +410,7 @@ function renderTournamentList() {
   });
 
   list.innerHTML = sortedRecords.map(record => renderTournamentCard(record)).join("");
+  restoreTournamentFormDrafts();
   updateDataAccessUi();
 }
 
@@ -627,36 +649,402 @@ async function loadTournamentData(sessionToken) {
   }
 }
 
-async function saveTournamentData(operationSession = null) {
-  const writeSession = operationSession || dataSessionGuard.captureWriteSession();
-  if (!writeSession || !dataSessionGuard.isWriteSessionCurrent(writeSession)) return false;
-  const userDocRef = getUserDocRef(writeSession.targetUid);
-  if (!userDocRef) return false;
+/* ===== D-017 tournament transactions: begin ===== */
+
+const TOURNAMENT_SAVE_TIMEOUT_MS = 15000;
+const TOURNAMENT_SAVE_SLOW_NOTICE_MS = 5000;
+const TOURNAMENT_VERIFY_TIMEOUT_MS = 10000;
+// Waits between single-attempt transactions (tournament-sync.js retries).
+const TOURNAMENT_RETRY_DELAYS_MS = [300, 600, 1200, 2400];
+const TOURNAMENT_BUSY_MESSAGE = "上一個參賽紀錄操作仍在儲存，請等候完成後再操作。你的輸入內容已保留。";
+const MATCH_FORM_DRAFT_FIELDS = Object.freeze(["data-match-opponent", "data-deck-select", "data-deck-custom"]);
+const ROUND_FORM_DRAFT_FIELDS = Object.freeze(["data-round-beyblade", "data-round-result", "data-round-score-type", "data-round-note"]);
+const TOURNAMENT_DRAFT_FIELDS = Object.freeze([...MATCH_FORM_DRAFT_FIELDS, ...ROUND_FORM_DRAFT_FIELDS]);
+const TOURNAMENT_DRAFT_SELECTOR = TOURNAMENT_DRAFT_FIELDS.map(name => `[${name}]`).join(",");
+const ADD_TOURNAMENT_INPUT_IDS = Object.freeze([
+  "tournamentDate",
+  "tournamentName",
+  "tournamentLocation",
+  "tournamentParticipantCount",
+  "tournamentNote"
+]);
+
+const TOURNAMENT_FAILURE_STATUS = Object.freeze({
+  [TOURNAMENT_SYNC_CODES.CONFLICT]: "沒有儲存：賽事已在其他地方更新",
+  [TOURNAMENT_SYNC_CODES.DELETED]: "沒有儲存：賽事已在其他地方刪除",
+  [TOURNAMENT_SYNC_CODES.DELETE_CONFLICT]: "沒有刪除：賽事有新的變更",
+  [TOURNAMENT_SYNC_CODES.DUPLICATE_ID]: "沒有儲存：雲端資料需要檢查",
+  [TOURNAMENT_SYNC_CODES.MALFORMED]: "沒有儲存：雲端資料需要檢查",
+  [TOURNAMENT_SYNC_CODES.INVALID]: "沒有儲存：請確認最新資料",
+  [TOURNAMENT_SYNC_CODES.OFFLINE]: "沒有儲存：目前無法連線",
+  [TOURNAMENT_SYNC_CODES.NETWORK]: "沒有儲存：目前無法連線",
+  [TOURNAMENT_SYNC_CODES.PERMISSION]: "沒有儲存：雲端拒絕寫入"
+});
+
+let activeTournamentSave = null;
+let tournamentSaveSequence = 0;
+let tournamentDraftOwnerUid = null;
+let pendingAddTournamentDraft = null;
+const tournamentFormDrafts = new Map();
+const matchEditDrafts = new Map();
+
+function isTournamentSaveBusy() {
+  return Boolean(activeTournamentSave) && dataSessionGuard.isWriteSessionCurrent(activeTournamentSave.session);
+}
+
+function isBrowserOffline() {
+  return typeof navigator !== "undefined" && navigator.onLine === false;
+}
+
+function resetTournamentSaveState() {
+  if (activeTournamentSave) activeTournamentSave.abandoned = true;
+  activeTournamentSave = null;
+}
+
+// Replaces the in-memory copy only with a whole document read from the server
+// (a committed transaction result or a fresh read), never with local edits.
+function adoptTournamentDocument(data) {
+  mainData = data && typeof data === "object" ? data : {};
+  tournamentRecords = Array.isArray(mainData.tournamentRecords) ? mainData.tournamentRecords : [];
+  rebuildConfigOptions();
+}
+
+// One SDK attempt per call (maxAttempts: 1). tournament-sync.js retries
+// itself so it can tell a rejected commit from one whose result is unknown.
+function createTournamentTransactionRunner(userDocRef) {
+  return updateFunction => runTransaction(db, transaction => updateFunction({
+    get: async () => {
+      const snapshot = await transaction.get(userDocRef);
+      const exists = snapshot.exists();
+      return { exists, data: exists ? snapshot.data() || {} : null };
+    },
+    update: fields => {
+      transaction.update(userDocRef, fields);
+    },
+    create: fields => {
+      transaction.set(userDocRef, fields);
+    }
+  }), { maxAttempts: 1 });
+}
+
+async function readTournamentDocumentFromServer(session) {
+  const snapshot = await getDocFromServer(getUserDocRef(session.targetUid));
+  return snapshot.exists() ? snapshot.data() || {} : {};
+}
+
+function withTournamentTimeout(promise, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      const error = new Error("timeout");
+      error.code = "deadline-exceeded";
+      reject(error);
+    }, timeoutMs);
+    promise.then(value => {
+      clearTimeout(timer);
+      resolve(value);
+    }, error => {
+      clearTimeout(timer);
+      reject(error);
+    });
+  });
+}
+
+function reportTournamentSaveFailure(code, notify) {
+  const message = TOURNAMENT_SYNC_MESSAGES[code] || TOURNAMENT_SYNC_MESSAGES[TOURNAMENT_SYNC_CODES.NETWORK];
+  setSyncStatus(TOURNAMENT_FAILURE_STATUS[code] || "沒有儲存", "error");
+  if (notify !== "silent") alert(message);
+  return message;
+}
+
+const TOURNAMENT_SAVED_STATUS = Object.freeze({
+  [TOURNAMENT_APPLIED.WRITTEN]: "參賽紀錄已儲存",
+  [TOURNAMENT_APPLIED.IDENTITY]: "參賽紀錄已儲存（先前中斷的儲存其實已完成，沒有重複新增）",
+  [TOURNAMENT_APPLIED.STATE_MATCH]: "雲端資料已是這次要儲存的內容，沒有重複寫入",
+  [TOURNAMENT_APPLIED.ABSENT]: "這筆資料已不存在，不需要再刪除"
+});
+
+const TOURNAMENT_VERIFIED_STATUS = Object.freeze({
+  committed: "已確認這次操作已儲存",
+  matches: "雲端資料已包含這次的變更內容（無法確認是否由這次操作寫入）"
+});
+
+function completeTournamentSave(data, onSaved, statusText) {
+  adoptTournamentDocument(data);
+  onSaved();
+  renderTournamentList();
+  setSyncStatus(statusText, "saved");
+}
+
+// A timeout or a dropped commit does not prove that nothing was written, so
+// the latest server copy is read before telling the user anything definite.
+async function confirmUnclearTournamentSave(operationSession, operation, onSaved, notify) {
+  setSyncStatus("無法確認是否已儲存，正在重新讀取雲端資料...", "saving");
+
+  let latest = null;
+  try {
+    latest = await withTournamentTimeout(readTournamentDocumentFromServer(operationSession), TOURNAMENT_VERIFY_TIMEOUT_MS);
+  } catch (error) {
+    latest = null;
+  }
+
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) {
+    return { ok: false, code: TOURNAMENT_SYNC_CODES.SESSION_CHANGED };
+  }
+
+  if (latest) {
+    adoptTournamentDocument(latest);
+    const applied = isTournamentOperationApplied(tournamentRecords, operation);
+    if (applied) {
+      onSaved();
+      renderTournamentList();
+      setSyncStatus(TOURNAMENT_VERIFIED_STATUS[applied], "saved");
+      return { ok: true, confirmed: applied };
+    }
+    renderTournamentList();
+  }
+
+  const message = TOURNAMENT_SYNC_MESSAGES[TOURNAMENT_SYNC_CODES.UNKNOWN_OUTCOME];
+  setSyncStatus(latest ? "無法確認是否已儲存，畫面已更新為雲端最新資料" : "無法確認是否已儲存，請稍後按重新載入", "error");
+  if (notify !== "silent") alert(message);
+  return { ok: false, code: TOURNAMENT_SYNC_CODES.UNKNOWN_OUTCOME, message };
+}
+
+// A commit that was already on the wire when the wait timed out may still
+// succeed. Its result is not trusted directly; the page re-reads the server.
+function watchLateTournamentCommit(handle, operationSession, operation, onSaved) {
+  handle.promise.then(async value => {
+    if (!value || !dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
+    let latest;
+    try {
+      latest = await withTournamentTimeout(readTournamentDocumentFromServer(operationSession), TOURNAMENT_VERIFY_TIMEOUT_MS);
+    } catch (error) {
+      return;
+    }
+    if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
+    adoptTournamentDocument(latest);
+    if (isTournamentOperationApplied(tournamentRecords, operation)) onSaved();
+    renderTournamentList();
+    setSyncStatus(value.changed ? "稍早逾時的操作已完成儲存，畫面已更新" : "稍早逾時的操作已完成確認，畫面已更新", "saved");
+  }, () => {});
+}
+
+// Runs one operation against the latest server copy. In-memory data and the
+// page change only after the transaction has committed for this same session.
+async function submitTournamentOperation(operationSession, operation, { onSaved = () => {}, notify = "alert" } = {}) {
+  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) {
+    return { ok: false, code: TOURNAMENT_SYNC_CODES.SESSION_CHANGED };
+  }
+
+  if (isTournamentSaveBusy()) {
+    if (notify !== "silent") alert(TOURNAMENT_BUSY_MESSAGE);
+    return { ok: false, code: "busy", message: TOURNAMENT_BUSY_MESSAGE };
+  }
+
+  if (isBrowserOffline()) {
+    const message = reportTournamentSaveFailure(TOURNAMENT_SYNC_CODES.OFFLINE, notify);
+    return { ok: false, code: TOURNAMENT_SYNC_CODES.OFFLINE, message };
+  }
+
+  const userDocRef = getUserDocRef(operationSession.targetUid);
+  if (!userDocRef) return { ok: false, code: TOURNAMENT_SYNC_CODES.SESSION_CHANGED };
+
+  const saveToken = { session: operationSession, id: ++tournamentSaveSequence, abandoned: false };
+  activeTournamentSave = saveToken;
+  updateDataAccessUi();
+  setSyncStatus("儲存參賽紀錄中...", "saving");
+
+  const slowTimer = setTimeout(() => {
+    if (activeTournamentSave === saveToken && dataSessionGuard.isWriteSessionCurrent(operationSession)) {
+      setSyncStatus("連線較慢，仍在等待雲端確認...", "saving");
+    }
+  }, TOURNAMENT_SAVE_SLOW_NOTICE_MS);
+
+  const handle = startTournamentTransaction({
+    operation,
+    runTransaction: createTournamentTransactionRunner(userDocRef),
+    canContinue: () => !saveToken.abandoned && dataSessionGuard.isWriteSessionCurrent(operationSession),
+    retryDelaysMs: TOURNAMENT_RETRY_DELAYS_MS
+  });
 
   try {
-    setSyncStatus("儲存參賽紀錄中...", "saving");
+    const outcome = await waitForTournamentTransaction(handle, { timeoutMs: TOURNAMENT_SAVE_TIMEOUT_MS });
+    clearTimeout(slowTimer);
 
-    const updatedAt = Date.now();
-    mainData = { ...mainData, tournamentRecords, updatedAt };
-
-    if (!dataSessionGuard.isWriteSessionCurrent(writeSession)) return false;
-
-    // Only update tournament-owned fields so stale page data cannot overwrite
-    // collection, inventory, configuration, or history records.
-    await setDoc(userDocRef, { tournamentRecords, updatedAt }, { merge: true });
-
-    if (!dataSessionGuard.isWriteSessionCurrent(writeSession)) return false;
-    rebuildConfigOptions();
-    setSyncStatus("參賽紀錄已儲存", "saved");
-    return true;
-  } catch (error) {
-    console.error("參賽紀錄儲存失敗：", error);
-    if (dataSessionGuard.isCurrent(writeSession)) {
-      alert("參賽紀錄儲存失敗：" + error.message);
-      setSyncStatus("儲存失敗", "error");
+    if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) {
+      return { ok: false, code: TOURNAMENT_SYNC_CODES.SESSION_CHANGED };
     }
-    return false;
+
+    if (outcome.kind === "settled") {
+      const applied = outcome.value.applied || TOURNAMENT_APPLIED.WRITTEN;
+      completeTournamentSave(outcome.value.data, onSaved, TOURNAMENT_SAVED_STATUS[applied]);
+      return { ok: true, applied };
+    }
+
+    if (outcome.kind === "timeout") {
+      // Stop any further attempt. Only a commit already handed to the SDK, or
+      // one whose result was lost, can still change the server.
+      saveToken.abandoned = true;
+      if (!isTournamentCommitUnresolved(handle.progress)) {
+        const message = reportTournamentSaveFailure(TOURNAMENT_SYNC_CODES.NETWORK, notify);
+        return { ok: false, code: TOURNAMENT_SYNC_CODES.NETWORK, message };
+      }
+      watchLateTournamentCommit(handle, operationSession, operation, onSaved);
+      return await confirmUnclearTournamentSave(operationSession, operation, onSaved, notify);
+    }
+
+    const code = classifyTournamentSaveFailure(outcome.error, handle.progress);
+    console.warn("參賽紀錄沒有儲存：", code);
+    if (code === TOURNAMENT_SYNC_CODES.SESSION_CHANGED) return { ok: false, code };
+    if (code === TOURNAMENT_SYNC_CODES.UNKNOWN_OUTCOME) {
+      return await confirmUnclearTournamentSave(operationSession, operation, onSaved, notify);
+    }
+
+    if (outcome.error && outcome.error.latestData) {
+      adoptTournamentDocument(outcome.error.latestData);
+      renderTournamentList();
+    }
+    const message = reportTournamentSaveFailure(code, notify);
+    return { ok: false, code, message };
+  } finally {
+    clearTimeout(slowTimer);
+    if (activeTournamentSave === saveToken) {
+      activeTournamentSave = null;
+      if (dataSessionGuard.isCurrent(operationSession)) updateDataAccessUi();
+    }
   }
+}
+
+const MATCH_EDIT_FIELDS = Object.freeze(["opponentName", "deck1", "deck2", "deck3"]);
+const MATCH_EDIT_LABELS = Object.freeze({ opponentName: "對手名稱", deck1: "陀螺 1", deck2: "陀螺 2", deck3: "陀螺 3" });
+
+function getMatchEditValues(match) {
+  return {
+    opponentName: String(match?.opponentName || ""),
+    deck1: String(match?.deck?.[0]?.configText || ""),
+    deck2: String(match?.deck?.[1]?.configText || ""),
+    deck3: String(match?.deck?.[2]?.configText || "")
+  };
+}
+
+/* ----- unsaved form drafts (memory only, tied to one account) ----- */
+
+function getTournamentDraftKey(element) {
+  const field = TOURNAMENT_DRAFT_FIELDS.find(name => element.hasAttribute(name));
+  if (!field) return "";
+  const tournamentId = element.closest("[data-tournament-id]")?.getAttribute("data-tournament-id") || "";
+  const matchId = element.closest("[data-match-id]")?.getAttribute("data-match-id") || "";
+  return JSON.stringify([tournamentId, matchId, field, element.getAttribute(field)]);
+}
+
+function canUseTournamentDrafts() {
+  return Boolean(currentUser) && tournamentDraftOwnerUid === currentUser.uid;
+}
+
+function captureTournamentFormDrafts() {
+  if (!canUseTournamentDrafts()) return;
+  const list = document.getElementById("tournamentList");
+  if (!list) return;
+  list.querySelectorAll(TOURNAMENT_DRAFT_SELECTOR).forEach(element => {
+    const key = getTournamentDraftKey(element);
+    if (key) tournamentFormDrafts.set(key, element.value);
+  });
+}
+
+function restoreTournamentFormDrafts() {
+  if (!canUseTournamentDrafts()) return;
+  const list = document.getElementById("tournamentList");
+  if (!list) return;
+  list.querySelectorAll(TOURNAMENT_DRAFT_SELECTOR).forEach(element => {
+    const key = getTournamentDraftKey(element);
+    if (!key || !tournamentFormDrafts.has(key)) return;
+    const value = tournamentFormDrafts.get(key);
+    if (element.tagName === "SELECT" && ![...element.options].some(option => option.value === value)) return;
+    element.value = value;
+  });
+}
+
+function clearTournamentFormDraft(tournamentId, matchId, fields) {
+  [...tournamentFormDrafts.keys()].forEach(key => {
+    const [draftTournamentId, draftMatchId, field] = JSON.parse(key);
+    if (draftTournamentId === tournamentId && draftMatchId === matchId && fields.includes(field)) {
+      tournamentFormDrafts.delete(key);
+    }
+  });
+
+  const list = document.getElementById("tournamentList");
+  if (!list) return;
+  list.querySelectorAll(TOURNAMENT_DRAFT_SELECTOR).forEach(element => {
+    const key = getTournamentDraftKey(element);
+    if (!key) return;
+    const [draftTournamentId, draftMatchId, field] = JSON.parse(key);
+    if (draftTournamentId !== tournamentId || draftMatchId !== matchId || !fields.includes(field)) return;
+    if (element.tagName === "SELECT") {
+      element.selectedIndex = 0;
+    } else {
+      element.value = "";
+    }
+  });
+}
+
+// L2: a save may only clear the form contents it actually submitted.
+function readTournamentFormScope(tournamentId, matchId, fields) {
+  captureTournamentFormDrafts();
+  const values = {};
+  tournamentFormDrafts.forEach((value, key) => {
+    const [draftTournamentId, draftMatchId, field] = JSON.parse(key);
+    if (draftTournamentId === tournamentId && draftMatchId === matchId && fields.includes(field)) {
+      values[key] = value;
+    }
+  });
+  return values;
+}
+
+function clearTournamentFormDraftIfUnchanged(tournamentId, matchId, fields, submitted) {
+  const current = readTournamentFormScope(tournamentId, matchId, fields);
+  if (createStableDataFingerprint(current) !== createStableDataFingerprint(submitted)) return false;
+  clearTournamentFormDraft(tournamentId, matchId, fields);
+  return true;
+}
+
+function clearAddTournamentForm() {
+  ADD_TOURNAMENT_INPUT_IDS.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) input.value = "";
+  });
+}
+
+// Drafts never follow a sign-out or an account switch.
+function syncTournamentDraftOwner(user) {
+  const uid = user ? user.uid : null;
+  if (uid === tournamentDraftOwnerUid) return;
+  tournamentFormDrafts.clear();
+  matchEditDrafts.clear();
+  pendingAddTournamentDraft = null;
+  clearAddTournamentForm();
+  const list = document.getElementById("tournamentList");
+  if (list) list.innerHTML = "";
+  tournamentDraftOwnerUid = uid;
+}
+
+// Re-submitting an unchanged add form after an unclear result reuses the same
+// id, so a save that did reach the server is recognised instead of duplicated.
+// L5: after an unclear result the earlier add may already exist, so a new id
+// (a second, separate tournament) is only created after explicit confirmation.
+function getAddTournamentId(values) {
+  const key = createStableDataFingerprint(values);
+  const pending = pendingAddTournamentDraft && pendingAddTournamentDraft.ownerUid === tournamentDraftOwnerUid
+    ? pendingAddTournamentDraft
+    : null;
+  if (pending && pending.key === key) return pending.id;
+
+  if (pending && pending.status === "unknown") {
+    const createNew = confirm(`上一筆新增的比賽「${pending.name}」儲存結果仍無法確認，它可能已經存在。\n\n若只是想修正內容，請按「取消」，先確認列表後再用「修改」調整。\n若確定要另外建立一場全新的比賽，請按「確定」。`);
+    if (!createNew) return null;
+  }
+
+  const id = generateId("tournament");
+  pendingAddTournamentDraft = { key, id, name: values.tournamentName, ownerUid: tournamentDraftOwnerUid, status: "not-sent" };
+  return id;
 }
 
 function retryTournamentDataLoad() {
@@ -699,31 +1087,44 @@ window.addTournament = async function () {
     return;
   }
 
-  const id = generateId("tournament");
-
-  tournamentRecords.push({
-    id,
-    tournamentName,
-    date,
-    location,
-    participantCount,
-    rank: "",
-    note,
-    isFinished: false,
-    matches: []
+  const submittedInputs = [dateInput.value, nameInput.value, locationInput.value, participantCountInput.value, noteInput.value];
+  const id = getAddTournamentId({ tournamentName, date, location, participantCount, note });
+  if (!id) return;
+  const operation = createTournamentOperation({
+    type: TOURNAMENT_OPERATION_TYPES.ADD_TOURNAMENT,
+    tournamentId: id,
+    updatedAt: Date.now(),
+    record: {
+      id,
+      tournamentName,
+      date,
+      location,
+      participantCount,
+      rank: "",
+      note,
+      isFinished: false,
+      matches: []
+    }
   });
 
-  openedTournamentIds.add(id);
+  const result = await submitTournamentOperation(operationSession, operation, {
+    onSaved: () => {
+      if (pendingAddTournamentDraft && pendingAddTournamentDraft.id === id) pendingAddTournamentDraft = null;
+      openedTournamentIds.add(id);
+      // Keep anything typed while the save was running.
+      const inputs = [dateInput, nameInput, locationInput, participantCountInput, noteInput];
+      if (inputs.every((input, index) => input.value === submittedInputs[index])) {
+        inputs.forEach(input => { input.value = ""; });
+      }
+    }
+  });
 
-  dateInput.value = "";
-  nameInput.value = "";
-  locationInput.value = "";
-  participantCountInput.value = "";
-  noteInput.value = "";
-
-  if (!await saveTournamentData(operationSession)) return;
-  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-  renderTournamentList();
+  if (!result.ok && result.code !== "busy" && pendingAddTournamentDraft && pendingAddTournamentDraft.id === id) {
+    pendingAddTournamentDraft = {
+      ...pendingAddTournamentDraft,
+      status: result.code === TOURNAMENT_SYNC_CODES.UNKNOWN_OUTCOME ? "unknown" : "not-saved"
+    };
+  }
 };
 
 window.toggleTournamentDetail = function (tournamentId) {
@@ -751,14 +1152,37 @@ window.finishTournament = async function (tournamentId) {
   const ok = confirm(`確定要完成這場比賽嗎？\n目前計算成績：${standing.label}${incompleteWarning}\n\n完成後會隱藏新增對局與新增回合；按修改可重新開啟編輯。`);
   if (!ok) return;
 
-  record.isFinished = true;
-
-  if (!await saveTournamentData(operationSession)) return;
-  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-  renderTournamentList();
+  await submitTournamentOperation(operationSession, createTournamentOperation({
+    type: TOURNAMENT_OPERATION_TYPES.UPDATE_TOURNAMENT,
+    tournamentId,
+    base: record,
+    patch: { isFinished: true },
+    updatedAt: Date.now()
+  }));
 };
 
-function openTournamentEditDialog(record, operationSession) {
+function describeTournamentForDialog(record) {
+  return [
+    `名稱：${record.tournamentName || "-"}`,
+    `日期：${record.date || "-"}`,
+    `地點：${record.location || "-"}`,
+    `總人數：${record.participantCount || "-"}`,
+    `備註：${record.note || "-"}`,
+    `狀態：${record.isFinished === true ? "已完成" : "編輯中"}`
+  ].join("\n");
+}
+
+const TOURNAMENT_FIELD_LABELS = Object.freeze({
+  tournamentName: "比賽名稱",
+  date: "日期",
+  location: "地點",
+  participantCount: "總人數",
+  note: "備註"
+});
+
+// The dialog stays open until the save is confirmed, so a failed or rejected
+// save never discards what the user typed.
+function openTournamentEditDialog(record, operationSession, submitEdit) {
   pendingTournamentInteractions.cancelAll();
   return new Promise(resolve => {
     const oldOverlay = document.getElementById("tournamentEditOverlay");
@@ -777,7 +1201,7 @@ function openTournamentEditDialog(record, operationSession) {
     overlay.style.boxSizing = "border-box";
 
     overlay.innerHTML = `
-      <div style="width:420px;max-width:100%;background:#1b1b1b;color:#fff;border:1px solid #3a3a3a;border-radius:14px;padding:16px;box-sizing:border-box;box-shadow:0 12px 32px rgba(0,0,0,0.65);font-family:Arial,'Microsoft JhengHei',sans-serif;">
+      <div style="width:420px;max-width:100%;max-height:100%;overflow-y:auto;background:#1b1b1b;color:#fff;border:1px solid #3a3a3a;border-radius:14px;padding:16px;box-sizing:border-box;box-shadow:0 12px 32px rgba(0,0,0,0.65);font-family:Arial,'Microsoft JhengHei',sans-serif;">
         <h4 style="margin:0 0 12px 0;font-size:18px;color:#fff;">修改比賽</h4>
 
         <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">比賽名稱</label>
@@ -795,6 +1219,9 @@ function openTournamentEditDialog(record, operationSession) {
 
         <label style="display:block;margin-bottom:6px;color:#dcdcdc;font-size:14px;">備註</label>
         <input id="editTournamentNote" type="text" value="${escapeHtml(record.note || "")}" style="width:100%;margin-bottom:14px;">
+        ${record.isFinished === true ? `<div style="margin:-4px 0 12px;color:#9ba8b5;font-size:12px;">這場比賽目前為「已完成」，儲存後會重新開啟編輯。</div>` : ""}
+
+        <div id="tournamentEditMessage" role="alert" hidden style="margin:0 0 12px;padding:10px 12px;border:1px solid #8a5a1f;border-radius:10px;background:rgba(255,170,60,0.12);color:#ffd8a8;font-size:13px;line-height:1.6;white-space:pre-line;"></div>
 
         <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
           <button type="button" id="cancelTournamentEditBtn">取消</button>
@@ -811,11 +1238,38 @@ function openTournamentEditDialog(record, operationSession) {
     const locationInput = overlay.querySelector("#editTournamentLocation");
     const participantCountInput = overlay.querySelector("#editTournamentParticipantCount");
     const noteInput = overlay.querySelector("#editTournamentNote");
+    const messageBox = overlay.querySelector("#tournamentEditMessage");
     const cancelBtn = overlay.querySelector("#cancelTournamentEditBtn");
     const saveBtn = overlay.querySelector("#saveTournamentEditBtn");
+    const defaultSaveLabel = saveBtn.textContent;
 
     let settled = false;
+    let saving = false;
+    let baseRecord = record;
+    // L4: only opening the dialog on a finished tournament means "reopen it".
+    const reopensFinished = record.isFinished === true;
     let unregisterCancel = () => {};
+
+    // After a conflict, fields the user did not touch are refreshed to the
+    // latest values so a re-save cannot write back another device's old data.
+    const fieldInputs = {
+      tournamentName: nameInput,
+      date: dateInput,
+      location: locationInput,
+      participantCount: participantCountInput,
+      note: noteInput
+    };
+    let shownValues = Object.fromEntries(Object.entries(fieldInputs).map(([key, input]) => [key, input.value]));
+
+    function getRecordInputValues(source) {
+      return {
+        tournamentName: String(source.tournamentName || ""),
+        date: String(source.date || ""),
+        location: String(source.location || ""),
+        participantCount: source.participantCount ? String(source.participantCount) : "",
+        note: String(source.note || "")
+      };
+    }
 
     function close(value) {
       if (settled) return;
@@ -825,9 +1279,15 @@ function openTournamentEditDialog(record, operationSession) {
       resolve(value);
     }
 
+    function showMessage(text) {
+      messageBox.textContent = text || "";
+      messageBox.hidden = !text;
+    }
+
     cancelBtn.onclick = () => close(null);
 
-    saveBtn.onclick = () => {
+    saveBtn.onclick = async () => {
+      if (saving) return;
       if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) {
         close(null);
         return;
@@ -851,13 +1311,76 @@ function openTournamentEditDialog(record, operationSession) {
         return;
       }
 
-      close({
+      const values = {
         tournamentName,
         date,
         location: locationInput.value.trim(),
         participantCount,
         note: noteInput.value.trim()
-      });
+      };
+
+      saving = true;
+      saveBtn.textContent = "儲存中...";
+      showMessage("");
+      let result;
+      try {
+        result = await submitEdit(values, baseRecord, { reopen: reopensFinished });
+      } finally {
+        saving = false;
+      }
+      if (settled) return;
+      saveBtn.textContent = defaultSaveLabel;
+
+      if (result && result.ok) {
+        close(values);
+        return;
+      }
+
+      const code = result ? result.code : TOURNAMENT_SYNC_CODES.NETWORK;
+      if (code === TOURNAMENT_SYNC_CODES.SESSION_CHANGED) {
+        close(null);
+        return;
+      }
+
+      const latestRecord = tournamentRecords.find(item => item.id === record.id) || null;
+      if (code === TOURNAMENT_SYNC_CODES.DELETED || (code === TOURNAMENT_SYNC_CODES.CONFLICT && !latestRecord)) {
+        showMessage(TOURNAMENT_SYNC_MESSAGES[TOURNAMENT_SYNC_CODES.DELETED]);
+        saveBtn.hidden = true;
+        saveBtn.removeAttribute("data-write-action");
+        cancelBtn.textContent = "關閉";
+        return;
+      }
+
+      if (code === TOURNAMENT_SYNC_CODES.CONFLICT) {
+        // The next save is an explicit new decision made against this copy.
+        // Untouched fields now show the latest values; edited ones are kept,
+        // and fields that both sides changed are listed instead of merged.
+        baseRecord = latestRecord;
+        const latestValues = getRecordInputValues(latestRecord);
+        const collisions = [];
+        Object.entries(fieldInputs).forEach(([key, input]) => {
+          const userEdited = input.value !== shownValues[key];
+          if (!userEdited) {
+            input.value = latestValues[key];
+          } else if (latestValues[key] !== shownValues[key] && latestValues[key] !== input.value) {
+            collisions.push(`${TOURNAMENT_FIELD_LABELS[key]}：你的「${input.value || "（空白）"}」／雲端「${latestValues[key] || "（空白）"}」`);
+          }
+        });
+        shownValues = latestValues;
+        const parts = [TOURNAMENT_SYNC_MESSAGES[code], `雲端最新內容：\n${describeTournamentForDialog(latestRecord)}`];
+        if (collisions.length) {
+          parts.push(`以下欄位你和其他裝置都修改了，重新儲存會以你的輸入取代雲端的值；若要保留雲端的值，請先改回：\n${collisions.join("\n")}`);
+        }
+        if (latestRecord.isFinished === true && !reopensFinished) {
+          parts.push("這場比賽已在其他裝置標記為「已完成」；重新儲存只會更新基本資料，不會重新開啟。");
+        }
+        parts.push("未修改的欄位已更新為雲端最新值，你修改的內容仍保留。確認後若仍要套用，請再按「以表單內容重新儲存」。");
+        showMessage(parts.join("\n\n"));
+        saveBtn.textContent = "以表單內容重新儲存";
+        return;
+      }
+
+      showMessage((result && result.message) || TOURNAMENT_SYNC_MESSAGES[TOURNAMENT_SYNC_CODES.NETWORK]);
     };
     unregisterCancel = pendingTournamentInteractions.register(() => close(null));
   });
@@ -871,25 +1394,22 @@ window.editTournament = async function (tournamentId) {
   const record = tournamentRecords.find(item => item.id === tournamentId);
   if (!record) return;
 
-  const edited = await openTournamentEditDialog(record, operationSession);
-  if (!edited) return;
-  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-
-  const currentRecord = tournamentRecords.find(item => item.id === tournamentId);
-  if (!currentRecord) return;
-
-  currentRecord.tournamentName = edited.tournamentName;
-  currentRecord.date = edited.date;
-  currentRecord.location = edited.location;
-  currentRecord.participantCount = edited.participantCount;
-  currentRecord.note = edited.note;
-  currentRecord.isFinished = false;
-
-  openedTournamentIds.add(tournamentId);
-
-  if (!await saveTournamentData(operationSession)) return;
-  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-  renderTournamentList();
+  await openTournamentEditDialog(record, operationSession, (values, baseRecord, { reopen = false } = {}) => {
+    if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) {
+      return { ok: false, code: TOURNAMENT_SYNC_CODES.SESSION_CHANGED };
+    }
+    return submitTournamentOperation(operationSession, createTournamentOperation({
+      type: TOURNAMENT_OPERATION_TYPES.UPDATE_TOURNAMENT,
+      tournamentId,
+      base: baseRecord,
+      // isFinished changes only when the user reopened a finished tournament.
+      patch: reopen ? { ...values, isFinished: false } : values,
+      updatedAt: Date.now()
+    }), {
+      notify: "silent",
+      onSaved: () => openedTournamentIds.add(tournamentId)
+    });
+  });
 };
 
 window.deleteTournament = async function (tournamentId) {
@@ -903,12 +1423,14 @@ window.deleteTournament = async function (tournamentId) {
   const ok = confirm(`確定要刪除「${record.tournamentName || "這場比賽"}」嗎？`);
   if (!ok) return;
 
-  tournamentRecords = tournamentRecords.filter(item => item.id !== tournamentId);
-  openedTournamentIds.delete(tournamentId);
-
-  if (!await saveTournamentData(operationSession)) return;
-  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-  renderTournamentList();
+  await submitTournamentOperation(operationSession, createTournamentOperation({
+    type: TOURNAMENT_OPERATION_TYPES.DELETE_TOURNAMENT,
+    tournamentId,
+    base: record,
+    updatedAt: Date.now()
+  }), {
+    onSaved: () => openedTournamentIds.delete(tournamentId)
+  });
 };
 
 window.addMatch = async function (tournamentId) {
@@ -941,25 +1463,27 @@ window.addMatch = async function (tournamentId) {
     return;
   }
 
-  if (!Array.isArray(record.matches)) {
-    record.matches = [];
-  }
-
-  record.matches.push({
-    id: generateId("match"),
-    opponentName,
-    deck: deckTexts.map(text => ({
-      source: configOptions.some(option => option.text === text) ? "config" : "custom",
-      configText: text
-    })),
-    rounds: []
+  const submittedDraft = readTournamentFormScope(tournamentId, "", MATCH_FORM_DRAFT_FIELDS);
+  await submitTournamentOperation(operationSession, createTournamentOperation({
+    type: TOURNAMENT_OPERATION_TYPES.ADD_MATCH,
+    tournamentId,
+    base: record,
+    updatedAt: Date.now(),
+    match: {
+      id: generateId("match"),
+      opponentName,
+      deck: deckTexts.map(text => ({
+        source: configOptions.some(option => option.text === text) ? "config" : "custom",
+        configText: text
+      })),
+      rounds: []
+    }
+  }), {
+    onSaved: () => {
+      openedTournamentIds.add(tournamentId);
+      clearTournamentFormDraftIfUnchanged(tournamentId, "", MATCH_FORM_DRAFT_FIELDS, submittedDraft);
+    }
   });
-
-  openedTournamentIds.add(tournamentId);
-
-  if (!await saveTournamentData(operationSession)) return;
-  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-  renderTournamentList();
 };
 
 window.addDirectAdvance = async function (tournamentId, advancementType) {
@@ -979,23 +1503,21 @@ window.addDirectAdvance = async function (tournamentId, advancementType) {
   const ok = confirm(`確定要新增「${advanceInfo.label}」嗎？\n這筆紀錄會計為晉級一輪，不會建立比分或回合。`);
   if (!ok) return;
 
-  if (!Array.isArray(record.matches)) {
-    record.matches = [];
-  }
-
-  record.matches.push({
-    id: generateId("match"),
-    advancementType,
-    opponentName: advanceInfo.opponentName,
-    deck: [],
-    rounds: []
+  await submitTournamentOperation(operationSession, createTournamentOperation({
+    type: TOURNAMENT_OPERATION_TYPES.ADD_MATCH,
+    tournamentId,
+    base: record,
+    updatedAt: Date.now(),
+    match: {
+      id: generateId("match"),
+      advancementType,
+      opponentName: advanceInfo.opponentName,
+      deck: [],
+      rounds: []
+    }
+  }), {
+    onSaved: () => openedTournamentIds.add(tournamentId)
   });
-
-  openedTournamentIds.add(tournamentId);
-
-  if (!await saveTournamentData(operationSession)) return;
-  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-  renderTournamentList();
 };
 
 window.editMatch = async function (tournamentId, matchId) {
@@ -1017,13 +1539,38 @@ window.editMatch = async function (tournamentId, matchId) {
     return;
   }
 
-  const opponentName = prompt("對手名稱", match.opponentName || "");
+  // M1: a draft keeps the values the user started from (base) and what the
+  // user typed (values). Reusing it after a failed save only carries over the
+  // fields the user changed; everything else comes from the latest copy.
+  const draftKey = JSON.stringify([tournamentId, matchId]);
+  const draft = canUseTournamentDrafts() ? matchEditDrafts.get(draftKey) : null;
+  const latestValues = getMatchEditValues(match);
+  const defaults = { ...latestValues };
+
+  if (draft) {
+    const collisions = [];
+    MATCH_EDIT_FIELDS.forEach(field => {
+      const userChanged = draft.values[field] !== draft.base[field];
+      if (!userChanged) return;
+      defaults[field] = draft.values[field];
+      const otherChanged = latestValues[field] !== draft.base[field];
+      if (otherChanged && latestValues[field] !== draft.values[field]) collisions.push(field);
+    });
+
+    if (collisions.length) {
+      const lines = collisions.map(field => `${MATCH_EDIT_LABELS[field]}：你的「${draft.values[field] || "（空白）"}」／雲端「${latestValues[field] || "（空白）"}」`);
+      const keepMine = confirm(`以下欄位你和其他裝置都修改了：\n${lines.join("\n")}\n\n按「確定」以你的輸入作為預設值繼續編輯；按「取消」改用雲端最新值。`);
+      if (!keepMine) collisions.forEach(field => { defaults[field] = latestValues[field]; });
+    }
+  }
+
+  const opponentName = prompt("對手名稱", defaults.opponentName);
   if (opponentName === null) return;
 
   const newDeck = [];
 
   for (let i = 0; i < 3; i++) {
-    const value = prompt(`陀螺 ${i + 1}`, match.deck?.[i]?.configText || "");
+    const value = prompt(`陀螺 ${i + 1}`, defaults[`deck${i + 1}`]);
     if (value === null) return;
 
     if (!value.trim()) {
@@ -1037,12 +1584,33 @@ window.editMatch = async function (tournamentId, matchId) {
     });
   }
 
-  match.opponentName = opponentName.trim();
-  match.deck = newDeck;
-
-  if (!await saveTournamentData(operationSession)) return;
   if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-  renderTournamentList();
+  const patch = { opponentName: opponentName.trim(), deck: newDeck };
+  const finalValues = { opponentName: patch.opponentName };
+  newDeck.forEach((item, index) => { finalValues[`deck${index + 1}`] = item.configText; });
+
+  // A save that reuses an earlier unsaved draft needs an explicit go-ahead.
+  if (draft) {
+    const summary = MATCH_EDIT_FIELDS.map(field => `${MATCH_EDIT_LABELS[field]}：${finalValues[field] || "（空白）"}`).join("\n");
+    if (!confirm(`確定要以這些內容重新儲存這局嗎？\n\n${summary}`)) return;
+  }
+
+  const newDraft = { base: latestValues, values: finalValues };
+  if (canUseTournamentDrafts()) matchEditDrafts.set(draftKey, newDraft);
+
+  await submitTournamentOperation(operationSession, createTournamentOperation({
+    type: TOURNAMENT_OPERATION_TYPES.EDIT_MATCH,
+    tournamentId,
+    base: record,
+    matchId,
+    patch,
+    updatedAt: Date.now()
+  }), {
+    // L2: only the draft created for this save may be cleared by it.
+    onSaved: () => {
+      if (matchEditDrafts.get(draftKey) === newDraft) matchEditDrafts.delete(draftKey);
+    }
+  });
 };
 
 window.deleteMatch = async function (tournamentId, matchId) {
@@ -1061,11 +1629,15 @@ window.deleteMatch = async function (tournamentId, matchId) {
   const ok = confirm("確定要刪除這局對戰紀錄嗎？");
   if (!ok) return;
 
-  record.matches = (record.matches || []).filter(item => item.id !== matchId);
-
-  if (!await saveTournamentData(operationSession)) return;
-  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-  renderTournamentList();
+  await submitTournamentOperation(operationSession, createTournamentOperation({
+    type: TOURNAMENT_OPERATION_TYPES.DELETE_MATCH,
+    tournamentId,
+    base: record,
+    matchId,
+    updatedAt: Date.now()
+  }), {
+    onSaved: () => matchEditDrafts.delete(JSON.stringify([tournamentId, matchId]))
+  });
 };
 
 window.addRound = async function (tournamentId, matchId) {
@@ -1102,23 +1674,24 @@ window.addRound = async function (tournamentId, matchId) {
 
   const scoreInfo = SCORE_TYPES[scoreType];
 
-  if (!Array.isArray(match.rounds)) {
-    match.rounds = [];
-  }
-
-  match.rounds.push({
-    id: generateId("round"),
-    roundNumber: match.rounds.length + 1,
-    result,
-    scoreType,
-    point: scoreInfo.point,
-    myBeyblade: beyblade,
-    note
+  const submittedDraft = readTournamentFormScope(tournamentId, matchId, ROUND_FORM_DRAFT_FIELDS);
+  await submitTournamentOperation(operationSession, createTournamentOperation({
+    type: TOURNAMENT_OPERATION_TYPES.ADD_ROUND,
+    tournamentId,
+    base: record,
+    matchId,
+    updatedAt: Date.now(),
+    round: {
+      id: generateId("round"),
+      result,
+      scoreType,
+      point: scoreInfo.point,
+      myBeyblade: beyblade,
+      note
+    }
+  }), {
+    onSaved: () => clearTournamentFormDraftIfUnchanged(tournamentId, matchId, ROUND_FORM_DRAFT_FIELDS, submittedDraft)
   });
-
-  if (!await saveTournamentData(operationSession)) return;
-  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-  renderTournamentList();
 };
 
 window.deleteRound = async function (tournamentId, matchId, roundId) {
@@ -1138,17 +1711,17 @@ window.deleteRound = async function (tournamentId, matchId, roundId) {
   const ok = confirm("確定要刪除這筆回合紀錄嗎？");
   if (!ok) return;
 
-  match.rounds = (match.rounds || [])
-    .filter(round => round.id !== roundId)
-    .map((round, index) => ({
-      ...round,
-      roundNumber: index + 1
-    }));
-
-  if (!await saveTournamentData(operationSession)) return;
-  if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-  renderTournamentList();
+  await submitTournamentOperation(operationSession, createTournamentOperation({
+    type: TOURNAMENT_OPERATION_TYPES.DELETE_ROUND,
+    tournamentId,
+    base: record,
+    matchId,
+    roundId,
+    updatedAt: Date.now()
+  }));
 };
+
+/* ===== D-017 tournament transactions: end ===== */
 
 document.addEventListener("DOMContentLoaded", function () {
   const googleLoginBtn = document.getElementById("googleLoginBtn");
@@ -1167,11 +1740,19 @@ document.addEventListener("DOMContentLoaded", function () {
     retryDataLoadBtn.addEventListener("click", retryTournamentDataLoad);
   }
 
+  const clientVersion = document.getElementById("tournamentClientVersion");
+  if (clientVersion) {
+    clientVersion.textContent = TOURNAMENT_CLIENT_VERSION;
+    clientVersion.hidden = false;
+  }
+
   renderTournamentList();
   setSyncStatus("請先使用 Google 登入", "muted");
 
   onAuthStateChanged(auth, user => {
     pendingTournamentInteractions.cancelAll();
+    resetTournamentSaveState();
+    syncTournamentDraftOwner(user);
     currentUser = user;
     updateAuthUI(user);
     dataSessionGuard.reset();
