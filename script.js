@@ -2,12 +2,23 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebas
 import { attachCatalogNames, getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel } from "./stock-catalog-names.js";
 import {
   DATA_SESSION_STATES,
-  INITIAL_DOCUMENT_CONFLICT_CODE,
   createDataSessionGuard,
   createPendingInteractionRegistry,
-  createSessionSnapshotGate,
-  writeDocumentSafely
+  createSessionSnapshotGate
 } from "./data-session-guard.js?v=20261029-phase1c";
+import {
+  COLLECTION_RETRY_DELAYS_MS,
+  COLLECTION_SYNC_CODES,
+  COLLECTION_SYNC_STATES,
+  COLLECTION_TABLE_LABELS,
+  COLLECTION_APPLIED,
+  classifyCollectionSaveFailure,
+  createCollectionSyncTracker,
+  isCollectionCommitUnresolved,
+  pickCollectionTables,
+  startCollectionTransaction,
+  waitForCollectionTransaction
+} from "./collection-sync.js?v=20261030-phase5b";
 
 import {
   getAuth,
@@ -20,7 +31,7 @@ import {
 import {
   getFirestore,
   doc,
-  setDoc,
+  getDocFromServer,
   onSnapshot,
   runTransaction
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -65,6 +76,25 @@ const dataSnapshotGate = createSessionSnapshotGate({
   })
 });
 let initialDocumentMissingGeneration = null;
+// D-018: shown on the page so a device that displays it runs the
+// transaction-protected collection saves (older code shows nothing).
+const COLLECTION_CLIENT_VERSION = "收藏儲存版本：5B（交易保護）";
+const COLLECTION_SAVE_TIMEOUT_MS = 15000;
+const COLLECTION_SAVE_SLOW_NOTICE_MS = 5000;
+const collectionSync = createCollectionSyncTracker();
+// Latest cloud copy received while a save, a failed save or a conflict keeps
+// the screen as it is. Applied (without losing unsaved rows) once clean.
+let deferredCollectionRemote = null;
+let collectionSaveSequence = 0;
+let lastCollectionApplied = null;
+// One dialog per failure streak; automatic retries only update the notice.
+let collectionFailureAlerted = false;
+// F-02: server check for cloud copies that look like an echo of an older
+// version. Waits between failed checks; after the last one the copy is shown.
+const COLLECTION_ECHO_VERIFY_RETRY_MS = [2000, 4000];
+const COLLECTION_ECHO_VERIFY_TIMEOUT_MS = 10000;
+let collectionEchoCheck = null;
+let latestCollectionSnapshot = null;
 
 const STOCK_PRODUCTS_URL = "stock_products_AUTOFILL_SAFE_2026-07-29-v3.json?v=20260920-cx19";
 const STOCK_NAMES_URL = "beyblade_x_model_chinese_english_2026-08-29.json?v=20260920-cx19";
@@ -103,7 +133,8 @@ function getUserDocRef(targetUid) {
 
 function updateDataAccessUi() {
   const session = dataSessionGuard.snapshot();
-  const writable = session.state === DATA_SESSION_STATES.READY;
+  const writable = session.state === DATA_SESSION_STATES.READY &&
+    collectionSync.state !== COLLECTION_SYNC_STATES.CONFLICT;
   document.body.dataset.dataState = session.state;
   document.body.setAttribute("aria-busy", String(session.state === DATA_SESSION_STATES.LOADING));
 
@@ -114,6 +145,7 @@ function updateDataAccessUi() {
 
   const retryButton = document.getElementById("retryDataLoadBtn");
   if (retryButton) retryButton.hidden = session.state !== DATA_SESSION_STATES.ERROR || !currentUser;
+  renderCollectionSyncNotice();
 }
 
 function cancelPendingCloudSaves() {
@@ -144,6 +176,12 @@ function beginDataSession(targetUid, readOnly = false) {
     targetUid,
     readOnly
   });
+  // Same account and target (for example "重新載入"): unsaved rows and what
+  // the page knows about its cloud base stay. Anything else starts over.
+  collectionSync.bindSession(currentUser.uid, readOnly ? `view:${targetUid}` : targetUid);
+  deferredCollectionRemote = null;
+  collectionEchoCheck = null;
+  latestCollectionSnapshot = null;
   initialDocumentMissingGeneration = null;
   dataSnapshotGate.begin(token);
   updateDataAccessUi();
@@ -175,6 +213,11 @@ function requireLogin() {
     const message = getDataWriteBlockMessage();
     alert(message);
     setSyncStatus(message, dataSessionGuard.snapshot().state === DATA_SESSION_STATES.ERROR ? "error" : "muted");
+    return false;
+  }
+
+  if (collectionSync.state === COLLECTION_SYNC_STATES.CONFLICT) {
+    alert(COLLECTION_CONFLICT_BLOCK_MESSAGE);
     return false;
   }
 
@@ -1573,6 +1616,367 @@ function getHistoryData() {
   return data;
 }
 
+/* ===== D-018 collection saves: begin ===== */
+
+const COLLECTION_CONFLICT_BLOCK_MESSAGE = "其他裝置已修改雲端資料，和這個畫面尚未儲存的變更衝突。請先在上方「雲端同步」選擇處理方式，再繼續操作。";
+const COLLECTION_SAVED_STATUS = Object.freeze({
+  [COLLECTION_APPLIED.WRITTEN]: "已儲存",
+  [COLLECTION_APPLIED.STATE_MATCH]: "已儲存（雲端已是這次要儲存的內容，沒有重複寫入）"
+});
+
+function collectCollectionTables() {
+  return pickCollectionTables(collectCurrentData());
+}
+
+function isCollectionSyncHolding() {
+  return collectionSync.state !== COLLECTION_SYNC_STATES.CLEAN;
+}
+
+function hasUnsavedCollectionChanges() {
+  if (isCollectionSyncHolding() || hasPendingCloudSave || isSavingCloudData) return true;
+  if (!collectionSync.hasBase() || !currentUser || isReadOnly()) return false;
+  return collectionSync.getDirtyTables(collectCollectionTables()).length > 0;
+}
+
+function formatCollectionTables(tables) {
+  return tables.map(table => COLLECTION_TABLE_LABELS[table] || table).join("、");
+}
+
+function getCollectionSyncNoticeText() {
+  const state = collectionSync.state;
+  if (state === COLLECTION_SYNC_STATES.CONFLICT) {
+    const conflict = collectionSync.conflict || { tables: [] };
+    const names = formatCollectionTables(conflict.tables);
+    const lead = conflict.latestExists === false
+      ? "雲端資料已被移除，"
+      : `其他裝置已修改「${names}」，和這個畫面尚未儲存的變更衝突，`;
+    const unsure = conflict.mayHaveSaved ? "（先前一次中斷的儲存可能已完成）" : "";
+    return `${lead}這次沒有儲存任何資料${unsure}。畫面上的變更仍保留，請選擇「載入雲端最新資料」（捨棄這些資料表的未儲存變更）或「以我的版本覆蓋」。`;
+  }
+  if (state === COLLECTION_SYNC_STATES.PENDING_UNKNOWN) {
+    return "無法確認最近一次儲存是否完成。變更仍保留在這個畫面，恢復連線後會自動確認並重試，不會重複寫入；也可以按「立即重試」。請先不要關閉或重新整理頁面。";
+  }
+  if (state === COLLECTION_SYNC_STATES.PENDING_NETWORK) {
+    if (collectionSync.lastFailure === COLLECTION_SYNC_CODES.PERMISSION) {
+      return "尚未儲存到雲端：雲端拒絕寫入。變更仍保留在這個畫面，請確認登入帳號後按「立即重試」。";
+    }
+    return "尚未儲存到雲端：目前無法連線。變更仍保留在這個畫面，恢復連線後會自動重試，也可以按「立即重試」。請先不要關閉或重新整理頁面。";
+  }
+  return "";
+}
+
+function renderCollectionSyncNotice() {
+  const state = collectionSync.state;
+  if (document.body) document.body.dataset.collectionSync = state;
+  const notice = document.getElementById("collectionSyncNotice");
+  if (!notice) return;
+  const isPending = state === COLLECTION_SYNC_STATES.PENDING_NETWORK || state === COLLECTION_SYNC_STATES.PENDING_UNKNOWN;
+  const isConflict = state === COLLECTION_SYNC_STATES.CONFLICT;
+  notice.hidden = !(isPending || isConflict);
+  notice.dataset.state = state;
+  const message = document.getElementById("collectionSyncMessage");
+  if (message) message.textContent = getCollectionSyncNoticeText();
+  const retryButton = document.getElementById("collectionRetryBtn");
+  if (retryButton) retryButton.hidden = !isPending;
+  const loadCloudButton = document.getElementById("collectionLoadCloudBtn");
+  if (loadCloudButton) loadCloudButton.hidden = !isConflict;
+  const keepLocalButton = document.getElementById("collectionKeepLocalBtn");
+  if (keepLocalButton) keepLocalButton.hidden = !isConflict;
+}
+
+function setCollectionSyncState(state, detail = {}) {
+  if (state === COLLECTION_SYNC_STATES.CLEAN || state === COLLECTION_SYNC_STATES.CONFLICT) collectionFailureAlerted = false;
+  collectionSync.setState(state, detail);
+  updateDataAccessUi();
+}
+
+// Rebuilds the tables from a cloud copy without losing unsaved rows: a table
+// with unsaved changes keeps what is on screen, the others take the cloud
+// rows. Nothing is written here; the caller decides whether to save.
+function applyRemoteCollections(remoteData, { discardTables = [], beforeRebuild = null, fromServerCheck = false } = {}) {
+  const exists = remoteData !== null && remoteData !== undefined;
+  const remoteTables = pickCollectionTables(remoteData);
+  const localTables = collectionSync.hasBase() ? collectCollectionTables() : null;
+  const plan = collectionSync.planRemote(remoteTables, localTables, { discardTables });
+
+  if (plan.suspectTables.length) scheduleCollectionEchoCheck();
+
+  if (!plan.needsRebuild) {
+    collectionSync.noteRemoteSeen({ exists, tables: plan.adoptTables, keepEcho: fromServerCheck });
+    return { rebuilt: false, upgraded: 0 };
+  }
+
+  if (beforeRebuild) beforeRebuild();
+  const merged = { ...(exists ? remoteData : {}) };
+  plan.keepTables.forEach(table => {
+    merged[table] = localTables[table];
+  });
+  const upgraded = applyDataToTables(merged) || 0;
+  const domTables = collectCollectionTables();
+  collectionSync.adoptRemote({
+    exists,
+    remoteTables,
+    domTables,
+    tables: plan.adoptTables,
+    keepEcho: fromServerCheck
+  });
+  // D-015 catalog upgrades change rows while loading; save them on purpose.
+  // The upgraded rows are recorded so another tab's identical upgrade can be
+  // recognised (F-01); any later user edit is not covered.
+  if (upgraded > 0) collectionSync.forceTable("beybladeTable", domTables.beybladeTable);
+  return { rebuilt: true, upgraded };
+}
+
+// Applies a cloud copy outside a running save: kept unsaved rows stay, open
+// editors are only closed when the screen is rebuilt.
+function applyCollectionRemoteWhenClean(data, { fromServerCheck = false } = {}) {
+  if (isCollectionSyncHolding()) {
+    deferredCollectionRemote = { data };
+    return;
+  }
+  const hadUnsavedInteraction = hasUnsavedDomInteraction();
+  const result = applyRemoteCollections(data, { beforeRebuild: cancelSessionInteractions, fromServerCheck });
+  if (result.rebuilt) {
+    updateDataAccessUi();
+    if (hadUnsavedInteraction) alert("偵測到較新的雲端資料，尚未儲存的編輯已取消，請重新操作。");
+  }
+  scheduleCollectionSaveIfDirty();
+}
+
+function withCollectionTimeout(promise, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      const error = new Error("timeout");
+      error.code = "deadline-exceeded";
+      reject(error);
+    }, timeoutMs);
+    promise.then(value => {
+      clearTimeout(timer);
+      resolve(value);
+    }, error => {
+      clearTimeout(timer);
+      reject(error);
+    });
+  });
+}
+
+// F-02: a cloud copy matched a version this page's own save replaced. That is
+// usually a late copy from before the save, but it can also be another
+// device changing the rows back. A fresh server read decides; device clocks
+// and updatedAt are not used. One check at a time, bound to this session.
+function scheduleCollectionEchoCheck() {
+  if (collectionEchoCheck) return;
+  const session = dataSessionGuard.snapshot();
+  if (!session.targetUid) return;
+  const check = { epoch: collectionSync.epoch, generation: session.generation, targetUid: session.targetUid };
+  collectionEchoCheck = check;
+  void runCollectionEchoCheck(check, 0);
+}
+
+function isCollectionEchoCheckCurrent(check) {
+  const session = dataSessionGuard.snapshot();
+  return collectionEchoCheck === check &&
+    collectionSync.epoch === check.epoch &&
+    session.generation === check.generation &&
+    session.targetUid === check.targetUid;
+}
+
+async function runCollectionEchoCheck(check, attempt) {
+  let serverData;
+  try {
+    const snapshot = await withCollectionTimeout(getDocFromServer(getUserDocRef(check.targetUid)), COLLECTION_ECHO_VERIFY_TIMEOUT_MS);
+    serverData = snapshot.exists() ? snapshot.data() || {} : null;
+  } catch (error) {
+    if (!isCollectionEchoCheckCurrent(check)) return;
+    if (attempt < COLLECTION_ECHO_VERIFY_RETRY_MS.length) {
+      setTimeout(() => {
+        if (isCollectionEchoCheckCurrent(check)) void runCollectionEchoCheck(check, attempt + 1);
+      }, COLLECTION_ECHO_VERIFY_RETRY_MS[attempt]);
+      return;
+    }
+    // Bounded: the guard is never permanent. Showing the newest copy received
+    // is safe because saves still check the cloud before writing.
+    collectionEchoCheck = null;
+    collectionSync.clearStaleEcho();
+    if (latestCollectionSnapshot) applyCollectionRemoteWhenClean(latestCollectionSnapshot.data);
+    return;
+  }
+  if (!isCollectionEchoCheckCurrent(check)) return;
+  collectionEchoCheck = null;
+  collectionSync.resolveStaleEcho(pickCollectionTables(serverData));
+  applyCollectionRemoteWhenClean(serverData, { fromServerCheck: true });
+}
+
+function scheduleCollectionSaveIfDirty() {
+  if (!dataSessionGuard.captureWriteSession() || isReadOnly()) return;
+  if (collectionSync.getDirtyTables(collectCollectionTables()).length) void saveData();
+}
+
+function applyDeferredCollectionRemote() {
+  if (!deferredCollectionRemote || isCollectionSyncHolding()) return { rebuilt: false, upgraded: 0 };
+  const { data } = deferredCollectionRemote;
+  deferredCollectionRemote = null;
+  const hadUnsavedInteraction = hasUnsavedDomInteraction();
+  const result = applyRemoteCollections(data, { beforeRebuild: cancelSessionInteractions });
+  if (result.rebuilt) {
+    updateDataAccessUi();
+    if (hadUnsavedInteraction) alert("偵測到較新的雲端資料，尚未儲存的編輯已取消，請重新操作。");
+  }
+  return result;
+}
+
+// One SDK attempt per call (maxAttempts: 1); collection-sync.js retries
+// itself so it can tell a rejected commit from one whose result is unknown.
+function createCollectionTransactionRunner(userDocRef) {
+  return updateFunction => runTransaction(db, transaction => updateFunction({
+    get: async () => {
+      const snapshot = await transaction.get(userDocRef);
+      const exists = snapshot.exists();
+      return { exists, data: exists ? snapshot.data() || {} : null };
+    },
+    update: fields => {
+      transaction.update(userDocRef, fields);
+    },
+    create: fields => {
+      transaction.set(userDocRef, fields);
+    }
+  }), { maxAttempts: 1 });
+}
+
+function completeCollectionSave(input, value) {
+  if (value.updatedAt) {
+    lastLocalWriteUpdatedAt = value.updatedAt;
+    lastAppliedRemoteUpdatedAt = value.updatedAt;
+  }
+  collectionSync.confirmCommit(input, value);
+  initialDocumentMissingGeneration = null;
+  lastCollectionApplied = value.applied;
+}
+
+function failCollectionSave(code) {
+  const state = code === COLLECTION_SYNC_CODES.UNKNOWN_OUTCOME
+    ? COLLECTION_SYNC_STATES.PENDING_UNKNOWN
+    : COLLECTION_SYNC_STATES.PENDING_NETWORK;
+  setCollectionSyncState(state, { code });
+  setSyncStatus(state === COLLECTION_SYNC_STATES.PENDING_UNKNOWN
+    ? "無法確認是否已儲存，變更已保留"
+    : "尚未儲存，變更已保留", "error");
+  // Automatic retries do not repeat the dialog; the notice stays on screen.
+  if (!collectionFailureAlerted) {
+    collectionFailureAlerted = true;
+    alert(getCollectionSyncNoticeText());
+  }
+  return { ok: false, code };
+}
+
+// A commit that was already sent when the wait timed out may still land.
+// Its result is not trusted directly: a retry re-reads the cloud and
+// recognises rows this page already wrote.
+function watchLateCollectionCommit(handle, session) {
+  const trackerEpoch = collectionSync.epoch;
+  handle.promise.then(() => {
+    if (collectionSync.epoch !== trackerEpoch) return;
+    if (session && !dataSessionGuard.isWriteSessionCurrent(session)) return;
+    if (!dataSessionGuard.captureWriteSession()) return;
+    if (collectionSync.state === COLLECTION_SYNC_STATES.PENDING_UNKNOWN) void saveData();
+  }, () => {});
+}
+
+// The write session ended while saving (connection lost, "重新載入", sign-out).
+// For a different account the tracker was already reset and nothing is kept.
+// For the same account the rows stay on screen and the save is retried once
+// the server answers again; a commit that may have landed is recognised then.
+function holdCollectionSaveAfterSessionChange(trackerEpoch, input, outcome, handle) {
+  const code = COLLECTION_SYNC_CODES.SESSION_CHANGED;
+  if (collectionSync.epoch !== trackerEpoch || collectionSync.state !== COLLECTION_SYNC_STATES.SAVING) {
+    return { ok: false, code };
+  }
+  const mayHaveLanded = outcome.kind === "settled" || isCollectionCommitUnresolved(handle.progress);
+  if (mayHaveLanded) collectionSync.noteUncertain(input);
+  if (mayHaveLanded) watchLateCollectionCommit(handle, null);
+  const pendingCode = mayHaveLanded ? COLLECTION_SYNC_CODES.UNKNOWN_OUTCOME : COLLECTION_SYNC_CODES.NETWORK;
+  collectionSync.setState(
+    mayHaveLanded ? COLLECTION_SYNC_STATES.PENDING_UNKNOWN : COLLECTION_SYNC_STATES.PENDING_NETWORK,
+    { code: pendingCode }
+  );
+  renderCollectionSyncNotice();
+  return { ok: false, code };
+}
+
+async function submitCollectionSave(session, input) {
+  const userDocRef = getUserDocRef(session.targetUid);
+  if (!userDocRef) return { ok: false, code: COLLECTION_SYNC_CODES.SESSION_CHANGED };
+
+  const saveToken = { id: ++collectionSaveSequence, abandoned: false };
+  const trackerEpoch = collectionSync.epoch;
+  setCollectionSyncState(COLLECTION_SYNC_STATES.SAVING);
+  setSyncStatus("儲存中...", "saving");
+  const slowTimer = setTimeout(() => {
+    if (collectionSync.state === COLLECTION_SYNC_STATES.SAVING && dataSessionGuard.isWriteSessionCurrent(session)) {
+      setSyncStatus("連線較慢，仍在等待雲端確認...", "saving");
+    }
+  }, COLLECTION_SAVE_SLOW_NOTICE_MS);
+
+  const handle = startCollectionTransaction({
+    input,
+    identity: { ownerUid: session.ownerUid, ownerEmail: currentUser?.email || "" },
+    minUpdatedAt: Math.max(Date.now(), lastLocalWriteUpdatedAt + 1),
+    runTransaction: createCollectionTransactionRunner(userDocRef),
+    canContinue: () => !saveToken.abandoned && dataSessionGuard.isWriteSessionCurrent(session),
+    retryDelaysMs: COLLECTION_RETRY_DELAYS_MS
+  });
+
+  try {
+    const outcome = await waitForCollectionTransaction(handle, { timeoutMs: COLLECTION_SAVE_TIMEOUT_MS });
+    if (!dataSessionGuard.isWriteSessionCurrent(session)) {
+      saveToken.abandoned = true;
+      return holdCollectionSaveAfterSessionChange(trackerEpoch, input, outcome, handle);
+    }
+
+    if (outcome.kind === "settled") {
+      completeCollectionSave(input, outcome.value);
+      return { ok: true, applied: outcome.value.applied };
+    }
+
+    if (outcome.kind === "timeout") {
+      // Stop further attempts. Only a commit already handed to the SDK, or one
+      // whose result was lost, can still change the cloud.
+      saveToken.abandoned = true;
+      if (!isCollectionCommitUnresolved(handle.progress)) return failCollectionSave(COLLECTION_SYNC_CODES.NETWORK);
+      collectionSync.noteUncertain(input);
+      watchLateCollectionCommit(handle, session);
+      return failCollectionSave(COLLECTION_SYNC_CODES.UNKNOWN_OUTCOME);
+    }
+
+    const code = classifyCollectionSaveFailure(outcome.error, handle.progress);
+    console.warn("收藏資料沒有儲存：", code);
+    if (code === COLLECTION_SYNC_CODES.SESSION_CHANGED) return holdCollectionSaveAfterSessionChange(trackerEpoch, input, outcome, handle);
+    if (handle.progress.uncertainCommit) collectionSync.noteUncertain(input);
+
+    if (code === COLLECTION_SYNC_CODES.CONFLICT || code === COLLECTION_SYNC_CODES.DOCUMENT_REMOVED) {
+      const error = outcome.error;
+      deferredCollectionRemote = { data: error.latestExists ? error.latestData : null };
+      setCollectionSyncState(COLLECTION_SYNC_STATES.CONFLICT, {
+        tables: error.tables,
+        latestData: error.latestData,
+        latestExists: error.latestExists,
+        mayHaveSaved: handle.progress.uncertainCommit
+      });
+      setSyncStatus("沒有儲存：雲端資料有衝突，請選擇處理方式", "error");
+      alert(getCollectionSyncNoticeText());
+      return { ok: false, code };
+    }
+
+    return failCollectionSave(code);
+  } finally {
+    clearTimeout(slowTimer);
+  }
+}
+
+// Saves what is on screen. Only tables that differ from the cloud copy the
+// page was built on are sent, inside a transaction that checks the latest
+// cloud rows first (collection-sync.js). Calls while a save runs collapse
+// into one follow-up save with the newest rows.
 async function saveData() {
   if (isApplyingRemoteData) return;
 
@@ -1583,75 +1987,54 @@ async function saveData() {
     return;
   }
 
+  if (collectionSync.state === COLLECTION_SYNC_STATES.CONFLICT) {
+    // Writing stays blocked until the user chooses how to resolve it.
+    hasPendingCloudSave = false;
+    renderCollectionSyncNotice();
+    return;
+  }
+
   hasPendingCloudSave = true;
   if (isSavingCloudData) return;
 
   isSavingCloudData = true;
-  setSyncStatus("儲存中...", "saving");
   let activeWriteSession = requestedSession;
+  let stopped = false;
+  lastCollectionApplied = null;
 
   try {
     while (hasPendingCloudSave) {
       activeWriteSession = dataSessionGuard.captureWriteSession();
       if (!activeWriteSession || !dataSessionGuard.isWriteSessionCurrent(activeWriteSession)) {
         hasPendingCloudSave = false;
+        stopped = true;
         break;
       }
 
       hasPendingCloudSave = false;
-      const userDocRef = getUserDocRef(activeWriteSession.targetUid);
-      const data = collectCurrentData();
-      data.updatedAt = Math.max(Number(data.updatedAt) || 0, lastLocalWriteUpdatedAt + 1);
+      const input = collectionSync.captureSaveInput(collectCollectionTables());
+      if (!input.changedTables.length) continue;
 
-      if (!dataSessionGuard.isWriteSessionCurrent(activeWriteSession)) {
+      const outcome = await submitCollectionSave(activeWriteSession, input);
+      if (!outcome.ok) {
         hasPendingCloudSave = false;
+        stopped = true;
         break;
       }
-
-      lastLocalWriteUpdatedAt = data.updatedAt;
-      lastAppliedRemoteUpdatedAt = data.updatedAt;
-      const requiresCreate = initialDocumentMissingGeneration === activeWriteSession.generation;
-
-      // Keep data owned by other pages, such as tournamentRecords. A confirmed
-      // missing document uses an atomic create-only transaction so two tabs
-      // cannot initialize the same user with competing empty/default data.
-      await writeDocumentSafely({
-        requiresCreate,
-        createOnly: () => runTransaction(db, async transaction => {
-          const latestSnapshot = await transaction.get(userDocRef);
-          if (latestSnapshot.exists()) {
-            const conflict = new Error("另一個分頁已建立雲端資料，請重新載入後再操作。");
-            conflict.code = INITIAL_DOCUMENT_CONFLICT_CODE;
-            throw conflict;
-          }
-          transaction.set(userDocRef, data, { merge: true });
-        }),
-        merge: () => setDoc(userDocRef, data, { merge: true })
-      });
-
-      if (!dataSessionGuard.isWriteSessionCurrent(activeWriteSession)) break;
-      if (requiresCreate) initialDocumentMissingGeneration = null;
-      dataSnapshotGate.noteApplied(activeWriteSession, data);
     }
 
-    if (dataSessionGuard.isWriteSessionCurrent(activeWriteSession)) {
-      setSyncStatus("已儲存", "saved");
+    if (!stopped && dataSessionGuard.isWriteSessionCurrent(activeWriteSession)) {
+      setCollectionSyncState(COLLECTION_SYNC_STATES.CLEAN);
+      setSyncStatus(COLLECTION_SAVED_STATUS[lastCollectionApplied] || "已儲存", "saved");
+      // Only rows the page itself changed while applying (catalog upgrades)
+      // need another save; user edits queue their own. This never loops on
+      // rows that were just confirmed.
+      if (applyDeferredCollectionRemote().upgraded > 0) hasPendingCloudSave = true;
     }
   } catch (error) {
     hasPendingCloudSave = false;
-    console.error("Firestore 儲存失敗：", error);
-    if (dataSessionGuard.isCurrent(activeWriteSession)) {
-      if (error?.code === INITIAL_DOCUMENT_CONFLICT_CODE) {
-        dataSessionGuard.markError(activeWriteSession);
-        cancelSessionInteractions();
-        updateDataAccessUi();
-        alert(error.message);
-        setSyncStatus("其他分頁已建立資料，請重新載入", "error");
-      } else {
-        alert("Firestore 儲存失敗：" + error.message);
-        setSyncStatus("儲存失敗", "error");
-      }
-    }
+    console.error("收藏資料儲存失敗：", error?.code || error?.name || "error");
+    if (dataSessionGuard.isWriteSessionCurrent(activeWriteSession)) failCollectionSave(COLLECTION_SYNC_CODES.NETWORK);
   } finally {
     isSavingCloudData = false;
 
@@ -1659,6 +2042,60 @@ async function saveData() {
     if (hasPendingCloudSave) void saveData();
   }
 }
+
+function retryCollectionSave() {
+  if (!dataSessionGuard.captureWriteSession()) {
+    const message = getDataWriteBlockMessage();
+    alert(message);
+    return;
+  }
+  void saveData();
+}
+
+function resolveCollectionConflictWithCloud() {
+  const conflict = collectionSync.conflict;
+  if (!conflict) return;
+  if (!dataSessionGuard.captureWriteSession()) {
+    alert(getDataWriteBlockMessage());
+    return;
+  }
+  const names = formatCollectionTables(conflict.tables);
+  const ok = confirm(`要把「${names}」換成雲端最新資料嗎？\n\n你在這些資料表尚未儲存的變更會被捨棄；其他資料表尚未儲存的變更會保留並重新儲存。`);
+  if (!ok || collectionSync.conflict !== conflict) return;
+
+  const remote = deferredCollectionRemote ? deferredCollectionRemote.data : (conflict.latestExists ? conflict.latestData : null);
+  deferredCollectionRemote = null;
+  collectionSync.setState(COLLECTION_SYNC_STATES.CLEAN);
+  cancelSessionInteractions();
+  applyRemoteCollections(remote, { discardTables: conflict.tables });
+  updateDataAccessUi();
+  setSyncStatus("已載入雲端最新資料", "saved");
+  scheduleCollectionSaveIfDirty();
+}
+
+function resolveCollectionConflictWithLocal() {
+  const conflict = collectionSync.conflict;
+  if (!conflict) return;
+  if (!dataSessionGuard.captureWriteSession()) {
+    alert(getDataWriteBlockMessage());
+    return;
+  }
+  const names = formatCollectionTables(conflict.tables);
+  const ok = confirm(`要用這個畫面上的「${names}」覆蓋雲端版本嗎？\n\n其他裝置在這些資料表的變更會被取代，這個動作無法復原。`);
+  if (!ok || collectionSync.conflict !== conflict) return;
+
+  const remote = deferredCollectionRemote
+    ? { data: deferredCollectionRemote.data, exists: deferredCollectionRemote.data !== null }
+    : { data: conflict.latestData, exists: conflict.latestExists };
+  // The next cloud snapshot will include this save; an older copy must not
+  // replace the rows the user chose to keep.
+  deferredCollectionRemote = null;
+  collectionSync.acceptCloudAsBase(conflict.tables, remote.data, remote.exists);
+  setCollectionSyncState(COLLECTION_SYNC_STATES.CLEAN);
+  void saveData();
+}
+
+/* ===== D-018 collection saves: end ===== */
 
 
 /* ====== 載入資料 ====== */
@@ -1827,15 +2264,16 @@ function startCloudListener(sessionToken) {
         // Only a DOM rebuild invalidates open editors. A metadata-only cache
         // event, such as a brief network drop, keeps unsaved input on screen;
         // writes still stay locked until the server confirms this session again.
-        if (cacheDecision.apply) {
-          cancelSessionInteractions();
-          applyDataToTables(snapshotData);
+        // D-018: while unsaved rows are held, the screen is not rebuilt at all.
+        let rebuilt = false;
+        if (cacheDecision.apply && !isCollectionSyncHolding()) {
+          rebuilt = applyRemoteCollections(snapshotData, { beforeRebuild: cancelSessionInteractions }).rebuilt;
         }
         dataSessionGuard.markError(sessionToken);
         cancelPendingCloudSaves();
         updateDataAccessUi();
         setSyncStatus(
-          cacheDecision.apply
+          rebuilt
             ? "尚未確認雲端最新資料，完成前僅供檢視"
             : "連線中斷，恢復前暫停儲存；尚未儲存的編輯會保留",
           "error"
@@ -1846,32 +2284,42 @@ function startCloudListener(sessionToken) {
       const serverDecision = dataSnapshotGate.acceptServer(sessionToken, snapshotData);
       if (!serverDecision.current) return;
 
-      if (!snapshot.exists()) {
-        initialDocumentMissingGeneration = sessionToken.generation;
-        if (serverDecision.apply) applyDataToTables(null);
-        dataSessionGuard.markReady(sessionToken);
+      initialDocumentMissingGeneration = snapshot.exists() ? null : sessionToken.generation;
+      if (snapshotData) lastAppliedRemoteUpdatedAt = Number(snapshotData.updatedAt) || 0;
+      latestCollectionSnapshot = { data: snapshotData };
+
+      if (isCollectionSyncHolding()) {
+        // A save is running, failed or hit a conflict: keep every unsaved row
+        // and open editor; remember the newest cloud copy for later.
+        deferredCollectionRemote = { data: snapshotData };
+        if (!dataSessionGuard.markReady(sessionToken) && !dataSessionGuard.isCurrent(sessionToken)) return;
         updateDataAccessUi();
-        setSyncStatus("目前沒有資料，可以開始新增", "muted");
+        const state = collectionSync.state;
+        if (state === COLLECTION_SYNC_STATES.PENDING_NETWORK || state === COLLECTION_SYNC_STATES.PENDING_UNKNOWN) {
+          // The server answered again: retry. The retry re-reads the cloud and
+          // never writes twice or over newer changes.
+          void saveData();
+        }
         return;
       }
 
-      const remoteUpdatedAt = Number(snapshotData.updatedAt) || 0;
-      initialDocumentMissingGeneration = null;
-      lastAppliedRemoteUpdatedAt = remoteUpdatedAt;
-      const hadUnsavedInteraction = serverDecision.apply && hasUnsavedDomInteraction();
-      if (serverDecision.apply) cancelSessionInteractions();
-      const upgradedStockCount = serverDecision.apply ? applyDataToTables(snapshotData) : 0;
+      const hadUnsavedInteraction = hasUnsavedDomInteraction();
+      const result = applyRemoteCollections(snapshotData, { beforeRebuild: cancelSessionInteractions });
       if (!dataSessionGuard.markReady(sessionToken) && !dataSessionGuard.isCurrent(sessionToken)) return;
       updateDataAccessUi();
-      setSyncStatus(sessionToken.readOnly ? "瀏覽資料已同步" : "資料已同步", "saved");
 
-      if (hadUnsavedInteraction) {
-        alert("偵測到較新的雲端資料，尚未儲存的編輯已取消，請重新操作。");
+      if (!snapshot.exists()) {
+        setSyncStatus("目前沒有資料，可以開始新增", "muted");
+      } else {
+        setSyncStatus(sessionToken.readOnly ? "瀏覽資料已同步" : "資料已同步", "saved");
+        if (result.rebuilt && hadUnsavedInteraction) {
+          alert("偵測到較新的雲端資料，尚未儲存的編輯已取消，請重新操作。");
+        }
       }
 
-      if (upgradedStockCount > 0 && dataSessionGuard.captureWriteSession()) {
-        void saveData();
-      }
+      // Catalog upgrades (D-015) and rows kept from before a reload are saved
+      // through the same protected path; a snapshot itself is never written.
+      scheduleCollectionSaveIfDirty();
     },
     error => {
       if (!dataSessionGuard.isCurrent(sessionToken)) return;
@@ -1899,6 +2347,8 @@ function loadCloudDataForCurrentTarget({ clearExisting = false } = {}) {
   lastAppliedRemoteUpdatedAt = 0;
 
   if (clearExisting) {
+    collectionSync.reset();
+    collectionSync.bindSession(currentUser.uid, viewingUserId ? `view:${targetUid}` : targetUid);
     clearAllTables();
     refreshSelectors();
   }
@@ -3443,6 +3893,14 @@ function updateAuthUI(user) {
 
 /* ====== 管理員：切換檢視使用者 ====== */
 
+// F-03: switching the viewed account rebuilds the page. Ask first when this
+// page still holds rows that are not confirmed in the cloud; cancelling
+// leaves the session, the screen and any running save untouched.
+function confirmDiscardUnsavedCollection() {
+  if (!hasUnsavedCollectionChanges()) return true;
+  return confirm("你自己的收藏還有變更尚未確認儲存到雲端（可能仍在儲存中）。切換瀏覽對象後，畫面上尚未儲存的變更會遺失。確定要切換嗎？");
+}
+
 window.adminViewUser = async function () {
   if (!isAdmin()) return;
 
@@ -3458,6 +3916,8 @@ window.adminViewUser = async function () {
     return;
   }
 
+  if (!confirmDiscardUnsavedCollection()) return;
+
   viewingUserId = targetUid;
 
   setSyncStatus(`瀏覽模式：${targetUid}`, "login");
@@ -3469,6 +3929,7 @@ window.adminViewUser = async function () {
 
 window.adminViewSelf = function () {
   if (!isAdmin()) return;
+  if (!confirmDiscardUnsavedCollection()) return;
 
   viewingUserId = null;
 
@@ -3494,6 +3955,10 @@ async function loginWithGoogle() {
 }
 
 async function logoutGoogle() {
+  if (hasUnsavedCollectionChanges()) {
+    const ok = confirm("還有變更尚未儲存到雲端，登出後這些變更會遺失。確定要登出嗎？");
+    if (!ok) return;
+  }
   try {
     await signOut(auth);
   } catch (error) {
@@ -3637,6 +4102,20 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  document.getElementById("collectionRetryBtn")?.addEventListener("click", retryCollectionSave);
+  document.getElementById("collectionLoadCloudBtn")?.addEventListener("click", resolveCollectionConflictWithCloud);
+  document.getElementById("collectionKeepLocalBtn")?.addEventListener("click", resolveCollectionConflictWithLocal);
+  const collectionClientVersion = document.getElementById("collectionClientVersion");
+  if (collectionClientVersion) {
+    collectionClientVersion.textContent = COLLECTION_CLIENT_VERSION;
+    collectionClientVersion.hidden = false;
+  }
+  window.addEventListener("beforeunload", event => {
+    if (!hasUnsavedCollectionChanges()) return;
+    event.preventDefault();
+    event.returnValue = "";
+  });
+
   clearAllTables();
   refreshSelectors();
   installUiSummaryObservers();
@@ -3656,6 +4135,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     cancelPendingCloudSaves();
     dataSessionGuard.reset();
+    collectionSync.reset();
+    deferredCollectionRemote = null;
+    collectionEchoCheck = null;
+    latestCollectionSnapshot = null;
     initialDocumentMissingGeneration = null;
     clearAllTables();
     refreshSelectors();

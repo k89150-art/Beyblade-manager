@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Claude 完成 Phase 4B-1 H-2 安全補強，等待使用者驗收與是否 commit）
+- 目前執行者：無（Claude 完成 Phase 5B-2C-1 審查修正，等待使用者授權進入 Emulator 驗證）
 - 寫入範圍：目前沒有進行中的寫入任務
-- Git 狀態（開始時）：`main` / `f9c9ea8833ae0415fbe7c66bc723c70a91d00818`，與 `origin/main` 同步，已追蹤檔案與 HEAD 一致
+- Git 狀態（開始時）：`main` / `4c6d090`，工作樹乾淨
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
 
@@ -31,6 +31,32 @@
 ```
 
 ## 最新紀錄
+
+### 2026-10-30 — Claude（Phase 5B-2C-1）
+
+- 任務：修正 Phase 5B-2B 獨立審查的 F-01、F-02，並最小修正 F-03。
+- 主要內容：F-01：`planCollectionCommit()` 只有在有證據（本頁結果不明提交的確切內容、同一次儲存流程的結果不明嘗試、型錄升級的確切內容）時，才把「雲端等於預期」判為已完成；證據存在 tracker 內，依帳號／目標、資料表、內容綁定，確認提交、套用雲端或重設時清除；沒有證據一律衝突。F-02：疑似舊快照改由 `getDocFromServer` 確認，不用時間判斷；讀取失敗重試兩次後直接顯示最新收到的雲端資料；直接讀取不解除監聽延遲的保護。F-03：`adminViewUser`／`adminViewSelf` 在有未儲存變更時先確認。
+- 修改檔案（相對 5B-2A）：`collection-sync.js`、`script.js`、`tests/collection-sync.test.mjs`、`tests/helpers/manager-page-harness.mjs`、`docs/PROJECT_DECISIONS.md`、`docs/AI_HANDOFF.md`。
+- 測試（Claude 雲端隔離環境）：11 個測試檔 270/270 PASS（5B-2A 257 → 新增 13）；validate PASS；build PASS（33 files）；`git diff --check` PASS；真實 `index.html` 兩裝置 S0–S5 與 RV1–RV6 符合預期；新增破壞性測試 10 項全部被偵測（含原本未偵測的 M11）。
+- Git status：未 stage；8 份已追蹤修改＋3 份新增（與 5B-2A 相同的檔案集合）。
+- 已知問題：兩台裝置做出完全相同的結果也會成為衝突（刻意保守）；Low 項目 F-04～F-08 未處理。
+- 下一位注意：Emulator 需實測 `getDocFromServer` 確認流程、相同新增衝突、M11 情境。
+- Commit / Deploy：未 commit、未 push、未部署。
+
+### 2026-10-30 — Claude（Phase 5B-2A）
+
+- 任務：主頁並行寫入保護（D-018，Phase 5A 的 R2）。
+- 根本原因：`saveData()` 每次從畫面收集全部四個資料表，以 `setDoc(..., { merge: true })` 整欄寫入且沒有前提條件；未同步的裝置會把其他裝置的新增、刪除整表蓋掉（5B-1 重現 S1–S5）。
+- 主要內容：新增 `collection-sync.js`（逐表差異、交易內衝突判定、結果分類、追蹤雲端／畫面基準）；`saveData()` 改為 transaction（`maxAttempts: 1`，自行重試 5 次），只寫有變更的表＋owner 欄位＋`updatedAt`，雲端已是預期內容視為完成，其他差異整次不寫入；狀態流程 clean／saving／pending-network／pending-unknown／conflict 公開於 `body[data-collection-sync]` 與 `#collectionSyncNotice`；衝突時停用寫入並提供「載入雲端最新資料」「以我的版本覆蓋」（皆需確認）；未儲存時暫存雲端更新、不重建畫面，伺服器恢復後自動重試；同帳號「重新載入」保留未儲存內容；登出／離開頁面有未儲存提示；主頁版本列「收藏儲存版本：5B（交易保護）」。移除 `setDoc` 與 `writeDocumentSafely` 的使用（`data-session-guard.js` 未修改）。
+- 修改檔案：`script.js`、`index.html`（`script.js?v=20261030-phase5b`、版本列、同步提示）、`collection-sync.js`（新增）、`tests/collection-sync.test.mjs`（新增）、`tests/helpers/manager-page-harness.mjs`（新增）、`tests/data-session-safety.test.mjs`、`tests/collection-autofill-safety.test.mjs`、`tests/manager-ui-refresh.test.mjs`、`docs/PROJECT_DECISIONS.md`、`docs/PROJECT_ARCHITECTURE.md`、`docs/AI_HANDOFF.md`。
+- 測試（Claude 雲端隔離環境，非使用者 Windows 本機）：11 個測試檔 257/257 PASS（原 221 → 新增 36）；validate-site PASS；build PASS（33 files）；`git diff --check` PASS；真實 `index.html` 兩裝置 Playwright（Firestore stub）S0–S5、S4b、載入不寫回皆符合預期，390／1440 版面正常、Console Error 0；mutation 13 項中 12 項被測到。
+- Branch / HEAD：`main` / `4c6d090`。
+- Git status：未 stage；8 份已追蹤修改＋3 份新增。
+- 未完成事項：Firestore Emulator 驗證（建議延伸主頁 M 系列）；`AGENTS.md`／`README.md` 測試指令。
+- 已知問題：同表不同筆的並行修改會成為衝突（刻意保守）；回應遺失後若他人又改同一表，只能顯示衝突並註明可能已儲存；舊版主頁分頁仍會整欄覆寫。
+- 資料庫／部署風險：未修改 Rules、Schema、官方型錄、競賽統計或賽事保護；部署需比照 D-017 關閉所有裝置的舊主頁並確認版本列。
+- 下一位注意：建議獨立審查 `planCollectionCommit()`、`planRemote()`（未儲存表保留與舊版本回音）、`submitCollectionSave()` 的結果分類與 Session 變更處理。
+- Commit / Deploy：未 commit、未 push、未部署。
 
 ### 2026-10-29 — Claude（Phase 4B-1）
 

@@ -77,18 +77,22 @@ test("main page binds snapshots and saves to immutable session tokens", () => {
   assert.match(script, /onSnapshot\(\s*userDocRef,\s*\{ includeMetadataChanges: true \}/);
   assert.match(script, /dataSnapshotGate\.acceptCache\(sessionToken, snapshotData\)[\s\S]*?完成前僅供檢視/);
   assert.match(script, /dataSnapshotGate\.acceptServer\(sessionToken, snapshotData\)/);
-  assert.match(script, /if \(!snapshot\.exists\(\)\) \{[\s\S]*?dataSessionGuard\.markReady\(sessionToken\)/);
+  assert.match(script, /initialDocumentMissingGeneration = snapshot\.exists\(\) \? null : sessionToken\.generation;[\s\S]*?dataSessionGuard\.markReady\(sessionToken\)[\s\S]*?if \(!snapshot\.exists\(\)\) \{/);
   assert.match(script, /dataSessionGuard\.markError\(sessionToken\)[\s\S]*?cancelPendingCloudSaves\(\)/);
-  assert.match(script, /const userDocRef = getUserDocRef\(activeWriteSession\.targetUid\)/);
-  assert.match(script, /if \(!dataSessionGuard\.isWriteSessionCurrent\(activeWriteSession\)\)[\s\S]*?await writeDocumentSafely\(\{/);
-  assert.match(script, /runTransaction\(db, async transaction =>[\s\S]*?transaction\.set\(userDocRef, data, \{ merge: true \}\)/);
-  assert.doesNotMatch(script, /getUserDocRef\(\)\s*;[\s\S]{0,250}await setDoc/);
+  // D-018: each save is bound to the write session captured for it.
+  assert.match(script, /const userDocRef = getUserDocRef\(session\.targetUid\)/);
+  assert.match(script, /if \(!activeWriteSession \|\| !dataSessionGuard\.isWriteSessionCurrent\(activeWriteSession\)\)[\s\S]*?await submitCollectionSave\(activeWriteSession, input\)/);
+  assert.match(script, /canContinue: \(\) => !saveToken\.abandoned && dataSessionGuard\.isWriteSessionCurrent\(session\)/);
+  assert.match(script, /runTransaction\(db, transaction => updateFunction\(\{[\s\S]*?\}\), \{ maxAttempts: 1 \}\)/);
+  assert.doesNotMatch(script, /\bsetDoc\b/);
 });
 
 test("main page preserves every manager-owned field during a guarded merge", () => {
   assert.match(script, /return \{\s*beybladeTable: getTableData\("beybladeTable", true\),\s*partTable: getTableData\("partTable", false\),\s*configTable: getTableData\("configTable", true\),\s*historyTable: getHistoryData\(\),\s*ownerUid:/);
-  assert.match(script, /merge: \(\) => setDoc\(userDocRef, data, \{ merge: true \}\)/);
-  assert.match(script, /Keep data owned by other pages, such as tournamentRecords/);
+  // D-018: only changed collection tables plus owner fields are written;
+  // tournamentRecords and other fields are never part of a collection save.
+  assert.match(script, /pickCollectionTables\(collectCurrentData\(\)\)/);
+  assert.match(script, /transaction\.update\(userDocRef, fields\)/);
 });
 
 test("async collection and configuration interactions revalidate their captured session", () => {

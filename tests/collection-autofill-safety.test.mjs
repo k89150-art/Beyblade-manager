@@ -4,6 +4,7 @@ import test from "node:test";
 import vm from "node:vm";
 import { createDataSessionGuard, createSessionSnapshotGate, DATA_SESSION_STATES } from "../data-session-guard.js";
 import { attachCatalogNames, getOfficialStockCode } from "../stock-catalog-names.js";
+import * as collectionSyncModule from "../collection-sync.js";
 
 // H-1 / D-015: run the real script.js collection code against the real
 // catalog files, with an in-memory DOM and Firestore mocks. Nothing here reads
@@ -27,6 +28,8 @@ const SLICES = [
   ["function getValue(", "function preventInvalidPartCountInput("],
   ["function getStockNameFromCell(", "function escapeHtml("],
   ["function getTableData(", "function collectCurrentData()"],
+  ["function collectCurrentData()", "/* ===== D-018 collection saves: begin"],
+  ["function collectCollectionTables()", "// One SDK attempt per call"],
   ["const STOCK_ROW_METADATA_KEYS", "function clearAllTables()"],
   ["function applyDataToTables(", "function startCloudListener("],
   ["function cancelPendingCloudSaves()", "function cancelSessionInteractions()"],
@@ -46,6 +49,11 @@ let hasPendingCloudSave = false;
 let lastAppliedRemoteUpdatedAt = 0;
 let initialDocumentMissingGeneration = null;
 let unsubscribeCloudData = null;
+let currentUser = null;
+let isSavingCloudData = false;
+let deferredCollectionRemote = null;
+let collectionFailureAlerted = false;
+const collectionSync = createCollectionSyncTracker();
 `;
 
 const EXPORTS = `
@@ -111,6 +119,8 @@ function createHarness({ source = managerSource, loadCatalog = true } = {}) {
   });
   const effects = { saves: 0, listeners: [] };
   const context = {
+    ...collectionSyncModule,
+    isReadOnly: () => false,
     document: dom.document,
     getOfficialStockCode,
     crypto: globalThis.crypto,

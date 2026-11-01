@@ -11,6 +11,8 @@ import {
   writeDocumentSafely
 } from "../data-session-guard.js";
 import { createMockFirestore, userDocPath } from "./helpers/mock-firestore.mjs";
+import { createManagerDevice } from "./helpers/manager-page-harness.mjs";
+import { COLLECTION_SYNC_STATES, createCollectionSyncTracker } from "../collection-sync.js";
 import { createTournamentPage } from "./helpers/tournament-page-harness.mjs";
 
 const managerSource = fs.readFileSync("script.js", "utf8");
@@ -609,6 +611,8 @@ test("Quick Editor: saving with an editor opened in an older session closes it w
 
 test("data-write-action controls follow the session state", () => {
   const guard = createDataSessionGuard();
+  const tracker = createCollectionSyncTracker();
+  let notices = 0;
   const controls = [0, 1, 2].map(() => ({ disabled: false, attributes: {}, setAttribute(name, value) { this.attributes[name] = value; } }));
   const retry = { hidden: true };
   const body = { dataset: {}, attributes: {}, setAttribute(name, value) { this.attributes[name] = value; } };
@@ -619,7 +623,10 @@ test("data-write-action controls follow the session state", () => {
       getElementById: id => (id === "retryDataLoadBtn" ? retry : null)
     },
     dataSessionGuard: guard,
-    DATA_SESSION_STATES
+    DATA_SESSION_STATES,
+    COLLECTION_SYNC_STATES,
+    collectionSync: tracker,
+    renderCollectionSyncNotice: () => { notices += 1; }
   }, [["function updateDataAccessUi()", "function cancelPendingCloudSaves()"]]);
   context.__set({ currentUser: { uid: "account-a" } });
 
@@ -638,52 +645,20 @@ test("data-write-action controls follow the session state", () => {
   check(true, false, "error shows retry");
   guard.markReady(token);
   check(false, true, "ready");
+  assert.ok(notices > 0, "the collection sync notice is refreshed with the controls");
+  tracker.setState(COLLECTION_SYNC_STATES.CONFLICT, { tables: ["partTable"] });
+  check(true, true, "a collection conflict blocks writes until resolved");
+  tracker.setState(COLLECTION_SYNC_STATES.PENDING_NETWORK);
+  check(false, true, "pending saves still accept edits (they are saved on retry)");
+  tracker.setState(COLLECTION_SYNC_STATES.CLEAN);
   const readonly = guard.begin({ ownerUid: "admin", targetUid: "account-a", readOnly: true });
   guard.markReady(readonly);
   check(true, true, "readonly");
 });
 
-function createListenerHarness({ unsavedInteraction = false } = {}) {
-  const guard = createDataSessionGuard();
-  const gate = createSnapshotGate();
-  const listeners = [];
-  const effects = { applied: [], cancels: 0, alerts: [], saves: 0, status: [] };
-  let unsaved = unsavedInteraction;
-  const context = runManagerSlices({
-    dataSessionGuard: guard,
-    dataSnapshotGate: gate,
-    getUserDocRef: uid => ({ uid }),
-    onSnapshot: (ref, options, next, error) => {
-      const listener = { ref, options, next, error, active: true };
-      listeners.push(listener);
-      return () => { listener.active = false; };
-    },
-    applyDataToTables: data => { effects.applied.push(data); return 0; },
-    cancelSessionInteractions: () => { effects.cancels += 1; },
-    updateDataAccessUi() {},
-    setSyncStatus: (text, type) => effects.status.push([text, type]),
-    hasUnsavedDomInteraction: () => unsaved,
-    alert: message => effects.alerts.push(message),
-    saveData: () => { effects.saves += 1; },
-    console: { error() {} }
-  }, [
-    ["function cancelPendingCloudSaves()", "function cancelSessionInteractions()"],
-    ["function startCloudListener(", "function loadCloudDataForCurrentTarget("]
-  ]);
-  const begin = (uid = "account-a") => {
-    const token = guard.begin({ ownerUid: uid });
-    gate.begin(token);
-    context.startCloudListener(token);
-    return { token, listener: listeners.at(-1) };
-  };
-  const snapshot = (data, { fromCache = false, pending = false } = {}) => ({
-    metadata: { fromCache, hasPendingWrites: pending },
-    exists: () => data !== null,
-    data: () => (data === null ? undefined : structuredClone(data))
-  });
-  return { context, guard, effects, begin, snapshot, setUnsaved: value => { unsaved = value; } };
-}
-
+// Phase 1C listener and save guarantees, re-checked against the D-018 save
+// path: the real script.js listener / saveData run on a simulated device
+// (tests/helpers/manager-page-harness.mjs) backed by the mock Firestore.
 const SAMPLE_DATA = Object.freeze({
   updatedAt: 1,
   beybladeTable: [{ cells: ["UX-01"] }],
@@ -692,237 +667,168 @@ const SAMPLE_DATA = Object.freeze({
   historyTable: []
 });
 
+function createListenerDevice(data = SAMPLE_DATA) {
+  const mock = createMockFirestore();
+  if (data) mock.seed(userDocPath("account-a"), data);
+  const device = createManagerDevice({ mock, uid: "account-a" });
+  const token = device.signIn("account-a");
+  return { mock, device, token, listener: device.effects.listeners.at(-1) };
+}
+
 test("onSnapshot: cache displays once without unlocking, identical server data unlocks without a rebuild", () => {
-  const h = createListenerHarness();
-  const { token, listener } = h.begin();
+  const { device, token, listener } = createListenerDevice();
   assert.equal(JSON.stringify(listener.options), JSON.stringify({ includeMetadataChanges: true }));
 
-  listener.next(h.snapshot(SAMPLE_DATA, { fromCache: true }));
-  assert.equal(h.effects.applied.length, 1);
-  assert.equal(h.guard.snapshot().state, DATA_SESSION_STATES.ERROR);
-  assert.equal(h.guard.captureWriteSession(), null, "cache never unlocks writes");
+  device.deliver({ fromCache: true, data: SAMPLE_DATA });
+  assert.equal(device.effects.rebuilds, 1);
+  assert.equal(device.guard.snapshot().state, DATA_SESSION_STATES.ERROR);
+  assert.equal(device.guard.captureWriteSession(), null, "cache never unlocks writes");
 
-  listener.next(h.snapshot(SAMPLE_DATA));
-  assert.equal(h.effects.applied.length, 1, "identical server data does not rebuild");
-  assert.equal(h.guard.isWriteSessionCurrent(token), true);
+  device.deliver({ data: SAMPLE_DATA });
+  assert.equal(device.effects.rebuilds, 1, "identical server data does not rebuild");
+  assert.equal(device.guard.isWriteSessionCurrent(token), true);
 
-  listener.next(h.snapshot({ ...SAMPLE_DATA, updatedAt: 99, tournamentRecords: [1] }));
-  assert.equal(h.effects.applied.length, 1, "changes outside manager tables do not rebuild");
+  device.deliver({ data: { ...SAMPLE_DATA, updatedAt: 99, tournamentRecords: [1] } });
+  assert.equal(device.effects.rebuilds, 1, "changes outside manager tables do not rebuild");
 
-  listener.next(h.snapshot({ ...SAMPLE_DATA, partTable: [] }, { pending: true }));
-  assert.equal(h.effects.applied.length, 1, "pending local writes are ignored");
+  listener.next({ metadata: { fromCache: false, hasPendingWrites: true }, exists: () => true, data: () => ({ ...SAMPLE_DATA, partTable: [] }) });
+  assert.equal(device.effects.rebuilds, 1, "pending local writes are ignored");
 });
 
 test("onSnapshot: a metadata-only cache event keeps open editors, locks writes, and recovers on server confirm", () => {
-  const h = createListenerHarness();
-  const { token, listener } = h.begin();
-  listener.next(h.snapshot(SAMPLE_DATA));
-  h.setUnsaved(true); // e.g. Quick Editor or the delete-reason modal is open
-  const cancelsAfterLoad = h.effects.cancels;
+  const { device, token } = createListenerDevice();
+  device.deliver();
+  device.setUnsavedInteraction(true); // e.g. Quick Editor or the delete-reason modal is open
+  const cancelsAfterLoad = device.effects.cancels;
 
-  listener.next(h.snapshot(SAMPLE_DATA, { fromCache: true }));
-  assert.equal(h.effects.cancels, cancelsAfterLoad, "network drop must not close editors");
-  assert.equal(h.effects.applied.length, 1);
-  assert.equal(h.guard.captureWriteSession(), null, "writes are locked while unconfirmed");
-  assert.match(h.effects.status.at(-1)[0], /尚未儲存的編輯會保留/);
+  device.deliver({ fromCache: true });
+  assert.equal(device.effects.cancels, cancelsAfterLoad, "network drop must not close editors");
+  assert.equal(device.effects.rebuilds, 1);
+  assert.equal(device.guard.captureWriteSession(), null, "writes are locked while unconfirmed");
+  assert.match(device.effects.status.at(-1)[0], /尚未儲存的編輯會保留/);
 
-  listener.next(h.snapshot(SAMPLE_DATA));
-  assert.equal(h.guard.isWriteSessionCurrent(token), true, "same session becomes writable again");
-  assert.equal(h.effects.cancels, cancelsAfterLoad);
-  assert.deepEqual(h.effects.alerts, []);
+  device.deliver();
+  assert.equal(device.guard.isWriteSessionCurrent(token), true, "same session becomes writable again");
+  assert.equal(device.effects.cancels, cancelsAfterLoad);
+  assert.deepEqual(device.effects.alerts, []);
 });
 
 test("onSnapshot: a real remote change rebuilds, cancels open editors and warns once", () => {
-  const h = createListenerHarness();
-  const { listener } = h.begin();
-  listener.next(h.snapshot(SAMPLE_DATA));
-  h.setUnsaved(true);
+  const { device } = createListenerDevice();
+  device.deliver();
+  device.setUnsavedInteraction(true);
 
-  listener.next(h.snapshot({ ...SAMPLE_DATA, partTable: [...SAMPLE_DATA.partTable, { cells: ["軸心", "F", "1"] }] }));
-  assert.equal(h.effects.applied.length, 2);
-  assert.ok(h.effects.cancels >= 1);
-  assert.equal(h.effects.alerts.length, 1);
+  device.deliver({ data: { ...SAMPLE_DATA, partTable: [...SAMPLE_DATA.partTable, { cells: ["軸心", "F", "1"] }] } });
+  assert.equal(device.effects.rebuilds, 2);
+  assert.ok(device.effects.cancels >= 1);
+  assert.equal(device.effects.alerts.length, 1);
 });
 
 test("onSnapshot: stale listeners, read errors and a missing document are handled safely", () => {
-  const h = createListenerHarness();
-  const first = h.begin("account-a");
-  const second = h.begin("account-b");
+  const mock = createMockFirestore();
+  const device = createManagerDevice({ mock, uid: "account-a" });
+  device.signIn("account-a");
+  const first = device.effects.listeners.at(-1);
+  const second = device.signIn("account-b");
+  const secondListener = device.effects.listeners.at(-1);
 
-  first.listener.next(h.snapshot(SAMPLE_DATA));
-  assert.equal(h.effects.applied.length, 0, "an old listener cannot touch the new session");
-  assert.equal(h.guard.snapshot().state, DATA_SESSION_STATES.LOADING);
+  first.next({ metadata: { fromCache: false, hasPendingWrites: false }, exists: () => true, data: () => structuredClone(SAMPLE_DATA) });
+  assert.equal(device.effects.rebuilds, 0, "an old listener cannot touch the new session");
+  assert.equal(device.guard.snapshot().state, DATA_SESSION_STATES.LOADING);
 
-  second.listener.next(h.snapshot(null));
-  assert.equal(h.guard.snapshot().state, DATA_SESSION_STATES.READY);
-  assert.equal(h.context.__state().initialDocumentMissingGeneration, second.token.generation);
+  secondListener.next({ metadata: { fromCache: false, hasPendingWrites: false }, exists: () => false, data: () => undefined });
+  assert.equal(device.guard.snapshot().state, DATA_SESSION_STATES.READY);
+  assert.equal(device.context.__test.sync.baseExists, false);
+  assert.equal(vm.runInContext("initialDocumentMissingGeneration", device.context), second.generation);
 
-  second.listener.error(new Error("permission-denied"));
-  assert.equal(h.guard.snapshot().state, DATA_SESSION_STATES.ERROR);
-  assert.equal(h.guard.captureWriteSession(), null);
-  assert.equal(h.effects.alerts.length, 1);
+  secondListener.error(new Error("permission-denied"));
+  assert.equal(device.guard.snapshot().state, DATA_SESSION_STATES.ERROR);
+  assert.equal(device.guard.captureWriteSession(), null);
+  assert.equal(device.effects.alerts.length, 1);
 });
 
-function createSaveHarness() {
-  const guard = createDataSessionGuard();
-  const gate = createSnapshotGate();
-  const writes = [];
-  const commits = [];
-  const pendingMerges = [];
-  const effects = { alerts: [], status: [], cancels: 0 };
-  let collected = 0;
-  let documentExistsPerAttempt = [false];
-  let transactionAttempts = 0;
-  const context = runManagerSlices({
-    db: {},
-    dataSessionGuard: guard,
-    dataSnapshotGate: gate,
-    writeDocumentSafely,
-    INITIAL_DOCUMENT_CONFLICT_CODE,
-    getUserDocRef: uid => ({ uid }),
-    collectCurrentData: () => ({
-      beybladeTable: [],
-      partTable: [{ cells: ["固鎖", "1-60", String(++collected)] }],
-      configTable: [],
-      historyTable: [],
-      ownerUid: "x",
-      ownerEmail: "",
-      updatedAt: Date.now()
-    }),
-    setDoc: (ref, data, options) => {
-      const write = deferred();
-      writes.push({ uid: ref.uid, count: data.partTable[0].cells[2], options });
-      pendingMerges.push(write);
-      return write.promise;
-    },
-    runTransaction: async (db, updateFunction) => {
-      let lastError = null;
-      for (const [attempt, exists] of documentExistsPerAttempt.entries()) {
-        transactionAttempts += 1;
-        const staged = [];
-        const transaction = {
-          get: async ref => ({ exists: () => exists, ref }),
-          set: (ref, data, options) => staged.push({ uid: ref.uid, count: data.partTable[0].cells[2], options })
-        };
-        try {
-          await updateFunction(transaction);
-          // A later entry in the sequence simulates SDK contention: the staged
-          // writes are discarded and the update function runs again.
-          if (attempt < documentExistsPerAttempt.length - 1) continue;
-          commits.push(...staged);
-          return;
-        } catch (error) {
-          lastError = error;
-          if (error?.code === INITIAL_DOCUMENT_CONFLICT_CODE) throw error;
-        }
-      }
-      throw lastError;
-    },
-    setSyncStatus: (text, type) => effects.status.push([text, type]),
-    alert: message => effects.alerts.push(message),
-    cancelSessionInteractions: () => { effects.cancels += 1; },
-    updateDataAccessUi() {},
-    console: { warn() {}, error() {} }
-  }, [["async function saveData()", "/* ====== 載入資料"]]);
-  return {
-    context, guard, gate, writes, commits, pendingMerges, effects,
-    setExistsSequence: sequence => { documentExistsPerAttempt = sequence; },
-    attempts: () => transactionAttempts
-  };
-}
-
 test("saveData: nothing is written before the session is ready", async () => {
-  const h = createSaveHarness();
-  h.context.__set({ currentUser: { uid: "account-a" } });
-  h.guard.begin({ ownerUid: "account-a" });
-  await h.context.saveData();
-  assert.deepEqual(h.writes, []);
-  assert.deepEqual(h.commits, []);
+  const { mock, device } = createListenerDevice();
+  await device.edit("partTable", rows => [...rows, { cells: ["軸心", "F", "1"] }]);
+  await device.settle();
+  assert.equal(mock.stats.transactions, 0);
 });
 
 test("saveData: queued saves coalesce into one follow-up write with the latest data", async () => {
-  const h = createSaveHarness();
-  h.context.__set({ currentUser: { uid: "account-a" } });
-  readySession(h.guard, "account-a");
+  const { mock, device } = createListenerDevice();
+  device.deliver();
+  const hold = deferred();
+  mock.on("beforeCommit", () => hold.promise);
 
-  const first = h.context.saveData();
-  await Promise.resolve();
-  h.context.saveData();
-  h.context.saveData();
-  assert.equal(h.writes.length, 1, "only one write is in flight");
-
-  h.pendingMerges[0].resolve();
+  const first = device.edit("partTable", rows => [...rows, { cells: ["軸心", "A", "1"] }]);
   await new Promise(resolve => setTimeout(resolve, 0));
-  assert.equal(h.writes.length, 2, "the queued saves collapse into one write");
-  assert.equal(h.writes[1].count, "2", "the follow-up write collects fresh data");
-  h.pendingMerges[1].resolve();
+  device.edit("partTable", rows => [...rows, { cells: ["軸心", "B", "1"] }]);
+  device.edit("partTable", rows => [...rows, { cells: ["軸心", "C", "1"] }]);
+  assert.equal(mock.stats.transactions, 1, "only one save is in flight");
+
+  hold.resolve();
   await first;
-  await new Promise(resolve => setTimeout(resolve, 0));
-  assert.equal(h.writes.length, 2);
-  assert.ok(h.writes.every(write => write.uid === "account-a" && write.options.merge === true));
+  await device.settle();
+  assert.equal(mock.stats.commits, 2, "the queued saves collapse into one write");
+  assert.deepEqual(mock.read(userDocPath("account-a")).partTable.map(row => row.cells[1]), ["1-60", "A", "B", "C"]);
+  assert.ok(mock.commitLog.flat().every(write => write.path === userDocPath("account-a")));
 });
 
 test("saveData: an account switch during an in-flight write never writes old data to the new account", async () => {
-  const h = createSaveHarness();
-  h.context.__set({ currentUser: { uid: "account-a" } });
-  readySession(h.guard, "account-a");
+  const { mock, device } = createListenerDevice();
+  mock.seed(userDocPath("account-b"), { partTable: [] });
+  device.deliver();
+  const hold = deferred();
+  mock.on("beforeCommit", () => hold.promise);
 
-  const first = h.context.saveData();
-  await Promise.resolve();
-  h.context.saveData();
+  const first = device.edit("partTable", rows => [...rows, { cells: ["軸心", "A", "1"] }]);
+  await new Promise(resolve => setTimeout(resolve, 0));
+  device.edit("partTable", rows => [...rows, { cells: ["軸心", "A2", "1"] }]);
 
   // Mirrors onAuthStateChanged: the user changes and a new session begins
   // while the queued account A save is still marked as pending.
-  h.context.__set({ currentUser: { uid: "account-b" } });
-  h.guard.begin({ ownerUid: "account-b" });
-  h.pendingMerges[0].resolve();
+  device.signIn("account-b");
+  hold.resolve();
   await first;
-  await new Promise(resolve => setTimeout(resolve, 0));
+  await device.settle();
 
-  assert.deepEqual(h.writes.map(write => write.uid), ["account-a"], "the queued account A save is dropped");
+  assert.deepEqual(mock.commitLog.flat().map(write => write.path), [userDocPath("account-a")], "the queued account A save is dropped");
+  assert.deepEqual(mock.read(userDocPath("account-b")).partTable, []);
 
-  const accountB = h.guard.snapshot();
-  h.guard.markReady(accountB);
-  h.context.saveData();
-  await Promise.resolve();
-  assert.deepEqual(h.writes.map(write => write.uid), ["account-a", "account-b"]);
-  h.pendingMerges[1].resolve();
+  device.deliver();
+  await device.edit("partTable", rows => [...rows, { cells: ["軸心", "B", "1"] }]);
+  await device.settle();
+  assert.deepEqual(mock.commitLog.flat().map(write => write.path), [userDocPath("account-a"), userDocPath("account-b")]);
 });
 
-test("transaction: a confirmed missing document is created once, then normal merges resume", async () => {
-  const h = createSaveHarness();
-  h.context.__set({ currentUser: { uid: "account-a" } });
-  const token = readySession(h.guard, "account-a");
-  h.context.__set({ initialDocumentMissingGeneration: token.generation });
-  h.setExistsSequence([false]);
+test("transaction: a confirmed missing document is created once, then later saves update it", async () => {
+  const { mock, device } = createListenerDevice(null);
+  device.deliver();
+  await device.edit("partTable", rows => [...rows, { cells: ["軸心", "A", "1"] }]);
+  await device.settle();
+  assert.equal(mock.commitLog.length, 1);
+  assert.equal(mock.commitLog[0][0].kind, "set");
+  assert.equal(mock.commitLog[0][0].merge, false);
+  assert.equal(vm.runInContext("initialDocumentMissingGeneration", device.context), null);
 
-  await h.context.saveData();
-  assert.equal(h.commits.length, 1);
-  assert.equal(JSON.stringify(h.commits[0].options), JSON.stringify({ merge: true }));
-  assert.equal(h.writes.length, 0, "no plain setDoc during initial creation");
-  assert.equal(h.context.__state().initialDocumentMissingGeneration, null);
-
-  const next = h.context.saveData();
-  await Promise.resolve();
-  assert.equal(h.writes.length, 1, "later saves use a normal merge");
-  h.pendingMerges[0].resolve();
-  await next;
+  await device.edit("partTable", rows => [...rows, { cells: ["軸心", "B", "1"] }]);
+  await device.settle();
+  assert.equal(mock.commitLog[1][0].kind, "update", "later saves update only changed fields");
 });
 
-test("transaction: an existing document is never overwritten, even when detected on a retry", async () => {
-  for (const sequence of [[true], [false, true]]) {
-    const h = createSaveHarness();
-    h.context.__set({ currentUser: { uid: "account-a" } });
-    const token = readySession(h.guard, "account-a");
-    h.context.__set({ initialDocumentMissingGeneration: token.generation });
-    h.setExistsSequence(sequence);
+test("transaction: a document created by another tab meanwhile is never overwritten", async () => {
+  for (const timing of ["before-read", "between-read-and-commit"]) {
+    const { mock, device } = createListenerDevice(null);
+    device.deliver();
+    const other = { partTable: [{ cells: ["固鎖", "其他分頁", "1"] }], updatedAt: 5 };
+    if (timing === "before-read") mock.seed(userDocPath("account-a"), other);
+    else mock.on("beforeCommit", () => mock.seed(userDocPath("account-a"), other));
 
-    await h.context.saveData();
-    assert.equal(h.attempts(), sequence.length, `sequence ${sequence} re-reads on retry`);
-    assert.deepEqual(h.commits, [], `sequence ${sequence}`);
-    assert.deepEqual(h.writes, [], `sequence ${sequence}`);
-    assert.equal(h.guard.snapshot().state, DATA_SESSION_STATES.ERROR);
-    assert.equal(h.guard.captureWriteSession(), null);
-    assert.match(h.effects.alerts.at(-1), /另一個分頁已建立雲端資料/);
+    await device.edit("partTable", rows => [...rows, { cells: ["軸心", "A", "1"] }]);
+    await device.settle();
+    assert.deepEqual(mock.read(userDocPath("account-a")).partTable, other.partTable, timing);
+    assert.equal(device.state, "conflict", timing);
+    assert.deepEqual(device.partNames(), ["A"], `${timing}: the unsaved row stays on screen`);
+    assert.match(device.effects.alerts.at(-1), /沒有儲存任何資料/);
   }
 });

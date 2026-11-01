@@ -247,12 +247,21 @@
       <div id="syncStatus" class="auth-status status-muted">
         尚未登入
       </div>
+      <div id="collectionClientVersion" class="auth-status status-muted" style="font-size:12px;" hidden></div>
     </div>
 
     <div class="auth-actions">
       <button id="retryDataLoadBtn" type="button" class="secondary-btn" hidden>重新載入</button>
       <button id="googleLoginBtn" class="primary-btn">使用 Google 登入</button>
       <button id="logoutBtn" class="danger-btn" style="display:none;">登出</button>
+    </div>
+  </div>
+  <div id="collectionSyncNotice" role="alert" style="margin-top:12px;" hidden>
+    <p id="collectionSyncMessage" class="auth-status status-error" style="margin:0 0 8px;"></p>
+    <div class="auth-actions" style="flex-wrap:wrap;">
+      <button id="collectionRetryBtn" type="button" class="secondary-btn" hidden>立即重試</button>
+      <button id="collectionLoadCloudBtn" type="button" class="secondary-btn" hidden>載入雲端最新資料</button>
+      <button id="collectionKeepLocalBtn" type="button" class="danger-btn" hidden>以我的版本覆蓋</button>
     </div>
   </div>
 </div>
@@ -686,7 +695,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20261029-phase2"></script>
+  <script type="module" src="script.js?v=20261030-phase5b"></script>
   <script src="site-menu.js?v=20260902-v192"></script>
 </body>
 </html>
