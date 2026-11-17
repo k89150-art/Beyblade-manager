@@ -12,7 +12,7 @@ Claude 進入專案後，必須先依序閱讀：
 
 Claude 專用提醒：
 
-- 只使用 `C:\Users\阿傑\OneDrive\文件\戰鬥陀螺管理器`；開始前執行 `git status --short --branch` 與 `git worktree list`，並檢查 OneDrive 衝突副本。
+- 只使用 `C:\Projects\Beyblade-manager`；開始前執行 `git status --short --branch` 與 `git worktree list`，並檢查 OneDrive 衝突副本。
 - 若有 Codex、使用者或其他執行者的未提交修改，不得覆蓋、還原或清除。
 - 不得任意重構、刪除功能、改變既有資料格式或以新架構取代目前網站。
 - 不得擅自修改或部署 Firebase Security Rules，不得碰正式資料、舊 RTDB 保留資料或使用者 UID 隔離。
