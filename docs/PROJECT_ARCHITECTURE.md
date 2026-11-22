@@ -192,9 +192,9 @@ git diff --check
 ### Firebase workflows
 
 - `.github/workflows/deploy-firestore-rules.yml`：手動部署 `k89150-web-login` 的 Firestore Rules。
-- `.github/workflows/backup-recent-tournament-records.yml`：手動備份／受控還原近期 `tournamentRecords`。
+- `.github/workflows/backup-recent-tournament-records.yml`：手動備份近期 `tournamentRecords` 到 `users/{uid}/recovery/`，或唯讀檢查既有備份。直接覆寫正式文件的還原（`restore_to_main`）已於 Phase 6C 停用：輸入、環境變數與程式路徑都已移除，唯一的寫入經 `write_recovery_document()` 限制在 recovery 集合；`tests/tournament-sync-regression.test.mjs` 以靜態檢查與實際執行內嵌 Python（模擬網路）驗證。
 
-這些 workflow 涉及正式權限或資料，只有在使用者明確授權後才能執行。`restore_to_main` 會直接覆寫正式文件的 `tournamentRecords`，執行前必須另行確認（風險見 `docs/AI_HANDOFF.md` Phase 6A 紀錄）。
+這些 workflow 涉及正式權限或資料，只有在使用者明確授權後才能執行。未來若需要還原，必須另立經審查的流程（輸入確認、先備份目前資料、updateTime 前提條件、只接受指定 backup_id）。
 
 ### Firebase Emulator 驗證
 

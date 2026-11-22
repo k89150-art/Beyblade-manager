@@ -3,6 +3,10 @@
 // tests/helpers/mock-firestore.mjs for what it does and does not model.
 import assert from "node:assert/strict";
 import test from "node:test";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
 import {
   TOURNAMENT_APPLIED as APPLIED,
   TOURNAMENT_OPERATION_TYPES as T,
@@ -466,4 +470,105 @@ test("L5: a definitely unsent add may be edited and resent without a prompt", as
   assert.equal(page.confirms.length, 0);
   assert.deepEqual(server(mock).map(record => record.tournamentName), ["改過的名稱"]);
   assert.equal(page.lastStatus().text, SAVED);
+});
+
+/* ---------- Phase 6C: the tournament backup workflow never writes the live document ---------- */
+
+const WORKFLOW_PATH = ".github/workflows/backup-recent-tournament-records.yml";
+const readWorkflow = () => fs.readFileSync(WORKFLOW_PATH, "utf8").replace(/\r\n/g, "\n");
+const embeddedPython = text => {
+  const start = text.indexOf("python3 - <<'PY'\n");
+  const end = text.indexOf("\n          PY\n", start);
+  assert.ok(start > 0 && end > start, "embedded Python block");
+  return text.slice(start + "python3 - <<'PY'\n".length, end).split("\n").map(line => line.replace(/^ {10}/, "")).join("\n") + "\n";
+};
+
+test("workflow: restore_to_main is gone from inputs, env and code; no write path targets appData", () => {
+  const text = readWorkflow();
+  const withoutComments = text.split("\n").filter(line => !/^\s*#/.test(line)).join("\n");
+  assert.doesNotMatch(withoutComments, /restore_to_main|RESTORE_TO_MAIN/i, "no input or variable can switch a restore on");
+  assert.equal((withoutComments.match(/updateMask/g) || []).length, 1, "updateMask appears only in the guard that refuses it");
+  assert.doesNotMatch(withoutComments, /updateMask\.fieldPaths/, "no field-mask PATCH of the live document");
+  assert.doesNotMatch(text, /Restored .* to the live document/);
+  const python = embeddedPython(text);
+  // Every Request that sends data goes through write_recovery_document only.
+  const writes = [...python.matchAll(/urllib\.request\.Request\(\s*([a-z_]+),\s*data=/g)].map(match => match[1]);
+  assert.deepEqual(writes, ["url"], "a single data-sending Request, inside the guard");
+  assert.match(python, /def write_recovery_document\(url, body\):\n {4}if not url\.startswith\(recovery_prefix\) or "\/appData\/" in url or "updateMask" in url:\n {8}raise SystemExit/);
+  assert.match(python, /recovery_prefix = f"\{base\}\/users\/\{uid\}\/recovery\/"/);
+  assert.equal((python.match(/method="PATCH"/g) || []).length, 1);
+  assert.doesNotMatch(python, /method="(DELETE|POST|PUT)"/);
+  // Normal backup inputs and behaviour stay.
+  for (const input of ["uid:", "scan_minutes:", "backup_id:"]) assert.ok(text.includes(`      ${input}`), input);
+  assert.match(python, /url = source_url \+ "\?" \+ urllib\.parse\.urlencode\(\{"readTime": read_time\}\)/);
+  assert.match(python, /backup_url = f"\{base\}\/users\/\{uid\}\/recovery\/\{backup_id\}"/);
+  assert.match(python, /write_recovery_document\(backup_url, body\)/);
+  assert.match(text, /permissions:\n  contents: read/);
+});
+
+// Runs the real embedded Python with stubbed Google auth and network: it may
+// read appData and write only to users/{uid}/recovery/, whatever the env says.
+const pythonCommand = ["py", "python3", "python"].find(command => {
+  const result = spawnSync(command, ["-c", "import sys; print(sys.version_info[0])"], { encoding: "utf8" });
+  return result.status === 0 && result.stdout.trim() === "3";
+});
+
+test("workflow: the backup script writes only to recovery even with RESTORE_TO_MAIN=true", { skip: !pythonCommand && "Python 3 is not installed" }, () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "beyblade-workflow-"));
+  try {
+    fs.writeFileSync(path.join(dir, "backup.py"), embeddedPython(readWorkflow()));
+    fs.writeFileSync(path.join(dir, "harness.py"), `
+import io, json, os, sys, types, urllib.request
+calls = []
+google = types.ModuleType("google")
+auth = types.ModuleType("google.auth"); transport = types.ModuleType("google.auth.transport")
+requests_mod = types.ModuleType("google.auth.transport.requests"); requests_mod.Request = lambda: None
+oauth2 = types.ModuleType("google.oauth2"); service_account = types.ModuleType("google.oauth2.service_account")
+class Credentials:
+    token = "test-token"
+    @classmethod
+    def from_service_account_info(cls, info, scopes=None): return cls()
+    def refresh(self, request): pass
+service_account.Credentials = Credentials
+for name, module in {"google": google, "google.auth": auth, "google.auth.transport": transport,
+                     "google.auth.transport.requests": requests_mod, "google.oauth2": oauth2,
+                     "google.oauth2.service_account": service_account}.items():
+    sys.modules[name] = module
+records = {"arrayValue": {"values": [{"mapValue": {"fields": {"id": {"stringValue": "t1"}}}}]}}
+def fake_urlopen(request):
+    url = request.full_url
+    method = request.get_method()
+    calls.append({"method": method, "url": url})
+    if method == "GET":
+        return io.BytesIO(json.dumps({"fields": {"tournamentRecords": records}}).encode())
+    return io.BytesIO(b"{}")
+urllib.request.urlopen = fake_urlopen
+source = open(os.path.join(os.path.dirname(__file__), "backup.py"), encoding="utf-8").read()
+try:
+    exec(compile(source, "backup.py", "exec"), {"__name__": "__main__"})
+except SystemExit as stop:
+    if stop.code not in (None, 0): raise
+print(json.dumps(calls))
+`);
+    const run = env => {
+      const result = spawnSync(pythonCommand, [path.join(dir, "harness.py")], {
+        encoding: "utf8",
+        env: { ...process.env, SERVICE_ACCOUNT_JSON: "{}", TARGET_UID: "uid-test", SCAN_MINUTES: "1", RESTORE_TO_MAIN: "true", ...env }
+      });
+      assert.equal(result.status, 0, result.stderr);
+      return JSON.parse(result.stdout.trim().split("\n").at(-1));
+    };
+    const scan = run({ BACKUP_ID: "" });
+    const scanWrites = scan.filter(call => call.method !== "GET");
+    assert.equal(scanWrites.length, 1, "the normal backup still writes one private copy");
+    assert.match(scanWrites[0].url, /\/documents\/users\/uid-test\/recovery\/tournament-\d{8}-\d{6}$/);
+    assert.ok(scan.some(call => call.method === "GET" && /\/users\/uid-test\/appData\/main\?readTime=/.test(call.url)), "the live document is only read");
+    const inspect = run({ BACKUP_ID: "tournament-20260101-000000" });
+    assert.deepEqual(inspect.filter(call => call.method !== "GET"), [], "inspecting a backup writes nothing");
+    for (const call of [...scan, ...inspect]) {
+      if (call.method !== "GET") assert.doesNotMatch(call.url, /appData|updateMask/);
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

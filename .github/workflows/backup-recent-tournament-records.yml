@@ -1,5 +1,14 @@
 name: Backup Recent Tournament Records
 
+# Phase 6C: the direct restore to the live document (restore_to_main) is
+# disabled. It overwrote users/{uid}/appData/main.tournamentRecords with no
+# typed confirmation, no backup of the current value and no precondition, so
+# newer records could be lost. This workflow now only reads the live document
+# and writes private copies under users/{uid}/recovery/. A future restore must
+# be a separate, reviewed workflow (typed confirmation, backup of the current
+# value first, updateTime precondition, explicit backup_id only).
+# See docs/AI_HANDOFF.md (Phase 6C).
+
 on:
   workflow_dispatch:
     inputs:
@@ -11,13 +20,8 @@ on:
         description: Number of recent minutes to scan (maximum 59)
         required: true
         default: "59"
-      restore_to_main:
-        description: Restore the recovered tournamentRecords field to the live document
-        required: true
-        type: boolean
-        default: false
       backup_id:
-        description: Existing private recovery document to restore (optional)
+        description: Existing private recovery document to inspect (read-only, optional)
         required: false
         default: ""
 
@@ -33,7 +37,6 @@ jobs:
           SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_K89150_WEB_LOGIN }}
           TARGET_UID: ${{ inputs.uid }}
           SCAN_MINUTES: ${{ inputs.scan_minutes }}
-          RESTORE_TO_MAIN: ${{ inputs.restore_to_main }}
           BACKUP_ID: ${{ inputs.backup_id }}
         run: |
           python3 -m pip install --quiet google-auth requests
@@ -64,6 +67,22 @@ jobs:
           now = datetime.datetime.now(datetime.timezone.utc)
           found = None
           existing_backup_id = os.environ.get("BACKUP_ID", "").strip()
+
+          # The only write this workflow may make: a private copy under
+          # users/{uid}/recovery/. The live appData document is never written.
+          recovery_prefix = f"{base}/users/{uid}/recovery/"
+
+          def write_recovery_document(url, body):
+              if not url.startswith(recovery_prefix) or "/appData/" in url or "updateMask" in url:
+                  raise SystemExit(f"Refusing to write outside the private recovery collection: {url}")
+              request = urllib.request.Request(
+                  url,
+                  data=json.dumps(body).encode("utf-8"),
+                  headers={**headers, "Content-Type": "application/json"},
+                  method="PATCH",
+              )
+              with urllib.request.urlopen(request) as response:
+                  json.load(response)
 
           if existing_backup_id:
               backup_url = f"{base}/users/{uid}/recovery/{existing_backup_id}"
@@ -123,29 +142,10 @@ jobs:
                       "sourceDocument": {"stringValue": source_path},
                   }
               }
-              request = urllib.request.Request(
-                  backup_url,
-                  data=json.dumps(body).encode("utf-8"),
-                  headers={**headers, "Content-Type": "application/json"},
-                  method="PATCH",
-              )
-              with urllib.request.urlopen(request) as response:
-                  json.load(response)
+              write_recovery_document(backup_url, body)
               print(f"Preserved {record_count} tournament record(s) in private backup {backup_id}.")
               print(f"Recovered source timestamp: {read_time}")
 
-          if os.environ.get("RESTORE_TO_MAIN", "false").lower() == "true":
-              restore_url = source_url + "?" + urllib.parse.urlencode(
-                  [("updateMask.fieldPaths", "tournamentRecords")]
-              )
-              restore_body = {"fields": {"tournamentRecords": tournament_field}}
-              request = urllib.request.Request(
-                  restore_url,
-                  data=json.dumps(restore_body).encode("utf-8"),
-                  headers={**headers, "Content-Type": "application/json"},
-                  method="PATCH",
-              )
-              with urllib.request.urlopen(request) as response:
-                  json.load(response)
-              print(f"Restored {record_count} tournament record(s) to the live document.")
+          # Restore to the live document is disabled (Phase 6C); see the header.
+          print("Live document not modified: the direct restore is disabled (Phase 6C).")
           PY
