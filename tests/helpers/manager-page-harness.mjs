@@ -41,7 +41,8 @@ export const MANAGER_SLICES = Object.freeze([
   ["function beginDataSession(", "const partTypes"],
   ["/* ===== D-018 collection saves: begin", "/* ===== D-018 collection saves: end"],
   ["function startCloudListener(", "/* ====== 第一區"],
-  ["/* ====== 管理員：切換檢視使用者 ====== */", "/* ====== Google 登入 / 登出 ====== */"]
+  ["/* ====== 管理員：切換檢視使用者 ====== */", "/* ====== Google 登入 / 登出 ====== */"],
+  ["/* ===== F-04 auth changes: begin", "/* ===== F-04 auth changes: end"]
 ]);
 
 const ACCESSOR = `
@@ -52,7 +53,9 @@ globalThis.__test = {
   get pending() { return hasPendingCloudSave; },
   get deferred() { return deferredCollectionRemote; },
   setUser(user) { currentUser = user; },
-  get user() { return currentUser; }
+  get user() { return currentUser; },
+  get drafts() { return orphanedCollectionDrafts; },
+  setLocalSignOut(value) { localSignOutRequested = value; }
 };
 `;
 
@@ -84,14 +87,15 @@ export function createManagerDevice({
   admin = false
 } = {}) {
   const screen = { tables: collectionModule.pickCollectionTables(null) };
-  const effects = { alerts: [], confirms: [], status: [], cancels: 0, rebuilds: 0, listeners: [], warnings: [] };
+  const effects = { alerts: [], confirms: [], status: [], cancels: 0, rebuilds: 0, listeners: [], warnings: [], authUi: [] };
   let unsavedInteraction = false;
   let confirmAnswer = true;
   let offline = false;
   let serverReadsFail = false;
   const elements = new Map(["collectionSyncNotice", "collectionSyncMessage", "collectionRetryBtn",
     "collectionLoadCloudBtn", "collectionKeepLocalBtn", "retryDataLoadBtn", "syncStatus",
-    "adminUidInput", "adminReturnBtn"].map(id => [id, { ...createElement(), value: "", style: {} }]));
+    "adminUidInput", "adminReturnBtn", "collectionDraftNotice", "collectionDraftMessage",
+    "collectionDraftDownloadBtn", "collectionDraftDismissBtn"].map(id => [id, { ...createElement(), value: "", style: {} }]));
   const body = createElement();
 
   let code = MANAGER_SLICES.map(([start, end]) => sourceBetween(source, start, end)).join("\n");
@@ -143,6 +147,7 @@ export function createManagerDevice({
       return count;
     },
     clearAllTables: () => { screen.tables = collectionModule.pickCollectionTables(null); },
+    updateAuthUI: user => effects.authUi.push(user ? user.uid : null),
     refreshSelectors() {},
     loadStockProducts: async () => {},
     cancelSessionInteractions: () => {
@@ -208,6 +213,17 @@ export function createManagerDevice({
       context.startCloudListener(token);
       return token;
     },
+
+    // Runs the real onAuthStateChanged handler (F-04). user: { uid, email } or null.
+    authChange(user) {
+      return context.handleAuthStateChange(user);
+    },
+    // A sign-out the user started and confirmed in this tab.
+    localSignOut() {
+      t.setLocalSignOut(true);
+      return context.handleAuthStateChange(null);
+    },
+    get drafts() { return t.drafts; },
 
     signOut() {
       t.setUser(null);

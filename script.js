@@ -2097,6 +2097,147 @@ function resolveCollectionConflictWithLocal() {
 
 /* ===== D-018 collection saves: end ===== */
 
+/* ===== F-04 auth changes: begin ===== */
+// When the account signs out or changes in another tab, this tab's unsaved
+// collection rows can no longer be saved: the write session belonged to the
+// old account. They are kept here in memory only (never in localStorage, never
+// written to any account, never resubmitted when a session comes back) so the
+// user is told and can download them by hand. A sign-out confirmed in this tab
+// discards them as the user already agreed.
+let orphanedCollectionDrafts = [];
+let localSignOutRequested = false;
+
+function captureOrphanedCollectionDraft(nextUser) {
+  const previous = currentUser;
+  if (!previous || localSignOutRequested) return null;
+  // The handler below clears the screen for every auth change, so a repeat for
+  // the same account is captured too rather than dropped.
+  const editorOpen = hasUnsavedDomInteraction();
+  if (!hasUnsavedCollectionChanges() && !editorOpen) return null;
+  const screenTables = collectionSync.hasBase() ? collectCollectionTables() : null;
+  const unsavedTables = screenTables ? collectionSync.getDirtyTables(screenTables) : [];
+  const saveUnresolved = isSavingCloudData || collectionSync.state === COLLECTION_SYNC_STATES.PENDING_UNKNOWN || collectionSync.state === COLLECTION_SYNC_STATES.SAVING;
+  // Rows are kept when they may differ from the cloud; an open editor alone
+  // leaves nothing in the tables worth downloading.
+  const keepRows = unsavedTables.length > 0 || isCollectionSyncHolding() || isSavingCloudData || hasPendingCloudSave;
+  return {
+    ownerUid: previous.uid,
+    ownerEmail: previous.email || "",
+    capturedAt: new Date().toISOString(),
+    reason: !nextUser ? "signed-out" : (nextUser.uid === previous.uid ? "session-reset" : "account-changed"),
+    unsavedTables,
+    saveUnresolved,
+    editorOpen,
+    tables: keepRows ? screenTables : null
+  };
+}
+
+function getCollectionDraftNoticeText(draft) {
+  const who = draft.ownerEmail || "原帳號";
+  const how = draft.reason === "account-changed" ? "已在其他分頁切換帳號"
+    : draft.reason === "session-reset" ? "的登入狀態已重新載入" : "已在其他分頁或裝置登出";
+  const names = draft.unsavedTables.length ? `「${formatCollectionTables(draft.unsavedTables)}」` : "";
+  const parts = [`${who} ${how}。這個分頁${names}尚未儲存到雲端的變更沒有寫入任何帳號，畫面已清除。`];
+  if (draft.saveUnresolved) parts.push("最近一次儲存是否完成無法確認，請用原帳號登入後先查看雲端內容。");
+  if (draft.editorOpen) parts.push("開啟中的編輯視窗內容無法保留。");
+  if (draft.tables) parts.push("這些變更只暫存在這個分頁，不會自動儲存，關閉或重新整理就會消失。如需保留，請按「下載未儲存資料」存成 JSON 檔，再用原帳號登入後手動重新輸入。");
+  return parts.join("");
+}
+
+function renderCollectionDraftNotice() {
+  const notice = document.getElementById("collectionDraftNotice");
+  if (!notice) return;
+  const drafts = orphanedCollectionDrafts;
+  const latest = drafts.at(-1);
+  notice.hidden = !latest;
+  const message = document.getElementById("collectionDraftMessage");
+  if (message) {
+    const earlier = drafts.length > 1 ? `（另有 ${drafts.length - 1} 份較早保留的未儲存資料，一併包含在下載檔中。）` : "";
+    message.textContent = latest ? getCollectionDraftNoticeText(latest) + earlier : "";
+  }
+  const downloadButton = document.getElementById("collectionDraftDownloadBtn");
+  if (downloadButton) downloadButton.hidden = !drafts.some(draft => draft.tables);
+}
+
+function buildOrphanedDraftExport(drafts) {
+  return {
+    kind: "beyblade-manager-unsaved-collection-draft",
+    note: "尚未儲存到雲端的收藏變更（未寫入任何帳號）。請用原帳號登入後手動重新輸入，本檔案不會被網站自動匯入。",
+    drafts: drafts.filter(draft => draft.tables).map(draft => ({
+      ownerEmail: draft.ownerEmail,
+      capturedAt: draft.capturedAt,
+      unsavedTables: draft.unsavedTables,
+      saveUnresolved: draft.saveUnresolved,
+      tables: draft.tables
+    }))
+  };
+}
+
+function downloadOrphanedCollectionDraft() {
+  const drafts = orphanedCollectionDrafts;
+  const latest = drafts.at(-1);
+  if (!drafts.some(draft => draft.tables)) return;
+  const blob = new Blob([JSON.stringify(buildOrphanedDraftExport(drafts), null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `beyblade-unsaved-draft-${latest.capturedAt.replace(/[:.]/g, "-")}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function dismissOrphanedCollectionDraft() {
+  if (!orphanedCollectionDrafts.length) return;
+  if (orphanedCollectionDrafts.some(draft => draft.tables) && !confirm("確定要捨棄這些尚未儲存的變更嗎？捨棄後無法復原。")) return;
+  orphanedCollectionDrafts = [];
+  renderCollectionDraftNotice();
+}
+
+async function handleAuthStateChange(user) {
+  const draft = captureOrphanedCollectionDraft(user);
+  localSignOutRequested = false;
+  cancelSessionInteractions();
+  currentUser = user;
+  viewingUserId = null;
+  updateAuthUI(user);
+
+  if (unsubscribeCloudData) {
+    unsubscribeCloudData();
+    unsubscribeCloudData = null;
+  }
+
+  cancelPendingCloudSaves();
+  dataSessionGuard.reset();
+  collectionSync.reset();
+  deferredCollectionRemote = null;
+  collectionEchoCheck = null;
+  latestCollectionSnapshot = null;
+  initialDocumentMissingGeneration = null;
+  clearAllTables();
+  refreshSelectors();
+  updateDataAccessUi();
+
+  // Earlier orphaned drafts stay until the user downloads or dismisses them.
+  if (draft) {
+    orphanedCollectionDrafts = [...orphanedCollectionDrafts, draft];
+    renderCollectionDraftNotice();
+    alert(getCollectionDraftNoticeText(draft));
+  }
+
+  if (user) {
+    setSyncStatus("已登入，正在載入雲端資料...", "login");
+    const sessionToken = beginDataSession(user.uid, false);
+    await loadStockProducts().catch(() => {});
+    if (currentUser !== user || !dataSessionGuard.isCurrent(sessionToken)) return;
+    startCloudListener(sessionToken);
+  } else {
+    setSyncStatus("尚未登入", "muted");
+  }
+}
+/* ===== F-04 auth changes: end ===== */
+
 
 /* ====== 載入資料 ====== */
 
@@ -3959,9 +4100,13 @@ async function logoutGoogle() {
     const ok = confirm("還有變更尚未儲存到雲端，登出後這些變更會遺失。確定要登出嗎？");
     if (!ok) return;
   }
+  // F-04: this tab asked for the sign-out (and confirmed losing unsaved
+  // changes), so the auth change does not keep an orphaned draft.
+  localSignOutRequested = true;
   try {
     await signOut(auth);
   } catch (error) {
+    localSignOutRequested = false;
     console.error("登出失敗：", error);
     alert("登出失敗：" + error.message);
   }
@@ -4110,8 +4255,10 @@ document.addEventListener("DOMContentLoaded", function () {
     collectionClientVersion.textContent = COLLECTION_CLIENT_VERSION;
     collectionClientVersion.hidden = false;
   }
+  document.getElementById("collectionDraftDownloadBtn")?.addEventListener("click", downloadOrphanedCollectionDraft);
+  document.getElementById("collectionDraftDismissBtn")?.addEventListener("click", dismissOrphanedCollectionDraft);
   window.addEventListener("beforeunload", event => {
-    if (!hasUnsavedCollectionChanges()) return;
+    if (!hasUnsavedCollectionChanges() && !orphanedCollectionDrafts.some(draft => draft.tables)) return;
     event.preventDefault();
     event.returnValue = "";
   });
@@ -4122,36 +4269,5 @@ document.addEventListener("DOMContentLoaded", function () {
   setSyncStatus("請先使用 Google 登入", "muted");
   installConfigSort();
 
-  onAuthStateChanged(auth, async user => {
-    cancelSessionInteractions();
-    currentUser = user;
-    viewingUserId = null;
-    updateAuthUI(user);
-
-    if (unsubscribeCloudData) {
-      unsubscribeCloudData();
-      unsubscribeCloudData = null;
-    }
-
-    cancelPendingCloudSaves();
-    dataSessionGuard.reset();
-    collectionSync.reset();
-    deferredCollectionRemote = null;
-    collectionEchoCheck = null;
-    latestCollectionSnapshot = null;
-    initialDocumentMissingGeneration = null;
-    clearAllTables();
-    refreshSelectors();
-    updateDataAccessUi();
-
-    if (user) {
-      setSyncStatus("已登入，正在載入雲端資料...", "login");
-      const sessionToken = beginDataSession(user.uid, false);
-      await loadStockProducts().catch(() => {});
-      if (currentUser !== user || !dataSessionGuard.isCurrent(sessionToken)) return;
-      startCloudListener(sessionToken);
-    } else {
-      setSyncStatus("尚未登入", "muted");
-    }
-  });
+  onAuthStateChanged(auth, handleAuthStateChange);
 });
