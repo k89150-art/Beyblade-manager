@@ -34,7 +34,7 @@
 4. 依任務需要閱讀 `docs/PROJECT_ARCHITECTURE.md` 與 `docs/PROJECT_DECISIONS.md`。
 5. 執行 `git status --short --branch`，確認工作樹狀態。
 6. 執行 `git worktree list`，確認沒有未知的平行工作樹或重複檢出。
-7. 檢查 OneDrive 同步衝突副本與異常檔名；發現時先保留並回報，不自動覆蓋。
+7. 檢查同步衝突副本與異常檔名（專案已移出 OneDrive，但舊路徑或其他同步工具仍可能產生）；發現時先保留並回報，不自動覆蓋。
 8. 明確界定本次允許修改的頁面、功能與檔案。
 9. 確認沒有其他 AI 或使用者正在同一工作樹寫入。
 
@@ -102,7 +102,7 @@
 依修改範圍執行針對性測試，完成實質修改時至少執行：
 
 ```powershell
-node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs
+node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs tests/collection-sync.test.mjs
 node --experimental-vm-modules scripts/validate-site.mjs
 node scripts/build-site.mjs
 git diff --check

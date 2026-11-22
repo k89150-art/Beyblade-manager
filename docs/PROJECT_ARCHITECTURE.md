@@ -1,6 +1,6 @@
 # 專案架構
 
-最後核對日期：2026-10-29
+最後核對日期：2026-11-23（本機 `main` 為 `origin/main`＝`5617f4e` 之後加上 Phase 6A 的本機 commit，尚未 push）
 
 本文件描述目前程式碼實際狀態，不是未來藍圖。架構變更後應同步更新。
 
@@ -140,7 +140,7 @@ users/{uid}/appData/main
 - `tournamentRecords`：賽事紀錄。
 - `ownerUid`、`ownerEmail`、`updatedAt`：擁有者與同步 metadata。
 
-`script.js` 以 `onSnapshot` 監聽；只有取得非 cache 的首次 snapshot 後才允許寫入。主頁儲存（D-018）以 transaction 單次嘗試並由 `collection-sync.js` 自行重試，只寫入與載入時不同的資料表；交易內逐表比對最新資料與畫面基準，雲端已是預期內容視為已完成，其他差異一律衝突且整次不寫入；離線不排隊，衝突、離線、結果不明時保留畫面變更並在「雲端同步」區提示。Cache metadata（例如短暫斷線）不會重建已確認的畫面，也不會關閉已開啟的 Quick Editor 或刪除 dialog，但在伺服器再次確認前會暫停寫入；相同 cache／server 內容不會重複套用；若伺服器確認文件不存在，第一次寫入只在交易內再次確認不存在時才建立，避免兩個分頁同時以空白或預設資料初始化。`tournament.js` 使用伺服器單次讀取確認資料存在狀態；寫入改為 transaction（D-017），以 `maxAttempts: 1` 單次嘗試並由 `tournament-sync.js` 自行重試，以區分已提交、未提交與結果不明；在交易內以最新的 `tournamentRecords` 重新計算，單場賽事基準不同即拒絕，只更新 `tournamentRecords` 與 `updatedAt`，離線時不送出、不排隊。兩頁在 loading、error、readonly 或 session 失效時都會阻止寫入並取消舊 session 的待處理 dialog；新增模組時必須明確定義欄位所有權，避免 stale state 覆蓋其他頁面資料。
+`script.js` 以 `onSnapshot` 監聽；只有取得非 cache 的首次 snapshot 後才允許寫入。主頁儲存（D-018）以 transaction 單次嘗試並由 `collection-sync.js` 自行重試，只寫入與載入時不同的資料表；交易內逐表比對最新資料與畫面基準，雲端已是預期內容視為已完成，其他差異一律衝突且整次不寫入；離線不排隊，衝突、離線、結果不明時保留畫面變更並在「雲端同步」區提示。Cache metadata（例如短暫斷線）不會重建已確認的畫面，也不會關閉已開啟的 Quick Editor 或刪除 dialog，但在伺服器再次確認前會暫停寫入；相同 cache／server 內容不會重複套用；若伺服器確認文件不存在，第一次寫入只在交易內再次確認不存在時才建立，避免兩個分頁同時以空白或預設資料初始化。`tournament.js` 使用伺服器單次讀取確認資料存在狀態；寫入改為 transaction（D-017），以 `maxAttempts: 1` 單次嘗試並由 `tournament-sync.js` 自行重試，以區分已提交、未提交與結果不明；在交易內以最新的 `tournamentRecords` 重新計算，單場賽事基準不同即拒絕，只更新 `tournamentRecords` 與 `updatedAt`，離線時不送出、不排隊。主頁的登入狀態變更由 `handleAuthStateChange()` 處理（F-04）：其他分頁登出或切換帳號時，先把尚未儲存的收藏資料表保留在本分頁記憶體並提示使用者下載，再清除畫面與 Session；保留的資料不寫入任何帳號、也不會在重新登入後自動提交。兩頁在 loading、error、readonly 或 session 失效時都會阻止寫入並取消舊 session 的待處理 dialog；新增模組時必須明確定義欄位所有權，避免 stale state 覆蓋其他頁面資料。
 
 ### 本機資料
 
@@ -194,7 +194,16 @@ git diff --check
 - `.github/workflows/deploy-firestore-rules.yml`：手動部署 `k89150-web-login` 的 Firestore Rules。
 - `.github/workflows/backup-recent-tournament-records.yml`：手動備份／受控還原近期 `tournamentRecords`。
 
-這些 workflow 涉及正式權限或資料，只有在使用者明確授權後才能執行。
+這些 workflow 涉及正式權限或資料，只有在使用者明確授權後才能執行。`restore_to_main` 會直接覆寫正式文件的 `tournamentRecords`，執行前必須另行確認（風險見 `docs/AI_HANDOFF.md` Phase 6A 紀錄）。
+
+### Firebase Emulator 驗證
+
+主頁與賽事頁的交易以本機 Firestore／Auth Emulator（`demo-beyblade-h2-test`，firebase 11.2.0、firebase-tools 13.35.1、Java 11 以上）驗證。工具與結果放在被 Git 忽略的 `exports/`：`firebase-emulator-h2/`（賽事 E01–E16）、`firebase-emulator-5b/`（主頁 M01–M15）、`firebase-emulator-6a/`（M01–M16，含 F-04）。這些工具不連線正式 Firebase，也不屬於正式網站。
+
+### 正式資料備份紀錄
+
+- 2026-11-02：使用者在本機備份兩份 `users/{uid}/appData/main` 文件，檔案 `C:BeybladeBackupseyblade-appData-backup-20261102-103649.json`（依交接紀錄，已通過 JSON、SHA-256 與讀回驗證）。這不是整個 Firebase 專案的備份。
+- 備份檔不在 repository 內；不得修改、覆寫或刪除。備份工具在被 Git 忽略的 `exports/firestore-backup-tool/`。
 
 ## 7. 已知架構注意事項
 

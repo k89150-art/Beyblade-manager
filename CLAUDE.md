@@ -10,6 +10,8 @@ Claude 進入專案後，必須先依序閱讀：
 4. [`docs/PROJECT_ARCHITECTURE.md`](docs/PROJECT_ARCHITECTURE.md)（實際架構與資料流）
 5. [`docs/PROJECT_DECISIONS.md`](docs/PROJECT_DECISIONS.md)（已確認決策）
 
+維護分工（2026-11-23 起）：Claude Code 為主要程式維護者（接手先前的 Claude Cowork）；ChatGPT 負責架構審查、重大修改與部署決策的驗收。
+
 Claude 專用提醒：
 
 - 只使用 `C:\Projects\Beyblade-manager`；開始前執行 `git status --short --branch` 與 `git worktree list`，並檢查 OneDrive 衝突副本。

@@ -4,9 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Claude Code 完成 Phase 6A-2 R3 修正，等待 ChatGPT／使用者審查與 commit 授權）
+- 目前執行者：無（Claude Code 完成 Phase 6A／6B 批次修正，等待 ChatGPT 最終審查與使用者部署授權）
 - 寫入範圍：目前沒有進行中的寫入任務
-- Git 狀態（開始時）：`main` / `5617f4e`（= `origin/main`），工作樹乾淨
+- Git 狀態：`origin/main` = `5617f4e`（正式網站）；本機 `main` 多 4 個 Phase 6A commit（ed4fee9、e6adf58、2558b7b 與 R9 文件），尚未 push
+- 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
 
@@ -31,6 +32,19 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-23 — Claude Code（Phase 6A／6B 批次）
+
+- 任務：R3 收尾、F-04、F-05～F-08 盤點、R9 文件整理、匯入器驗證與還原 workflow 的唯讀審查。
+- Commit（本機，未 push）：`ed4fee9` R3 匯入器；`e6adf58` 補回 6 份歷史快照；`2558b7b` F-04；R9 文件 commit 見 `git log`。
+- R3：中斷注入 `COMPETITION_IMPORT_FAULT` 只在含 `.competition-import-test-workspace` 標記、且不是 Git 檢出的暫存目錄生效，其他地方設定會在寫入前直接停止（新增測試 R3-11b）。
+- F-04：主頁 `onAuthStateChanged` 改為呼叫 `handleAuthStateChange()`。其他分頁登出、切換帳號（或同帳號重複事件）時，清除前把未儲存的收藏資料表保留在記憶體，以 alert 與 `#collectionDraftNotice` 告知，可下載 JSON（不含 UID）或確認後捨棄；不寫入任何帳號、不會在 Session 恢復後自動提交；本頁確認登出則不保留。`collection-sync.js` 與 D-018 交易協定未修改。`script.js?v=20261123-phase6a`；收藏儲存版本列仍為 5B。
+- F-05、F-08：Git 歷史、文件、測試與 `exports/` 都找不到原始定義，標記「無法確認」，未修改。F-06：評估後不修改（見下）。F-07：衝突處理文字與實際行為一致，結案。
+- 測試（使用者 Windows 本機，Node 24.18）：11 個測試檔 291/291 PASS；validate PASS；build PASS（33 files）；`git diff --check` PASS；瀏覽器 390／1024 寬主頁無水平 overflow、Console Error 0、未儲存資料提示樣式正常。F-04 mutation 5 項皆被測到。
+- Emulator（本次重新執行）：2026-11-23 在使用者本機以 `exports/firebase-emulator-6a/`（複製 5B 工具，HEAD 檢查改為 `2558b7b`，新增 M16 F-04 與每項 180 秒逾時）對 `2558b7b` 執行 Firestore＋Auth Emulator（`demo-beyblade-h2-test`），M01–M16 PASS 16／FAIL 0，專案檔案未被修改。前兩次嘗試在 M04 停住，原因是 PowerShell `*>` 轉向造成輸出管道阻塞；改用檔案轉向直接執行 `firebase emulators:exec` 後正常（未經 ps1 包裝，Git 與單元測試由本次另外執行）。歷史紀錄：E01–E16（2026-10-29）、M01–M15（2026-10-30）見 `docs/PROJECT_DECISIONS.md`。
+- 已知問題：F-06 型錄升級以整個 `beybladeTable` 強制寫入，載入後立即儲存期間若其他裝置改同表會成為衝突（D-018 表層級保守設計，影響小，未修改）；匯入器寫死的統計數值仍需每週手動更新（已提設計，未實作）；`backup-recent-tournament-records.yml` 的 `restore_to_main` 有覆寫風險（已提建議，未修改）。
+- 資料庫／部署風險：未寫入正式 Firestore、未修改 Rules／Schema、未 push、未部署。F-04 部署時須比照 D-017／D-018 部署程序：關閉所有裝置的舊主頁，部署後確認載入 `script.js?v=20261123-phase6a`。
+- Commit / Deploy：本機 commit，未 push、未部署。
 
 ### 2026-11-23 — Claude Code（Phase 6A-2，R3）
 
