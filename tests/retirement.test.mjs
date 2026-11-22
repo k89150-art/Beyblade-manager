@@ -142,11 +142,18 @@ test('所有來源網址、快照日期與跨引用仍有效', () => {
   for (const p of db.featuredBladeProfiles) assert.ok(db.blades.some(x=>x.id===p.bladeId));
   assert.ok(db.cx.assistBlades.some(x=>x.id===db.featuredCxPartProfiles[0].code));
 });
-test('Git 內所有既有排程完全未修改', () => {
+// Phase 6C (user-authorized): the direct restore was removed from the backup
+// workflow in a6ed126. That file is pinned to the reviewed version; every other
+// workflow must still equal the baseline.
+const REVIEWED_WORKFLOWS = { 'backup-recent-tournament-records.yml': 'a6ed126' };
+test('Git 內所有既有排程完全未修改（備份 workflow 只允許 Phase 6C 審查後的版本）', () => {
   for (const name of fs.readdirSync('.github/workflows')) {
     const file = '.github/workflows/' + name;
-    assert.equal(normalizeLines(read(file)), normalizeLines(previous(file)));
+    const ref = REVIEWED_WORKFLOWS[name] || baseline;
+    const expected = execFileSync('git', ['show', `${ref}:${file}`], { encoding: 'utf8', maxBuffer: 5e6 });
+    assert.equal(normalizeLines(read(file)), normalizeLines(expected), file);
   }
+  assert.deepEqual(fs.readdirSync('.github/workflows').sort(), ['backup-recent-tournament-records.yml', 'deploy-firestore-rules.yml']);
 });
 
 function fakeEnvironment(fail = false) {
