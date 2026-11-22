@@ -87,7 +87,7 @@ export function createManagerDevice({
   admin = false
 } = {}) {
   const screen = { tables: collectionModule.pickCollectionTables(null) };
-  const effects = { alerts: [], confirms: [], status: [], cancels: 0, rebuilds: 0, listeners: [], warnings: [], authUi: [] };
+  const effects = { alerts: [], confirms: [], status: [], cancels: 0, rebuilds: 0, listeners: [], warnings: [], authUi: [], downloads: [] };
   let unsavedInteraction = false;
   let confirmAnswer = true;
   let offline = false;
@@ -96,7 +96,8 @@ export function createManagerDevice({
     "collectionLoadCloudBtn", "collectionKeepLocalBtn", "retryDataLoadBtn", "syncStatus",
     "adminUidInput", "adminReturnBtn", "collectionDraftNotice", "collectionDraftMessage",
     "collectionDraftDownloadBtn", "collectionDraftDismissBtn"].map(id => [id, { ...createElement(), value: "", style: {} }]));
-  const body = createElement();
+  const body = { ...createElement(), appendChild() {} };
+  const blobs = new Map();
 
   let code = MANAGER_SLICES.map(([start, end]) => sourceBetween(source, start, end)).join("\n");
   code = setConstant(code, "COLLECTION_SAVE_TIMEOUT_MS", String(saveTimeoutMs));
@@ -115,8 +116,12 @@ export function createManagerDevice({
     document: {
       body,
       querySelectorAll: () => [],
-      getElementById: id => elements.get(id) || null
+      getElementById: id => elements.get(id) || null,
+      // F-04 download: a link that records what the user would save.
+      createElement: () => ({ click() { effects.downloads.push({ name: this.download, text: blobs.get(this.href) }); }, remove() {} })
     },
+    Blob: class { constructor(parts) { this.text = parts.join(""); } },
+    URL: { createObjectURL: blob => { const url = `blob:test-${blobs.size}`; blobs.set(url, blob.text); return url; }, revokeObjectURL() {} },
     getUserDocRef: targetUid => (targetUid ? { path: userDocPath(targetUid), uid: targetUid } : null),
     // Transactions need the server: an offline device fails at once (the SDK
     // does not queue them like plain writes).

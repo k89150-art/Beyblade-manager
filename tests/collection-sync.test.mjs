@@ -803,11 +803,24 @@ test("F-03: no prompt when there is nothing unsaved", async () => {
 
 /* ---------- F-04: sign-out or account change in another tab ---------- */
 // The real onAuthStateChanged handler (handleAuthStateChange) runs here.
+// Phase 6C: a draft is only shown, downloaded or discarded by its own account.
 
+const USER_A = { uid: "user-a", email: "a@example.test" };
+const USER_B = { uid: "user-b", email: "b@example.test" };
 const draftNotice = device => device.elements.get("collectionDraftNotice");
 const draftMessage = device => device.elements.get("collectionDraftMessage").textContent;
+const downloadHidden = device => device.elements.get("collectionDraftDownloadBtn").hidden;
+const dismissHidden = device => device.elements.get("collectionDraftDismissBtn").hidden;
+const download = device => {
+  const before = device.effects.downloads.length;
+  device.context.downloadOrphanedCollectionDraft();
+  return device.effects.downloads.slice(before);
+};
+const seedB = mock => mock.seed(PATH_B, { updatedAt: 1, ownerUid: "user-b", partTable: [partRow("B-原有")], beybladeTable: [], configTable: [], historyTable: [] });
+// Everything a signed-in user can read on the page about drafts.
+const visibleDraftText = device => [draftMessage(device), ...device.effects.alerts].join("\n");
 
-test("F-04: sign-out in another tab keeps unsaved rows as a visible draft and writes nothing", async () => {
+test("F-04: sign-out in another tab keeps unsaved rows, tells the user, and writes nothing", async () => {
   const { mock, A } = setup();
   A.setOffline(true);
   await addPart(A, "未儲存零件"); await A.settle();
@@ -821,23 +834,26 @@ test("F-04: sign-out in another tab keeps unsaved rows as a visible draft and wr
   assert.equal(draft.reason, "signed-out");
   assert.deepEqual(draft.unsavedTables, ["partTable"]);
   assert.deepEqual(draft.tables.partTable.map(row => row.cells[1]), ["P1-原有", "未儲存零件"]);
+  // Not silent: notice and alert, but no rows, table names or full e-mail while signed out.
   assert.equal(draftNotice(A).hidden, false);
-  assert.match(draftMessage(A), /a@example\.test 已在其他分頁或裝置登出/);
-  assert.match(draftMessage(A), /沒有寫入任何帳號/);
-  assert.match(draftMessage(A), /下載未儲存資料/);
-  assert.equal(A.elements.get("collectionDraftDownloadBtn").hidden, false);
-  assert.ok(A.effects.alerts.some(text => /沒有寫入任何帳號/.test(text)), "the user is told at once");
+  assert.match(draftMessage(A), /a\*\*\*@example\.test 已在其他分頁或裝置登出/);
+  assert.match(draftMessage(A), /請用原帳號重新登入後才能下載或捨棄/);
+  assert.ok(A.effects.alerts.some(text => /請用原帳號重新登入後才能下載或捨棄/.test(text)));
+  assert.doesNotMatch(visibleDraftText(A), /a@example\.test|未儲存零件|額外零件庫存/);
+  assert.equal(downloadHidden(A), true);
+  assert.equal(dismissHidden(A), true);
+  assert.deepEqual(download(A), [], "nobody can download while signed out");
+  assert.equal(A.context.buildOrphanedDraftExport().drafts.length, 0);
   assert.deepEqual(A.partNames(), [], "screen cleared after sign-out");
   assert.equal(A.guard.captureWriteSession(), null, "no write session for the signed-out account");
 
-  // Saving is impossible while signed out.
   A.setOffline(false);
   await A.save(); await A.settle();
-  assert.equal(mock.commitLog.length, commits);
+  assert.equal(mock.commitLog.length, commits, "nothing is written while signed out");
   assert.deepEqual(serverParts(mock), ["P1-原有"]);
 });
 
-test("F-04: when the same account signs in again the old draft is not submitted", async () => {
+test("F-04: the original account signing in again regains access; the draft is never resubmitted", async () => {
   const { mock, A } = setup();
   A.setOffline(true);
   await addPart(A, "未儲存零件"); await A.settle();
@@ -845,40 +861,104 @@ test("F-04: when the same account signs in again the old draft is not submitted"
   A.setOffline(false);
   const commits = mock.commitLog.length;
 
-  await A.authChange({ uid: "user-a", email: "a@example.test" });
+  await A.authChange(USER_A);
   A.deliver();
   await A.settle();
   assert.equal(mock.commitLog.length, commits, "session recovery does not resubmit the draft");
   assert.deepEqual(serverParts(mock), ["P1-原有"]);
   assert.deepEqual(A.partNames(), ["P1-原有"], "the screen shows the cloud copy, not the draft");
   assert.equal(A.state, STATES.CLEAN);
-  assert.equal(A.drafts.length, 1, "the draft stays available for download");
-  assert.equal(draftNotice(A).hidden, false);
+  assert.match(draftMessage(A), /a@example\.test 已在其他分頁或裝置登出。這個分頁「額外零件庫存」尚未儲存/);
+  assert.equal(downloadHidden(A), false);
+  assert.equal(dismissHidden(A), false);
+  const [file] = download(A);
+  const payload = JSON.parse(file.text);
+  assert.equal(payload.kind, "beyblade-manager-unsaved-collection-draft");
+  assert.deepEqual(payload.drafts.map(item => item.tables.partTable.map(row => row.cells[1])), [["P1-原有", "未儲存零件"]]);
+  assert.ok(!file.text.includes("user-a"), "the download carries no UID");
 
-  // A new edit after recovery saves only what the user does now.
   await addPart(A, "恢復後新增"); await A.settle();
-  assert.deepEqual(serverParts(mock), ["P1-原有", "恢復後新增"]);
+  assert.deepEqual(serverParts(mock), ["P1-原有", "恢復後新增"], "only the new edit is saved");
 });
 
-test("F-04: an account switch in another tab never writes the old account's draft to the new account", async () => {
+test("F-04: account B in the same tab can neither see, download nor discard the draft of account A", async () => {
   const { mock, A } = setup();
-  mock.seed(PATH_B, { updatedAt: 1, ownerUid: "user-b", partTable: [partRow("B-原有")], beybladeTable: [], configTable: [], historyTable: [] });
+  seedB(mock);
   A.screen.tables.partTable = [...A.screen.tables.partTable, partRow("A-未儲存")]; // edited, save not yet run
 
-  await A.authChange({ uid: "user-b", email: "b@example.test" });
-  assert.equal(A.drafts.length, 1);
+  await A.authChange(USER_B);
+  assert.equal(A.drafts.length, 1, "kept, not dropped");
   assert.equal(A.drafts[0].reason, "account-changed");
-  assert.equal(A.drafts[0].ownerEmail, "a@example.test");
-  assert.match(draftMessage(A), /a@example\.test 已在其他分頁切換帳號/);
+  assert.equal(draftNotice(A).hidden, false, "B is told a draft exists");
+  assert.match(draftMessage(A), /另一個帳號尚未儲存的變更，只有該帳號重新登入後才能查看、下載或捨棄/);
+  assert.doesNotMatch(visibleDraftText(A), /a@example\.test|a\*\*\*|A-未儲存|額外零件庫存/, "nothing of A is shown to B");
+  assert.equal(downloadHidden(A), true);
+  assert.equal(dismissHidden(A), true);
+  assert.deepEqual(download(A), [], "B cannot download the draft of A");
+  assert.equal(A.context.buildOrphanedDraftExport().drafts.length, 0);
+  A.context.dismissOrphanedCollectionDraft();
+  assert.equal(A.drafts.length, 1, "B cannot discard the draft of A");
+  assert.equal(A.effects.confirms.length, 0);
+
   A.deliver();
   await A.settle();
   assert.deepEqual(A.partNames(), ["B-原有"]);
   await addPart(A, "B-新增"); await A.settle();
-  assert.deepEqual(mock.read(PATH_B).partTable.map(row => row.cells[1]), ["B-原有", "B-新增"], "only B's own edit reaches B");
-  assert.deepEqual(serverParts(mock), ["P1-原有"], "A's document untouched");
+  assert.deepEqual(mock.read(PATH_B).partTable.map(row => row.cells[1]), ["B-原有", "B-新增"], "only the own edit of B reaches B");
+  assert.deepEqual(serverParts(mock), ["P1-原有"], "document of A untouched");
   for (const write of mock.commitLog.flat()) {
     assert.ok(!JSON.stringify(write.fields).includes("A-未儲存"), "the draft row is never written anywhere");
   }
+
+  // The drafts of B and A stay separate; A regains only its own.
+  A.screen.tables.partTable = [...A.screen.tables.partTable, partRow("B-未儲存")];
+  await A.authChange(USER_A);
+  assert.equal(A.drafts.length, 2);
+  assert.match(draftMessage(A), /另有其他帳號的未儲存資料/);
+  assert.doesNotMatch(draftMessage(A), /b@example\.test|B-未儲存/);
+  const [file] = download(A);
+  assert.ok(file.text.includes("A-未儲存") && !file.text.includes("B-未儲存"), "A downloads only its own rows");
+  A.setConfirm(true);
+  A.context.dismissOrphanedCollectionDraft();
+  assert.deepEqual([...A.drafts].map(item => item.ownerUid), ["user-b"], "the confirmed discard of A clears only the draft of A");
+  assert.equal(draftNotice(A).hidden, false, "the draft of B is still announced");
+  assert.equal(downloadHidden(A), true);
+});
+
+test("F-04: a repeat auth event for the same account keeps the draft and leaves it accessible", async () => {
+  const { A } = setup();
+  A.screen.tables.partTable = [...A.screen.tables.partTable, partRow("重複事件")];
+  await A.authChange(USER_A);
+  assert.equal(A.drafts.length, 1);
+  assert.equal(A.drafts[0].reason, "session-reset");
+  assert.match(draftMessage(A), /的登入狀態已重新載入/);
+  assert.equal(downloadHidden(A), false);
+  assert.ok(download(A)[0].text.includes("重複事件"));
+  await A.authChange(USER_A);
+  assert.equal(A.drafts.length, 1, "a second repeat with nothing new adds nothing and loses nothing");
+});
+
+test("F-04: a confirmed discard clears the drafts of the owner; cancel keeps them", async () => {
+  const { A } = setup();
+  A.screen.tables.partTable = [...A.screen.tables.partTable, partRow("第一份")];
+  await A.authChange(null);
+  await A.authChange(USER_A);
+  A.deliver();
+  A.screen.tables.partTable = [...A.screen.tables.partTable, partRow("第二份")];
+  await A.authChange(null);
+  await A.authChange(USER_A);
+  assert.equal(A.drafts.length, 2, "the earlier draft is not replaced");
+  assert.match(draftMessage(A), /另有 1 份較早保留的未儲存資料/);
+  assert.equal(JSON.parse(download(A)[0].text).drafts.length, 2);
+
+  A.setConfirm(false);
+  A.context.dismissOrphanedCollectionDraft();
+  assert.equal(A.drafts.length, 2, "cancel keeps the drafts");
+  A.setConfirm(true);
+  A.context.dismissOrphanedCollectionDraft();
+  assert.equal(A.drafts.length, 0);
+  assert.equal(draftNotice(A).hidden, true);
+  assert.deepEqual(download(A), []);
 });
 
 test("F-04: a sign-out confirmed in this tab, or with nothing unsaved, keeps no draft", async () => {
@@ -888,28 +968,22 @@ test("F-04: a sign-out confirmed in this tab, or with nothing unsaved, keeps no 
   assert.equal(confirmed.drafts.length, 0);
   assert.deepEqual(confirmed.effects.alerts, [], "the user already confirmed losing the changes");
 
-  // A repeat auth event for the same account also clears the screen, so the rows are kept, not dropped.
-  const repeat = setup().A;
-  repeat.screen.tables.partTable = [...repeat.screen.tables.partTable, partRow("重複事件")];
-  await repeat.authChange({ uid: "user-a", email: "a@example.test" });
-  assert.equal(repeat.drafts.length, 1);
-  assert.equal(repeat.drafts[0].reason, "session-reset");
-  assert.match(draftMessage(repeat), /登入狀態已重新載入/);
-
   const clean = setup().A;
   await clean.authChange(null);
   assert.equal(clean.drafts.length, 0);
   assert.deepEqual(clean.effects.alerts, []);
 });
 
-test("F-04: an open editor or an unresolved save is reported; earlier drafts are kept until dismissed", async () => {
+test("F-04: an open editor or an unresolved save is reported to the owner", async () => {
   const editor = setup().A;
   editor.setUnsavedInteraction(true);
   await editor.authChange(null);
   assert.equal(editor.drafts.length, 1);
   assert.equal(editor.drafts[0].tables, null, "nothing in the tables to download");
   assert.match(draftMessage(editor), /開啟中的編輯視窗內容無法保留/);
-  assert.equal(editor.elements.get("collectionDraftDownloadBtn").hidden, true);
+  await editor.authChange(USER_A);
+  assert.match(draftMessage(editor), /開啟中的編輯視窗內容無法保留/);
+  assert.equal(downloadHidden(editor), true);
 
   const { mock, A } = setup();
   const gate = deferred();
@@ -918,26 +992,16 @@ test("F-04: an open editor or an unresolved save is reported; earlier drafts are
   await new Promise(resolve => setTimeout(resolve, 0));
   await A.authChange(null);
   assert.equal(A.drafts[0].saveUnresolved, true);
-  assert.match(draftMessage(A), /最近一次儲存是否完成無法確認/);
   gate.resolve();
   await saving; await A.settle();
+  await A.authChange(USER_A);
+  assert.match(draftMessage(A), /最近一次儲存是否完成無法確認/);
+});
 
-  await A.authChange({ uid: "user-a", email: "a@example.test" });
-  A.deliver();
-  A.screen.tables.partTable = [...A.screen.tables.partTable, partRow("第二份")];
-  await A.authChange(null);
-  assert.equal(A.drafts.length, 2, "the earlier draft is not replaced");
-  assert.match(draftMessage(A), /另有 1 份較早保留的未儲存資料/);
-  const exported = A.context.buildOrphanedDraftExport(A.drafts);
-  assert.equal(exported.kind, "beyblade-manager-unsaved-collection-draft");
-  assert.equal(exported.drafts.length, 2);
-  assert.ok(!("ownerUid" in exported.drafts[0]), "the download carries no UID");
-
-  A.setConfirm(false);
-  A.context.dismissOrphanedCollectionDraft();
-  assert.equal(A.drafts.length, 2, "cancel keeps the drafts");
-  A.setConfirm(true);
-  A.context.dismissOrphanedCollectionDraft();
-  assert.equal(A.drafts.length, 0);
-  assert.equal(draftNotice(A).hidden, true);
+test("F-04: drafts are never written to browser storage and access is bound to the owner UID", () => {
+  const source = loadManagerSource();
+  const section = source.slice(source.indexOf("/* ===== F-04 auth changes: begin"), source.indexOf("/* ===== F-04 auth changes: end"));
+  assert.ok(section.length > 0);
+  assert.doesNotMatch(section, /\b(localStorage|sessionStorage|indexedDB)\s*[.[]|caches\.|document\.cookie/);
+  assert.match(section, /function isDraftOwner\(draft\) \{\r?\n  return Boolean\(currentUser && draft && draft\.ownerUid === currentUser\.uid\);/);
 });

@@ -2132,38 +2132,79 @@ function captureOrphanedCollectionDraft(nextUser) {
   };
 }
 
+// Phase 6C: a draft belongs to the account that wrote it. Its rows, table
+// names and full e-mail are shown, downloaded or discarded only while that
+// same account is signed in again in this tab (Firebase Auth has verified
+// it). Anyone else sees only that a draft exists. Nothing is persisted.
+function isDraftOwner(draft) {
+  return Boolean(currentUser && draft && draft.ownerUid === currentUser.uid);
+}
+
+function ownCollectionDrafts() {
+  return orphanedCollectionDrafts.filter(isDraftOwner);
+}
+
+function maskEmail(email) {
+  const [name, domain] = String(email || "").split("@");
+  if (!name || !domain) return "原帳號";
+  return `${name.slice(0, 1)}***@${domain}`;
+}
+
+// Text for the account that owns the draft.
 function getCollectionDraftNoticeText(draft) {
   const who = draft.ownerEmail || "原帳號";
   const how = draft.reason === "account-changed" ? "已在其他分頁切換帳號"
     : draft.reason === "session-reset" ? "的登入狀態已重新載入" : "已在其他分頁或裝置登出";
   const names = draft.unsavedTables.length ? `「${formatCollectionTables(draft.unsavedTables)}」` : "";
   const parts = [`${who} ${how}。這個分頁${names}尚未儲存到雲端的變更沒有寫入任何帳號，畫面已清除。`];
-  if (draft.saveUnresolved) parts.push("最近一次儲存是否完成無法確認，請用原帳號登入後先查看雲端內容。");
+  if (draft.saveUnresolved) parts.push("最近一次儲存是否完成無法確認，請先查看雲端內容。");
   if (draft.editorOpen) parts.push("開啟中的編輯視窗內容無法保留。");
-  if (draft.tables) parts.push("這些變更只暫存在這個分頁，不會自動儲存，關閉或重新整理就會消失。如需保留，請按「下載未儲存資料」存成 JSON 檔，再用原帳號登入後手動重新輸入。");
+  if (draft.tables) parts.push("這些變更只暫存在這個分頁，不會自動儲存，關閉或重新整理就會消失。如需保留，請按「下載未儲存資料」存成 JSON 檔後手動重新輸入。");
   return parts.join("");
+}
+
+// Text for everyone else: no rows, no table names, no full e-mail.
+function getLockedCollectionDraftText(drafts) {
+  const kept = drafts.filter(draft => draft.tables).length;
+  if (!currentUser) {
+    const owners = [...new Set(drafts.map(draft => maskEmail(draft.ownerEmail)))].join("、");
+    const lead = `帳號 ${owners} 已在其他分頁或裝置登出。`;
+    return kept
+      ? `${lead}這個分頁保留了該帳號 ${kept} 份尚未儲存到雲端的變更（沒有寫入任何帳號）。請用原帳號重新登入後才能下載或捨棄；關閉或重新整理頁面就會消失。`
+      : `${lead}開啟中的編輯視窗內容無法保留。`;
+  }
+  return `這個分頁保留了另一個帳號尚未儲存的變更，只有該帳號重新登入後才能查看、下載或捨棄；目前登入的帳號無法存取。`;
 }
 
 function renderCollectionDraftNotice() {
   const notice = document.getElementById("collectionDraftNotice");
   if (!notice) return;
-  const drafts = orphanedCollectionDrafts;
-  const latest = drafts.at(-1);
-  notice.hidden = !latest;
+  const own = ownCollectionDrafts();
+  const others = orphanedCollectionDrafts.filter(draft => !isDraftOwner(draft));
+  const latest = own.at(-1);
+  notice.hidden = !orphanedCollectionDrafts.length;
   const message = document.getElementById("collectionDraftMessage");
   if (message) {
-    const earlier = drafts.length > 1 ? `（另有 ${drafts.length - 1} 份較早保留的未儲存資料，一併包含在下載檔中。）` : "";
-    message.textContent = latest ? getCollectionDraftNoticeText(latest) + earlier : "";
+    if (latest) {
+      const earlier = own.length > 1 ? `（另有 ${own.length - 1} 份較早保留的未儲存資料，一併包含在下載檔中。）` : "";
+      const foreign = others.length ? "（另有其他帳號的未儲存資料，只有該帳號登入後才能存取。）" : "";
+      message.textContent = getCollectionDraftNoticeText(latest) + earlier + foreign;
+    } else {
+      message.textContent = others.length ? getLockedCollectionDraftText(others) : "";
+    }
   }
   const downloadButton = document.getElementById("collectionDraftDownloadBtn");
-  if (downloadButton) downloadButton.hidden = !drafts.some(draft => draft.tables);
+  if (downloadButton) downloadButton.hidden = !own.some(draft => draft.tables);
+  const dismissButton = document.getElementById("collectionDraftDismissBtn");
+  if (dismissButton) dismissButton.hidden = !own.length;
 }
 
-function buildOrphanedDraftExport(drafts) {
+// Only the signed-in owner's drafts are ever exported.
+function buildOrphanedDraftExport() {
   return {
     kind: "beyblade-manager-unsaved-collection-draft",
     note: "尚未儲存到雲端的收藏變更（未寫入任何帳號）。請用原帳號登入後手動重新輸入，本檔案不會被網站自動匯入。",
-    drafts: drafts.filter(draft => draft.tables).map(draft => ({
+    drafts: ownCollectionDrafts().filter(draft => draft.tables).map(draft => ({
       ownerEmail: draft.ownerEmail,
       capturedAt: draft.capturedAt,
       unsavedTables: draft.unsavedTables,
@@ -2174,24 +2215,25 @@ function buildOrphanedDraftExport(drafts) {
 }
 
 function downloadOrphanedCollectionDraft() {
-  const drafts = orphanedCollectionDrafts;
-  const latest = drafts.at(-1);
-  if (!drafts.some(draft => draft.tables)) return;
-  const blob = new Blob([JSON.stringify(buildOrphanedDraftExport(drafts), null, 2)], { type: "application/json" });
+  const payload = buildOrphanedDraftExport();
+  if (!payload.drafts.length) return;
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `beyblade-unsaved-draft-${latest.capturedAt.replace(/[:.]/g, "-")}.json`;
+  link.download = `beyblade-unsaved-draft-${payload.drafts.at(-1).capturedAt.replace(/[:.]/g, "-")}.json`;
   document.body.appendChild(link);
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
+// Discards only the signed-in owner's drafts, after confirmation.
 function dismissOrphanedCollectionDraft() {
-  if (!orphanedCollectionDrafts.length) return;
-  if (orphanedCollectionDrafts.some(draft => draft.tables) && !confirm("確定要捨棄這些尚未儲存的變更嗎？捨棄後無法復原。")) return;
-  orphanedCollectionDrafts = [];
+  const own = ownCollectionDrafts();
+  if (!own.length) return;
+  if (own.some(draft => draft.tables) && !confirm("確定要捨棄這些尚未儲存的變更嗎？捨棄後無法復原。")) return;
+  orphanedCollectionDrafts = orphanedCollectionDrafts.filter(draft => !isDraftOwner(draft));
   renderCollectionDraftNotice();
 }
 
@@ -2219,12 +2261,11 @@ async function handleAuthStateChange(user) {
   refreshSelectors();
   updateDataAccessUi();
 
-  // Earlier orphaned drafts stay until the user downloads or dismisses them.
-  if (draft) {
-    orphanedCollectionDrafts = [...orphanedCollectionDrafts, draft];
-    renderCollectionDraftNotice();
-    alert(getCollectionDraftNoticeText(draft));
-  }
+  // Earlier orphaned drafts stay until their owner downloads or dismisses
+  // them. Access follows the account signed in now (Phase 6C).
+  if (draft) orphanedCollectionDrafts = [...orphanedCollectionDrafts, draft];
+  renderCollectionDraftNotice();
+  if (draft) alert(isDraftOwner(draft) ? getCollectionDraftNoticeText(draft) : getLockedCollectionDraftText([draft]));
 
   if (user) {
     setSyncStatus("已登入，正在載入雲端資料...", "login");
