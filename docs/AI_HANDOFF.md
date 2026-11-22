@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Claude Code 完成 Phase 6A／6B 批次修正，等待 ChatGPT 最終審查與使用者部署授權）
+- 目前執行者：無（Claude Code 完成 Phase 6C 部署前補強，等待 ChatGPT 最終審查與使用者部署授權）
 - 寫入範圍：目前沒有進行中的寫入任務
-- Git 狀態：`origin/main` = `5617f4e`（正式網站）；本機 `main` 多 4 個 Phase 6A commit（ed4fee9、e6adf58、2558b7b 與 R9 文件），尚未 push
+- Git 狀態：`origin/main` = `5617f4e`（正式網站）；本機 `main` 多 8 個 Phase 6A／6C commit，尚未 push
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -32,6 +32,15 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-23 — Claude Code（Phase 6C，部署前補強）
+
+- 任務：F-04 草稿跨帳號隔離；停用備份 workflow 的直接還原。
+- F-04（`67ab4c1`）：草稿綁定擁有者 UID。只有同一帳號在該分頁重新登入（Firebase Auth）後，才顯示內容、表名與完整 email，並可下載或確認捨棄。未登入時只顯示遮罩 email 與份數；其他帳號只看到「有另一個帳號的未儲存資料」，無法查看、下載或捨棄。捨棄只清除目前帳號自己的草稿。仍只存在分頁記憶體，不寫入任何帳號、不會自動提交。殘餘：同分頁的 JavaScript 記憶體仍含草稿，能開啟開發者工具的人可讀取（瀏覽器本身的限制，UI 與下載不提供）。
+- Workflow（`a6ed126`、`d390749`）：`backup-recent-tournament-records.yml` 移除 `restore_to_main` 輸入、環境變數與覆寫 `appData/main` 的 PATCH；唯一寫入經 `write_recovery_document()` 限制在 `users/{uid}/recovery/`；正常備份（readTime 掃描＋私人備份）不變；`backup_id` 只唯讀檢查。測試：靜態檢查＋以模擬網路實際執行內嵌 Python（設定 `RESTORE_TO_MAIN=true`），兩者對舊版 workflow 都會失敗。`a6ed126` 單獨會讓 `retirement.test.mjs` 的排程保護測試失敗 1 項（該測試要求所有 workflow 等於 `a1f4159`），由 `d390749` 改為只允許備份 workflow 等於審查後的 `a6ed126` 版本，其他 workflow 仍須等於 `a1f4159`。
+- 測試（使用者 Windows 本機，Node 24.18）：11 個測試檔 296/296 PASS；validate PASS；build PASS（33 files）；`git diff --check` PASS。F-04 隔離 mutation 6 項、workflow mutation（移除 guard）皆被測到。Emulator：`exports/firebase-emulator-6a/` 對 `d390749` 執行 M01–M16 PASS 16／FAIL 0（M16 新增 B 無法匯出／捨棄 A 的草稿、A 重新登入後可存取且不寫入）。8085 埠被使用者另一個專案的 Emulator 佔用，本次改用 8185／9199，未關閉該程序。
+- 完整性：自 `5617f4e` 起 `collection-sync.js`、`tournament-sync.js`、`tournament.js`、`data-session-guard.js`、Rules、官方型錄、主資料庫與 10-18 快照皆無變更；`script.js` 的 D-018 儲存區段雜湊不變。未寫入正式 Firestore。
+- Commit / Deploy：本機 commit，未 push、未部署。
 
 ### 2026-11-23 — Claude Code（Phase 6A／6B 批次）
 
