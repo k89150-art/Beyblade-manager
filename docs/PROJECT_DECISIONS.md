@@ -131,7 +131,21 @@
 
 - 日期化競賽統計 JSON 必須保留在 Git 專案中；新版統計新增快照，不覆蓋或自動刪除既有歷史快照。
 - 不另建與現有 canonical 主資料及競賽統計契約互不相干的第二套統計資料庫。
-- 現有匯入腳本尚未依此決策調整；修改腳本與對應測試必須另立任務。
+
+> 狀態：**匯入器已依此決策修正，待使用者審查與 commit**（Phase 6A-2，2026-11-23，本機工作樹未 commit）。
+
+### 匯入規則（`scripts/import-competition-statistics.mjs`）
+
+- R-1 永不刪除：匯入器不刪除、不覆寫任何既有快照；唯一的刪除只限本次建立的鎖檔與主資料暫存檔。
+- R-2 版本身分：以 `SHA-256(JSON.stringify(competitionStatistics))` 判定是否同一版本（與 `competitionStatisticsImport.sha256` 相同算法），不以檔名或檔案位元組判定。
+- R-3 檔名：`beyblade_x_competition_statistics_YYYY-MM-DD.json`，日期必須等於 `metadata.generatedAt`（整理完成日期，不是來源或 commit 日期）。
+- R-4 去重：與整個歷史目錄比對。等於最新快照且主資料已是該版本時完全不寫入；等於較舊快照時拒絕，不回退主資料；日期必須新於最新快照。
+- 同日期不同內容：中止，不寫入任何檔案；需要同日修訂時由使用者另行決定。
+- R-5 寫入：所有驗證完成後才寫入；新快照以排他建立（`wx`）；主資料先寫同目錄 `.tmp` 暫存檔，改名前確認主資料未被其他程序修改，再以改名取代。快照與主資料是兩次檔案操作，**不是原子交易**。
+- R-6 中斷恢復：快照已建立但主資料未更新時，只有「同檔名、內容完全相同、主資料停在前一份快照」才會只補寫主資料；其他狀態一律停止並要求人工確認。
+- 開始前驗證：歷史目錄只能有日期化快照（混入其他檔案、損毀、日期不符即停止）；主資料的 `competitionStatistics` 必須符合 `competitionStatisticsImport.sha256`，且對應快照存在、hash 相符。
+- 同時執行：以 `.competition-statistics-import.lock` 排他鎖互斥；中斷後殘留的鎖需人工確認後移除。
+- 測試：`tests/competition-statistics.test.mjs` 的 R3-1～R3-13 在獨立暫存目錄執行真實匯入器（`COMPETITION_IMPORT_FAULT` 僅供測試注入中斷，只在含 `.competition-import-test-workspace` 標記且不是 Git 檢出的暫存目錄生效；其他地方設定此變數會在寫入前直接停止）。
 
 ## D-017：賽事並行寫入使用 Transaction 與單場賽事衝突檢查
 

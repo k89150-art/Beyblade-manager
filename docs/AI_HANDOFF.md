@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Claude 完成 Phase 5B-2C-1 審查修正，等待使用者授權進入 Emulator 驗證）
+- 目前執行者：無（Claude Code 完成 Phase 6A-2 R3 修正，等待 ChatGPT／使用者審查與 commit 授權）
 - 寫入範圍：目前沒有進行中的寫入任務
-- Git 狀態（開始時）：`main` / `4c6d090`，工作樹乾淨
+- Git 狀態（開始時）：`main` / `5617f4e`（= `origin/main`），工作樹乾淨
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
 
@@ -31,6 +31,19 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-23 — Claude Code（Phase 6A-2，R3）
+
+- 任務：競賽統計匯入器刪除歷史快照（R3）修正，並補回 6 份歷史快照（D-016）。
+- 根本原因：`import-competition-statistics.mjs` 每次匯入以 `rmSync` 刪除所有其他日期快照（`266691c` 起）；同檔名時不比內容直接覆寫；舊測試反而要求目錄只有一份快照、腳本必須含 `rmSync`。
+- 主要內容：實作 D-016 R-1～R-6（永不刪除／覆寫、內容 hash 為版本身分、檔名日期＝`metadata.generatedAt`、整個歷史目錄去重、等於較舊快照拒絕回退、同日期不同內容中止、`wx` 排他建立、主資料暫存檔＋改名前確認未被修改、只在可驗證狀態下恢復、匯入鎖）。原有來源驗證全部保留。快照與主資料寫入不是原子交易，中斷狀態在下次執行時偵測。
+- 變更分兩組（供分別 commit）：
+  - A 程式修正：`scripts/import-competition-statistics.mjs`、`tests/competition-statistics.test.mjs`、`docs/PROJECT_DECISIONS.md`（D-016）、`docs/PROJECT_ARCHITECTURE.md`、`docs/AI_HANDOFF.md`。
+  - B 歷史快照補回：`competition-statistics/` 新增 2026-08-29、09-06、09-13、09-20、09-27、10-14 六份，取自原始 commit blob，`git hash-object` 與原 blob 完全相同；未修改內容、未補欄位；10-18 未變。
+- 測試（使用者 Windows 本機，Node 24.18）：全部 11 個測試檔 286/286 PASS（270＋新增 16，含中斷注入只在測試工作區生效的保護）；R3 測試皆在暫存目錄執行真實匯入器，並驗證正式快照與主資料逐位元不變；A 組單獨套用於 CRLF 檢出的暫存 clone 亦全部 PASS；mutation 8 項（取消 `wx`、同名檢查、回退檢查、歷史 hash 檢查、鎖、主資料變更檢查、暫存檔清除、恢復條件）皆被測到；validate PASS；build PASS（33 files）；`git diff --check` PASS。
+- 已知問題：匯入器內寫死的筆數與 hash 仍需每週手動更新（未在本階段處理）；repo 外的 ChatGPT 週日 20:00 排程無法由本機檢查，需確認它不依賴「目錄只有一份快照」或同日重跑覆寫；中斷後殘留的鎖檔需人工移除。
+- 資料庫／部署風險：未修改 Firestore、Rules、`script.js`、`collection-sync.js`、`tournament.js`、`tournament-sync.js`、官方型錄或主資料內容；網站不讀取歷史快照。
+- Commit / Deploy：未 commit、未 push、未部署。
 
 ### 2026-10-30 — Claude（Phase 5B-2C-1）
 

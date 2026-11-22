@@ -116,7 +116,7 @@ Firebase Web SDK 目前由 `https://www.gstatic.com/firebasejs/11.2.0/` 載入�
 ### 資料更新流程
 
 - **官方原裝配置**：每週檢查 TAKARA TOMY 官方型號、官方名稱與原裝零件，去重後與 `stock_products_AUTOFILL_SAFE_2026-07-29-v3.json` 及名稱基準對照。
-- **競賽統計**：獨立處理 MetaBeys 與 Beywatch 快照，保留歷史基準、來源時間、canonical 對應與現有 schema。`scripts/import-competition-statistics.mjs` 只能明確手動執行，不會在網站啟動或 build 時自動匯入。
+- **競賽統計**：獨立處理 MetaBeys 與 Beywatch 快照，保留歷史基準、來源時間、canonical 對應與現有 schema。`scripts/import-competition-statistics.mjs` 只能明確手動執行，不會在網站啟動或 build 時自動匯入；依 D-016 保留 `competition-statistics/` 內所有日期化快照，不刪除或覆寫既有快照。這些快照不被網站讀取，也不進入 `.site-build/`，但 legacy Pages 會公開提供 repository 內的檔案。
 - 兩條更新的週排程是 repository 之外的運作設定；本 repository 沒有對應的 schedule workflow。未經使用者授權，AI 不得重建、變更或執行排程。
 
 ## 5. Authentication 與 Firestore

@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-import {execFileSync} from 'node:child_process';
+import os from 'node:os';
+import path from 'node:path';
+import {execFileSync, spawn, spawnSync} from 'node:child_process';
 import {createStatisticsStore, CATEGORIES, STATUS, normalizeName, formatValue, formatDate, sourceNumber, sourceRows, resolveBladeDisplayIdentity, resolveOfficialBladeDisplayName, formatCompetitionComboDisplayName, entryName, entryEnglish, entryModel, entryStatus, entryRank, bladeHref, readRoute, makeStatisticsLoader, safeUrl} from '../competition-stats-data.js';
 import {categoryMarkup, detailMarkup, detailTableMarkup, searchMarkup, tabsMarkup, sourceInfo, WARNING} from '../competition-stats-view.js';
 const read = file => fs.readFileSync(file,'utf8');
@@ -31,18 +33,36 @@ test('獨立競賽統計基準是網站快照的唯一完整來源', () => {
   assert.equal(db.competitionStatisticsImport.sourceFileName,'beyblade_x_competition_statistics_2026-10-18.json');
   assert.equal(db.competitionStatisticsImport.baselineFile,'competition-statistics/beyblade_x_competition_statistics_2026-10-18.json');
   assert.equal(db.competitionStatisticsImport.sha256,crypto.createHash('sha256').update(JSON.stringify(stats)).digest('hex'));
-  assert.deepEqual(fs.readdirSync('competition-statistics').filter(name=>name.endsWith('.json')),['beyblade_x_competition_statistics_2026-10-18.json']);
+  // D-016: the directory keeps every dated snapshot; the database uses the latest one.
+  const snapshots=fs.readdirSync('competition-statistics').sort();
+  assert.ok(snapshots.length>=1);
+  for(const name of snapshots){
+    const match=/^beyblade_x_competition_statistics_(\d{4}-\d{2}-\d{2})\.json$/.exec(name);
+    assert.ok(match,`unexpected history file ${name}`);
+    const snapshot=JSON.parse(read(`competition-statistics/${name}`));
+    assert.equal(snapshot.metadata.contentScope,'objective-competition-statistics-only',name);
+    assert.equal(snapshot.metadata.generatedAt,match[1],name);
+    assert.ok(snapshot.competitionStatistics&&typeof snapshot.competitionStatistics==='object',name);
+  }
+  assert.equal(snapshots.at(-1),'beyblade_x_competition_statistics_2026-10-18.json');
 });
-test('每週匯入器使用日期化唯一基準、先完整驗證，且相同內容不建立新日期檔', () => {
+test('每週匯入器使用日期化基準、先完整驗證，保留所有歷史快照且相同內容不建立新日期檔', () => {
   const importer=read('scripts/import-competition-statistics.mjs');
-  assert.match(importer,/beyblade_x_competition_statistics_\\d\{4\}-\\d\{2\}-\\d\{2\}/);
-  assert.match(importer,/priorSha256 === snapshotSha256/);
+  assert.match(importer,/beyblade_x_competition_statistics_\(\\d\{4\}-\\d\{2\}-\\d\{2\}\)/);
+  assert.match(importer,/entry\.sha256 === snapshotSha256/);
   assert.match(importer,/changed: false, retainedBaseline/);
-  assert.match(importer,/fs\.rmSync\(path\.join\(baselineDirectory, priorBaseline\)\)/);
-  assert.ok(importer.indexOf('assert.equal(pages.length, 136') < importer.indexOf('fs.writeFileSync(target'));
-  assert.ok(importer.indexOf('assertNotOlder(db.competitionStatistics?.beywatch?.sourceUpdatedAt') < importer.indexOf('fs.writeFileSync(target'));
-  assert.ok(importer.indexOf('canonicalId regressed') < importer.indexOf('fs.writeFileSync(target'));
-  assert.ok(importer.indexOf('assert.deepEqual(preservedAfter, preservedBefore') < importer.indexOf('fs.writeFileSync(target'));
+  // R-1: no deletion API except the guarded helper for its own lock/temp file.
+  assert.doesNotMatch(importer,/rmSync|rmdirSync|fs\.rm\(|fs\.promises/);
+  assert.equal(importer.match(/unlinkSync/g).length,1);
+  assert.match(importer,/function removeOwnFile\(file\) \{\r?\n  assert\.ok\(file === lockPath \|\| \(file\.endsWith\('\.tmp'\)/);
+  // R-5: snapshots are created exclusively; the database is replaced by rename only.
+  assert.match(importer,/fs\.writeFileSync\(baselineTarget, JSON\.stringify\(incoming, null, 2\) \+ '\\n', \{flag: 'wx'\}\)/);
+  assert.doesNotMatch(importer,/fs\.writeFileSync\(target/);
+  const writePhase=importer.indexOf('// WRITE PHASE');
+  assert.ok(writePhase>0);
+  for(const check of ['assert.equal(pages.length, 136','assertNotOlder(db.competitionStatistics?.beywatch?.sourceUpdatedAt','canonicalId regressed','assert.deepEqual(preservedAfter, preservedBefore','Refusing to overwrite a history snapshot','Refusing to roll the database back','is damaged or unreadable']) {
+    assert.ok(importer.indexOf(check)>0&&importer.indexOf(check)<writePhase,check);
+  }
   assert.doesNotMatch(importer,/incoming\.blades|incoming\.aliases|recommended|tier|synergy/i);
 });
 test('Beywatch 全部 136 頁、40 排名、80 未排名、16 無資料與 998/510/535 明細完整', () => {
@@ -510,4 +530,351 @@ test('統計顯示只用客觀來源，不重新引入分數/推薦/勝率解讀
   assert.doesNotMatch(html.replaceAll(WARNING,''),/勝率|Tier|最佳配置|推薦配置|最近上榜紀錄|協同效果|攻擊型|持久型|防守型|平衡型/);
   const code = ['competition-stats-data.js','competition-stats-view.js','competition-stats.js'].map(read).join('');
   assert.doesNotMatch(code,/recommendedBits|comboScore|inventoryRecommendation|independentTier|stockBonus|localStorage|indexedDB|\.sort\(/);
+});
+
+// ===== D-016 importer behaviour (R3). Every case runs the real importer in its
+// own temporary workspace; the project's snapshots and database are never used
+// as a write target. =====
+const IMPORTER=path.resolve('scripts/import-competition-statistics.mjs');
+const DB_FILE='beyblade_x_database_v1_zhTW.json';
+const HISTORY='competition-statistics';
+const LOCK='.competition-statistics-import.lock';
+const snapshotName=date=>`beyblade_x_competition_statistics_${date}.json`;
+const LATEST=snapshotName('2026-10-18');
+const bytesHash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+const statsSha=value=>crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const projectState=()=>Object.fromEntries([DB_FILE,...fs.readdirSync(HISTORY).map(name=>`${HISTORY}/${name}`)].map(file=>[file,bytesHash(file)]));
+const PROJECT_STATE_BEFORE=projectState();
+const workspaces=[];
+function workspace({history=[LATEST],dbEdit}={}) {
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'beyblade-r3-'));
+  workspaces.push(dir);
+  fs.mkdirSync(path.join(dir,HISTORY));
+  fs.mkdirSync(path.join(dir,'incoming'));
+  fs.writeFileSync(path.join(dir,'.competition-import-test-workspace'),'');
+  for(const name of history) fs.copyFileSync(path.join(HISTORY,name),path.join(dir,HISTORY,name));
+  if(dbEdit){
+    const data=JSON.parse(read(DB_FILE));
+    dbEdit(data);
+    fs.writeFileSync(path.join(dir,DB_FILE),JSON.stringify(data,null,2)+'\n');
+  } else fs.copyFileSync(DB_FILE,path.join(dir,DB_FILE));
+  return dir;
+}
+// A newer input derived from the 2026-10-18 snapshot. Only fields the importer
+// does not pin by hash are changed, so all source validations still apply.
+function derived(dir,date,{keepCapturedAt=false,edit,name=snapshotName(date)}={}) {
+  const doc=JSON.parse(read(path.join(HISTORY,LATEST)));
+  doc.metadata.generatedAt=date;
+  if(!keepCapturedAt) doc.competitionStatistics.capturedAt=date;
+  if(edit) edit(doc);
+  const file=path.join(dir,'incoming',name);
+  fs.writeFileSync(file,JSON.stringify(doc,null,2)+'\n');
+  return file;
+}
+function runImport(dir,input,env={}) {
+  const result=spawnSync(process.execPath,[IMPORTER,input],{cwd:dir,encoding:'utf8',env:{...process.env,...env}});
+  return {status:result.status,stdout:result.stdout,stderr:result.stderr,json:result.status===0?JSON.parse(result.stdout):null};
+}
+function runImportAsync(dir,input) {
+  return new Promise(resolve=>{
+    const child=spawn(process.execPath,[IMPORTER,input],{cwd:dir});
+    let stdout='',stderr='';
+    child.stdout.on('data',chunk=>{stdout+=chunk;});
+    child.stderr.on('data',chunk=>{stderr+=chunk;});
+    child.on('close',status=>resolve({status,stdout,stderr,json:status===0?JSON.parse(stdout):null}));
+  });
+}
+// Byte hashes of everything outside incoming/, including leftover lock or temp files.
+function state(dir) {
+  const files={};
+  for(const name of fs.readdirSync(dir)) if(name!=='incoming'&&name!==HISTORY) files[name]=bytesHash(path.join(dir,name));
+  for(const name of fs.readdirSync(path.join(dir,HISTORY))) files[`${HISTORY}/${name}`]=bytesHash(path.join(dir,HISTORY,name));
+  return files;
+}
+const dbIn=dir=>JSON.parse(fs.readFileSync(path.join(dir,DB_FILE),'utf8'));
+const historyIn=dir=>fs.readdirSync(path.join(dir,HISTORY)).sort();
+const withoutStatistics=data=>{const copy=structuredClone(data);delete copy.competitionStatistics;delete copy.competitionStatisticsImport;return copy;};
+const ORIGINAL_DB=JSON.parse(read(DB_FILE));
+function assertNoLeftovers(dir) {
+  const names=fs.readdirSync(dir);
+  assert.ok(!names.includes(LOCK),'lock left behind');
+  assert.ok(!names.some(name=>name.endsWith('.tmp')),'temporary database file left behind');
+}
+function assertConsistent(dir) {
+  const data=dbIn(dir);
+  const names=historyIn(dir);
+  assert.equal(data.competitionStatisticsImport.baselineFile,`${HISTORY}/${names.at(-1)}`,'database points at the latest snapshot');
+  assert.equal(data.competitionStatisticsImport.sha256,statsSha(data.competitionStatistics));
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(dir,data.competitionStatisticsImport.baselineFile),'utf8')).competitionStatistics,data.competitionStatistics);
+  assert.deepEqual(withoutStatistics(data),withoutStatistics(ORIGINAL_DB),'non-statistics data changed');
+}
+function assertRefused(result,pattern) {
+  assert.notEqual(result.status,0,`expected refusal, got ${result.stdout}`);
+  assert.match(result.stderr,pattern);
+}
+
+test('R3-1 首次匯入：沒有歷史快照與匯入紀錄時建立快照並寫入主資料', () => {
+  const dir=workspace({history:[],dbEdit:data=>{delete data.competitionStatistics;delete data.competitionStatisticsImport;}});
+  const input=path.join(dir,'incoming',LATEST);
+  fs.copyFileSync(path.join(HISTORY,LATEST),input);
+  const result=runImport(dir,input);
+  assert.equal(result.status,0,result.stderr);
+  assert.equal(result.json.outcome,'created');
+  assert.deepEqual(historyIn(dir),[LATEST]);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(dir,HISTORY,LATEST),'utf8')),JSON.parse(read(path.join(HISTORY,LATEST))));
+  assert.deepEqual(dbIn(dir).competitionStatistics,stats);
+  assert.equal(dbIn(dir).competitionStatisticsImport.sha256,db.competitionStatisticsImport.sha256,'same hash algorithm as the stored record');
+  assertConsistent(dir);
+  assertNoLeftovers(dir);
+});
+
+test('R3-2 相同內容重跑：不新增快照、不更新主資料或任何時間欄位', () => {
+  const dir=workspace();
+  const before=state(dir);
+  const copy=path.join(dir,'incoming',LATEST);
+  fs.copyFileSync(path.join(HISTORY,LATEST),copy);
+  const relabelled=derived(dir,'2026-10-20',{keepCapturedAt:true});
+  for(const input of [copy,path.join(dir,HISTORY,LATEST),relabelled]) {
+    const result=runImport(dir,input);
+    assert.equal(result.status,0,result.stderr);
+    assert.equal(result.json.changed,false);
+    assert.deepEqual(state(dir),before);
+  }
+});
+
+test('R3-3 不同內容：新增快照、保留所有舊檔且主資料格式相容；之後重跑不再寫入', () => {
+  const dir=workspace();
+  const oldHash=bytesHash(path.join(dir,HISTORY,LATEST));
+  const input=derived(dir,'2026-10-25');
+  const result=runImport(dir,input);
+  assert.equal(result.status,0,result.stderr);
+  assert.equal(result.json.outcome,'created');
+  assert.deepEqual(historyIn(dir),[LATEST,snapshotName('2026-10-25')]);
+  assert.equal(bytesHash(path.join(dir,HISTORY,LATEST)),oldHash,'older snapshot unchanged');
+  const data=dbIn(dir);
+  assert.deepEqual(data.competitionStatistics,JSON.parse(read(input)).competitionStatistics);
+  assert.deepEqual(Object.keys(data.competitionStatisticsImport),['capturedAt','sha256','sourceFileName','baselineFile']);
+  assert.deepEqual(Object.keys(data),Object.keys(ORIGINAL_DB),'top-level field order unchanged');
+  assertConsistent(dir);
+  assertNoLeftovers(dir);
+  const after=state(dir);
+  assert.equal(runImport(dir,input).json.changed,false);
+  assert.deepEqual(state(dir),after);
+});
+
+test('R3-4 同日期不同內容：中止且既有同名快照與主資料逐位元不變', () => {
+  const dir=workspace();
+  // keepCapturedAt: the date guard alone would not stop the rewrite of the older file below.
+  assert.equal(runImport(dir,derived(dir,'2026-10-25',{keepCapturedAt:true,edit:doc=>{doc.competitionStatistics.displayStatus='first';}})).status,0);
+  const before=state(dir);
+  const other=derived(dir,'2026-10-25',{keepCapturedAt:true,edit:doc=>{doc.competitionStatistics.displayStatus='changed-same-day';}});
+  assertRefused(runImport(dir,other),/already exists with different content[\s\S]*Refusing to overwrite a history snapshot/);
+  assert.deepEqual(state(dir),before);
+  // The same rule protects a snapshot that is not the latest one.
+  assertRefused(runImport(dir,derived(dir,'2026-10-18',{keepCapturedAt:true,edit:doc=>{doc.competitionStatistics.displayStatus='rewrite-old';}})),/Refusing to overwrite a history snapshot/);
+  assert.deepEqual(state(dir),before);
+});
+
+test('R3-5 匯入失敗：來源驗證不通過時快照目錄與主資料完全不變', () => {
+  const dir=workspace();
+  const before=state(dir);
+  const cases=[
+    [derived(dir,'2026-10-25',{edit:doc=>{doc.metadata.contentScope='analysis';}}),/objective-only/],
+    [derived(dir,'2026-10-26',{edit:doc=>{doc.competitionStatistics.beywatch.sourceUpdatedAt='2026-10-01';}}),/regressed/],
+    [derived(dir,'2026-10-27',{edit:doc=>{doc.competitionStatistics.metaBeys.categories.blades.pop();}}),/blades/],
+    [derived(dir,'2026-10-28',{edit:doc=>{doc.metadata.generatedAt='2026-10-29';}}),/metadata\.generatedAt/],
+    [derived(dir,'2026-10-17',{keepCapturedAt:true,edit:doc=>{doc.competitionStatistics.displayStatus='back-dated';}}),/not newer than the latest snapshot/]
+  ];
+  for(const [input,pattern] of cases) {
+    assertRefused(runImport(dir,input),pattern);
+    assert.deepEqual(state(dir),before);
+  }
+});
+
+test('R3-6 內容等於較舊快照：拒絕匯入，不自動回退主資料', () => {
+  const dir=workspace();
+  // Newer snapshot with the same capturedAt, so only the history check can stop the rollback.
+  assert.equal(runImport(dir,derived(dir,'2026-10-25',{keepCapturedAt:true,edit:doc=>{doc.competitionStatistics.displayStatus='newer';}})).status,0);
+  const before=state(dir);
+  const rollback=derived(dir,'2026-10-26',{keepCapturedAt:true});
+  assertRefused(runImport(dir,rollback),/equals the older snapshot[\s\S]*Refusing to roll the database back/);
+  assert.deepEqual(state(dir),before);
+});
+
+test('R3-7 主資料與最新快照不一致：停止，不覆蓋主資料', () => {
+  const tampered=workspace({dbEdit:data=>{data.competitionStatistics.displayStatus='edited elsewhere';}});
+  const before=state(tampered);
+  assertRefused(runImport(tampered,derived(tampered,'2026-10-25')),/no longer matches competitionStatisticsImport\.sha256/);
+  assert.deepEqual(state(tampered),before);
+
+  const missing=workspace({history:[]});
+  assertRefused(runImport(missing,derived(missing,'2026-10-25')),/which is missing from competition-statistics/);
+  assert.deepEqual(historyIn(missing),[]);
+
+  const unrecorded=workspace({dbEdit:data=>{delete data.competitionStatisticsImport;}});
+  const older=JSON.parse(read(path.join(HISTORY,LATEST)));
+  older.metadata.generatedAt='2026-10-14';
+  fs.writeFileSync(path.join(unrecorded,HISTORY,snapshotName('2026-10-14')),JSON.stringify(older,null,2)+'\n');
+  const beforeUnrecorded=state(unrecorded);
+  assertRefused(runImport(unrecorded,derived(unrecorded,'2026-10-25')),/has no competitionStatisticsImport record/);
+  assert.deepEqual(state(unrecorded),beforeUnrecorded);
+});
+
+test('R3-8 歷史快照缺損、混入非快照檔或 hash 不符：停止並回報', () => {
+  const rewrite=(dir,edit)=>{const doc=JSON.parse(read(path.join(HISTORY,LATEST)));edit(doc);fs.writeFileSync(path.join(dir,HISTORY,LATEST),JSON.stringify(doc,null,2)+'\n');};
+  const variants=[
+    [dir=>fs.writeFileSync(path.join(dir,HISTORY,LATEST),fs.readFileSync(path.join(HISTORY,LATEST)).subarray(0,5000)),/is damaged or unreadable/],
+    [dir=>fs.copyFileSync(path.join(HISTORY,LATEST),path.join(dir,HISTORY,'beyblade_x_competition_statistics_2026-10-18 (1).json')),/Unexpected file/],
+    [dir=>fs.writeFileSync(path.join(dir,HISTORY,'.import.tmp'),'{}'),/Unexpected file/],
+    [dir=>rewrite(dir,doc=>{doc.competitionStatistics.displayStatus='altered';}),/hash mismatch/],
+    [dir=>rewrite(dir,doc=>{doc.metadata.generatedAt='2026-10-19';}),/filename date does not match/]
+  ];
+  for(const [damage,pattern] of variants) {
+    const dir=workspace();
+    damage(dir);
+    const before=state(dir);
+    assertRefused(runImport(dir,derived(dir,'2026-10-25')),pattern);
+    assert.deepEqual(state(dir),before);
+  }
+});
+
+test('R3-9 快照建立成功但主資料更新前中斷：保留快照，只在可驗證狀態下恢復', () => {
+  const dir=workspace();
+  const dbBefore=bytesHash(path.join(dir,DB_FILE));
+  const input=derived(dir,'2026-10-25');
+  const inputText=read(input);
+  assertRefused(runImport(dir,input,{COMPETITION_IMPORT_FAULT:'after-snapshot'}),/Injected fault: after-snapshot/);
+  assert.deepEqual(historyIn(dir),[LATEST,snapshotName('2026-10-25')]);
+  assert.equal(bytesHash(path.join(dir,DB_FILE)),dbBefore,'database not updated');
+  assertNoLeftovers(dir);
+  const interrupted=state(dir);
+  // Anything but the exact same input is refused while the database is behind.
+  assertRefused(runImport(dir,derived(dir,'2026-10-26')),/latest snapshot is beyblade_x_competition_statistics_2026-10-25\.json/);
+  assertRefused(runImport(dir,derived(dir,'2026-10-25',{edit:doc=>{doc.competitionStatistics.displayStatus='other';}})),/Refusing to overwrite a history snapshot/);
+  assertRefused(runImport(dir,derived(dir,'2026-10-25',{edit:doc=>{doc.metadata.notes=['different metadata'];}})),/Recovery requires .* to equal the input exactly/);
+  assert.deepEqual(state(dir),interrupted);
+  // The exact same input finishes the database update without touching the snapshot.
+  fs.writeFileSync(input,inputText);
+  const snapshotHash=bytesHash(path.join(dir,HISTORY,snapshotName('2026-10-25')));
+  const recovered=runImport(dir,input);
+  assert.equal(recovered.status,0,recovered.stderr);
+  assert.equal(recovered.json.outcome,'recovered');
+  assert.equal(bytesHash(path.join(dir,HISTORY,snapshotName('2026-10-25'))),snapshotHash);
+  assertConsistent(dir);
+  assertNoLeftovers(dir);
+  assert.equal(runImport(dir,input).json.changed,false);
+
+  // Recovery is refused when the database is more than one snapshot behind.
+  const behind=workspace();
+  const left=[derived(behind,'2026-10-25'),derived(behind,'2026-10-26')];
+  for(const file of left) fs.copyFileSync(file,path.join(behind,HISTORY,path.basename(file)));
+  const beforeBehind=state(behind);
+  assertRefused(runImport(behind,left[1]),/not the snapshot right before beyblade_x_competition_statistics_2026-10-26\.json/);
+  assert.deepEqual(state(behind),beforeBehind);
+});
+
+test('R3-9b 主資料在匯入途中被其他程序更新：不覆蓋，保留快照並清除暫存檔', async () => {
+  const dir=workspace();
+  const input=derived(dir,'2026-10-25');
+  const dbPath=path.join(dir,DB_FILE);
+  const child=spawn(process.execPath,[IMPORTER,input],{cwd:dir,env:{...process.env,COMPETITION_IMPORT_FAULT:'pause-before-db-rename'}});
+  let stderr='';
+  child.stderr.on('data',chunk=>{stderr+=chunk;});
+  const closed=new Promise(resolve=>child.on('close',resolve));
+  const deadline=Date.now()+20000;
+  while(!fs.readdirSync(dir).some(name=>name.endsWith('.tmp'))) {
+    assert.ok(Date.now()<deadline,'importer never reached the database write');
+    await new Promise(resolve=>setTimeout(resolve,20));
+  }
+  fs.appendFileSync(dbPath,'\n');
+  const changed=bytesHash(dbPath);
+  assert.notEqual(await closed,0);
+  assert.match(stderr,/was changed by another process during this import; not overwriting it/);
+  assert.equal(bytesHash(dbPath),changed,'the other process\'s write is kept');
+  assert.ok(historyIn(dir).includes(snapshotName('2026-10-25')));
+  assertNoLeftovers(dir);
+});
+
+test('R3-10主資料暫存檔寫入或改名前失敗：主資料不變、暫存檔清除，可重跑恢復', () => {
+  for(const point of ['db-temp-write','before-db-rename']) {
+    const dir=workspace();
+    const dbBefore=bytesHash(path.join(dir,DB_FILE));
+    const input=derived(dir,'2026-10-25');
+    assertRefused(runImport(dir,input,{COMPETITION_IMPORT_FAULT:point}),new RegExp(`Injected fault: ${point}[\\s\\S]*is kept; ${DB_FILE.replaceAll('.','\\.')} was not updated`));
+    assert.equal(bytesHash(path.join(dir,DB_FILE)),dbBefore);
+    assert.ok(historyIn(dir).includes(snapshotName('2026-10-25')));
+    assertNoLeftovers(dir);
+    assert.equal(runImport(dir,input).json.outcome,'recovered');
+    assertConsistent(dir);
+  }
+});
+
+test('R3-11 真實檔案系統改名失敗（唯讀主資料）：主資料不變、暫存檔清除', {skip:process.platform!=='win32'&&'rename over a read-only file only fails on Windows'}, () => {
+  const dir=workspace();
+  const dbPath=path.join(dir,DB_FILE);
+  const dbBefore=bytesHash(dbPath);
+  const input=derived(dir,'2026-10-25');
+  fs.chmodSync(dbPath,0o444);
+  try {
+    assertRefused(runImport(dir,input),/EPERM|EACCES|operation not permitted/i);
+    assert.equal(bytesHash(dbPath),dbBefore);
+    assertNoLeftovers(dir);
+  } finally {
+    fs.chmodSync(dbPath,0o644);
+  }
+  assert.equal(runImport(dir,input).json.outcome,'recovered');
+  assertConsistent(dir);
+});
+
+test('R3-11b 中斷注入只在測試工作區生效：正式目錄設定變數時直接停止、不寫入', () => {
+  assert.ok(!fs.existsSync('.competition-import-test-workspace'),'the project must never contain the test marker');
+  const dir=workspace();
+  fs.rmSync(path.join(dir,'.competition-import-test-workspace'));
+  const before=state(dir);
+  assertRefused(runImport(dir,derived(dir,'2026-10-25'),{COMPETITION_IMPORT_FAULT:'after-snapshot'}),/outside a test workspace; unset it\. Nothing was imported/);
+  assert.deepEqual(state(dir),before);
+  fs.writeFileSync(path.join(dir,'.competition-import-test-workspace'),'');
+  fs.mkdirSync(path.join(dir,'.git'));
+  assertRefused(runImport(dir,derived(dir,'2026-10-25'),{COMPETITION_IMPORT_FAULT:'after-snapshot'}),/outside a test workspace/);
+  fs.rmSync(path.join(dir,'.git'),{recursive:true});
+  assertRefused(runImport(dir,derived(dir,'2026-10-25'),{COMPETITION_IMPORT_FAULT:'typo'}),/Unknown COMPETITION_IMPORT_FAULT/);
+  assert.deepEqual(historyIn(dir),[LATEST]);
+});
+
+test('R3-12 匯入鎖：另一個匯入進行中時拒絕，不動快照、主資料或他人的鎖', () => {
+  const dir=workspace();
+  fs.writeFileSync(path.join(dir,LOCK),'{"pid":1}');
+  const before=state(dir);
+  assertRefused(runImport(dir,derived(dir,'2026-10-25')),/Another competition import is running/);
+  assert.deepEqual(state(dir),before);
+});
+
+test('R3-13 兩個匯入程序同時執行：不覆寫快照、不遺失更新，結束狀態一致', async () => {
+  for(let round=0;round<3;round+=1) {
+    const same=workspace();
+    const input=derived(same,'2026-10-25');
+    const results=await Promise.all([runImportAsync(same,input),runImportAsync(same,input)]);
+    assert.equal(results.filter(result=>result.json?.outcome==='created').length,1,JSON.stringify(results));
+    for(const result of results) if(result.json?.outcome!=='created') assert.ok(result.json?.changed===false||/Another competition import is running/.test(result.stderr),result.stderr);
+    assert.equal(fs.readFileSync(path.join(same,HISTORY,snapshotName('2026-10-25')),'utf8'),read(input));
+    assertConsistent(same);
+    assertNoLeftovers(same);
+
+    const different=workspace();
+    const inputs=[derived(different,'2026-10-25'),derived(different,'2026-10-26')];
+    const outcomes=await Promise.all(inputs.map(file=>runImportAsync(different,file)));
+    for(const [index,result] of outcomes.entries()) {
+      if(result.status===0) assert.equal(fs.readFileSync(path.join(different,HISTORY,path.basename(inputs[index])),'utf8'),read(inputs[index]),'created snapshot equals its own input');
+      else assert.match(result.stderr,/Another competition import is running|not newer than the latest snapshot/);
+    }
+    assert.ok(outcomes.some(result=>result.status===0));
+    assert.equal(bytesHash(path.join(different,HISTORY,LATEST)),bytesHash(path.join(HISTORY,LATEST)));
+    assertConsistent(different);
+    assertNoLeftovers(different);
+  }
+});
+
+test('R3 測試只使用暫存目錄：正式快照與主資料逐位元不變', () => {
+  assert.deepEqual(projectState(),PROJECT_STATE_BEFORE);
+  for(const dir of workspaces) fs.rmSync(dir,{recursive:true,force:true});
 });
