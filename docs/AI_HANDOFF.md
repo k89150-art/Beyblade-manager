@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Claude Code 完成 Phase 6C 部署前補強，等待 ChatGPT 最終審查與使用者部署授權）
+- 目前執行者：無（Phase 6D-2 已正式部署完成，等待 ChatGPT 最終確認）
 - 寫入範圍：目前沒有進行中的寫入任務
-- Git 狀態：`origin/main` = `5617f4e`（正式網站）；本機 `main` 多 8 個 Phase 6A／6C commit，尚未 push
+- 正式版本：`2c8e4a85cb572dd959a87416324d8dc3b963717e`（`origin/main`，GitHub Pages deployment `7986025514` success）。本筆部署紀錄 commit 只在本機，未 push。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -32,6 +32,20 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-23 — Claude Code（Phase 6D-2，正式部署）
+
+- 任務：經使用者授權 push 並部署 Phase 6A／6C 的 8 個 commit。
+- Push：`git push origin main`，`5617f4e..2c8e4a8`（快轉，無 force push）。推送的 8 個 commit 依序為 `ed4fee9`、`e6adf58`、`2558b7b`、`6987553`、`67ab4c1`、`a6ed126`、`d390749`、`2c8e4a8`。推送前 `git fetch` 確認遠端仍為 `5617f4e`、工作區乾淨。
+- 正式版本：`2c8e4a85cb572dd959a87416324d8dc3b963717e`。GitHub Pages（legacy，`main` 根目錄）建置 `built`；deployment `7986025514`（github-pages）狀態 success；workflow run `45077711900`（pages-build-deployment）success。
+- 部署前備份：使用者以既有備份工具建立 `C:\BeybladeBackups\beyblade-appData-backup-20261123-062202.json`（2026/11/23 06:22 台灣時間），`verify-backup.mjs` 驗證 PASS（`k89150-web-login`，2 份文件，整體 SHA-256 `4a602c7d…524b8`，與 2026-11-02 備份相同，代表期間正式資料未變）。部署前使用者已關閉所有裝置的舊主頁、賽事頁與 PWA。
+- 部署前測試（Phase 6C／6D-1，非部署後重新執行）：`2c8e4a8` 乾淨 clone 上 Node 296/296 PASS、validate PASS、build PASS（33 files）、`git diff --check` PASS；Emulator M01–M16 PASS 16／FAIL 0（對 `d390749`，與 `2c8e4a8` 只差交接文件）。
+- 部署後唯讀驗收：瀏覽器在該網站沒有 Firebase 登入資料，以未登入狀態檢查，不可能觸發寫入。首頁與賽事頁正常開啟，靜態資源全部 200，Console Error 0，桌面與 375 寬無水平 overflow；首頁載入 `script.js?v=20261123-phase6a`、顯示「收藏儲存版本：5B（交易保護）」；賽事頁載入 `tournament.js?v=20261029-phase4b1`、顯示「賽事儲存版本：4B-1（交易保護）」。19 個正式檔案（主要 JS／HTML、主資料庫、官方型錄、7 份競賽快照）與 commit blob 逐位元組相同。
+- 已部署：R3 匯入器（D-016）與 6 份補回快照、R9 文件、F-04（含 Phase 6C 跨帳號隔離）、備份 workflow 的直接還原停用。遠端 workflow 只剩 Backup Recent Tournament Records、Deploy Firestore Rules 與 Pages 建置；沒有 `restore_to_main` 與 `updateMask.fieldPaths`；正常備份路徑存在；部署期間沒有執行任何備份或還原 workflow。
+- 正式 Firestore：部署過程沒有任何寫入（沒有 Firestore 呼叫、沒有執行 workflow，只有本機備份檔的唯讀驗證）。Rules、Schema 未修改。
+- 仍待處理：F-06（型錄升級以整表強制寫入，載入後立即儲存期間可能產生表層級衝突；需修改 D-018 核心協定，暫不處理）；競賽統計匯入器驗證協定（寫死數值改為預期值檔＋完整性檢查，已提設計，待核准）；F-05、F-08 找不到原始定義，維持「無法確認」。
+- 下一位注意：使用者重新開啟網站時，每台裝置應看到上述兩個版本列；看不到時先重新整理，仍看不到不要在該裝置編輯。
+- Commit / Deploy：`2c8e4a8` 已 push 並部署至 GitHub Pages；本筆紀錄為本機 commit，未 push。
 
 ### 2026-11-23 — Claude Code（Phase 6C，部署前補強）
 
