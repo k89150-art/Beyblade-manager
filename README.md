@@ -21,12 +21,12 @@
 本專案沒有 `package.json`，不需要安裝 npm 套件。建議使用 Node.js 20 或相容版本執行：
 
 ```powershell
-node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs tests/collection-sync.test.mjs tests/assembly-rules.test.mjs
+node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs tests/collection-sync.test.mjs tests/assembly-rules.test.mjs tests/site-navigation.test.mjs
 node --experimental-vm-modules scripts/validate-site.mjs
 node scripts/build-site.mjs
 git diff --check
 ```
 
-上列 12 個測試檔是目前全部的 Node 測試。主頁與賽事頁的 Firestore 交易另以 Firebase Emulator 驗證，工具與結果放在被 Git 忽略的 `exports/firebase-emulator-*/`，只連本機 `demo-` 專案。
+上列 13 個測試檔是目前全部的 Node 測試。主頁與賽事頁的 Firestore 交易另以 Firebase Emulator 驗證，工具與結果放在被 Git 忽略的 `exports/firebase-emulator-*/`，只連本機 `demo-` 專案。
 
 `scripts/build-site.mjs` 會將檢查後的靜態檔案輸出到被 Git 忽略的 `.site-build/`；該資料夾不是部署來源，也不得提交。

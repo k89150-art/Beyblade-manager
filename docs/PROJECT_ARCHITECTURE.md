@@ -58,8 +58,8 @@ Firebase Web SDK 目前由 `https://www.gstatic.com/firebasejs/11.2.0/` 載入�
 
 ### 全站導覽與說明頁
 
-- `site-menu.js` 是 `HELP_NAV_ITEMS`、`SIDE_MENU_ITEMS`、側欄、手機底部五項導覽、active 狀態、主題與版本顯示的主要來源。
-- `site-menu.css` 提供共用導覽、主題與 typography tokens。
+- `site-menu.js` 是 `HELP_NAV_ITEMS`、`SIDE_MENU_ITEMS`、`QUICK_ACTIONS`、側欄、手機底部導覽（收藏／配置／＋新增／賽事／更多，D-020）、「＋新增」快速選單、active 狀態、主題與版本顯示的主要來源。導覽 HTML 與 active 判斷在檔內 `nav model (pure …)` 區塊，不依賴 DOM，由 `tests/site-navigation.test.mjs` 測試。快速新增以 hash（`#add-collection`、`#add-part`、`#add-tournament`）導向既有欄位，只捲動與聚焦，不寫入資料。
+- `site-menu.css` 提供共用導覽、主題與 typography tokens；Phase 7-1 新增 `--ui-*` 設計 tokens（深色與米色各一組）與快速選單樣式（桌面 popover、≤820px 底部 sheet）。
 - 說明頁：`home.html`、`guide.html`、`changelog.html`、`privacy.html`、`about.html`、`contact.html`。
 - `retire-analysis-cache.js` 只處理已退役分析頁的舊網址／快取標記。
 

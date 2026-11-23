@@ -858,3 +858,237 @@ html[data-theme="beige"] body .tournament-detail {
     color: #777a75;
   }
 }
+
+/* ===== Phase 7-1 (D-020): navigation tokens and components =====
+   --ui-* tokens are shared by the new navigation components and later
+   Phase 7 page components. Both themes keep the same structure and sizes. */
+:root {
+  --ui-surface: #10161d;
+  --ui-surface-raised: #1a222c;
+  --ui-line: #2b3743;
+  --ui-text: #e6ebf1;
+  --ui-text-muted: #8d99a6;
+  --ui-accent: #4b91ff;
+  --ui-accent-text: #ffffff;
+  --ui-bx: #4f8cff;
+  --ui-ux: #a371f7;
+  --ui-cx: #f0883e;
+  --ui-radius-sm: 6px;
+  --ui-radius-md: 10px;
+  --ui-radius-lg: 16px;
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-space-4: 16px;
+  --ui-space-5: 20px;
+  --ui-space-6: 24px;
+  --ui-touch: 44px;
+  --ui-z-nav: 850;
+  --ui-z-sheet: 960;
+  --ui-shadow-pop: 0 18px 40px rgba(0, 0, 0, .45);
+}
+
+html[data-theme="beige"] {
+  --ui-surface: #fbf7f0;
+  --ui-surface-raised: #f3ece1;
+  --ui-line: #d6cab8;
+  --ui-text: #2b2620;
+  --ui-text-muted: #776b5c;
+  --ui-accent: #2f6fd6;
+  --ui-accent-text: #ffffff;
+  --ui-shadow-pop: 0 18px 40px rgba(60, 48, 30, .22);
+}
+
+/* side menu: ＋新增 button and the 零件 child item */
+body .side-menu-add {
+  min-height: var(--ui-touch);
+  margin: var(--ui-space-3) 0 var(--ui-space-1);
+  padding: 0 var(--ui-space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-space-2);
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: var(--ui-radius-md);
+  color: var(--ui-accent-text);
+  background: var(--ui-accent);
+  font: inherit;
+  font-size: var(--type-navigation-size);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+body .side-menu-add:hover {
+  filter: brightness(1.08);
+}
+
+body .side-menu-add:focus-visible,
+.bottom-nav-link:focus-visible,
+.quick-add-item:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+}
+
+body .side-menu-link.is-child {
+  min-height: 36px;
+  padding-left: 40px;
+  font-size: 12.5px;
+}
+
+body .side-menu-link.is-child .nav-icon {
+  width: 16px;
+  height: 16px;
+  flex-basis: 16px;
+}
+
+@media (min-width: 821px) {
+  body.desktop-nav-collapsed .side-menu-add > span {
+    display: none;
+  }
+
+  body.desktop-nav-collapsed .side-menu-link.is-child {
+    padding-left: 12px;
+  }
+}
+
+/* bottom nav: ＋新增 and 更多 are buttons styled like the links */
+.bottom-nav-add,
+.bottom-nav-more {
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (max-width: 820px) {
+  .bottom-nav {
+    z-index: var(--ui-z-nav);
+  }
+
+  .bottom-nav-add,
+  .bottom-nav-more {
+    color: #8995a2;
+    font-size: 10px;
+    font-weight: 900;
+  }
+
+  .bottom-nav-add .nav-symbol-add {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    margin-top: -14px;
+    border: 0;
+    border-radius: 50%;
+    color: var(--ui-accent-text);
+    background: var(--ui-accent);
+    font-size: 20px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .35);
+  }
+
+  .bottom-nav-add[aria-expanded="true"] .nav-symbol-add {
+    transform: rotate(45deg);
+  }
+
+  html[data-theme="beige"] .bottom-nav-add,
+  html[data-theme="beige"] .bottom-nav-more {
+    color: #747570;
+  }
+}
+
+/* ＋新增 menu: popover beside the side menu on desktop, bottom sheet on phones */
+.quick-add-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--ui-z-sheet) - 1);
+  background: transparent;
+}
+
+.quick-add-menu {
+  position: fixed;
+  z-index: var(--ui-z-sheet);
+  top: 128px;
+  left: var(--ui-space-3);
+  width: 228px;
+  padding: var(--ui-space-2);
+  display: grid;
+  gap: var(--ui-space-1);
+  box-sizing: border-box;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-lg);
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-pop);
+}
+
+.quick-add-backdrop[hidden],
+.quick-add-menu[hidden] {
+  display: none;
+}
+
+.quick-add-item {
+  min-height: var(--ui-touch);
+  padding: var(--ui-space-2) var(--ui-space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-2);
+  box-sizing: border-box;
+  border-radius: var(--ui-radius-md);
+  color: var(--ui-text);
+  background: var(--ui-surface-raised);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.quick-add-item small {
+  color: var(--ui-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.quick-add-item:hover {
+  box-shadow: inset 0 0 0 1px var(--ui-accent);
+}
+
+@media (min-width: 821px) {
+  body.desktop-nav-collapsed .quick-add-menu {
+    left: calc(var(--nav-collapsed-width) + var(--ui-space-2));
+    top: 72px;
+  }
+}
+
+@media (max-width: 820px) {
+  .quick-add-backdrop {
+    background: rgba(0, 0, 0, .45);
+  }
+
+  html[data-theme="beige"] .quick-add-backdrop {
+    background: rgba(52, 45, 36, .4);
+  }
+
+  .quick-add-menu {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    padding: var(--ui-space-3) max(var(--ui-space-4), env(safe-area-inset-right)) calc(var(--ui-space-4) + env(safe-area-inset-bottom)) max(var(--ui-space-4), env(safe-area-inset-left));
+    border-width: 1px 0 0;
+    border-radius: var(--ui-radius-lg) var(--ui-radius-lg) 0 0;
+  }
+
+  .quick-add-menu::before {
+    content: "";
+    width: 40px;
+    height: 4px;
+    margin: 0 auto var(--ui-space-2);
+    border-radius: 2px;
+    background: var(--ui-line);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bottom-nav-add .nav-symbol-add {
+    transition: transform .15s ease;
+  }
+}

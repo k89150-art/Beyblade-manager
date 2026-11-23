@@ -58,7 +58,7 @@
 - 手機優先，同時維持桌面合理的資訊密度；不得用固定單一螢幕尺寸硬湊畫面。
 - 沿用既有 Design Tokens、元件與 responsive 規則，避免大量 inline style、重複樣式與 `!important`。
 - 收藏、庫存、配置、競賽統計、賽事與說明頁具有不同責任；修改共用 CSS 前必須檢查是否造成其他頁面 regression。
-- 手機底部五項主導覽、側欄資訊架構與主題切換是既有操作契約，不得擅自改變。
+- 手機底部導覽「收藏／配置／＋新增／賽事／更多」（D-020）、「＋新增」選單內容、側欄資訊架構與主題切換是既有操作契約，未經使用者核准不得改變。
 - 保持可讀性、觸控範圍、無水平 overflow、合理 focus/hover/disabled 狀態。
 - 競賽統計與賽事若不在任務範圍內，不得因全域樣式調整而改變外觀或行為。
 
@@ -102,7 +102,7 @@
 依修改範圍執行針對性測試，完成實質修改時至少執行：
 
 ```powershell
-node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs tests/collection-sync.test.mjs tests/assembly-rules.test.mjs
+node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs tests/collection-sync.test.mjs tests/assembly-rules.test.mjs tests/site-navigation.test.mjs
 node --experimental-vm-modules scripts/validate-site.mjs
 node scripts/build-site.mjs
 git diff --check

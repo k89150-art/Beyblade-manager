@@ -312,10 +312,11 @@ test("desktop and mobile sidebars share one structured navigation source", () =>
   const menuScript = fs.readFileSync("site-menu.js", "utf8");
   const menuStyles = fs.readFileSync("site-menu.css", "utf8");
 
-  assert.match(menuScript, /label: "額外零件庫存", bottomLabel: "庫存"/);
+  // Phase 7-1 (D-020): 零件 sits under 收藏; bottom nav is 收藏／配置／＋新增／賽事／更多.
+  assert.match(menuScript, /label: "零件", title: "額外零件庫存"[\s\S]*?child: true/);
   assert.match(menuScript, /label: "配置紀錄", bottomLabel: "配置"/);
-  assert.match(menuScript, /label: "Quick Editor"[\s\S]*?group: "工具"/);
-  assert.match(menuScript, /const SITE_VERSION = "v1\.9\.2"/);
+  assert.match(menuScript, /label: "建立配置（Quick Editor）"[\s\S]*?group: "工具"/);
+  assert.match(menuScript, /const SITE_VERSION = "v1\.10\.0"/);
   assert.match(menuScript, /buildMenuLinkInnerHtml\(item, true\)/);
   assert.match(menuStyles, /body \.side-menu-section\[data-menu-group="說明"\][\s\S]*?border-top:/);
   assert.match(menuStyles, /body \.side-menu-footer[\s\S]*?flex: 0 0 auto/);

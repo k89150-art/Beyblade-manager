@@ -18,23 +18,41 @@ const HELP_NAV_ITEMS = [
   { href: "contact.html", label: "聯絡方式", icon: "mail", sideMenu: true }
 ];
 
+// Phase 7-1 (D-020): mobile bottom nav is 收藏／配置／＋新增／賽事／更多.
+// "bottom" gives the bottom-nav position (3 = ＋新增 button, 5 = 更多 button).
 const SIDE_MENU_ITEMS = [
-  { href: "index.html#collectionSection", label: "收藏", symbol: "C", icon: "collection", group: "主要功能", section: "collectionSection", bottom: true },
-  { href: "index.html#inventorySection", label: "額外零件庫存", bottomLabel: "庫存", symbol: "I", icon: "inventory", group: "主要功能", section: "inventorySection", bottom: true },
-  { href: "index.html#configSection", label: "配置紀錄", bottomLabel: "配置", symbol: "X", icon: "config", group: "主要功能", section: "configSection", bottom: true },
-  { href: "competition-stats.html", label: "競賽統計", symbol: "S", icon: "stats", group: "主要功能", page: "competition-stats.html", bottom: true },
-  { href: "tournament.html", label: "賽事", symbol: "3G", icon: "trophy", group: "主要功能", page: "tournament.html", bottom: true },
-  { href: "index.html#configQuickEditor", label: "Quick Editor", icon: "sliders", group: "工具", action: "quick-editor" },
+  { href: "index.html#collectionSection", label: "收藏", symbol: "C", icon: "collection", group: "主要功能", section: "collectionSection", bottom: 1, bottomSections: ["collectionSection", "inventorySection"] },
+  { href: "index.html#inventorySection", label: "零件", title: "額外零件庫存", icon: "inventory", group: "主要功能", section: "inventorySection", child: true },
+  { href: "index.html#configSection", label: "配置紀錄", bottomLabel: "配置", symbol: "X", icon: "config", group: "主要功能", section: "configSection", bottom: 2, bottomSections: ["configSection"] },
+  { href: "tournament.html", label: "賽事", symbol: "3G", icon: "trophy", group: "主要功能", page: "tournament.html", bottom: 4 },
+  { href: "competition-stats.html", label: "競賽統計", icon: "stats", group: "參考", page: "competition-stats.html" },
+  { href: "index.html#configQuickEditor", label: "建立配置（Quick Editor）", icon: "sliders", group: "工具", action: "quick-editor" },
   ...HELP_NAV_ITEMS
     .filter(item => item.sideMenu)
     .map(item => ({ ...item, group: "說明", suppressActive: item.href === "index.html" })),
   { href: "admin.html", label: "管理員後台", icon: "admin", group: "管理", adminOnly: true }
 ];
 
+// ＋新增 menu. Navigation only: every write still goes through the page's own forms and guards.
+const QUICK_ACTIONS = [
+  { id: "add-collection", label: "新增收藏", href: "index.html#add-collection" },
+  { id: "add-part", label: "新增零件", href: "index.html#add-part" },
+  { id: "new-config", label: "建立配置", href: "index.html#configQuickEditor", action: "quick-editor" },
+  { id: "add-tournament", label: "新增比賽", href: "tournament.html#add-tournament" },
+  { id: "record-round", label: "記錄回合", href: "tournament.html", note: "開啟賽事頁" }
+];
+const QUICK_ACTION_TARGETS = {
+  "add-collection": { page: "index.html", section: "collectionSection", focus: "model" },
+  "add-part": { page: "index.html", section: "inventorySection", focus: "partName" },
+  "add-tournament": { page: "tournament.html", focus: "tournamentDate" }
+};
+// Sections that light up a bottom-nav item; history belongs to 配置.
+const SECTION_ALIASES = { historySection: "configSection" };
+
 const DESKTOP_NAV_STATE_KEY = "beybladeDesktopNavCollapsed";
 const SITE_THEME_STORAGE_KEY = "beybladeSiteTheme";
 const SITE_THEMES = ["dark", "beige"];
-const SITE_VERSION = "v1.9.2";
+const SITE_VERSION = "v1.10.0";
 
 const MENU_ICONS = {
   collection: '<path d="M6 3.75h12v17l-6-3.5-6 3.5z"/>',
@@ -50,7 +68,8 @@ const MENU_ICONS = {
   shield: '<path d="M12 3 20 6v6c0 5-3.4 8-8 10-4.6-2-8-5-8-10V6z"/><path d="m9 12 2 2 4-5"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/>',
-  admin: '<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4.4 3.5-6.5 8-6.5s7.2 2.1 8 6.5"/>'
+  admin: '<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4.4 3.5-6.5 8-6.5s7.2 2.1 8 6.5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>'
 };
 
 function normalizeSiteTheme(theme) {
@@ -152,20 +171,63 @@ function currentPageName() {
   return location.pathname.split("/").pop() || "index.html";
 }
 
-function getInitialToolSection() {
-  const hash = location.hash.replace("#", "");
-  return ["collectionSection", "inventorySection", "configSection"].includes(hash)
-    ? hash
-    : "collectionSection";
+/* ===== nav model (pure: no DOM, tested in tests/site-navigation.test.mjs) ===== */
+const TOOL_SECTIONS = ["collectionSection", "inventorySection", "configSection", "historySection"];
+
+function sectionForHash(hash) {
+  const id = String(hash || "").replace("#", "");
+  if (TOOL_SECTIONS.includes(id)) return id;
+  if (QUICK_ACTION_TARGETS[id]?.section) return QUICK_ACTION_TARGETS[id].section;
+  return "collectionSection";
 }
 
-let activeToolSection = getInitialToolSection();
+function getQuickActionTarget(hash, page) {
+  const target = QUICK_ACTION_TARGETS[String(hash || "").replace("#", "")];
+  return target && target.page === page ? target : null;
+}
+
+function navItemActive(item, page, section) {
+  if (item.suppressActive || item.action) return false;
+  if (item.section) return page === "index.html" && item.section === section;
+  return (item.page || item.href.split("#")[0]) === page;
+}
+
+function bottomItemActive(item, page, section) {
+  if (item.bottomSections) return page === "index.html" && item.bottomSections.includes(SECTION_ALIASES[section] || section);
+  return navItemActive(item, page, section);
+}
+
+// "更多" lights up on pages that have no bottom-nav item of their own.
+function moreActive(page) {
+  return !["index.html", "tournament.html"].includes(page);
+}
+
+function buildBottomNavHtml(page, section) {
+  const items = SIDE_MENU_ITEMS.filter(item => item.bottom).sort((a, b) => a.bottom - b.bottom);
+  const link = item => {
+    const active = bottomItemActive(item, page, section);
+    const targets = item.bottomSections ? ` data-section-targets="${item.bottomSections.join(" ")}"` : "";
+    return `<a href="${item.href}" class="bottom-nav-link${active ? " active" : ""}"${targets}${active ? ' aria-current="page"' : ""}>${buildMenuLinkInnerHtml(item, true)}</a>`;
+  };
+  const add = `<button type="button" class="bottom-nav-link bottom-nav-add" data-quick-add aria-haspopup="menu" aria-controls="quickAddMenu" aria-expanded="false"><span class="nav-symbol nav-symbol-add" aria-hidden="true">＋</span><span>新增</span></button>`;
+  const more = `<button type="button" class="bottom-nav-link bottom-nav-more${moreActive(page) ? " active" : ""}" data-open-more aria-label="更多：競賽統計、說明與設定"><span class="nav-symbol" aria-hidden="true">⋯</span><span>更多</span></button>`;
+  const byPos = new Map(items.map(item => [item.bottom, link(item)]));
+  return [byPos.get(1), byPos.get(2), add, byPos.get(4), more].join("");
+}
+
+function buildQuickAddMenuHtml() {
+  return QUICK_ACTIONS.map(action => {
+    const menuAction = action.action ? ` data-menu-action="${action.action}"` : "";
+    const note = action.note ? `<small>${action.note}</small>` : "";
+    return `<a role="menuitem" href="${action.href}" class="quick-add-item" data-quick-action="${action.id}"${menuAction}><span>${action.label}</span>${note}</a>`;
+  }).join("");
+}
+/* ===== end nav model ===== */
+
+let activeToolSection = sectionForHash(location.hash);
 
 function isMenuItemActive(item) {
-  if (item.suppressActive || item.action) return false;
-  const page = currentPageName();
-  if (item.section) return page === "index.html" && item.section === activeToolSection;
-  return (item.page || item.href.split("#")[0]) === page;
+  return navItemActive(item, currentPageName(), activeToolSection);
 }
 
 function buildMenuIcon(iconName) {
@@ -191,6 +253,7 @@ function buildSideMenuInnerHtml() {
         <div class="side-menu-subtitle">BEYBLADE MANAGER</div>
       </div>
     </div>
+    <button type="button" class="side-menu-add" data-quick-add aria-haspopup="menu" aria-controls="quickAddMenu" aria-expanded="false">${buildMenuIcon("plus")}<span>新增</span></button>
     <div class="side-menu-links">
   `;
   let currentGroup = "";
@@ -207,7 +270,9 @@ function buildSideMenuInnerHtml() {
     const sectionTarget = item.section ? ` data-section-target="${item.section}"` : "";
     const menuAction = item.action ? ` data-menu-action="${item.action}"` : "";
     const currentAttribute = activeClass ? ' aria-current="page"' : "";
-    html += `<a href="${item.href}" class="side-menu-link${activeClass}"${sectionTarget}${menuAction}${adminOnly}${currentAttribute}>${buildMenuLinkInnerHtml(item)}</a>`;
+    const childClass = item.child ? " is-child" : "";
+    const title = item.title ? ` title="${item.title}"` : "";
+    html += `<a href="${item.href}" class="side-menu-link${childClass}${activeClass}"${sectionTarget}${menuAction}${adminOnly}${currentAttribute}${title}>${buildMenuLinkInnerHtml(item)}</a>`;
   });
 
   html += `
@@ -269,14 +334,75 @@ function ensureBottomNavShell() {
 
 function renderBottomNav() {
   const nav = ensureBottomNavShell();
-  nav.innerHTML = SIDE_MENU_ITEMS
-    .filter(item => item.bottom)
-    .map(item => {
-      const activeClass = isMenuItemActive(item) ? " active" : "";
-      const sectionTarget = item.section ? ` data-section-target="${item.section}"` : "";
-      return `<a href="${item.href}" class="bottom-nav-link${activeClass}"${sectionTarget}>${buildMenuLinkInnerHtml(item, true)}</a>`;
-    })
-    .join("");
+  nav.innerHTML = buildBottomNavHtml(currentPageName(), activeToolSection);
+  nav.querySelector("[data-open-more]")?.addEventListener("click", openSideMenu);
+}
+
+/* ===== ＋新增 menu ===== */
+let quickAddTrigger = null;
+
+function ensureQuickAddMenu() {
+  let menu = document.getElementById("quickAddMenu");
+  if (!menu) {
+    document.body.insertAdjacentHTML("beforeend", `<div class="quick-add-backdrop" hidden></div><div id="quickAddMenu" class="quick-add-menu" role="menu" aria-label="新增" hidden>${buildQuickAddMenuHtml()}</div>`);
+    menu = document.getElementById("quickAddMenu");
+    document.querySelector(".quick-add-backdrop").addEventListener("click", () => closeQuickAddMenu(false));
+    menu.addEventListener("keydown", event => {
+      const items = [...menu.querySelectorAll('[role="menuitem"]')];
+      const index = items.indexOf(document.activeElement);
+      if (event.key === "ArrowDown") { event.preventDefault(); items[(index + 1) % items.length].focus(); }
+      if (event.key === "ArrowUp") { event.preventDefault(); items[(index - 1 + items.length) % items.length].focus(); }
+      if (event.key === "Home") { event.preventDefault(); items[0].focus(); }
+      if (event.key === "End") { event.preventDefault(); items[items.length - 1].focus(); }
+      if (event.key === "Tab") closeQuickAddMenu(false);
+    });
+    menu.querySelectorAll(".quick-add-item").forEach(item => item.addEventListener("click", () => closeQuickAddMenu(false)));
+    installQuickEditorLinks(menu);
+  }
+  return menu;
+}
+
+function openQuickAddMenu(trigger) {
+  const menu = ensureQuickAddMenu();
+  closeSideMenu();
+  quickAddTrigger = trigger;
+  menu.hidden = false;
+  document.querySelector(".quick-add-backdrop").hidden = false;
+  document.body.classList.add("quick-add-open");
+  document.querySelectorAll("[data-quick-add]").forEach(button => button.setAttribute("aria-expanded", String(button === trigger)));
+  menu.querySelector('[role="menuitem"]')?.focus();
+}
+
+function closeQuickAddMenu(restoreFocus = true) {
+  const menu = document.getElementById("quickAddMenu");
+  if (!menu || menu.hidden) return;
+  menu.hidden = true;
+  document.querySelector(".quick-add-backdrop").hidden = true;
+  document.body.classList.remove("quick-add-open");
+  document.querySelectorAll("[data-quick-add]").forEach(button => button.setAttribute("aria-expanded", "false"));
+  if (restoreFocus) quickAddTrigger?.focus();
+  quickAddTrigger = null;
+}
+
+function installQuickAddTriggers() {
+  document.querySelectorAll("[data-quick-add]").forEach(button => {
+    button.addEventListener("click", () => {
+      const menu = document.getElementById("quickAddMenu");
+      if (menu && !menu.hidden && quickAddTrigger === button) closeQuickAddMenu();
+      else openQuickAddMenu(button);
+    });
+  });
+}
+
+// Scrolls to and focuses the field for #add-collection / #add-part / #add-tournament.
+function handleQuickActionHash() {
+  const target = getQuickActionTarget(location.hash, currentPageName());
+  if (!target) return;
+  if (target.section) updateNavigationActiveState(target.section);
+  const field = document.getElementById(target.focus);
+  if (!field) return;
+  field.scrollIntoView({ block: "center", behavior: "smooth" });
+  if (!field.disabled) field.focus({ preventScroll: true });
 }
 
 function installSideMenuActions() {
@@ -284,7 +410,11 @@ function installSideMenuActions() {
     link.addEventListener("click", closeSideMenu);
   });
 
-  document.querySelectorAll('[data-menu-action="quick-editor"]').forEach(link => {
+  installQuickEditorLinks(document);
+}
+
+function installQuickEditorLinks(root) {
+  root.querySelectorAll('[data-menu-action="quick-editor"]').forEach(link => {
     link.addEventListener("click", event => {
       if (currentPageName() !== "index.html") return;
       event.preventDefault();
@@ -311,19 +441,22 @@ function renderHelpPageNavigation() {
 
 function updateNavigationActiveState(sectionId) {
   if (sectionId) activeToolSection = sectionId;
+  const onIndex = currentPageName() === "index.html";
 
   document.querySelectorAll("[data-section-target]").forEach(link => {
-    link.classList.toggle(
-      "active",
-      currentPageName() === "index.html" && link.dataset.sectionTarget === activeToolSection
-    );
+    link.classList.toggle("active", onIndex && link.dataset.sectionTarget === activeToolSection);
+  });
+  document.querySelectorAll("[data-section-targets]").forEach(link => {
+    const active = onIndex && link.dataset.sectionTargets.split(" ").includes(SECTION_ALIASES[activeToolSection] || activeToolSection);
+    link.classList.toggle("active", active);
+    if (active) link.setAttribute("aria-current", "page"); else link.removeAttribute("aria-current");
   });
 }
 
 function installToolSectionTracking() {
   if (currentPageName() !== "index.html") return;
 
-  const sections = ["collectionSection", "inventorySection", "configSection"]
+  const sections = TOOL_SECTIONS
     .map(id => document.getElementById(id))
     .filter(Boolean);
 
@@ -396,9 +529,15 @@ function installAdminMenuGuard() {
   restoreDesktopNavState();
   installToolSectionTracking();
   installAdminMenuGuard();
+  ensureQuickAddMenu();
+  installQuickAddTriggers();
+  handleQuickActionHash();
+  window.addEventListener("hashchange", handleQuickActionHash);
 
   document.addEventListener("keydown", event => {
-    if (event.key === "Escape") closeSideMenu();
+    if (event.key !== "Escape") return;
+    closeQuickAddMenu();
+    closeSideMenu();
   });
 })();
 
@@ -407,3 +546,5 @@ window.closeSideMenu = closeSideMenu;
 window.toggleDesktopNav = toggleDesktopNav;
 window.setSiteTheme = setSiteTheme;
 window.toggleSiteTheme = toggleSiteTheme;
+window.openQuickAddMenu = openQuickAddMenu;
+window.closeQuickAddMenu = closeQuickAddMenu;

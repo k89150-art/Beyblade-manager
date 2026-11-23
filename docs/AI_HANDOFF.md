@@ -4,10 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Phase 7-R 已正式部署完成）
+- 目前執行者：無（Phase 7-1 導覽已完成本機 commit，待授權部署）
 - 寫入範圍：目前沒有進行中的寫入任務
-- 正式版本：`f1df0bc5da31eeaed64c6ea5a32e5074f4a731fa`（`origin/main`，GitHub Pages deployment `7989712953` success）。本筆部署紀錄 commit 只在本機，未 push。
-- Phase 7 設計文件在未追蹤的 `design/phase7/`（是否 commit 待使用者決定）。
+- 正式版本：`f1df0bc5da31eeaed64c6ea5a32e5074f4a731fa`（`origin/main`，GitHub Pages deployment `7989712953` success）。本機 `main` 領先 3 個 commit（`38afe4d` 部署紀錄、`64263e4` Phase 7 設計文件、Phase 7-1 導覽），皆未 push。
+- Phase 7 設計文件已 commit 在 `design/phase7/`。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -33,6 +33,17 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（Phase 7-1，導覽骨架）
+
+- 任務：依使用者核准的 `design/phase7/09-phase7-1-navigation-spec.md`（含三項預設：側欄「零件」放在收藏下、「記錄回合」開啟賽事頁、版本 v1.10.0）實作全站導覽（D-020）。
+- 主要內容：手機底部導覽改為「收藏／配置／＋新增／賽事／更多」；新增「＋新增」快速選單（新增收藏、新增零件、建立配置、新增比賽、記錄回合），手機為底部 sheet、桌面為側欄上方按鈕＋popover；「更多」開啟側欄；競賽統計移到側欄「參考」。快速新增只以 hash 導向既有欄位並聚焦，不寫入資料。新增 `--ui-*` 設計 tokens（深色／米色）。版本 v1.10.0，更新日誌與使用說明同步。
+- 修改檔案：`site-menu.js`、`site-menu.css`、11 個 HTML 頁（`site-menu.*?v=20261124-v1100`；`style.css`、`script.js`、`tournament.js` 版本未變）、`guide.html`、`changelog.html`、`tests/site-navigation.test.mjs`（新）、`tests/help-pages.test.mjs`、`tests/manager-ui-refresh.test.mjs`、`README.md`／`AGENTS.md`（測試指令、導覽契約）、`docs/PROJECT_DECISIONS.md`（D-020；D-019 狀態改為已部署）、`docs/PROJECT_ARCHITECTURE.md`、`design/phase7/`（規格 09）。
+- 測試（使用者 Windows 本機，Node 24.18）：13 個測試檔 313/313 PASS（307＋新增 6）；validate PASS；build PASS（34 files）；`git diff --check` PASS。本機預覽（未登入）：11 頁 × 390／768／1440 × 深色／米色無水平 overflow、Console Error 0、active 狀態正確（主頁→收藏、賽事頁→賽事、其他→更多）；375 寬實際操作：＋新增開啟並聚焦第一項、方向鍵移動、Escape 關閉並還原焦點、點背景關閉、更多開啟側欄、新增零件導向 `#add-part` 並聚焦 `partName`。
+- 未驗證：登入後的實際新增流程（只驗證導向與聚焦）；賽事頁 `#add-tournament` 只由測試確認欄位存在。
+- 資料庫／部署風險：無資料、Schema、Rules、交易流程變更。部署只需確認載入 `site-menu.js?v=20261124-v1100`；舊分頁只會顯示舊導覽。
+- 下一位注意：底部導覽與「＋新增」內容是 D-020 契約，改動需使用者核准；收藏「零件」分頁化、組裝器、賽事面板屬後續 Phase。
+- Commit / Deploy：本機 commit，未 push、未部署。
 
 ### 2026-11-23 — Claude Code（Phase 7-R，正式部署）
 

@@ -38,6 +38,7 @@
 | [06-implementation-plan.md](06-implementation-plan.md) | 分階段實作、驗收、回退與風險 |
 | [07-rules-fix-spec.md](07-rules-fix-spec.md) | 第一步：組裝規則修正的實作規格（已核准並部署為 D-019） |
 | [08-integrated-ac-prototype.md](08-integrated-ac-prototype.md) | Phase 7A：A＋C 整合原型（`prototypes/integrated-ac/index.html`），待檢視 |
+| [09-phase7-1-navigation-spec.md](09-phase7-1-navigation-spec.md) | Phase 7-1：導覽骨架與導覽元件的實作規格（待核准） |
 | [prototypes/](prototypes/index.html) | 靜態 HTML 原型（假資料，不連 Firebase） |
 
 原型不屬於網站建置：`scripts/build-site.mjs` 與 `scripts/validate-site.mjs` 只處理根目錄檔案。若日後推送到 GitHub，legacy Pages 會公開這個資料夾；推送前需決定是否保留在 repository 內。
