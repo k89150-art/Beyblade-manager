@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><title>K-1 isolation check</title>
+<style>iframe{border:1px solid #888;height:600px;margin:4px;vertical-align:top}</style></head>
+<body>
+<pre id="out">running…</pre>
+<script>
+const MODES = ["visible", "displayNone", "sectionHidden", "rowHidden", "filterAxis", "visibilityHidden", "clip"];
+const WIDTHS = [390, 1440], THEMES = ["dark", "beige"];
+const results = [];
+const total = MODES.length * WIDTHS.length * THEMES.length;
+window.addEventListener("message", e => {
+  if (!e.data || !e.data.k1) return;
+  results.push(e.data);
+  if (results.length === total) summarize();
+});
+WIDTHS.forEach(w => THEMES.forEach(t => MODES.forEach(m => {
+  const f = document.createElement("iframe");
+  f.style.width = w + "px";
+  f.src = `frame.html?mode=${m}&theme=${t}&w=${w}`;
+  document.body.appendChild(f);
+})));
+function diffTables(a, b) {
+  const out = [];
+  for (const table of Object.keys(a)) {
+    const ra = a[table], rb = b[table];
+    if (ra.length !== rb.length) { out.push(`${table}: rows ${ra.length} vs ${rb.length}`); continue; }
+    ra.forEach((row, i) => {
+      const x = JSON.stringify(row), y = JSON.stringify(rb[i]);
+      if (x !== y) {
+        const fields = [...new Set([...Object.keys(row), ...Object.keys(rb[i])])].filter(k => JSON.stringify(row[k]) !== JSON.stringify(rb[i][k]));
+        fields.forEach(k => {
+          if (k === "cells") row.cells.forEach((c, j) => { if (c !== rb[i].cells[j]) out.push(`${table}[${i}].cells[${j}]: ${JSON.stringify(c)} vs ${JSON.stringify(rb[i].cells[j])}`); });
+          else out.push(`${table}[${i}].${k}: ${JSON.stringify(row[k])} vs ${JSON.stringify(rb[i][k])}`);
+        });
+      }
+    });
+  }
+  return out;
+}
+function summarize() {
+  const errors = results.filter(r => !r.ok);
+  const base = results.find(r => r.ok && r.mode === "visible" && r.width === 1440 && r.theme === "dark");
+  const rows = results.filter(r => r.ok).map(r => ({
+    mode: r.mode, theme: r.theme, width: r.width,
+    samePrintsAsVisibleDesktop: Object.keys(base.prints).every(k => base.prints[k] === r.prints[k]),
+    diffs: diffTables(base.data, r.data)
+  }));
+  const inputVsVisible = diffTables(
+    { beybladeTable: base.inputs.beybladeTable.map(x => ({ ...x, stockAutoFilled: x.stockAutoFilled })), partTable: base.inputs.partTable, configTable: base.inputs.configTable, historyTable: base.inputs.historyTable },
+    base.data);
+  window.__k1 = { errors, rows, inputVsVisible, baseOrder: base.data.beybladeTable.map(r => r.cells[0] + "|" + r.cells[1] + "|" + (r.stockSetInstanceId || "") + "|" + (r.customNote || "")) };
+  document.getElementById("out").textContent = JSON.stringify(window.__k1, null, 1);
+}
+</script>
+</body></html>

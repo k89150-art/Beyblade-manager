@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body>
+<script type="module">
+// Phase 7-2a integration check (A-01..A-08, D-020, Q1 DOM, K-1 on the
+// integrated page). Runs the REAL source text of the changed script.js
+// (sliced by markers, as tests/*.test.mjs do) on the REAL changed index.html
+// markup with the REAL style.css / site-menu.css, in a real browser.
+// Stubs: sign-in state, write session, saveData (counted, never writes),
+// refreshSelectors, confirm/alert (recorded). No Firebase.
+import { fingerprintTable, pickCollectionTables } from "/repo/collection-sync.js";
+import { getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel } from "/repo/stock-catalog-names.js";
+import * as view from "/repo/collection-view.js";
+
+const params = new URLSearchParams(location.search);
+const MODE = params.get("mode") || "full", THEME = params.get("theme") || "dark";
+const report = data => parent.postMessage({ i72a: true, mode: MODE, theme: THEME, width: innerWidth, ...data }, "*");
+// Hidden panes do not run requestAnimationFrame; the check uses timers instead.
+const frame = () => new Promise(r => setTimeout(r, 40));
+const checks = [];
+const check = (id, ok, detail = "") => checks.push({ id, ok: Boolean(ok), detail: String(detail).slice(0, 300) });
+
+try {
+  const html = await (await fetch("/repo/index.html")).text();
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map(l => l.getAttribute("href")).filter(h => !/^https?:/.test(h));
+  await Promise.all(links.map(href => new Promise(ok => { const l = document.createElement("link"); l.rel = "stylesheet"; l.href = "/repo/" + href; l.onload = l.onerror = ok; document.head.appendChild(l); })));
+  doc.querySelectorAll("script").forEach(s => s.remove());
+  document.body.className = doc.body.className;
+  document.body.innerHTML = doc.body.innerHTML;
+  if (THEME === "beige") document.documentElement.dataset.theme = "beige";
+  if (MODE === "fail") document.getElementById("partViewList").remove();   // forces the fallback
+
+  const src = (await (await fetch("/repo/script.js")).text()).replace(/\r\n/g, "\n");
+  const slice = (a, b) => { const i = src.indexOf(a), j = src.indexOf(b, i + 1); if (i < 0 || j < 0) throw new Error("slice " + a); return src.slice(i, j); };
+  const code = [
+    slice("let inventoryFilterType", "\n", 0) + "\n",
+    slice("const partTypes = [", "function normalizeAllModelCells("),
+    slice("const RANDOM_BOOSTER_MODELS", "// Phase 7-R: the ratchet rules"),
+    slice("function getSeriesFromModel(", "function getConfigStructureModeFromRow("),
+    slice("const TABLE_SORT_ORDER", "function sortConfigTable("),
+    slice("function addStock(", "function closeConfigActionMenus("),
+    slice("function getEditingButtons(", "function normalizeComboValue("),
+    slice("function createHistoryRow(", "function findHistoryByComboKey("),
+    slice("window.deleteRow = async function", "function getConfigEditCurrentValue("),     // deleteRow, editRow, saveEditRow, cancelEditRow, rebuildRow, updateMainStockName
+    slice("function getTableData(", "/* ===== D-018 collection saves: begin"),
+    slice("const QUICK_ADD_TEXT_FIELD_IDS", "async function handleAuthStateChange("),
+    slice("const STOCK_ROW_METADATA_KEYS", "function applyDataToTables("),
+    slice("function getTotalParts(", "function toHalfWidth("),
+    slice("function installUiSummaryObservers(", "/* ===== Phase 7-2a collection view (R2): begin"),
+    slice("/* ===== Phase 7-2a collection view (R2): begin", "/* ===== Phase 7-2a collection view (R2): end")
+  ].join("\n");
+  const counters = { saveData: 0, confirms: [], alerts: [] };
+  window.confirm = text => { counters.confirms.push(text); return true; };
+  window.alert = text => { counters.alerts.push(text); };
+  const api = new Function("deps", `
+    const { getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel, view, counters } = deps;
+    const { COLLECTION_VIEW_TABS, buildPartItems, buildStockItems, collectionHashTarget, isAddPanelOpen, listNotice, otherTab, rowSignature } = view;
+    const requestAnimationFrame = callback => setTimeout(callback, 16);
+    const DATA_SESSION_STATES = { LOADING: "loading", READY: "ready", ERROR: "error", READONLY: "readonly" };
+    const isReadOnly = () => false;
+    const requireLogin = () => true;
+    const dataSessionGuard = { captureWriteSession: () => ({}), isWriteSessionCurrent: () => true, snapshot: () => ({ state: "ready" }) };
+    const refreshSelectors = () => {};
+    const renderStockAutoPreview = () => {};
+    const askDeleteReasonForConfig = async () => null;
+    const saveData = () => { counters.saveData += 1; };
+    let currentUser = { uid: "user-a" }, stockProductsByRecordId = new Map();
+    ${code}
+    function load(data) {
+      clearAllTables();
+      data.beybladeTable.forEach(item => createBeybladeRow(item.cells, item.mainStockName, item));
+      data.partTable.forEach(item => createPartRow(item.cells));
+      data.historyTable.forEach(item => createHistoryRow(item));
+      data.configTable.forEach(item => createConfigRow(item.cells, item.mainStockName));
+      sortBeybladeTable();
+    }
+    function refreshUi() { updateUiSummaries(); updateResponsiveTableCells(); applyInventoryFilters(); scheduleCollectionViewRender(); }
+    return { load, refreshUi, collectCurrentData, installCollectionView, installUiSummaryObservers, setCollectionTab, applyCollectionHash, collectionViewState,
+      resetQuickAddFormsForAccountChange, isCollectionViewActive,
+      setFilter: v => { inventoryFilterType = v; } };
+  `)({ getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel, view, counters });
+
+  const set = (code, layer, fix, axis, extra = {}) => ({ cells: [code, layer, "-", "-", "-", "-", "-", fix, axis], mainStockName: "-", stockAutoFilled: "true", stockRecordId: code, stockProductCode: code, stockAssemblySystem: "STANDARD", stockRatchetMode: "standard", ...extra });
+  const DATA = {
+    beybladeTable: [
+      set("BX-01", "蒼龍神劍", "3-60", "F"),
+      set("BX-01", "蒼龍神劍", "3-60", "F"),
+      set("BX-01", "蒼龍神劍", "3-60", "F", { customNote: "keep me" }),
+      set("BX-00", "歐比王肯諾比", "4-60", "P", { stockRecordId: "BX-00-01-01", stockSetId: "BX-00-01", stockSetInstanceId: "BX-00-01-aaaa" }),
+      set("BX-00", "葛里維斯將軍", "3-80", "HN", { stockRecordId: "BX-00-01-02", stockSetId: "BX-00-01", stockSetInstanceId: "BX-00-01-aaaa" }),
+      { cells: ["CX-03", "紋章鎖金屬超越S", "紋章鎖", "超越/金屬", "超越", "金屬", "S", "4-55", "LO"], mainStockName: "", stockAutoFilled: "true", stockRecordId: "CX-03", stockAssemblySystem: "CX_4P" },
+      { cells: ["CX-01", "蒼龍勇  氣S", "蒼龍", "勇  氣", "-", "-", "S", "6-60", "V"], mainStockName: "勇  氣", stockAutoFilled: "true", stockRecordId: "CX-01", stockAssemblySystem: "CX_3P" },
+      { cells: ["CX-11", "-", "帝王", "威能", "-", "-", "-", "-", "Op"], mainStockName: "威能", stockAutoFilled: false },
+      { cells: ["UX-01", "雙  空白", "-", "-", "-", "-", "-", "1-60", "A"], mainStockName: "-" },
+      { cells: ["UX-02", "全形　空白", "-", "-", "-", "-", "-", "3-70", "H"], mainStockName: "-" },
+      { cells: ["UX-03", "不斷行 空白", "-", "-", "-", "-", "-", "3-80", "FB"], mainStockName: "-" },
+      { cells: ["UX-04", "定位\t字元", "-", "-", "-", "-", "-", "9-60", "LR"], mainStockName: "-" },
+      { cells: ["UX-06", "  前後空白  ", "-", "-", "-", "-", "-", "4-60", "T"], mainStockName: "-" }
+    ],
+    partTable: [
+      { cells: ["固鎖", "3-60", "2"] },
+      { cells: ["軸心", "雙  空白", "1"] },
+      { cells: ["上蓋", "全形　空白", "1"] },
+      { cells: ["軸心", "F", "1"] },
+      { cells: ["軸心", "F", "3"] }
+    ],
+    configTable: [
+      { cells: ["CX-CUSTOM", "紋章鎖金屬超越S", "紋章鎖", "超越/金屬", "超越", "金屬", "S", "4-55", "LO"], mainStockName: "" },
+      { cells: ["BX-CUSTOM", "雙  空白", "-", "-", "-", "-", "-", "3-60", "F"], mainStockName: "-" }
+    ],
+    historyTable: [{ model: "BX-CUSTOM", combo: "蒼龍  神劍", fix: "3-60", axis: "F", result: "好用", note: "備註  兩格", date: "2026/11/24", comboKey: "k1" }]
+  };
+
+  const collect = () => { const out = api.collectCurrentData(); delete out.updatedAt; const t = pickCollectionTables(out); return { json: JSON.stringify(t), prints: Object.values(t).map(fingerprintTable).join("|"), tables: t }; };
+  const rowsOf = id => Array.from(document.querySelectorAll(`#${id} tbody tr`));
+  const sameRows = (a, b) => a.length === b.length && a.every((row, i) => row === b[i]);
+
+  window.__api = api; window.__counters = counters;
+  api.load(DATA);
+  if (MODE === "probe") {
+    // Existing behaviour (not 7-2a): what collectCurrentData returns right after rows are
+    // created versus after the first refreshUi (card classes) of the same page.
+    const before = collect();
+    api.refreshUi(); await frame();
+    const after = collect();
+    const diffs = [];
+    for (const t of Object.keys(before.tables)) before.tables[t].forEach((row, i) => { const a = JSON.stringify(row), b = JSON.stringify(after.tables[t][i]); if (a !== b) diffs.push(t + "[" + i + "] " + a + " -> " + b); });
+    report({ ok: true, checks: [], probe: diffs });
+  } else {
+  api.refreshUi();   // production: the summary observer runs refreshUi right after rows are created
+  await frame();
+  // Baseline: the tables as they render before the display layer starts (visible, not clipped).
+  const visible = collect();
+  const rowsBefore = { b: rowsOf("beybladeTable"), p: rowsOf("partTable") };
+  api.installCollectionView();      // same order as the DOMContentLoaded handler
+  api.installUiSummaryObservers();
+  api.refreshUi();
+  await frame();
+  const installed = collect();
+  const failed = !api.isCollectionViewActive();
+
+  if (MODE === "fail") {
+    const box = document.getElementById("partSourceBox");
+    check("A-08 fallback active", failed && document.body.classList.contains("collection-view-failed"));
+    check("A-08 tables visible again", !box.classList.contains("is-source-hidden") && !box.hasAttribute("inert") && !document.getElementById("beybladeSourceBox").classList.contains("is-source-hidden"));
+    check("A-08 both sections shown, tabs hidden", !document.getElementById("collectionSection").hidden && !document.getElementById("inventorySection").hidden && document.getElementById("collectionTabs").hidden);
+    check("A-08 data unchanged", installed.json === visible.json && installed.prints === visible.prints);
+    check("A-08 no save", counters.saveData === 0);
+    report({ ok: true, checks });
+  } else {
+    const sbox = document.getElementById("beybladeSourceBox"), pbox = document.getElementById("partSourceBox");
+    check("K-1 boxes clip-hidden + inert + aria-hidden", [sbox, pbox].every(b => b.classList.contains("is-source-hidden") && b.hasAttribute("inert") && b.getAttribute("aria-hidden") === "true"));
+    check("K-1 no display/visibility on boxes or tables", [sbox, pbox, document.getElementById("beybladeTable"), document.getElementById("partTable")].every(el => getComputedStyle(el).display !== "none" && getComputedStyle(el).visibility === "visible" && !el.hidden));
+    check("A-04 installed (clip) == visible (cells, mainStockName, metadata, order, prints)", installed.json === visible.json && installed.prints === visible.prints, installed.json === visible.json ? "" : "diff");
+
+    const states = [];
+    const step = async (label, fn) => { await fn(); api.refreshUi(); await frame(); const c = collect(); states.push({ label, same: c.json === visible.json && c.prints === visible.prints }); };
+    for (let i = 0; i < 5; i++) {
+      await step(`tab parts ${i}`, () => document.getElementById("collectionTabParts").click());
+      await step(`tab stock ${i}`, () => document.getElementById("collectionTabStock").click());
+    }
+    await step("keyboard ArrowRight", () => document.getElementById("collectionTabs").dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })));
+    await step("keyboard Home", () => document.getElementById("collectionTabs").dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true })));
+    await step("hash #inventorySection", () => api.applyCollectionHash("#inventorySection"));
+    await step("hash #add-collection", () => api.applyCollectionHash("#add-collection"));
+    await step("toggle add panels", () => { document.getElementById("collectionAddToggle").click(); document.getElementById("collectionAddToggle").click(); });
+    await step("filter 軸心", () => { document.querySelector('[data-inventory-filter="軸心"]').click?.(); api.setFilter("軸心"); });
+    await step("filter 上蓋 (hides the double-space part in the view)", () => api.setFilter("上蓋"));
+    await step("search", () => { document.getElementById("inventorySearchInput").value = "F"; });
+    await step("filter reset", () => { api.setFilter("all"); document.getElementById("inventorySearchInput").value = ""; });
+    check("A-01/A-02 every tab/hash/filter/search step keeps collectCurrentData and prints identical", states.every(s => s.same), states.filter(s => !s.same).map(s => s.label).join(","));
+    check("A-02 original <tr> identity and order unchanged", sameRows(rowsOf("beybladeTable"), rowsBefore.b) && sameRows(rowsOf("partTable"), rowsBefore.p));
+    check("A-02 no original part row hidden by the filter", rowsOf("partTable").every(r => !r.hidden));
+    check("A-05 no saveData during display operations", counters.saveData === 0, counters.saveData);
+
+    // View content mirrors the rows.
+    api.setFilter("all"); api.refreshUi(); await frame();
+    const stockArticles = document.querySelectorAll("#stockViewList .cv-item"), partArticles = document.querySelectorAll("#partViewList .cv-item");
+    check("R2 one item per stock row (G2: duplicates and set members separate)", stockArticles.length === rowsOf("beybladeTable").length, `${stockArticles.length}/${rowsOf("beybladeTable").length}`);
+    check("R2 one item per part row", partArticles.length === rowsOf("partTable").length);
+    check("R2 tab counts", document.getElementById("collectionTabStockCount").textContent === String(rowsOf("beybladeTable").length) && document.getElementById("collectionTabPartsCount").textContent === "5");
+    api.setFilter("軸心"); api.refreshUi(); await frame();
+    check("R2 filter applies to the view only", document.querySelectorAll("#partViewList .cv-item").length === 3 && rowsOf("partTable").length === 5);
+    api.setFilter("all"); api.refreshUi(); await frame();
+
+    // D-020 quick add.
+    api.setCollectionTab("stock"); document.getElementById("collectionAddToggle").click(); await frame();
+    api.applyCollectionHash("#add-part"); await frame();
+    const dbg = () => JSON.stringify({ active: document.activeElement?.id || document.activeElement?.tagName, inv: document.getElementById("inventorySection").hidden, col: document.getElementById("collectionSection").hidden, invBody: document.getElementById("inventoryAddBody").hidden, colBody: document.getElementById("collectionAddBody").hidden, tab: api.collectionViewState.tab });
+    check("D-020 #add-part: parts tab, form open, focus #partName", document.activeElement?.id === "partName" && !document.getElementById("inventorySection").hidden && document.getElementById("collectionSection").hidden && !document.getElementById("inventoryAddBody").hidden, dbg());
+    api.applyCollectionHash("#add-collection"); await frame();
+    check("D-020 #add-collection: stock tab, form open, focus #model", document.activeElement?.id === "model" && !document.getElementById("collectionSection").hidden && document.getElementById("inventorySection").hidden && !document.getElementById("collectionAddBody").hidden, dbg());
+
+    // Q1 panel keeps typed text; account change clears it.
+    const model = document.getElementById("model");
+    model.value = "UX-01"; document.getElementById("partName").value = "半途"; document.getElementById("partCount").value = "2"; document.getElementById("partType").value = "軸心";
+    document.getElementById("collectionAddToggle").click(); await frame();
+    check("Q1 collapse hides the form", document.getElementById("collectionAddBody").hidden && document.getElementById("collectionAddToggle").getAttribute("aria-expanded") === "false");
+    document.getElementById("collectionAddToggle").click(); await frame();
+    check("Q1 collapse/expand keeps same-account input (same element)", model.value === "UX-01" && document.getElementById("model") === model);
+    api.resetQuickAddFormsForAccountChange("user-a", "user-a");
+    check("Q1-04 same UID keeps input", model.value === "UX-01" && document.getElementById("partName").value === "半途");
+    document.getElementById("inventorySearchInput").value = "F"; api.setFilter("軸心");
+    api.resetQuickAddFormsForAccountChange("user-a", "user-b"); await frame();
+    check("Q1-01 A→B clears add forms", ["model", "partName", "partCount"].every(id => document.getElementById(id).value === "") && document.getElementById("partType").value === "上蓋");
+    check("Q1 A→B clears view search/filter", document.getElementById("inventorySearchInput").value === "" && document.querySelector('[data-inventory-filter="all"]').getAttribute("aria-pressed") === "true");
+    check("Q1 account reset leaves data untouched", collect().json === visible.json && counters.saveData === 0);
+
+    // Delete through the view: second of three identical rows.
+    api.setCollectionTab("stock"); api.refreshUi(); await frame();
+    const bx01Rows = rowsOf("beybladeTable").filter(r => r.cells[0].innerText === "BX-01");
+    const bx01Items = [...document.querySelectorAll("#stockViewList .cv-item")].filter(a => a.querySelector(".cv-code").textContent === "BX-01");
+    bx01Items[1].querySelector('[data-view-action="delete"]').click(); await frame(); await frame();
+    check("K4-01 delete removes exactly the chosen duplicate row", !bx01Rows[1].isConnected && bx01Rows[0].isConnected && bx01Rows[2].isConnected && counters.saveData === 1, counters.confirms.at(-1));
+    check("K4-01 other duplicates keep their unknown fields", collect().tables.beybladeTable.filter(r => r.cells[0] === "BX-01").some(r => r.customNote === "keep me"));
+    api.refreshUi(); await frame();
+
+    // Set delete: both rows go, through the existing set confirmation.
+    const setRows = rowsOf("beybladeTable").filter(r => r.dataset.stockSetInstanceId === "BX-00-01-aaaa");
+    [...document.querySelectorAll("#stockViewList .cv-item")].find(a => a.querySelector(".cv-code").textContent === "BX-00").querySelector('[data-view-action="delete"]').click(); await frame();
+    check("K4-06 set delete removes both set rows via the existing confirm", setRows.every(r => !r.isConnected) && /雙陀螺套組/.test(counters.confirms.at(-1)) && /歐比王肯諾比、葛里維斯將軍/.test(counters.confirms.at(-1)) && counters.saveData === 2, counters.confirms.at(-1));
+    api.refreshUi(); await frame();
+
+    // Stale row: the row changed after the list was drawn.
+    const ux01Row = rowsOf("beybladeTable").find(r => r.cells[0].innerText === "UX-01");
+    const ux01Button = [...document.querySelectorAll("#stockViewList .cv-item")].find(a => a.querySelector(".cv-code").textContent === "UX-01").querySelector('[data-view-action="delete"]');
+    ux01Row.cells[1].innerText = "被其他操作改變";
+    const confirmsBefore = counters.confirms.length;
+    ux01Button.click(); await frame();
+    check("K4-04 stale row: nothing deleted, user told", ux01Row.isConnected && counters.confirms.length === confirmsBefore && /資料已更新/.test(counters.alerts.at(-1) || "") && counters.saveData === 2);
+    ux01Row.cells[1].innerText = "雙  空白";
+    api.refreshUi(); await frame();
+
+    // Part edit on the original row.
+    api.setCollectionTab("parts"); api.refreshUi(); await frame();
+    const partRow = rowsOf("partTable")[0];
+    [...document.querySelectorAll("#partViewList .cv-item")].find(a => a.querySelector(".cv-title").textContent === "3-60").querySelector('[data-view-action="edit"]').click();
+    await frame(); await frame();
+    check("K5 edit reveals the original table (no clip, not inert) and focuses the row", !pbox.classList.contains("is-source-hidden") && !pbox.hasAttribute("inert") && pbox.classList.contains("is-editing") && partRow.contains(document.activeElement), JSON.stringify({ clip: pbox.classList.contains("is-source-hidden"), inert: pbox.hasAttribute("inert"), editing: pbox.classList.contains("is-editing"), active: document.activeElement?.tagName, rowEditing: partRow.dataset.editing }));
+    check("K5 data unchanged while editing (persisted cells)", collect().tables.partTable[0].cells.join() === "固鎖,3-60,2");
+    partRow.cells[2].querySelector("input").value = "5";
+    window.saveEditRow(partRow.cells[partRow.cells.length - 1].querySelector('button[onclick^="saveEditRow("]'), "part");
+    api.refreshUi(); await frame(); await frame();
+    check("K5-01 save goes through saveEditRow: one save, row updated", partRow.cells[2].innerText === "5" && counters.saveData === 3 && collect().tables.partTable[0].cells.join() === "固鎖,3-60,5");
+    check("K5 box clip-hidden again after editing", pbox.classList.contains("is-source-hidden") && pbox.hasAttribute("inert"));
+    [...document.querySelectorAll("#partViewList .cv-item")].find(a => a.querySelector(".cv-title").textContent === "3-60").querySelector('[data-view-action="edit"]').click();
+    await frame(); await frame();
+    partRow.cells[1].querySelector("input").value = "不會保存";
+    partRow.querySelector("input").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    api.refreshUi(); await frame(); await frame();
+    check("K5-02 Escape cancels through cancelEditRow: restored, no save", partRow.cells[1].innerText === "3-60" && counters.saveData === 3 && pbox.classList.contains("is-source-hidden"));
+
+    // Layout.
+    check("layout no horizontal overflow", document.documentElement.scrollWidth <= innerWidth + 1, `${document.documentElement.scrollWidth}/${innerWidth}`);
+    report({ ok: true, checks, visibleJson: visible.json.length });
+  }
+  }
+} catch (error) {
+  report({ ok: false, error: String(error && error.stack || error), checks });
+}
+</script>
+</body>
+</html>

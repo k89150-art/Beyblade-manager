@@ -1,0 +1,635 @@
+<title>收藏與零件 7-2 原型</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: A 工作台 — 左側欄｜中間清單｜右側詳細面板；手機為單欄清單＋底部 sheet。Tokens 取自 site-menu.css 的 --ui-*（深色為預設，米色為淺色）。 */
+:root {
+  --bg: #0b1015; --surface: #10161d; --raised: #1a222c; --line: #2b3743;
+  --text: #e6ebf1; --muted: #8d99a6; --accent: #4b91ff; --accent-text: #ffffff;
+  --bx: #4f8cff; --ux: #a371f7; --cx: #f0883e;
+  --good: #3fb950; --warn: #d29922; --bad: #f85149;
+  --chip: #1f2933; --shadow: 0 18px 40px rgba(0,0,0,.45);
+  --font: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 16px; --touch: 44px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #efe7da; --surface: #fbf7f0; --raised: #f3ece1; --line: #d6cab8;
+  --text: #2b2620; --muted: #776b5c; --accent: #2f6fd6; --accent-text: #ffffff;
+  --bx: #2f6fd6; --ux: #7d4cc9; --cx: #c4621d;
+  --good: #2f7d3a; --warn: #9a6a00; --bad: #c0362c;
+  --chip: #ebe2d3; --shadow: 0 18px 40px rgba(60,48,30,.22); color-scheme: light; } }
+:root[data-theme="light"] {
+  --bg: #efe7da; --surface: #fbf7f0; --raised: #f3ece1; --line: #d6cab8;
+  --text: #2b2620; --muted: #776b5c; --accent: #2f6fd6; --accent-text: #ffffff;
+  --bx: #2f6fd6; --ux: #7d4cc9; --cx: #c4621d;
+  --good: #2f7d3a; --warn: #9a6a00; --bad: #c0362c;
+  --chip: #ebe2d3; --shadow: 0 18px 40px rgba(60,48,30,.22); color-scheme: light; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 40px; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+.num { font-variant-numeric: tabular-nums; font-family: var(--mono); }
+
+/* 原型控制列（不是網站 UI） */
+.proto-head { max-width: 1240px; margin: 0 auto 14px; display: grid; gap: 10px; }
+.proto-head h1 { font-size: 20px; }
+.proto-head p { margin: 0; color: var(--muted); max-width: 72ch; }
+.proto-note { border: 1px dashed var(--line); border-radius: var(--r-md); padding: 8px 12px; color: var(--muted); font-size: 13px; }
+.opts { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.opt { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.opt > span { color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 5px 11px; min-height: 32px; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
+
+/* 裝置框 */
+.stage { max-width: 1240px; margin: 0 auto; overflow-x: auto; }
+.device { margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); position: relative; overflow: hidden; }
+.device.desktop { width: 1200px; height: 760px; display: grid; grid-template-columns: 208px minmax(0,1fr) 340px; }
+.device.mobile { width: 390px; height: 800px; display: grid; grid-template-rows: auto minmax(0,1fr) auto; }
+
+/* 側欄（D-020） */
+.side { border-right: 1px solid var(--line); padding: 14px 10px; display: flex; flex-direction: column; gap: 4px; background: var(--surface); }
+.brand { font-weight: 800; padding: 4px 8px 10px; }
+.side-add { display: flex; align-items: center; gap: 8px; min-height: var(--touch); border: 0; border-radius: var(--r-md); background: var(--accent); color: var(--accent-text); padding: 0 12px; font-weight: 700; margin-bottom: 8px; }
+.side small { color: var(--muted); padding: 8px 8px 2px; font-size: 12px; }
+.side a { display: block; padding: 7px 10px; border-radius: var(--r-sm); color: var(--text); text-decoration: none; }
+.side a.child { padding-left: 26px; font-size: 13px; }
+.side a.on { background: var(--raised); color: var(--accent); font-weight: 700; }
+
+/* 主區 */
+.main { display: grid; grid-template-rows: auto auto auto minmax(0,1fr); min-height: 0; min-width: 0; }
+.mobile .main { overflow: hidden; }
+.topbar { display: flex; align-items: center; gap: 12px; padding: 14px 18px 8px; }
+.topbar h2 { font-size: 20px; }
+.mobile .topbar { padding: 12px 14px 6px; }
+.sync { margin-left: auto; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.sync i { width: 8px; height: 8px; border-radius: 50%; background: var(--good); display: inline-block; }
+.tabs { display: flex; gap: 4px; padding: 0 18px; border-bottom: 1px solid var(--line); }
+.mobile .tabs { padding: 0 14px; }
+.tab { border: 0; background: none; padding: 10px 12px; min-height: var(--touch); color: var(--muted); border-bottom: 2px solid transparent; font-weight: 700; display: flex; gap: 6px; align-items: center; }
+.tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+.tab .cnt { font-size: 12px; background: var(--chip); color: var(--muted); border-radius: 999px; padding: 0 7px; }
+.anchors { display: flex; gap: 6px; padding: 8px 18px; border-bottom: 1px solid var(--line); }
+.anchors button { border: 1px solid var(--line); background: var(--raised); border-radius: 999px; padding: 4px 12px; min-height: 32px; }
+
+.tools { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 18px; align-items: center; }
+.mobile .tools { padding: 8px 14px; flex-wrap: nowrap; overflow-x: auto; }
+.search { flex: 1 1 220px; min-width: 160px; min-height: 38px; border: 1px solid var(--line); background: var(--raised); border-radius: var(--r-md); padding: 0 12px; }
+.mobile .search { flex: 0 0 100%; }
+.mobile .tools.row2 { padding-top: 0; }
+.chip { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 4px 11px; min-height: 34px; white-space: nowrap; color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--chip); color: var(--text); border-color: var(--accent); }
+.tools select { min-height: 36px; border: 1px solid var(--line); background: var(--raised); border-radius: var(--r-md); padding: 0 8px; }
+.tools .status { color: var(--muted); font-size: 12px; margin-left: auto; white-space: nowrap; }
+
+.scroll { overflow: auto; min-height: 0; padding: 0 18px 18px; }
+.mobile .scroll { padding: 0 14px 18px; }
+.addpanel { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--raised); padding: 12px; margin-bottom: 12px; display: grid; gap: 8px; }
+.addpanel summary { cursor: pointer; font-weight: 700; min-height: 28px; }
+.addrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.addrow input, .addrow select { flex: 1 1 140px; min-height: 40px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-sm); padding: 0 10px; }
+.btn { min-height: 40px; border: 1px solid var(--line); background: var(--raised); border-radius: var(--r-md); padding: 0 14px; font-weight: 700; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.btn.danger { color: var(--bad); }
+.hint { color: var(--muted); font-size: 12px; }
+.preview { font-size: 13px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--surface); border: 1px dashed var(--line); }
+
+/* 清單（V1） */
+.list { display: grid; }
+.lrow { display: grid; grid-template-columns: 86px minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 9px 10px; border-bottom: 1px solid var(--line); border-radius: var(--r-sm); background: none; border-left: 0; border-right: 0; border-top: 0; text-align: left; min-height: var(--touch); }
+.lrow:hover { background: var(--raised); }
+.lrow.sel { background: var(--raised); box-shadow: inset 3px 0 0 var(--accent); }
+.code { font-family: var(--mono); font-size: 12.5px; font-weight: 700; }
+.ser { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+.ser.BX { background: var(--bx); } .ser.UX { background: var(--ux); } .ser.CX { background: var(--cx); }
+.name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sub { color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badges { display: flex; flex-wrap: wrap; gap: 4px; }
+.badge { font-size: 12px; border-radius: var(--r-sm); background: var(--chip); padding: 1px 7px; white-space: nowrap; }
+.badge small { color: var(--muted); margin-right: 4px; }
+.mult { font-family: var(--mono); font-weight: 800; color: var(--accent); }
+.tag { font-size: 11px; border: 1px solid var(--line); border-radius: 999px; padding: 0 7px; color: var(--muted); white-space: nowrap; }
+
+/* 卡片（V2 與手機） */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.card { text-align: left; border: 1px solid var(--line); background: var(--raised); border-radius: var(--r-md); padding: 11px 12px; display: grid; gap: 6px; min-height: var(--touch); }
+.card.sel { border-color: var(--accent); }
+.card .top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.mobile .grid { grid-template-columns: 1fr; gap: 8px; }
+
+/* 零件數字 */
+.nums { display: flex; gap: 12px; align-items: baseline; justify-content: flex-end; }
+.nums div { display: grid; justify-items: end; line-height: 1.2; }
+.nums small { color: var(--muted); font-size: 11px; }
+.nums b { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 15px; }
+.avail b { font-size: 18px; }
+.ok { color: var(--good); } .zero { color: var(--warn); } .over { color: var(--bad); }
+.prow { grid-template-columns: minmax(0,1fr) auto; }
+.typepill { font-size: 11px; border-radius: 999px; padding: 0 8px; background: var(--chip); color: var(--muted); margin-right: 6px; }
+
+.section-h { display: flex; align-items: baseline; gap: 8px; margin: 14px 0 6px; font-size: 15px; }
+.section-h:first-child { margin-top: 4px; }
+.empty { color: var(--muted); padding: 30px 10px; text-align: center; }
+.summary { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.summary div { border: 1px solid var(--line); border-radius: var(--r-md); padding: 6px 12px; display: grid; min-width: 86px; }
+.summary small { color: var(--muted); font-size: 11.5px; }
+.summary b { font-family: var(--mono); font-size: 17px; }
+
+/* 詳細面板 */
+.detail { border-left: 1px solid var(--line); padding: 16px; overflow: auto; display: grid; align-content: start; gap: 14px; background: var(--surface); }
+.detail h3 { font-size: 18px; }
+.kv { display: grid; grid-template-columns: 82px minmax(0,1fr); gap: 6px 10px; font-size: 13.5px; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; }
+.box { border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 12px; display: grid; gap: 6px; }
+.box h4 { margin: 0; font-size: 13px; color: var(--muted); font-weight: 700; }
+.refs { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: 13px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: var(--r-md); }
+.stepper button { width: 40px; min-height: 40px; border: 0; background: none; font-size: 18px; }
+.stepper b { min-width: 34px; text-align: center; font-family: var(--mono); }
+.src { font-size: 12.5px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--raised); color: var(--muted); }
+
+/* 手機底部導覽（D-020） */
+.bnav { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); border-top: 1px solid var(--line); background: var(--surface); padding: 6px 4px 10px; }
+.bnav button { border: 0; background: none; display: grid; justify-items: center; gap: 2px; font-size: 11.5px; color: var(--muted); min-height: var(--touch); }
+.bnav button b { width: 28px; height: 24px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: var(--r-sm); font-size: 11px; }
+.bnav button.on { color: var(--accent); } .bnav button.on b { border-color: var(--accent); }
+.bnav .plus b { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-size: 22px; margin-top: -14px; }
+
+/* sheet、對話框、選單 */
+.scrim { position: absolute; inset: 0; background: rgba(0,0,0,.45); z-index: 20; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--surface); border-top: 1px solid var(--line); border-radius: var(--r-lg) var(--r-lg) 0 0; max-height: 82%; overflow: auto; padding: 8px 16px 18px; display: grid; gap: 12px; box-shadow: var(--shadow); }
+.sheet .grab { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 2px auto 4px; }
+.dialog { position: absolute; z-index: 31; left: 50%; top: 50%; transform: translate(-50%,-50%); width: min(420px, calc(100% - 32px)); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 18px; display: grid; gap: 12px; box-shadow: var(--shadow); }
+.dialog.scrimmed::before { content: none; }
+.dlg-scrim { z-index: 30; }
+.dialog h3 { font-size: 16px; }
+.impact { border-left: 3px solid var(--warn); padding: 6px 10px; background: var(--raised); border-radius: 0 var(--r-sm) var(--r-sm) 0; font-size: 13px; display: grid; gap: 4px; }
+.qmenu { position: absolute; z-index: 25; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 6px; display: grid; width: 220px; }
+.desktop .qmenu { left: 14px; top: 104px; }
+.mobile .qmenu { left: 0; right: 0; bottom: 0; width: auto; border-radius: var(--r-lg) var(--r-lg) 0 0; padding: 10px 12px 18px; }
+.qmenu button { text-align: left; border: 0; background: none; padding: 10px 12px; min-height: var(--touch); border-radius: var(--r-sm); }
+.qmenu button:hover, .qmenu button:focus-visible { background: var(--raised); }
+.qmenu small { color: var(--muted); display: block; font-size: 11.5px; }
+.toast { position: absolute; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 40; background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: var(--r-md); font-size: 13px; max-width: 90%; box-shadow: var(--shadow); }
+.desktop .toast { bottom: 24px; }
+
+.legend { max-width: 1240px; margin: 16px auto 0; display: grid; gap: 8px; color: var(--muted); font-size: 13px; }
+.legend b { color: var(--text); }
+@media (prefers-reduced-motion: no-preference) { .sheet { animation: up .18s ease-out; } @keyframes up { from { transform: translateY(24px); opacity: .6; } } }
+.final-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.final-chips span { font-size: 12px; border: 1px solid var(--accent); color: var(--text); border-radius: 999px; padding: 2px 10px; }
+.tools .seg button { min-height: 34px; }
+.confirm { margin: 0; white-space: pre-wrap; font-family: var(--font); font-size: 13.5px; line-height: 1.6; max-height: 50vh; overflow: auto; }
+.confirm-label { margin: 0; font-size: 12px; color: var(--muted); }
+.box.editing { border-color: var(--accent); }
+</style>
+
+<header class="proto-head">
+  <h1>Phase 7-2 收藏與零件｜最終設計原型</h1>
+  <p>設計已定案（2026-11-24），實作尚未授權。預設畫面就是最終設計；「歷史選項」只供比較，標示「未採用」的選項不會實作。</p>
+  <div class="proto-note">原型使用假資料，不連接 Firebase。新增、修改、刪除只示範確認文字（D1 影響提示），不會改動任何資料。正式網站的寫入仍走既有 <code>addRow</code>／<code>addPart</code>／<code>deleteRow</code>／<code>saveEditRow</code>／<code>saveData()</code>。</div>
+  <div class="final-chips" aria-label="已定案決策"><span>T1 分頁</span><span>P2 全部持有</span><span>R2 顯示層</span><span>V3 清單／卡片切換</span><span>G2 一顆一張</span><span>Q1 上方收合面板</span><span>S1 英文名限可靠對照</span><span>U2 配置引用</span><span>D1 只提示</span><span>N2 不加建立配置</span></div>
+  <div class="opts" id="opts"></div>
+</header>
+<div class="stage"><div id="device"></div></div>
+<section class="legend" id="legend"></section>
+
+<script>
+(() => {
+"use strict";
+// ---------- 假資料（名稱取自官方型錄；不是使用者的資料） ----------
+// rid：型錄編號。只有自動帶入且有 rid 的列，英文名才算「可靠對照」（S1）。
+const COLLECTION = [
+  { id: "c1", code: "UX-01", zh: "蒼龍爆刃", en: "DranBuster", rid: "UX-01", series: "UX", auto: true, parts: [["上蓋","蒼龍爆刃"],["固鎖","1-60"],["軸心","A"]] },
+  { id: "c2", code: "UX-02", zh: "惡魔重錘", en: "HellsHammer", rid: "UX-02", series: "UX", auto: true, parts: [["上蓋","惡魔重錘"],["固鎖","3-70"],["軸心","H"]] },
+  { id: "c3", code: "UX-08", zh: "霜輝銀狼", en: "Silver Wolf", rid: "UX-08", series: "UX", auto: true, parts: [["上蓋","霜輝銀狼"],["固鎖","3-80"],["軸心","FB"]] },
+  { id: "c4", code: "UX-11", zh: "衝擊龍神", en: "Impact Drake", rid: "UX-11", series: "UX", auto: true, parts: [["上蓋","衝擊龍神"],["固鎖","9-60"],["軸心","LR"]] },
+  { id: "c5", code: "BX-01", zh: "蒼龍神劍", en: "DranSword", rid: "BX-01", series: "BX", auto: true, parts: [["上蓋","蒼龍神劍"],["固鎖","3-60"],["軸心","F"]] },
+  { id: "c6", code: "BX-01", zh: "蒼龍神劍", en: "DranSword", rid: "BX-01", series: "BX", auto: true, parts: [["上蓋","蒼龍神劍"],["固鎖","3-60"],["軸心","F"]] },
+  { id: "c7", code: "BX-02", zh: "惡魔紅鐮", en: "HellsScythe", rid: "BX-02", series: "BX", auto: true, parts: [["上蓋","惡魔紅鐮"],["固鎖","4-60"],["軸心","T"]] },
+  { id: "c8", code: "BX-03", zh: "魔導幻箭", en: "WizardArrow", rid: "BX-03", series: "BX", auto: true, parts: [["上蓋","魔導幻箭"],["固鎖","4-80"],["軸心","B"]] },
+  { id: "c9", code: "BX-04", zh: "騎士重盾", en: "KnightShield", rid: "", series: "BX", auto: false, parts: [["上蓋","騎士重盾"],["固鎖","3-80"],["軸心","N"]] },
+  { id: "c10", code: "BX-23", zh: "鳳凰飛翼", en: "PhoenixWing", rid: "BX-23", series: "BX", auto: true, parts: [["上蓋","鳳凰飛翼"],["固鎖","9-60"],["軸心","GF"]] },
+  { id: "c13", code: "BX-00", zh: "歐比王肯諾比", en: "Obi-Wan Kenobi", rid: "BX-00-01-01", series: "BX", auto: true, set: "BX-00-01", parts: [["上蓋","歐比王肯諾比"],["固鎖","4-60"],["軸心","P"]] },
+  { id: "c14", code: "BX-00", zh: "葛里維斯將軍", en: "General Grievous", rid: "BX-00-01-02", series: "BX", auto: true, set: "BX-00-01", parts: [["上蓋","葛里維斯將軍"],["固鎖","3-80"],["軸心","HN"]] },
+  { id: "c11", code: "CX-01", zh: "蒼龍勇氣", en: "Dran Brave", rid: "CX-01", series: "CX", auto: true, parts: [["紋章鎖","蒼龍"],["主要戰刃","勇氣"],["輔助戰刃","S"],["固鎖","6-60"],["軸心","V"]] },
+  { id: "c12", code: "CX-02", zh: "魔導至尊", en: "Wizard Arc", rid: "CX-02", series: "CX", auto: true, parts: [["紋章鎖","魔導"],["主要戰刃","至尊"],["輔助戰刃","R"],["固鎖","4-55"],["軸心","LO"]] }
+];
+// 註：c9 是手動輸入，雖然這裡填了英文名，S1 規則下不會以英文名搜尋到（沒有可靠型錄對照）。
+const EXTRA = [
+  { id: "p1", type: "固鎖", name: "3-60", count: 2 },
+  { id: "p2", type: "固鎖", name: "4-60", count: 1 },
+  { id: "p3", type: "軸心", name: "F", count: 1 },
+  { id: "p4", type: "軸心", name: "R", count: 1 },
+  { id: "p5", type: "軸心", name: "LR", count: 1 },
+  { id: "p6", type: "上蓋", name: "蒼龍神劍", count: 1 },
+  { id: "p7", type: "輔助戰刃", name: "S", count: 1 }
+];
+// cx:true 的配置，上蓋欄是組合名稱（正式程式 addConfig 的寫法），不是零件，不計入配置引用。
+const CONFIGS = [
+  { name: "蒼龍爆刃 3-60 LR", parts: [["上蓋","蒼龍爆刃"],["固鎖","3-60"],["軸心","LR"]] },
+  { name: "衝擊龍神 9-60 F", parts: [["上蓋","衝擊龍神"],["固鎖","9-60"],["軸心","F"]] },
+  { name: "惡魔紅鐮 3-60 R", parts: [["上蓋","惡魔紅鐮"],["固鎖","3-60"],["軸心","R"]] },
+  { name: "蒼龍神劍 4-60 T", parts: [["上蓋","蒼龍神劍"],["固鎖","4-60"],["軸心","T"]] },
+  { name: "鳳凰飛翼 3-60 F", parts: [["上蓋","鳳凰飛翼"],["固鎖","3-60"],["軸心","F"]] },
+  { name: "霜輝銀狼 9-60 R", parts: [["上蓋","霜輝銀狼"],["固鎖","9-60"],["軸心","R"]] },
+  { name: "蒼龍勇氣S 4-55 V", cx: true, parts: [["上蓋","蒼龍勇氣S"],["紋章鎖","蒼龍"],["主要戰刃","勇氣"],["輔助戰刃","S"],["固鎖","4-55"],["軸心","V"]] },
+  { name: "蒼龍神劍 3-60 A", parts: [["上蓋","蒼龍神劍"],["固鎖","3-60"],["軸心","A"]] },
+  { name: "葛里維斯將軍 3-80 HN", parts: [["上蓋","葛里維斯將軍"],["固鎖","3-80"],["軸心","HN"]] },
+  { name: "惡魔重錘 3-70 LF", parts: [["上蓋","惡魔重錘"],["固鎖","3-70"],["軸心","LF"]] }
+];
+const CATALOG = { "UX-01": "蒼龍爆刃 1-60 A", "BX-01": "蒼龍神劍 3-60 F", "BX-02": "惡魔紅鐮 4-60 T", "CX-01": "蒼龍勇氣 S 6-60 V", "UX-11": "衝擊龍神 9-60 LR" };
+const TYPES = ["上蓋","紋章鎖","主要戰刃","超越戰刃","金屬戰刃","輔助戰刃","固鎖","軸心"];
+const CX_TYPES = ["紋章鎖","主要戰刃","超越戰刃","金屬戰刃","輔助戰刃"];
+const SERIES_ORDER = { UX: 1, BX: 2, CX: 3 };
+const FINAL = { T: "T1", P: "P2", G: "G2", Q: "Q1", S: "S1" };
+
+// ---------- 狀態 ----------
+const S = {
+  device: "desktop", tab: "stock", hist: false, view: "list",
+  ...FINAL,
+  q: "", series: "all", source: "all", sort: "default",
+  pq: "", ptype: "all", pstatus: "all", psort: "default",
+  sel: null, sheet: false, dialog: null, qmenu: false, toast: "", addOpen: false, addModel: "", edit: null
+};
+
+// ---------- 計算（對應 getTotalParts／getUsedParts；CX 上蓋不計、CX 配置的組合上蓋不計） ----------
+const key = (t, n) => t + "|" + n;
+function holdings({ excludeStock = [], extraOverride = null } = {}) {
+  const m = new Map();
+  const add = (t, n, field, c) => { const k = key(t, n); const v = m.get(k) || { type: t, name: n, orig: 0, extra: 0, extraIds: [] }; v[field] += c; m.set(k, v); return v; };
+  COLLECTION.forEach(b => { if (excludeStock.includes(b.id)) return; b.parts.forEach(([t, n]) => add(t, n, "orig", 1)); });
+  EXTRA.forEach(p => {
+    const o = extraOverride && extraOverride.id === p.id ? extraOverride : null;
+    const t = o?.type ?? p.type, n = o?.name ?? p.name, c = o ? o.count : p.count;
+    if (c > 0) { const v = add(t, n, "extra", c); v.extraIds.push(p.id); }
+  });
+  return m;
+}
+function used() {
+  const m = new Map();
+  CONFIGS.forEach(c => c.parts.forEach(([t, n]) => { if (c.cx && t === "上蓋") return; m.set(key(t, n), (m.get(key(t, n)) || 0) + 1); }));
+  return m;
+}
+function partRows(h = holdings()) {
+  const u = used();
+  return [...h.values()].map(v => { const ref = u.get(key(v.type, v.name)) || 0; return { ...v, ref, held: v.orig + v.extra, avail: v.orig + v.extra - ref }; });
+}
+function orphanRefs(h = holdings()) {
+  const out = [];
+  used().forEach((ref, k) => { if (!h.has(k)) { const [t, n] = k.split("|"); out.push({ t, n, ref, configs: configsUsing(t, n) }); } });
+  return out;
+}
+function configsUsing(t, n) { return CONFIGS.filter(c => c.parts.some(([pt, pn]) => pt === t && pn === n && !(c.cx && pt === "上蓋"))).map(c => c.name); }
+// vanished：變更後持有中已完全沒有這個名稱。刪除／減量時算「不足（持有 0）」；改名時改列為「找不到對應」（newOrphans）。
+function shortages(h, { countVanished = true } = {}) {
+  const u = used(), base = holdings(), out = [];
+  u.forEach((ref, k) => {
+    const v = h.get(k);
+    if (!v && (!countVanished || !base.has(k))) return;
+    const held = v ? v.orig + v.extra : 0;
+    if (ref > held) { const [t, n] = k.split("|"); out.push({ t, n, ref, held, configs: configsUsing(t, n) }); }
+  });
+  return out;
+}
+function newShortages(h, opts) { const before = new Set(shortages(holdings()).map(o => key(o.t, o.n))); return shortages(h, opts).filter(o => !before.has(key(o.t, o.n))); }
+function newOrphans(h) { const before = new Set(orphanRefs().map(o => key(o.t, o.n))); return orphanRefs(h).filter(o => !before.has(key(o.t, o.n))); }
+const reliableEn = b => b.auto && b.rid; // S1
+
+// ---------- 篩選與排序（正式網站：只作用在顯示層，原始 <tr> 不動） ----------
+function stockView() {
+  const q = S.q.trim().toLowerCase();
+  let rows = COLLECTION.filter(b => (S.series === "all" || b.series === S.series) && (S.source === "all" || (S.source === "auto") === b.auto))
+    .filter(b => !q || [b.code, b.zh, ...b.parts.map(p => p[1]), S.S === "S1" && reliableEn(b) ? b.en : ""].join(" ").toLowerCase().includes(q));
+  const cmp = {
+    default: (a, b) => (SERIES_ORDER[a.series] - SERIES_ORDER[b.series]) || a.code.localeCompare(b.code, "zh-Hant", { numeric: true }),
+    code: (a, b) => a.code.localeCompare(b.code, "zh-Hant", { numeric: true }),
+    name: (a, b) => a.zh.localeCompare(b.zh, "zh-Hant")
+  }[S.sort];
+  rows = [...rows].sort(cmp);
+  if (S.G === "G1") {
+    const groups = new Map();
+    rows.forEach(b => { const k = b.code + "|" + b.parts.map(p => p.join(":")).join("|"); if (!groups.has(k)) groups.set(k, { ...b, members: [] }); groups.get(k).members.push(b.id); });
+    return [...groups.values()];
+  }
+  return rows.map(b => ({ ...b, members: [b.id] }));
+}
+function partView() {
+  const q = S.pq.trim().toLowerCase();
+  let rows = partRows();
+  if (S.P === "P1") rows = rows.filter(r => r.extra > 0);
+  rows = rows.filter(r => S.ptype === "all" || (S.ptype === "CX" ? CX_TYPES.includes(r.type) : r.type === S.ptype))
+    .filter(r => S.pstatus === "all" || (S.pstatus === "ok" ? r.avail > 0 : S.pstatus === "zero" ? r.avail === 0 : r.avail < 0))
+    .filter(r => !q || (r.type + " " + r.name).toLowerCase().includes(q));
+  const cmp = {
+    default: (a, b) => (TYPES.indexOf(a.type) - TYPES.indexOf(b.type)) || a.name.localeCompare(b.name, "zh-Hant", { numeric: true }),
+    name: (a, b) => a.name.localeCompare(b.name, "zh-Hant", { numeric: true }),
+    avail: (a, b) => a.avail - b.avail
+  }[S.psort];
+  return [...rows].sort(cmp);
+}
+
+// ---------- 原型控制 ----------
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const seg = (name, label, items) => `<div class="opt"><span>${label}</span><div class="seg" role="group" aria-label="${label}">${items.map(([v, t]) => `<button data-opt="${name}" data-val="${v}" aria-pressed="${String(S[name]) === v}">${t}</button>`).join("")}</div></div>`;
+function renderOpts() {
+  const base = [seg("device", "裝置", [["desktop", "桌面"], ["mobile", "手機"]]), seg("hist", "顯示", [["false", "最終設計"], ["true", "歷史選項比較"]])];
+  const hist = S.hist ? [
+    seg("T", "分頁", [["T1", "T1 分頁（採用）"], ["T2", "T2 上下區段（未採用）"]]),
+    seg("P", "零件", [["P2", "P2 全部持有（採用）"], ["P1", "P1 只額外（未採用）"]]),
+    seg("G", "同款", [["G2", "G2 一顆一張（採用）"], ["G1", "G1 合併 ×n（未採用）"]]),
+    seg("Q", "新增", [["Q1", "Q1 面板（採用）"], ["Q2", "Q2 sheet（未採用）"]]),
+    seg("S", "英文名", [["S1", "S1 限可靠對照（採用）"], ["S2", "不搜尋（未採用）"]])
+  ] : [];
+  document.getElementById("opts").innerHTML = base.concat(hist).join("");
+}
+const badges = parts => `<span class="badges">${parts.map(([t, n]) => `<span class="badge"><small>${esc(t)}</small>${esc(n)}</span>`).join("")}</span>`;
+const numCls = a => a > 0 ? "ok" : a === 0 ? "zero" : "over";
+const availLabel = a => a < 0 ? `超用 ${-a}` : a === 0 ? "已全用" : `可用 ${a}`;
+const isList = () => S.device === "desktop" && S.view === "list";
+
+function stockItem(b, mode) {
+  const sel = S.sel && S.sel.kind === "stock" && S.sel.id === b.members[0] ? " sel" : "";
+  const mult = b.members.length > 1 ? `<span class="mult">×${b.members.length}</span>` : "";
+  const tags = `${b.auto ? "" : `<span class="tag">手動</span>`}${b.set ? `<span class="tag">套組</span>` : ""}`;
+  if (mode === "list") return `<button class="lrow${sel}" data-sel="stock" data-id="${b.members[0]}"><span class="code"><i class="ser ${b.series}"></i>${esc(b.code)}</span><span style="min-width:0;display:grid;gap:3px"><span class="name">${esc(b.zh)} ${tags}</span>${badges(b.parts)}</span><span>${mult}</span></button>`;
+  return `<button class="card${sel}" data-sel="stock" data-id="${b.members[0]}"><span class="top"><span class="code"><i class="ser ${b.series}"></i>${esc(b.code)}</span><span>${mult}${tags}</span></span><span class="name">${esc(b.zh)}</span>${badges(b.parts)}</button>`;
+}
+function nums(r) {
+  return `<span class="nums">${S.P === "P2" ? `<div><small>原裝內含</small><b>${r.orig}</b></div>` : ""}<div><small>額外持有</small><b>${r.extra}</b></div><div><small>配置引用</small><b>${r.ref}</b></div><div class="avail"><small>${r.avail < 0 ? "超用" : "可用"}</small><b class="${numCls(r.avail)}">${Math.abs(r.avail)}</b></div></span>`;
+}
+function partItem(r, mode) {
+  const id = key(r.type, r.name);
+  const sel = S.sel && S.sel.kind === "part" && S.sel.id === id ? " sel" : "";
+  if (mode === "list") return `<button class="lrow prow${sel}" data-sel="part" data-id="${esc(id)}"><span style="min-width:0"><span class="typepill">${esc(r.type)}</span><span class="name" style="display:inline">${esc(r.name)}</span></span>${nums(r)}</button>`;
+  return `<button class="card${sel}" data-sel="part" data-id="${esc(id)}"><span class="top"><span><span class="typepill">${esc(r.type)}</span><b>${esc(r.name)}</b></span><b class="${numCls(r.avail)}">${availLabel(r.avail)}</b></span>${nums(r)}</button>`;
+}
+
+function addPanel(kind) {
+  if (S.Q === "Q2") return "";
+  if (kind === "stock") {
+    const code = S.addModel.trim().toUpperCase().replace(/\s+/g, "-");
+    const hit = CATALOG[code];
+    return `<details class="addpanel" id="addStock" ${S.addOpen ? "open" : ""}><summary>新增收藏</summary>
+      <div class="addrow"><input id="model" placeholder="輸入型號，例如 UX-01、BX01" value="${esc(S.addModel)}" autocomplete="off" aria-label="商品型號"><button class="btn primary" data-act="add-stock">加入</button></div>
+      <div class="preview">${hit ? `將加入：<b>${esc(code)}</b> ${esc(hit)}（自動帶入）` : "輸入型號後，這裡會顯示即將加入的原裝配置（沿用現有自動帶入）。"}</div>
+      <span class="hint">手動輸入、共用型號候選與套組一次加入都沿用現有流程，D-019 規則照常檢查。輸入到一半時：雲端更新會保留輸入；登出或切換帳號會清空。</span></details>`;
+  }
+  return `<details class="addpanel" id="addPart" ${S.addOpen ? "open" : ""}><summary>新增額外零件</summary>
+    <div class="addrow"><select aria-label="類別">${TYPES.map(t => `<option>${t}</option>`).join("")}</select><input id="partName" placeholder="零件名稱"><input placeholder="數量" inputmode="numeric" style="flex:0 1 90px"><button class="btn primary" data-act="add-part">加入</button></div></details>`;
+}
+
+function viewToggle() {
+  if (S.device !== "desktop") return "";
+  return `<div class="seg" role="group" aria-label="檢視方式"><button data-view="list" aria-pressed="${S.view === "list"}">清單</button><button data-view="card" aria-pressed="${S.view === "card"}">卡片</button></div>`;
+}
+function stockToolbar() {
+  const chips = [["all", "全部"], ["UX", "UX"], ["BX", "BX"], ["CX", "CX"]].map(([v, t]) => `<button class="chip" data-f="series" data-val="${v}" aria-pressed="${S.series === v}">${t}</button>`).join("");
+  const n = stockView().reduce((a, g) => a + g.members.length, 0);
+  return `<div class="tools"><input class="search" type="search" id="stockSearch" placeholder="${S.S === "S1" ? "搜尋型號、名稱、零件；英文名（型錄對照）" : "搜尋型號、名稱、零件"}" value="${esc(S.q)}" aria-label="搜尋收藏">${S.device === "mobile" ? "" : chips}
+    <select data-f="source" aria-label="來源"><option value="all" ${S.source === "all" ? "selected" : ""}>所有來源</option><option value="auto" ${S.source === "auto" ? "selected" : ""}>自動帶入</option><option value="manual" ${S.source === "manual" ? "selected" : ""}>手動輸入</option></select>
+    <select data-f="sort" aria-label="排序"><option value="default" ${S.sort === "default" ? "selected" : ""}>預設（UX→BX→CX）</option><option value="code" ${S.sort === "code" ? "selected" : ""}>型號</option><option value="name" ${S.sort === "name" ? "selected" : ""}>名稱</option></select>
+    ${viewToggle()}<span class="status">顯示 ${n} / ${COLLECTION.length} 顆</span></div>${S.device === "mobile" ? `<div class="tools row2">${chips}</div>` : ""}`;
+}
+function partToolbar() {
+  const tchips = [["all", "全部"], ["上蓋", "上蓋"], ["固鎖", "固鎖"], ["軸心", "軸心"], ["CX", "CX 分件"]].map(([v, t]) => `<button class="chip" data-f="ptype" data-val="${v}" aria-pressed="${S.ptype === v}">${t}</button>`).join("");
+  const schips = [["all", "全部狀態"], ["ok", "可用"], ["zero", "已全用"], ["over", "超用"]].map(([v, t]) => `<button class="chip" data-f="pstatus" data-val="${v}" aria-pressed="${S.pstatus === v}">${t}</button>`).join("");
+  return `<div class="tools"><input class="search" type="search" id="partSearch" placeholder="搜尋零件名稱" value="${esc(S.pq)}" aria-label="搜尋零件">
+    <select data-f="psort" aria-label="排序"><option value="default" ${S.psort === "default" ? "selected" : ""}>預設（類別）</option><option value="name" ${S.psort === "name" ? "selected" : ""}>名稱</option><option value="avail" ${S.psort === "avail" ? "selected" : ""}>可用數量（少→多）</option></select>
+    ${S.device === "mobile" ? "" : tchips + schips}${viewToggle()}</div>${S.device === "mobile" ? `<div class="tools row2">${tchips}</div><div class="tools row2">${schips}</div>` : ""}`;
+}
+function partSummary() {
+  const rows = partRows();
+  const sum = f => rows.reduce((a, r) => a + r[f], 0);
+  const over = rows.filter(r => r.avail < 0).length, orphan = orphanRefs().length;
+  return `<div class="summary" aria-label="零件摘要">${S.P === "P2" ? `<div><small>原裝內含</small><b>${sum("orig")}</b></div>` : ""}<div><small>額外持有</small><b>${sum("extra")}</b></div><div><small>配置引用</small><b>${sum("ref")}</b></div><div><small>超用品項</small><b class="${over ? "over" : "ok"}">${over}</b></div><div><small>無對應引用</small><b class="${orphan ? "zero" : "ok"}">${orphan}</b></div></div>
+    <p class="hint" style="margin:-4px 0 10px">配置引用＝目前配置中使用這個零件名稱的次數，不是比賽使用次數。</p>`;
+}
+function orphanBlock() {
+  const list = orphanRefs();
+  if (!list.length) return "";
+  return `<div class="box" style="margin-top:14px"><h4>找不到對應零件的配置引用（${list.length}）</h4><ul class="refs">${list.map(o => `<li>${esc(o.t)}「${esc(o.n)}」：被 ${o.ref} 個配置引用（${o.configs.map(esc).join("、")}），但目前沒有持有這個名稱。可能是改名或刪除造成；只提示，不會修改配置。</li>`).join("")}</ul></div>`;
+}
+
+function stockBody() {
+  const rows = stockView();
+  const body = rows.length ? `<div class="${isList() ? "list" : "grid"}">${rows.map(b => stockItem(b, isList() ? "list" : "card")).join("")}</div>` : `<div class="empty">沒有符合條件的收藏。</div>`;
+  return addPanel("stock") + body;
+}
+function partBody() {
+  const rows = partView();
+  const body = rows.length ? `<div class="${isList() ? "list" : "grid"}">${rows.map(r => partItem(r, isList() ? "list" : "card")).join("")}</div>` : `<div class="empty">沒有符合條件的零件。</div>`;
+  return addPanel("part") + partSummary() + body + orphanBlock();
+}
+
+// ---------- 詳細資訊 ----------
+function detailHtml() {
+  if (!S.sel) return `<div class="empty">選擇一筆資料查看詳細資訊。</div>`;
+  if (S.sel.kind === "stock") {
+    const b = COLLECTION.find(x => x.id === S.sel.id);
+    if (!b) return `<div class="empty">這筆資料已更新或已刪除。</div>`;
+    const setRows = b.set ? COLLECTION.filter(x => x.set === b.set) : [];
+    const blade = b.parts.find(p => p[0] === "上蓋") || b.parts.find(p => p[0] === "主要戰刃");
+    const refs = blade ? configsUsing(blade[0], blade[1]) : [];
+    return `<div style="display:grid;gap:4px"><span class="code"><i class="ser ${b.series}"></i>${esc(b.code)}</span><h3>${esc(b.zh)}</h3>${reliableEn(b) ? `<span class="sub">${esc(b.en)}</span>` : ""}</div>
+      <dl class="kv">${b.parts.map(([t, n]) => `<dt>${esc(t)}</dt><dd>${esc(n)}</dd>`).join("")}</dl>
+      <div class="src">${b.auto ? "來源：型錄自動帶入（有型錄編號，型錄更新時會一併更新；D-015）。" : "來源：手動輸入。官方型錄不會覆蓋這筆資料（D-015）；沒有可靠型錄對照，所以不顯示英文名，也不能用英文名搜尋。"}</div>
+      ${setRows.length ? `<div class="box"><h4>套組 ${esc(b.set)}（${setRows.length} 顆，刪除時會一起刪除）</h4><ul class="refs">${setRows.map(x => `<li>${esc(x.zh)}</li>`).join("")}</ul></div>` : ""}
+      <div class="box"><h4>使用這個${blade ? esc(blade[0]) : "陀螺"}的配置（${refs.length}）</h4>${refs.length ? `<ul class="refs">${refs.map(r => `<li>${esc(r)}</li>`).join("")}</ul>` : `<span class="hint">目前沒有配置使用。</span>`}</div>
+      <div class="actions"><button class="btn danger" data-act="del-stock" data-id="${b.id}">${setRows.length ? "刪除整組" : "刪除這顆"}</button></div>
+      <span class="hint">收藏目前不能直接修改（維持現況）。同款多顆各自一筆（G2），刪除只會刪這一顆。</span>`;
+  }
+  const r = partRows().find(x => key(x.type, x.name) === S.sel.id);
+  if (!r) return `<div class="empty">這筆資料已更新或已刪除。</div>`;
+  const refs = configsUsing(r.type, r.name);
+  const extraRows = EXTRA.filter(p => r.extraIds.includes(p.id));
+  const editor = S.edit && extraRows.some(p => p.id === S.edit.id) ? `<div class="box editing"><h4>修改額外零件（原始列進入編輯狀態）</h4>
+      <div class="addrow"><select id="editType" aria-label="類別">${TYPES.map(t => `<option ${t === S.edit.type ? "selected" : ""}>${t}</option>`).join("")}</select><input id="editName" value="${esc(S.edit.name)}" aria-label="零件名稱"></div>
+      <div class="actions"><span class="stepper"><button data-act="dec" aria-label="減少">−</button><b class="num">${S.edit.count}</b><button data-act="inc" aria-label="增加">＋</button></span><button class="btn primary" data-act="save-edit">保存</button><button class="btn" data-act="cancel-edit">取消</button></div>
+      <span class="hint">輸入只同步到原始列的輸入框；保存與取消走既有 saveEditRow／cancelEditRow 與它們的確認訊息。Esc＝取消。</span></div>` : "";
+  return `<div style="display:grid;gap:4px"><span class="typepill" style="justify-self:start">${esc(r.type)}</span><h3>${esc(r.name)}</h3></div>
+    <div class="summary"><div><small>原裝內含</small><b>${r.orig}</b></div><div><small>額外持有</small><b>${r.extra}</b></div><div><small>配置引用</small><b>${r.ref}</b></div><div><small>${r.avail < 0 ? "超用" : "可用"}</small><b class="${numCls(r.avail)}">${Math.abs(r.avail)}</b></div></div>
+    ${r.avail < 0 ? `<div class="impact"><b>配置引用比持有多 ${-r.avail} 個。</b><span>只提示，不會阻擋或自動修改配置。</span></div>` : ""}
+    <div class="box"><h4>引用這個零件的配置（${refs.length}）</h4>${refs.length ? `<ul class="refs">${refs.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<span class="hint">沒有配置使用。</span>`}</div>
+    ${r.orig ? `<div class="src">原裝內含 ${r.orig} 個會隨原裝陀螺變動，不能在這裡修改。</div>` : ""}
+    ${extraRows.length ? `<div class="box"><h4>額外持有（${extraRows.length} 筆資料）</h4>${extraRows.map(p => `<div class="actions" style="align-items:center"><span>數量 <b class="num">${p.count}</b></span><button class="btn" data-act="edit-part" data-id="${p.id}">修改</button><button class="btn danger" data-act="del-part" data-id="${p.id}">刪除</button></div>`).join("")}</div>${editor}` : `<div class="src">沒有額外持有可修改或刪除。</div>`}`;
+}
+
+// ---------- 主畫面 ----------
+function sideHtml() {
+  const on = S.tab;
+  return `<nav class="side" aria-label="主要導覽"><div class="brand">戰鬥陀螺管理表</div><button class="side-add" data-act="qmenu" aria-haspopup="menu" aria-expanded="${S.qmenu}">＋ 新增</button>
+    <small>主要功能</small><a href="#" data-go="stock" class="${on === "stock" ? "on" : ""}">收藏</a><a href="#" data-go="part" class="child ${on === "part" ? "on" : ""}">零件</a><a href="#" data-noop>配置紀錄</a><a href="#" data-noop>賽事</a>
+    <small>參考</small><a href="#" data-noop>競賽統計</a><small>工具</small><a href="#" data-noop>建立配置（Quick Editor）</a></nav>`;
+}
+function partCount() { return partRows().filter(r => S.P === "P2" || r.extra > 0).length; }
+function tabsHtml() {
+  if (S.T === "T2") return `<div class="anchors"><button data-anchor="secStock">原裝陀螺 ${COLLECTION.length}</button><button data-anchor="secPart">零件 ${partCount()}</button><span class="hint" style="align-self:center">T2（未採用）：兩區段上下排列</span></div>`;
+  return `<div class="tabs" role="tablist" aria-label="收藏分頁"><button class="tab" role="tab" data-go="stock" aria-selected="${S.tab === "stock"}" tabindex="${S.tab === "stock" ? 0 : -1}">原裝陀螺 <span class="cnt">${COLLECTION.length}</span></button><button class="tab" role="tab" data-go="part" aria-selected="${S.tab === "part"}" tabindex="${S.tab === "part" ? 0 : -1}">零件 <span class="cnt">${partCount()}</span></button></div>`;
+}
+function mainHtml() {
+  let toolbar = "", body = "";
+  if (S.T === "T2") {
+    body = `<h3 class="section-h" id="secStock">原裝陀螺</h3>${stockToolbar()}${stockBody()}<h3 class="section-h" id="secPart">零件</h3>${partToolbar()}${partBody()}`;
+  } else {
+    toolbar = S.tab === "stock" ? stockToolbar() : partToolbar();
+    body = S.tab === "stock" ? stockBody() : partBody();
+  }
+  return `<main class="main"><div class="topbar"><h2>收藏</h2><span class="sync"><i></i>已同步（原型）</span></div>${tabsHtml()}<div>${toolbar}</div><div class="scroll" id="scroller">${body}</div></main>`;
+}
+function bnavHtml() {
+  return `<nav class="bnav" aria-label="底部導覽"><button class="on" data-go="${S.tab}"><b>C</b>收藏</button><button data-noop><b>X</b>配置</button><button class="plus" data-act="qmenu" aria-haspopup="menu" aria-expanded="${S.qmenu}"><b>＋</b>新增</button><button data-noop><b>3G</b>賽事</button><button data-noop><b>⋯</b>更多</button></nav>`;
+}
+function overlays() {
+  let h = "";
+  if (S.qmenu) h += `<div class="scrim" data-act="close-q"></div><div class="qmenu" role="menu" aria-label="快速新增">
+    <button role="menuitem" data-act="q-stock">新增收藏<small>切到原裝陀螺並聚焦型號</small></button><button role="menuitem" data-act="q-part">新增零件<small>切到零件並聚焦名稱</small></button>
+    <button role="menuitem" data-noop>建立配置<small>Quick Editor（不在本原型）</small></button><button role="menuitem" data-noop>新增比賽<small>賽事頁</small></button><button role="menuitem" data-noop>記錄回合<small>開啟賽事頁</small></button></div>`;
+  if (S.device === "mobile" && S.sheet && S.sel) h += `<div class="scrim" data-act="close-sheet"></div><div class="sheet" role="dialog" aria-label="詳細資訊"><div class="grab"></div>${detailHtml()}<button class="btn" data-act="close-sheet">關閉</button></div>`;
+  if (S.Q === "Q2" && S.addSheet) {
+    const inner = S.addSheet === "stock"
+      ? `<h3>新增收藏</h3><div class="addrow"><input id="model" placeholder="輸入型號，例如 UX-01" autocomplete="off" aria-label="商品型號"></div><div class="actions"><button class="btn primary" data-act="add-stock">加入</button><button class="btn" data-act="close-add">取消</button></div>`
+      : `<h3>新增額外零件</h3><div class="addrow"><select aria-label="類別">${TYPES.map(t => `<option>${t}</option>`).join("")}</select><input id="partName" placeholder="零件名稱"><input placeholder="數量" inputmode="numeric"></div><div class="actions"><button class="btn primary" data-act="add-part">加入</button><button class="btn" data-act="close-add">取消</button></div>`;
+    h += `<div class="scrim" data-act="close-add"></div><div class="${S.device === "mobile" ? "sheet" : "dialog"}" role="dialog" aria-label="新增">${S.device === "mobile" ? '<div class="grab"></div>' : ""}${inner}<span class="hint">Q2（未採用）</span></div>`;
+  }
+  if (S.dialog) h += `<div class="scrim dlg-scrim"></div><div class="dialog" role="alertdialog" aria-label="確認"><p class="confirm-label">確認訊息（正式網站為原生 confirm）</p><pre class="confirm">${esc(S.dialog.text)}</pre><div class="actions"><button class="btn primary" data-act="dlg-ok">確定</button><button class="btn" data-act="dlg-cancel">取消</button></div></div>`;
+  if (S.toast) h += `<div class="toast" role="status">${esc(S.toast)}</div>`;
+  return h;
+}
+function render() {
+  renderOpts();
+  const d = document.getElementById("device");
+  const scrollTop = document.getElementById("scroller")?.scrollTop || 0;
+  d.className = "device " + S.device;
+  d.innerHTML = S.device === "desktop"
+    ? sideHtml() + mainHtml() + `<aside class="detail" aria-label="詳細資訊">${detailHtml()}</aside>` + overlays()
+    : mainHtml() + bnavHtml() + overlays();
+  const sc = document.getElementById("scroller"); if (sc) sc.scrollTop = scrollTop;
+  renderLegend();
+}
+function renderLegend() {
+  const diff = Object.keys(FINAL).filter(k => S[k] !== FINAL[k]);
+  document.getElementById("legend").innerHTML = `<div><b>${diff.length ? `目前顯示含未採用選項：${diff.map(k => S[k]).join("、")}` : "目前顯示：最終設計"}</b></div>
+    <div>四個數字：原裝內含（原裝陀螺拆算，CX 上蓋不計）、額外持有（額外零件資料）、配置引用（配置使用此名稱的次數；CX 配置的組合上蓋不計）、可用＝原裝內含＋額外持有－配置引用。小於 0 顯示「超用」。只提示，不阻擋。</div>
+    <div>名稱以完全相同比對，不處理全形／半形或大小寫。配置引用找不到持有名稱時，列在零件分頁底部「無對應引用」。</div>
+    <div>搜尋、篩選、排序、分頁與清單／卡片切換只改變顯示層，正式網站的原始表格與資料順序不變，也不會寫入。</div>
+    <div>示範資料：BX-00 兩顆為同一套組；「惡魔重錘 3-70 LF」引用不存在的軸心 LF（無對應引用）；騎士重盾為手動輸入（不能用英文名搜尋）。</div>`;
+}
+
+// ---------- D1 影響提示（文字會接在既有 confirm 訊息中） ----------
+function listShort(list, verb) {
+  if (!list.length) return "";
+  const shown = list.slice(0, 5).map(o => `・${o.t} ${o.n}：持有 ${o.held}，配置引用 ${o.ref}（${o.configs.slice(0, 3).join("、")}${o.configs.length > 3 ? ` 等 ${o.configs.length} 個` : ""}）`);
+  return `\n${verb}，下列零件會不夠配置使用：\n${shown.join("\n")}${list.length > 5 ? `\n…等 ${list.length} 個零件` : ""}`;
+}
+// 變更前就已不足的相關零件：不重複列入清單，另以一句提醒。
+function alreadyShort(keys) {
+  const before = shortages(holdings()).filter(o => keys.includes(key(o.t, o.n)));
+  return before.map(o => `\n${o.t} ${o.n} 原本就不夠配置使用（持有 ${o.held}，配置引用 ${o.ref}），變更後會更不足。`).join("");
+}
+function listOrphan(list, oldName) {
+  if (!list.length) return "";
+  return `\n改名後，下列配置仍使用舊名稱「${oldName}」，將找不到對應零件：\n${list.map(o => `・${o.t} ${o.n}：${o.configs.slice(0, 3).join("、")}${o.configs.length > 3 ? ` 等 ${o.configs.length} 個` : ""}`).join("\n")}\n配置不會自動改名。`;
+}
+function askDeleteStock(id) {
+  const b = COLLECTION.find(x => x.id === id);
+  const ids = b.set ? COLLECTION.filter(x => x.set === b.set).map(x => x.id) : [id];
+  const base = b.set ? `「${b.set}」是雙陀螺套組。確定要一起刪除「${COLLECTION.filter(x => ids.includes(x.id)).map(x => x.zh).join("、")}」嗎？` : `確定要刪除「${b.code} ${b.zh}」嗎？`;
+  const keys = COLLECTION.filter(x => ids.includes(x.id)).flatMap(x => x.parts.map(([t, n]) => key(t, n)));
+  const extra = listShort(newShortages(holdings({ excludeStock: ids })), b.set ? "整組刪除後" : "刪除後") + alreadyShort(keys);
+  S.dialog = { text: base + extra + (extra ? "\n配置不會被修改。" : "") };
+}
+function askDeletePart(pid) {
+  const p = EXTRA.find(x => x.id === pid);
+  const extra = listShort(newShortages(holdings({ extraOverride: { id: pid, count: 0 } })), "刪除後") + alreadyShort([key(p.type, p.name)]);
+  S.dialog = { text: `確定要刪除「${p.type}：${p.name}，數量 ${p.count}」嗎？` + extra + (extra ? "\n配置不會被修改。" : "") };
+}
+function askSaveEdit() {
+  const p = EXTRA.find(x => x.id === S.edit.id);
+  const o = { id: p.id, type: S.edit.type, name: S.edit.name.trim(), count: S.edit.count };
+  if (o.type === p.type && o.name === p.name && o.count === p.count) { toast("沒有變更。"); return; }
+  const h = holdings({ extraOverride: o });
+  const renamed = o.type !== p.type || o.name !== p.name;
+  const short = listShort(newShortages(h, { countVanished: !renamed }), renamed ? "變更後" : "數量減少後");
+  const orphan = renamed ? listOrphan(newOrphans(h), p.name) : "";
+  const oldKey = key(p.type, p.name);
+  const prior = (o.count < p.count || renamed) && h.has(oldKey) ? alreadyShort([oldKey]) : "";
+  S.dialog = { text: "確定要保存這次修改嗎？" + short + orphan + prior + ((short || prior) && !orphan ? "\n配置不會被修改。" : "") };
+}
+
+let toastTimer;
+function toast(msg) { S.toast = msg; render(); clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = ""; render(); }, 2600); }
+function focusLater(id) { setTimeout(() => document.getElementById(id)?.focus(), 30); }
+
+// ---------- 事件 ----------
+document.addEventListener("click", e => {
+  const t = e.target.closest("button, a, [data-act]");
+  if (!t) return;
+  if (t.matches("a")) e.preventDefault();
+  if (t.dataset.opt) {
+    const v = t.dataset.val; S[t.dataset.opt] = v === "true" ? true : v === "false" ? false : v;
+    if (t.dataset.opt === "hist" && !S.hist) Object.assign(S, FINAL);
+    S.sheet = false; S.qmenu = false; S.addSheet = null; S.edit = null; if (t.dataset.opt === "P") S.sel = null; render(); return;
+  }
+  if (t.dataset.view) { S.view = t.dataset.view; render(); return; }
+  if (t.dataset.noop !== undefined) { S.qmenu = false; toast("原型只包含收藏與零件。"); return; }
+  if (t.dataset.go) { S.tab = t.dataset.go; S.sel = null; S.edit = null; render(); return; }
+  if (t.dataset.anchor) { document.getElementById(t.dataset.anchor)?.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  if (t.dataset.f) { S[t.dataset.f] = t.dataset.val; render(); return; }
+  if (t.dataset.sel) { S.sel = { kind: t.dataset.sel, id: t.dataset.id }; S.edit = null; S.sheet = S.device === "mobile"; render(); return; }
+  const act = t.dataset.act;
+  if (!act) return;
+  if (act === "qmenu") { S.qmenu = !S.qmenu; render(); setTimeout(() => document.querySelector(".qmenu button")?.focus(), 20); return; }
+  if (act === "close-q") { S.qmenu = false; render(); return; }
+  if (act === "q-stock" || act === "q-part") {
+    S.qmenu = false; S.tab = act === "q-stock" ? "stock" : "part"; S.sel = null; S.sheet = false; S.edit = null;
+    if (S.Q === "Q2") { S.addSheet = S.tab; render(); focusLater(S.tab === "stock" ? "model" : "partName"); }
+    else { S.addOpen = true; render(); if (S.T === "T2") document.getElementById(S.tab === "stock" ? "secStock" : "secPart")?.scrollIntoView({ block: "start" }); focusLater(S.tab === "stock" ? "model" : "partName"); }
+    return;
+  }
+  if (act === "close-add") { S.addSheet = null; render(); return; }
+  if (act === "close-sheet") { S.sheet = false; S.edit = null; render(); return; }
+  if (act === "add-stock") { S.addSheet = null; toast("原型：正式網站會呼叫既有 addRow()，再由 saveData() 儲存。"); return; }
+  if (act === "add-part") { S.addSheet = null; toast("原型：正式網站會呼叫既有 addPart()，再由 saveData() 儲存。"); return; }
+  if (act === "del-stock") { askDeleteStock(t.dataset.id); render(); return; }
+  if (act === "del-part") { askDeletePart(t.dataset.id); render(); return; }
+  if (act === "edit-part") { const p = EXTRA.find(x => x.id === t.dataset.id); S.edit = { id: p.id, type: p.type, name: p.name, count: p.count }; render(); focusLater("editName"); return; }
+  if (act === "dec" || act === "inc") { S.edit.count = Math.max(1, S.edit.count + (act === "inc" ? 1 : -1)); render(); return; }
+  if (act === "save-edit") { askSaveEdit(); render(); return; }
+  if (act === "cancel-edit") { S.edit = null; toast("原型：正式網站會走既有 cancelEditRow（含確認）。"); return; }
+  if (act === "dlg-cancel") { S.dialog = null; toast("已取消：沒有修改、沒有寫入。"); return; }
+  if (act === "dlg-ok") { S.dialog = null; S.edit = null; toast("原型：不會修改假資料。正式網站會以原始列的按鈕呼叫既有函式。"); return; }
+});
+document.addEventListener("input", e => {
+  const keep = (id, val) => { render(); const el = document.getElementById(id); el.focus(); el.setSelectionRange(val.length, val.length); };
+  if (e.target.id === "stockSearch") { S.q = e.target.value; keep("stockSearch", S.q); }
+  if (e.target.id === "partSearch") { S.pq = e.target.value; keep("partSearch", S.pq); }
+  if (e.target.id === "model" && S.Q === "Q1") { S.addModel = e.target.value; S.addOpen = true; keep("model", S.addModel); }
+  if (e.target.id === "editName" && S.edit) { S.edit.name = e.target.value; }
+});
+document.addEventListener("change", e => {
+  if (e.target.matches("select[data-f]")) { S[e.target.dataset.f] = e.target.value; render(); }
+  if (e.target.id === "editType" && S.edit) { S.edit.type = e.target.value; }
+});
+document.addEventListener("keydown", e => {
+  if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && e.target.matches?.(".tab")) {
+    S.tab = S.tab === "stock" ? "part" : "stock"; S.sel = null; render(); document.querySelector(".tab[aria-selected=true]")?.focus(); return;
+  }
+  if (e.key !== "Escape") return;
+  if (S.dialog) S.dialog = null; else if (S.qmenu) S.qmenu = false; else if (S.edit) S.edit = null; else if (S.addSheet) S.addSheet = null; else if (S.sheet) S.sheet = false; else return;
+  render();
+});
+document.addEventListener("toggle", e => { if (e.target.matches?.(".addpanel")) S.addOpen = e.target.open; }, true);
+
+S.sel = { kind: "stock", id: "c5" };
+if (window.matchMedia && window.matchMedia("(max-width: 700px)").matches && window.innerWidth > 0) { S.device = "mobile"; S.sel = null; }
+render();
+})();
+</script>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><title>Phase 7-2a integration check</title>
+<style>iframe{border:1px solid #888;height:900px;margin:4px;vertical-align:top}</style></head>
+<body>
+<pre id="out">running…</pre>
+<script>
+const RUNS = [];
+[390, 768, 1440].forEach(w => ["dark", "beige"].forEach(t => RUNS.push({ mode: "full", theme: t, w })));
+RUNS.push({ mode: "fail", theme: "dark", w: 1440 });
+const results = [];
+window.addEventListener("message", e => {
+  if (!e.data || !e.data.i72a) return;
+  results.push(e.data);
+  startNext();
+  if (results.length === RUNS.length) {
+    window.__i72a = results.map(r => ({ mode: r.mode, theme: r.theme, width: r.width, ok: r.ok, error: r.error,
+      passed: (r.checks || []).filter(c => c.ok).length, total: (r.checks || []).length,
+      failed: (r.checks || []).filter(c => !c.ok) }));
+    window.__checks = results.find(r => r.mode === "full" && r.width === 1440 && r.theme === "dark")?.checks;
+    window.__failChecks = results.find(r => r.mode === "fail")?.checks;
+    document.getElementById("out").textContent = JSON.stringify(window.__i72a, null, 1);
+  }
+});
+// One frame at a time: only one document can hold focus, and the D-020 and
+// part-edit checks look at focus.
+let next = 0;
+function startNext() {
+  const r = RUNS[next++];
+  if (!r) return;
+  const f = document.createElement("iframe");
+  f.style.width = r.w + "px";
+  f.src = `frame.html?mode=${r.mode}&theme=${r.theme}&w=${r.w}`;
+  document.body.appendChild(f);
+  f.addEventListener("load", () => f.contentWindow.focus());
+}
+startNext();
+</script>
+</body></html>

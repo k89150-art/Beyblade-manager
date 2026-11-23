@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body>
+<script type="module">
+// K-1 isolation check. Runs the REAL source text of script.js (sliced by
+// function markers, like tests/*.test.mjs do) inside a real browser layout
+// engine, on the REAL index.html markup and REAL style.css / site-menu.css.
+// Only session/guard helpers are stubbed. Nothing talks to Firebase.
+import { fingerprintTable, pickCollectionTables } from "/repo/collection-sync.js";
+import { getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel } from "/repo/stock-catalog-names.js";
+
+const params = new URLSearchParams(location.search);
+const MODE = params.get("mode"), THEME = params.get("theme");
+const report = (data) => parent.postMessage({ k1: true, mode: MODE, theme: THEME, width: innerWidth, ...data }, "*");
+
+try {
+  // 1. Real page markup and stylesheets.
+  const html = await (await fetch("/repo/index.html")).text();
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map(l => l.getAttribute("href")).filter(h => !/^https?:/.test(h));
+  await Promise.all(links.map(href => new Promise(ok => { const l = document.createElement("link"); l.rel = "stylesheet"; l.href = "/repo/" + href; l.onload = l.onerror = ok; document.head.appendChild(l); })));
+  doc.querySelectorAll("script").forEach(s => s.remove());
+  document.body.className = doc.body.className;
+  document.body.innerHTML = doc.body.innerHTML;
+  if (THEME === "beige") document.documentElement.dataset.theme = "beige";
+
+  // 2. Real functions from script.js.
+  const src = (await (await fetch("/repo/script.js")).text()).replace(/\r\n/g, "\n");
+  const slice = (a, b) => { const i = src.indexOf(a), j = src.indexOf(b, i + 1); if (i < 0 || j < 0) throw new Error("slice " + a); return src.slice(i, j); };
+  const code = [
+    slice("const partTypes = [", "function normalizeAllModelCells("),          // includes normalizeModel
+    slice("const RANDOM_BOOSTER_MODELS", "// Phase 7-R: the ratchet rules"),        // isRandomBooster and helpers
+    slice("function addStock(", "function getStockNameFromCell("),
+    slice("function getSeriesFromModel(", "function getConfigStructureModeFromRow("),
+    slice("const TABLE_SORT_ORDER", "function sortConfigTable("),
+    slice("function getStockNameFromCell(", "function closeConfigActionMenus("),
+    slice("function createHistoryRow(", "function findHistoryByComboKey("),
+    slice("function getTableData(", "/* ===== D-018 collection saves: begin"),
+    slice("const STOCK_ROW_METADATA_KEYS", "function applyDataToTables("),
+    slice("function inventoryTypeMatchesFilter(", "function toHalfWidth("),
+    slice("function getTotalParts(", "function inventoryTypeMatchesFilter(")   // getTotalParts, getUsedParts, updateUiSummaries (K-7 golden values)
+  ].join("\n");
+  const api = new Function("deps", `
+    const { getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel } = deps;
+    const isReadOnly = () => false;
+    const dataSessionGuard = { captureWriteSession: () => ({}) };
+    let currentUser = null, stockProductsByRecordId = new Map(), inventoryFilterType = "all";
+    ${code}
+    // Loader: same row builders and order as applyDataToTables (catalog upgrade,
+    // normalizeAllModelCells and refreshSelectors are out of scope here).
+    function load(data) {
+      clearAllTables();
+      data.beybladeTable.forEach(item => createBeybladeRow(item.cells, item.mainStockName, item));
+      data.partTable.forEach(item => createPartRow(item.cells));
+      data.historyTable.forEach(item => createHistoryRow(item));
+      data.configTable.forEach(item => createConfigRow(item.cells, item.mainStockName));
+      sortBeybladeTable();
+    }
+    function summary() {
+      updateUiSummaries();
+      const read = id => document.getElementById(id)?.textContent ?? null;
+      return { inventoryKinds: read("inventoryKinds"), inventoryTotal: read("inventoryTotal"),
+        inventoryUsed: read("inventoryUsed"), inventoryAvailable: read("inventoryAvailable"),
+        total: getTotalParts(), used: getUsedParts() };
+    }
+    return { load, collectCurrentData, updateResponsiveTableCells, applyInventoryFilters, summary,
+      setFilter: v => { inventoryFilterType = v; } };
+  `)({ getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel });
+
+  // 3. Fixture: whitespace edge cases, CX split, duplicates, a set, unknown fields.
+  const set = (code, layer, fix, axis, extra = {}) => ({ cells: [code, layer, "-", "-", "-", "-", "-", fix, axis], mainStockName: "-", stockAutoFilled: "true", stockRecordId: code, stockProductCode: code, stockAssemblySystem: "STANDARD", stockRatchetMode: "standard", ...extra });
+  const DATA = {
+    beybladeTable: [
+      set("BX-01", "蒼龍神劍", "3-60", "F"),
+      set("BX-01", "蒼龍神劍", "3-60", "F"),                                   // duplicate 1
+      set("BX-01", "蒼龍神劍", "3-60", "F", { customNote: "keep me" }),          // duplicate 2 with unknown field
+      set("BX-00", "歐比王肯諾比", "4-60", "P", { stockRecordId: "BX-00-01-01", stockSetId: "BX-00-01", stockSetInstanceId: "BX-00-01-aaaa" }),
+      set("BX-00", "葛里維斯將軍", "3-80", "HN", { stockRecordId: "BX-00-01-02", stockSetId: "BX-00-01", stockSetInstanceId: "BX-00-01-aaaa" }),
+      { cells: ["CX-03", "紋章鎖金屬超越S", "紋章鎖", "超越/金屬", "超越", "金屬", "S", "4-55", "LO"], mainStockName: "", stockAutoFilled: "true", stockRecordId: "CX-03", stockAssemblySystem: "CX_4P" }, // CX split
+      { cells: ["UX-01", "雙  空白", "-", "-", "-", "-", "-", "1-60", "A"], mainStockName: "-" },          // double space, manual
+      { cells: ["UX-02", "全形　空白", "-", "-", "-", "-", "-", "3-70", "H"], mainStockName: "-" },    // U+3000
+      { cells: ["UX-03", "不斷行 空白", "-", "-", "-", "-", "-", "3-80", "FB"], mainStockName: "-" }, // NBSP
+      { cells: ["UX-04", "定位\t字元", "-", "-", "-", "-", "-", "9-60", "LR"], mainStockName: "-" },  // TAB
+      { cells: ["UX-05", "換行\n字元", "-", "-", "-", "-", "-", "5-60", "R"], mainStockName: "-" },   // newline
+      { cells: ["UX-06", "  前後空白  ", "-", "-", "-", "-", "-", "4-60", "T"], mainStockName: "-" },      // leading/trailing
+      { cells: ["CX-01", "蒼龍勇  氣S", "蒼龍", "勇  氣", "-", "-", "S", "6-60", "V"], mainStockName: "勇  氣", stockAutoFilled: "true", stockRecordId: "CX-01", stockAssemblySystem: "CX_3P" }, // CX 3-part, double space in mainStockName
+      { cells: ["CX-11", "-", "帝王", "威能", "-", "-", "-", "-", "Op"], mainStockName: "威能", stockAutoFilled: false }   // integrated ratchet, falsy marker
+    ],
+    partTable: [
+      { cells: ["固鎖", "3-60", "2"] },
+      { cells: ["軸心", "雙  空白", "1"] },
+      { cells: ["上蓋", "全形　空白", "1"] },
+      { cells: ["軸心", "F", "1"] },
+      { cells: ["軸心", "F", "3"] }          // same part twice, order matters
+    ],
+    configTable: [
+      { cells: ["CX-CUSTOM", "紋章鎖金屬超越S", "紋章鎖", "超越/金屬", "超越", "金屬", "S", "4-55", "LO"], mainStockName: "" },
+      { cells: ["BX-CUSTOM", "雙  空白", "-", "-", "-", "-", "-", "3-60", "F"], mainStockName: "-" }
+    ],
+    historyTable: [{ model: "BX-CUSTOM", combo: "蒼龍  神劍", fix: "3-60", axis: "F", result: "好用", note: "備註  兩格", date: "2026/11/24", comboKey: "k1" }]
+  };
+
+  api.load(DATA);
+  api.updateResponsiveTableCells();   // production observer runs these on every change
+  api.applyInventoryFilters();
+
+  // 4. Apply the hiding method under test.
+  const tables = ["beybladeTable", "partTable"].map(id => document.getElementById(id));
+  if (MODE === "displayNone") tables.forEach(t => { t.style.display = "none"; });
+  if (MODE === "sectionHidden") ["collectionSection", "inventorySection"].forEach(id => { document.getElementById(id).hidden = true; });
+  if (MODE === "rowHidden") tables.forEach(t => t.querySelectorAll("tbody tr").forEach(r => { r.hidden = true; }));
+  if (MODE === "filterAxis") { api.setFilter("軸心"); api.applyInventoryFilters(); }
+  if (MODE === "visibilityHidden") tables.forEach(t => { t.style.visibility = "hidden"; });
+  if (MODE === "clip") {
+    const box = document.createElement("div");
+    box.setAttribute("aria-hidden", "true"); box.inert = true;
+    box.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:normal;";
+    document.querySelector("main, body").appendChild(box);
+    tables.forEach(t => box.appendChild(t));   // structural move of <table>, as the HTML source would place it
+    ["collectionSection", "inventorySection"].forEach(id => { document.getElementById(id).hidden = true; }); // tab switching
+  }
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+  const out = api.collectCurrentData();
+  delete out.updatedAt;
+  const tablesOut = pickCollectionTables(out);
+  const prints = Object.fromEntries(Object.entries(tablesOut).map(([k, v]) => [k, fingerprintTable(v)]));
+  report({ ok: true, data: tablesOut, prints, inputs: DATA, summary: MODE === "visible" ? api.summary() : null });
+} catch (error) {
+  report({ ok: false, error: String(error && error.stack || error) });
+}
+</script>
+</body>
+</html>
