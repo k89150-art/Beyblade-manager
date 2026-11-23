@@ -4,10 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（v1.11.0 正式上線程序進行中：版本 commit chore(release): prepare v1.11.0 collection UI release，部署前需正式備份與使用者確認舊分頁已關閉；Phase 7-2a 已在本機實作並完成登入後 Emulator 驗收，已本機 commit 兩筆（設計驗證與 7-2a 實作，訊息 docs(phase7): add collection and parts design verification、feat(collection): implement phase 7-2a tabs and read-only views），未 push、未部署）
+- 目前執行者：無（v1.11.0／Phase 7-2a 已正式部署完成）
 - 寫入範圍：目前沒有進行中的寫入任務
-- 正式版本：`5c32213934b9e955b9e4222f1b6fb14fb34b6cde`（`origin/main`，GitHub Pages deployment `8005259788` success）。本筆部署紀錄 commit 只在本機，未 push。
-- Phase 7 設計文件已 commit 在 `design/phase7/`。
+- 正式版本：`c18a33f181d7af842a97732f7dc76bb8f79b0a2d`（v1.11.0，`origin/main`，GitHub Pages deployment `8011069119` success）。本筆部署紀錄 commit 只在本機，未 push。
+- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b～7-2d 尚未授權。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -33,6 +33,20 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（v1.11.0／Phase 7-2a，正式部署）
+
+- 任務：經使用者授權正式上線 v1.11.0（Phase 7-2a 收藏與零件分頁）。
+- 版本 commit：`c18a33f`（chore(release): prepare v1.11.0 collection UI release，16 檔：`SITE_VERSION`、11 頁 `site-menu.js?v=20261124-v1110`、更新日誌、使用說明、3 個測試檔與本文件）。
+- 正式備份（部署前，使用者以管理員帳號操作既有工具 `exports/firestore-backup-tool/`，只讀取）：`C:\BeybladeBackups\beyblade-appData-backup-20261124-050655.json`，建立時間 2026-11-23T21:06:55Z，來源 `k89150-web-login`，2 份文件，檔案 SHA-256 `2dacc906334578ddfb302fab8e4fe01c90922168a7e37c637036bbd0c832bb2e`，文件整體 SHA-256 `4a602c7d…524b8`（與 11-23 備份相同，期間正式資料未變）；`verify-backup.mjs` PASS（工具測試 9/9）。
+- 部署前檢查：遠端仍為 `5c32213`、可快轉、工作樹乾淨；333/333 PASS；validate PASS；build PASS（35 files）；受保護檔案與 `origin/main` 相比只有 `competition-stats.html` 的 site-menu.js 快取參數；`SITE_VERSION` v1.11.0；11 頁載入 v1110；主頁載入 `script.js`／`style.css`／`collection-view.js` 的 `20261124-phase72a`。使用者確認所有裝置的舊收藏／賽事頁與 PWA 已關閉。
+- Push：`git push origin main`，`5c32213..c18a33f`（快轉，無 force push），4 個 commit：`50169d7`、`3a3fc75`、`b6d10b8`、`c18a33f`。
+- GitHub Pages：build `built`（`c18a33f`）；deployment `8011069119` success；workflow run `45266577803` success。
+- 部署後唯讀驗收（瀏覽器確認沒有正式網站 Firebase 登入資料，未登入）：35 個網站檔案與 `c18a33f` 逐位元組相同。375 寬：側欄 v1.11.0、顯示層啟用且未回退、主要 JS／CSS 8 項 200（含 `collection-view.js`）、版本列「5B（交易保護）」、原始表格 clip 隱藏、分頁切換、新增區展開／收合、＋新增→新增零件聚焦 `#partName`、＋新增→新增收藏聚焦 `#model`、底部導覽五項不變。1024 寬分頁與側欄新增按鈕正常。更新日誌最新 v1.11.0（6 項）、歷史 v1.2.0～v1.10.0；使用說明新段落存在。各頁無水平捲動、Console Error 0。
+- 正式 Firestore：備份只讀取；部署與驗收沒有任何寫入；Rules、Schema、型錄、競賽統計未修改，也沒有還原或匯入。
+- 未驗證：正式網站登入後的新增／修改／刪除（包含正式版 `signInWithPopup`；登入後流程只在 Emulator 測試副本以 redirect 驗證）；Safari／iOS。
+- 既有待處理（未修正）：上蓋名稱含連續空白／TAB 時 D-018 載入基準可能不一致；三顆套組刪除確認仍寫「雙陀螺套組」；回退表格介面時收藏表格排在零件區之後。
+- Commit / Deploy：`c18a33f` 已 push 並部署；本筆紀錄為本機 commit，未 push。
 
 ### 2026-11-24 — Claude Code（Phase 7-2a 部署前版本與說明）
 
@@ -79,7 +93,7 @@
 - 部署前檢查：乾淨 clone 發現 `tests/site-navigation.test.mjs` 讀取 `site-menu.css` 未正規化換行，在 Windows（`core.autocrlf=true`）checkout 下失敗 1 項；經使用者同意另以 `5c32213` 修正（只改測試）。修正後乾淨 clone 313/313 PASS、validate PASS、build PASS（34 files）。差異只含導覽、頁面版本字串、說明文字、測試與文件；資料、儲存、同步、組裝規則、型錄、統計、Firebase、workflow 檔案皆未變更。`design/` 已確認不含個人資料或金鑰（部署後會公開可讀）。
 - Push：`git push origin main`，`f1df0bc..5c32213`（快轉，無 force push），共 4 個 commit：`38afe4d`、`64263e4`、`1b6a989`、`5c32213`。推送前確認遠端仍為 `f1df0bc`、工作區乾淨。
 - 正式版本：`5c32213934b9e955b9e4222f1b6fb14fb34b6cde`。GitHub Pages（legacy，`main` 根目錄）建置 `built`；deployment `8005259788` success；workflow run `45221998763` success。
-- 部署前：備份以既有 `C:\BeybladeBackups\beyblade-appData-backup-20261123-062202.json` 為準（檔案可正常解析；本機找不到 `verify-backup.mjs`，本次未重新以該工具驗證）；舊分頁關閉以使用者授權回覆為確認（比照 Phase 7-R）。本次未改變任何儲存路徑。
+- 部署前：備份以既有 `C:\BeybladeBackups\beyblade-appData-backup-20261123-062202.json` 為準（檔案可正常解析；本機找不到 `verify-backup.mjs`，本次未重新以該工具驗證〔2026-11-24 更正：工具其實在被 Git 忽略的 `exports/firestore-backup-tool/`，當時漏查該資料夾〕）；舊分頁關閉以使用者授權回覆為確認（比照 Phase 7-R）。本次未改變任何儲存路徑。
 - 部署後唯讀驗收（瀏覽器確認沒有 Firebase 登入資料，未登入狀態）：17 個正式檔案與 commit 逐位元組相同。主頁（375 寬）載入 `site-menu.js?v=20261124-v1100`、`script.js`／`assembly-rules.js?v=20261123-phase7r`（未變），顯示 v1.10.0 與「收藏儲存版本：5B（交易保護）」；底部導覽「收藏／配置／＋新增／賽事／更多」、收藏 active；＋新增開啟五項、Escape 關閉並還原焦點。賽事頁載入 `tournament.js?v=20261029-phase4b1`（未變）、賽事 active、日期欄位存在。競賽統計（1024 寬）側欄有新增按鈕、競賽統計 active、底部導覽隱藏。三頁無水平 overflow，Console Error 0。
 - 未驗證：未登入，未在正式網站實際新增收藏、零件或比賽（只驗證導向與聚焦）。
 - 正式 Firestore：部署過程沒有任何寫入；Rules、Schema 未修改。
