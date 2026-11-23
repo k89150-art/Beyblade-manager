@@ -39,7 +39,7 @@ test("六個說明頁只保留共用捷徑掛載點", () => {
     assert.equal((html.match(/data-help-nav/g) || []).length, 1, `${page} 掛載點數量錯誤`);
     assert.match(html, /class="site-nav help-page-nav" data-help-nav/);
     assert.doesNotMatch(html, /<div class="site-nav">/);
-    assert.match(html, /site-menu\.js\?v=20261124-v1120/);
+    assert.match(html, /site-menu\.js\?v=20261124-v1130/);
     assert.match(html, /site-menu\.css\?v=20261124-v1100/);
   });
 });
@@ -64,18 +64,19 @@ test("使用教學符合目前正式操作", () => {
 
 test("更新紀錄只直接顯示最新版本，其餘版本集中於歷史版本", () => {
   const html = readFileSync("changelog.html", "utf8");
-  const latestVersionIndex = html.indexOf("v1.12.0｜零件庫存與配置引用");
+  const latestVersionIndex = html.indexOf("v1.13.0｜收藏清單篩選與排序");
   const historyIndex = html.indexOf('<details class="version-archive">');
-  const previousVersionIndex = html.indexOf("v1.11.0｜收藏與零件分頁");
+  const previousVersionIndex = html.indexOf("v1.12.0｜零件庫存與配置引用");
 
   assert.equal((html.match(/2026-09-02/g) || []).length, 1);
   assert.equal((html.match(/class="version-archive"/g) || []).length, 1);
   assert.ok(latestVersionIndex >= 0 && latestVersionIndex < historyIndex);
   assert.ok(previousVersionIndex > historyIndex);
+  assert.ok(html.indexOf("v1.11.0｜收藏與零件分頁") > historyIndex);
   assert.ok(html.indexOf("v1.10.0｜導覽調整與組裝規則更新") > historyIndex);
   assert.ok(html.indexOf("v1.9.2｜收藏與文字閱讀體驗改善") > historyIndex);
   assert.ok(html.indexOf("v1.9.0｜主題、導覽與管理介面更新") > historyIndex);
-  assert.match(html, /<summary>歷史版本（v1\.2\.0～v1\.11\.0）<\/summary>/);
-  assert.equal((html.match(/2026-11-24/g) || []).length, 3, "v1.12.0, v1.11.0 and v1.10.0");
+  assert.match(html, /<summary>歷史版本（v1\.2\.0～v1\.12\.0）<\/summary>/);
+  assert.equal((html.match(/2026-11-24/g) || []).length, 4, "v1.13.0, v1.12.0, v1.11.0 and v1.10.0");
   assert.doesNotMatch(html, /v1\.9\.1｜收藏與庫存資訊顯示優化/);
 });

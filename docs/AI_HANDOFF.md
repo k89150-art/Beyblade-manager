@@ -4,8 +4,8 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Phase 7-2c 已本機 commit，未 push、未部署；正式版本仍為 v1.12.0）
-- 寫入範圍：目前沒有進行中的寫入任務
+- 目前執行者：Claude Code（v1.13.0 正式上線進行中；ChatGPT 已核准 7-2c commit `9d589a9` 與發布流程）
+- 寫入範圍：v1.13.0 release commit（版本、更新紀錄、使用說明、相關測試、本文件）
 - 正式版本：`b006f165a68a6d652ac13589cb38ac16ddd59ac9`（v1.12.0，`origin/main`，GitHub Pages deployment `8012230899` success）。本筆部署紀錄 commit 只在本機，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已本機 commit（未 push）；Phase 7-2d 尚未授權。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
@@ -33,6 +33,14 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（v1.13.0 發布準備，release commit）
+
+- 任務：ChatGPT 核准 Phase 7-2c commit `9d589a9` 後，授權 v1.13.0 發布流程（版本、文件、release commit、備份、push、部署、唯讀驗收）。
+- 主要內容：`SITE_VERSION` v1.12.0 → v1.13.0（只改常數）；11 頁 `site-menu.js` 快取 `20261124-v1120` → `20261124-v1130`，其他資源快取不變（`style.css`／`script.js`／`collection-view.js` 仍為 `phase72c`，`site-menu.css` 仍為 `v1100`）。changelog 新增「v1.13.0｜收藏清單篩選與排序」五點（V3、系列／來源篩選、原裝陀螺排序與筆數、零件狀態篩選與排序、只改顯示不寫入且換帳號重設），v1.12.0 移入歷史版本（v1.2.0～v1.12.0）。guide 第二節加入系列／來源篩選、排序、筆數、清單／卡片切換與「只改顯示、重新整理／登出／換帳號回到預設，V3 保留」；第三節零件篩選補充狀態與排序。
+- 修改檔案：`site-menu.js`、11 個頁面（快取參數）、`changelog.html`、`guide.html`、`tests/collection-view.test.mjs`、`tests/help-pages.test.mjs`、`tests/manager-ui-refresh.test.mjs`、本文件。7-2c 功能程式未修改。
+- 測試：Node 359/359；測試只更新版本字串、快取參數與更新紀錄順序／日期次數（2026-11-24 由 3 次改為 4 次），未放寬功能斷言。
+- Commit / Deploy：release commit `chore(release): prepare v1.13.0 collection controls`；部署見上方紀錄。
 
 ### 2026-11-24 — Claude Code（Phase 7-2c，本機實作，已本機 commit）
 
