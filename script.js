@@ -26,6 +26,16 @@ import {
   isIntegratedRatchetBit,
   isSimpleRatchet as isOfficialSimpleRatchet
 } from "./assembly-rules.js?v=20261123-phase7r";
+import {
+  COLLECTION_VIEW_TABS,
+  buildPartItems,
+  buildStockItems,
+  collectionHashTarget,
+  isAddPanelOpen,
+  listNotice,
+  otherTab,
+  rowSignature
+} from "./collection-view.js?v=20261124-phase72a";
 
 import {
   getAuth,
@@ -153,6 +163,7 @@ function updateDataAccessUi() {
   const retryButton = document.getElementById("retryDataLoadBtn");
   if (retryButton) retryButton.hidden = session.state !== DATA_SESSION_STATES.ERROR || !currentUser;
   renderCollectionSyncNotice();
+  if (typeof scheduleCollectionViewRender === "function") scheduleCollectionViewRender();
 }
 
 function cancelPendingCloudSaves() {
@@ -2252,10 +2263,39 @@ function dismissOrphanedCollectionDraft() {
   renderCollectionDraftNotice();
 }
 
+// Phase 7-2a (Q1): the add-collection / add-part forms are not collection data
+// and are not part of F-04 drafts. They are cleared whenever the signed-in
+// account changes (sign-out, a different UID, or a first sign-in), after the
+// draft above is captured, so text typed for one account is never submitted to
+// another. A repeat event for the same UID keeps what was typed.
+const QUICK_ADD_TEXT_FIELD_IDS = Object.freeze([
+  "model", "layer", "lock", "primaryBlade", "transcendBlade", "metalBlade", "aux", "fix", "axis",
+  "partName", "partCount"
+]);
+
+function shouldResetQuickAddForms(previousUid, nextUid) {
+  return !nextUid || previousUid !== nextUid;
+}
+
+function resetQuickAddFormsForAccountChange(previousUid, nextUid) {
+  if (!shouldResetQuickAddForms(previousUid, nextUid)) return false;
+  QUICK_ADD_TEXT_FIELD_IDS.forEach(id => {
+    const field = document.getElementById(id);
+    if (field) field.value = "";
+  });
+  const partType = document.getElementById("partType");
+  if (partType) partType.value = "上蓋";
+  if (typeof renderStockAutoPreview === "function") renderStockAutoPreview();
+  if (typeof resetCollectionViewState === "function") resetCollectionViewState();
+  return true;
+}
+
 async function handleAuthStateChange(user) {
+  const previousUid = currentUser ? currentUser.uid : null;
   const draft = captureOrphanedCollectionDraft(user);
   localSignOutRequested = false;
   cancelSessionInteractions();
+  resetQuickAddFormsForAccountChange(previousUid, user ? user.uid : null);
   currentUser = user;
   viewingUserId = null;
   updateAuthUI(user);
@@ -2970,13 +3010,22 @@ function applyInventoryFilters() {
     const matchesQuery = !query || `${type} ${name}`.toLocaleLowerCase("zh-TW").includes(query);
     const visible = matchesType && matchesQuery;
     row.dataset.inventoryTone = getInventoryTypeTone(type);
-    row.hidden = !visible;
-    row.style.order = String(getInventoryTypeDisplayRank(type));
+    // Phase 7-2a (K-1): hiding an original row changes what innerText returns
+    // for names with repeated spaces, so rows are only hidden in the fallback
+    // table layout. The display layer applies the same filter to its own list.
+    if (typeof isCollectionViewActive === "function" && isCollectionViewActive()) {
+      row.hidden = false;
+      row.style.order = "";
+    } else {
+      row.hidden = !visible;
+      row.style.order = String(getInventoryTypeDisplayRank(type));
+    }
     if (visible) visibleCount += 1;
   });
 
   const status = document.getElementById("inventoryFilterStatus");
   if (status) status.textContent = rows.length ? `顯示 ${visibleCount} / ${rows.length} 種` : "尚無額外零件";
+  if (typeof scheduleCollectionViewRender === "function") scheduleCollectionViewRender();
 }
 
 function updateResponsiveTableCells() {
@@ -3632,6 +3681,7 @@ function installUiSummaryObservers() {
     updateUiSummaries();
     updateResponsiveTableCells();
     applyInventoryFilters();
+    if (typeof scheduleCollectionViewRender === "function") scheduleCollectionViewRender();
   };
 
   ["beybladeTable", "partTable", "configTable", "historyTable"].forEach(tableId => {
@@ -3644,6 +3694,391 @@ function installUiSummaryObservers() {
 
   refreshUi();
 }
+
+/* ===== Phase 7-2a collection view (R2): begin ===== */
+// The original #beybladeTable / #partTable rows stay the only stored data
+// source: getTableData(), collectCurrentData() and the D-018 saves are not
+// changed. This layer only reads those rows and draws its own lists outside
+// every table body, so nothing it renders is ever collected or saved. Actions
+// call the existing deleteRow / editRow with the original row's own buttons;
+// there is no second write path. The original tables are clip-hidden only
+// (K-1: display:none, [hidden] and visibility:hidden change what innerText
+// returns; see design/phase7/verification/k1-hidden-table).
+const collectionViewState = {
+  active: false,
+  failed: false,
+  tab: "stock",
+  addChoice: { stock: null, parts: null },
+  renderQueued: false,
+  refs: new Map(),
+  editingPartRow: null
+};
+const collectionViewKeys = new WeakMap();
+let collectionViewKeySequence = 0;
+
+function isCollectionViewActive() {
+  return collectionViewState.active && !collectionViewState.failed;
+}
+
+function getCollectionViewKey(row) {
+  if (!collectionViewKeys.has(row)) {
+    collectionViewKeySequence += 1;
+    collectionViewKeys.set(row, `r${collectionViewKeySequence}`);
+  }
+  return collectionViewKeys.get(row);
+}
+
+function getSourceRowButton(row, name) {
+  const cell = row?.cells[row.cells.length - 1];
+  return cell ? cell.querySelector(`button[onclick^="${name}("]`) : null;
+}
+
+// Read-only: the same reads as getTableData() (persisted cells while a row is
+// being edited, the main-blade stock name, D-015 metadata).
+function readSourceRowSnapshot(row, tableId) {
+  const snapshot = {
+    cells: getPersistedRowCells(row),
+    mainStockName: tableId === "beybladeTable" ? getPersistedStockName(row, 3) : null,
+    meta: {},
+    editing: row.dataset.editing === "true"
+  };
+  if (tableId === "beybladeTable") {
+    STOCK_ROW_METADATA_KEYS.forEach(key => {
+      if (row.dataset[key]) snapshot.meta[key] = row.dataset[key];
+    });
+  }
+  return snapshot;
+}
+
+function getStockViewDisplay(row, cells) {
+  const model = cells[0] || "";
+  const [layer, lock, main, transcend, metal, aux, fix, axis] = cells.slice(1, 9);
+  const parts = getCollectionCardParts(getSeriesFromModel(model), { layer, lock, main, transcend, metal, aux, fix, axis });
+  const cardTitle = row.cells[0]?.dataset.cardTitle || "";
+  const title = cardTitle.startsWith(model) ? cardTitle.slice(model.length).trim() : cardTitle;
+  return { title: title || (layer && layer !== "-" ? layer : model), parts };
+}
+
+function setSourceBoxHidden(box, hidden) {
+  if (!box) return;
+  box.classList.toggle("is-source-hidden", hidden);
+  box.toggleAttribute("inert", hidden);
+  if (hidden) box.setAttribute("aria-hidden", "true");
+  else box.removeAttribute("aria-hidden");
+}
+
+function setAddPanelOpen(kind, open) {
+  const body = document.getElementById(COLLECTION_VIEW_TABS[kind].addBody);
+  const toggle = document.querySelector(`[data-add-toggle="${kind}"]`);
+  if (body) body.hidden = !open;
+  if (toggle) toggle.setAttribute("aria-expanded", String(open));
+}
+
+function setCollectionTab(tab, { focusTab = false, updateHash = false } = {}) {
+  if (!isCollectionViewActive()) return;
+  const next = tab === "parts" ? "parts" : "stock";
+  collectionViewState.tab = next;
+  Object.entries(COLLECTION_VIEW_TABS).forEach(([name, config]) => {
+    const active = name === next;
+    const section = document.getElementById(config.section);
+    if (section) section.hidden = !active;
+    const button = document.querySelector(`[data-collection-tab="${name}"]`);
+    if (!button) return;
+    button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
+    button.classList.toggle("active", active);
+    if (active && focusTab) button.focus();
+  });
+  if (updateHash && typeof history.replaceState === "function") {
+    history.replaceState(null, "", `#${COLLECTION_VIEW_TABS[next].section}`);
+  }
+}
+
+// D-020: #add-collection / #add-part open the right tab and form and focus the
+// existing field; #collectionSection / #inventorySection only switch tabs.
+function applyCollectionHash(hash, { scroll = true } = {}) {
+  if (!isCollectionViewActive()) return false;
+  const target = collectionHashTarget(hash);
+  if (!target) return false;
+  setCollectionTab(target.tab);
+  const section = document.getElementById(COLLECTION_VIEW_TABS[target.tab].section);
+  if (target.quickAdd) {
+    collectionViewState.addChoice[target.tab] = true;
+    setAddPanelOpen(target.tab, true);
+    const field = document.getElementById(target.focus);
+    if (field) {
+      field.scrollIntoView({ block: "center" });
+      if (!field.disabled) field.focus({ preventScroll: true });
+    }
+  } else if (scroll && section) {
+    section.scrollIntoView({ block: "start" });
+  }
+  return true;
+}
+
+function isSameDocumentLink(url) {
+  if (url.origin !== location.origin) return false;
+  const page = path => path.replace(/\/index\.html$/, "/");
+  return page(url.pathname) === page(location.pathname);
+}
+
+function renderStockViewItem(item) {
+  const tags = `${item.manual ? '<span class="cv-tag">手動</span>' : ""}${item.inSet ? '<span class="cv-tag">套組</span>' : ""}`;
+  const parts = item.parts.map(part => `<span class="cv-part" data-part-tone="${escapeHtml(part.tone)}"><small>${escapeHtml(part.type)}</small>${escapeHtml(part.value)}</span>`).join("");
+  const label = escapeHtml(`${item.model} ${item.title}`.trim());
+  const action = item.canDelete
+    ? `<button type="button" class="cv-action cv-action-danger" data-write-action data-view-action="delete" data-view-key="${item.key}"${item.deleteDisabled ? " disabled" : ""} aria-label="刪除 ${label}">刪除</button>`
+    : "";
+  return `<article class="cv-item" data-series="${escapeHtml(item.series)}">
+    <div class="cv-head"><span class="cv-code">${escapeHtml(item.model)}</span><strong class="cv-title">${escapeHtml(item.title)}</strong>${tags}</div>
+    ${parts ? `<div class="cv-parts">${parts}</div>` : ""}
+    ${action ? `<div class="cv-actions">${action}</div>` : ""}
+  </article>`;
+}
+
+function renderPartViewItem(item) {
+  const label = escapeHtml(`${item.type} ${item.name}`.trim());
+  const actions = item.editing
+    ? '<span class="cv-editing">修改中：請在下方表格保存或取消</span>'
+    : `${item.canEdit ? `<button type="button" class="cv-action" data-write-action data-view-action="edit" data-view-key="${item.key}"${item.editDisabled ? " disabled" : ""} aria-label="修改 ${label}">修改</button>` : ""}${item.canDelete ? `<button type="button" class="cv-action cv-action-danger" data-write-action data-view-action="delete" data-view-key="${item.key}"${item.deleteDisabled ? " disabled" : ""} aria-label="刪除 ${label}">刪除</button>` : ""}`;
+  return `<article class="cv-item cv-part-item${item.editing ? " is-editing" : ""}" data-inventory-tone="${escapeHtml(item.tone)}">
+    <div class="cv-head"><span class="cv-type">${escapeHtml(item.type)}</span><strong class="cv-title">${escapeHtml(item.name)}</strong></div>
+    <span class="cv-count">數量 <strong>${escapeHtml(item.count)}</strong></span>
+    ${actions ? `<div class="cv-actions">${actions}</div>` : ""}
+  </article>`;
+}
+
+function writeViewList(list, notice, itemsHtml) {
+  if (!list) return;
+  list.innerHTML = `${notice ? `<p class="cv-notice">${escapeHtml(notice)}</p>` : ""}${itemsHtml}`;
+}
+
+// Part editing happens on the original row (existing editRow / saveEditRow /
+// cancelEditRow). While a part row is being edited its box is shown as is.
+function syncPartEditing(editingRow) {
+  const box = document.getElementById("partSourceBox");
+  const previous = collectionViewState.editingPartRow;
+  if (editingRow && editingRow !== previous) {
+    collectionViewState.editingPartRow = editingRow;
+    setSourceBoxHidden(box, false);
+    box?.classList.add("is-editing");
+    if (collectionViewState.tab !== "parts") setCollectionTab("parts");
+    editingRow.scrollIntoView({ block: "center" });
+    editingRow.querySelector("input, select")?.focus({ preventScroll: true });
+  } else if (!editingRow && previous) {
+    collectionViewState.editingPartRow = null;
+    box?.classList.remove("is-editing");
+    setSourceBoxHidden(box, true);
+    const key = previous.isConnected ? getCollectionViewKey(previous) : null;
+    const button = key ? document.querySelector(`[data-view-key="${key}"][data-view-action="edit"]`) : null;
+    (button || document.querySelector('[data-collection-tab="parts"]'))?.focus({ preventScroll: true });
+  }
+}
+
+function renderCollectionView() {
+  if (!isCollectionViewActive()) return;
+  const active = document.activeElement;
+  const restore = active?.dataset?.viewKey ? { key: active.dataset.viewKey, action: active.dataset.viewAction } : null;
+  const signedIn = Boolean(currentUser);
+  const loading = dataSessionGuard.snapshot().state === DATA_SESSION_STATES.LOADING;
+  const refs = new Map();
+
+  const stockRows = Array.from(document.querySelectorAll("#beybladeTable tbody tr"));
+  const stockItems = buildStockItems(stockRows.map(row => {
+    const snapshot = readSourceRowSnapshot(row, "beybladeTable");
+    const key = getCollectionViewKey(row);
+    const remove = getSourceRowButton(row, "deleteRow");
+    refs.set(key, { row, tableId: "beybladeTable", signature: rowSignature(snapshot) });
+    return { ...snapshot, key, display: getStockViewDisplay(row, snapshot.cells), actions: { delete: Boolean(remove), deleteDisabled: Boolean(remove?.disabled) } };
+  }));
+
+  const partRows = Array.from(document.querySelectorAll("#partTable tbody tr"));
+  const query = document.getElementById("inventorySearchInput")?.value || "";
+  const partItems = buildPartItems(partRows.map(row => {
+    const snapshot = readSourceRowSnapshot(row, "partTable");
+    const key = getCollectionViewKey(row);
+    const edit = getSourceRowButton(row, "editRow");
+    const remove = getSourceRowButton(row, "deleteRow");
+    refs.set(key, { row, tableId: "partTable", signature: rowSignature(snapshot) });
+    return {
+      ...snapshot,
+      key,
+      tone: getInventoryTypeTone(snapshot.cells[0] || ""),
+      actions: { edit: Boolean(edit), delete: Boolean(remove), editDisabled: Boolean(edit?.disabled), deleteDisabled: Boolean(remove?.disabled) }
+    };
+  }), {
+    matchesType: type => inventoryTypeMatchesFilter(type, inventoryFilterType),
+    query,
+    rank: getInventoryTypeDisplayRank
+  });
+
+  collectionViewState.refs = refs;
+  writeViewList(document.getElementById("stockViewList"),
+    listNotice({ signedIn, loading, total: stockRows.length, shown: stockItems.length, kind: "stock" }),
+    stockItems.map(renderStockViewItem).join(""));
+  writeViewList(document.getElementById("partViewList"),
+    listNotice({ signedIn, loading, total: partRows.length, shown: partItems.length, kind: "parts" }),
+    partItems.map(renderPartViewItem).join(""));
+
+  const stockCount = document.getElementById("collectionTabStockCount");
+  if (stockCount) stockCount.textContent = String(stockRows.length);
+  const partsCount = document.getElementById("collectionTabPartsCount");
+  if (partsCount) partsCount.textContent = String(partRows.length);
+  setAddPanelOpen("stock", isAddPanelOpen(collectionViewState.addChoice.stock, stockRows.length));
+  setAddPanelOpen("parts", isAddPanelOpen(collectionViewState.addChoice.parts, partRows.length));
+
+  if (restore) {
+    document.querySelector(`[data-view-key="${restore.key}"][data-view-action="${restore.action}"]`)?.focus({ preventScroll: true });
+  }
+  syncPartEditing(partRows.find(row => row.dataset.editing === "true") || null);
+}
+
+function scheduleCollectionViewRender() {
+  if (!isCollectionViewActive() || collectionViewState.renderQueued) return;
+  collectionViewState.renderQueued = true;
+  const run = () => {
+    collectionViewState.renderQueued = false;
+    try {
+      renderCollectionView();
+    } catch (error) {
+      failCollectionView(error);
+    }
+  };
+  if (typeof requestAnimationFrame === "function") requestAnimationFrame(run);
+  else setTimeout(run, 0);
+}
+
+// Confirms, right before acting, that the row the user saw is still there and
+// unchanged; otherwise nothing is called. The existing function then shows its
+// own confirmation (sets are still deleted together by deleteRow).
+function runCollectionViewAction(button) {
+  const entry = collectionViewState.refs.get(button.dataset.viewKey);
+  const row = entry?.row;
+  const current = row && row.isConnected && row.closest("table")?.id === entry.tableId
+    ? readSourceRowSnapshot(row, entry.tableId)
+    : null;
+  if (!current || rowSignature(current) !== entry.signature) {
+    alert("資料已更新，請確認清單後再操作。");
+    scheduleCollectionViewRender();
+    return;
+  }
+  if (button.dataset.viewAction === "delete") {
+    const source = getSourceRowButton(row, "deleteRow");
+    if (source && !source.disabled) window.deleteRow(source);
+  } else if (button.dataset.viewAction === "edit" && entry.tableId === "partTable") {
+    const source = getSourceRowButton(row, "editRow");
+    if (source && !source.disabled) window.editRow(source, "part");
+  }
+}
+
+// Q1 / F-04: called from resetQuickAddFormsForAccountChange on account change.
+function resetCollectionViewState() {
+  const search = document.getElementById("inventorySearchInput");
+  if (search) search.value = "";
+  inventoryFilterType = "all";
+  document.querySelectorAll("[data-inventory-filter]").forEach(button => {
+    const active = button.dataset.inventoryFilter === "all";
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  collectionViewState.addChoice = { stock: null, parts: null };
+  applyInventoryFilters();
+  scheduleCollectionViewRender();
+}
+
+// Fallback: the page goes back to the original tables (never an empty page,
+// never a data change).
+function failCollectionView(error) {
+  if (collectionViewState.failed) return;
+  collectionViewState.failed = true;
+  console.error("收藏顯示層無法使用，已改回原本的表格介面。", error);
+  try {
+    document.body.classList.add("collection-view-failed");
+    ["beybladeSourceBox", "partSourceBox"].forEach(id => setSourceBoxHidden(document.getElementById(id), false));
+    ["collectionSection", "inventorySection", "collectionAddBody", "inventoryAddBody"].forEach(id => {
+      const element = document.getElementById(id);
+      if (element) element.hidden = false;
+    });
+    ["collectionTabs", "stockViewList", "partViewList"].forEach(id => {
+      const element = document.getElementById(id);
+      if (element) element.hidden = true;
+    });
+    document.querySelectorAll("[data-add-toggle]").forEach(toggle => { toggle.hidden = true; });
+    applyInventoryFilters();
+  } catch (fallbackError) {
+    console.error(fallbackError);
+  }
+}
+
+function installCollectionView() {
+  try {
+    const required = ["collectionTabs", "collectionSection", "inventorySection", "stockViewList", "partViewList",
+      "collectionAddBody", "inventoryAddBody", "beybladeSourceBox", "partSourceBox"];
+    const missing = required.filter(id => !document.getElementById(id));
+    if (missing.length) throw new Error(`收藏顯示層缺少元素：${missing.join("、")}`);
+
+    collectionViewState.active = true;
+    ["beybladeSourceBox", "partSourceBox"].forEach(id => setSourceBoxHidden(document.getElementById(id), true));
+    document.getElementById("collectionTabs").hidden = false;
+    ["stockViewList", "partViewList"].forEach(id => { document.getElementById(id).hidden = false; });
+    document.querySelectorAll("[data-add-toggle]").forEach(toggle => {
+      toggle.hidden = false;
+      toggle.addEventListener("click", () => {
+        const kind = toggle.dataset.addToggle;
+        const open = toggle.getAttribute("aria-expanded") !== "true";
+        collectionViewState.addChoice[kind] = open;
+        setAddPanelOpen(kind, open);
+        if (open) document.getElementById(COLLECTION_VIEW_TABS[kind].focus)?.focus();
+      });
+    });
+
+    const tabs = document.getElementById("collectionTabs");
+    tabs.addEventListener("click", event => {
+      const button = event.target.closest("[data-collection-tab]");
+      if (button) setCollectionTab(button.dataset.collectionTab, { updateHash: true });
+    });
+    tabs.addEventListener("keydown", event => {
+      const keys = { ArrowRight: otherTab(collectionViewState.tab), ArrowLeft: otherTab(collectionViewState.tab), Home: "stock", End: "parts" };
+      if (!(event.key in keys)) return;
+      event.preventDefault();
+      setCollectionTab(keys[event.key], { focusTab: true, updateHash: true });
+    });
+
+    ["stockViewList", "partViewList"].forEach(id => {
+      document.getElementById(id).addEventListener("click", event => {
+        const button = event.target.closest("[data-view-action]");
+        if (button && !button.disabled) runCollectionViewAction(button);
+      });
+    });
+
+    window.addEventListener("hashchange", () => applyCollectionHash(location.hash));
+    // A link to the hash that is already in the address bar fires no
+    // hashchange; still switch the tab and focus the field.
+    document.addEventListener("click", event => {
+      const link = event.target.closest?.("a[href]");
+      if (!link) return;
+      const url = new URL(link.href, location.href);
+      if (!url.hash || url.hash !== location.hash || !isSameDocumentLink(url) || !collectionHashTarget(url.hash)) return;
+      setTimeout(() => applyCollectionHash(url.hash), 0);
+    }, true);
+
+    document.addEventListener("keydown", event => {
+      if (event.key !== "Escape") return;
+      const row = collectionViewState.editingPartRow;
+      if (!row || !row.isConnected || !document.getElementById("partSourceBox")?.contains(document.activeElement)) return;
+      const cancel = row.cells[row.cells.length - 1]?.querySelector('button[onclick^="cancelEditRow("]');
+      if (cancel) window.cancelEditRow(cancel, "part");
+    });
+
+    document.body.classList.add("collection-view-ready");
+    setCollectionTab(collectionHashTarget(location.hash)?.tab || "stock");
+    renderCollectionView();
+    applyCollectionHash(location.hash, { scroll: false });
+  } catch (error) {
+    failCollectionView(error);
+  }
+}
+/* ===== Phase 7-2a collection view (R2): end ===== */
 
 function updateNoRatchetConfigOption() {
   const modelInput = document.getElementById("confModel");
@@ -4322,6 +4757,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   clearAllTables();
   refreshSelectors();
+  installCollectionView();
   installUiSummaryObservers();
   setSyncStatus("請先使用 Google 登入", "muted");
   installConfigSort();

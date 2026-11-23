@@ -14,7 +14,7 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20260902-v192" />
+  <link rel="stylesheet" href="style.css?v=20261124-phase72a" />
   <link rel="stylesheet" href="site-menu.css?v=20261124-v1100" />
   <style>
 
@@ -282,6 +282,11 @@
       </div>
     </header>
 
+    <div id="collectionTabs" class="collection-tabs" role="tablist" aria-label="收藏分頁" hidden>
+      <button type="button" role="tab" id="collectionTabStock" class="collection-tab" data-collection-tab="stock" aria-controls="collectionSection" aria-selected="true">原裝陀螺 <span class="collection-tab-count" id="collectionTabStockCount">0</span></button>
+      <button type="button" role="tab" id="collectionTabParts" class="collection-tab" data-collection-tab="parts" aria-controls="inventorySection" aria-selected="false" tabindex="-1">零件 <span class="collection-tab-count" id="collectionTabPartsCount">0</span></button>
+    </div>
+
     <section id="collectionSection" class="tool-section">
       <div class="section-heading">
         <div><span class="eyebrow">MY COLLECTION</span><h2>我的陀螺收藏</h2></div>
@@ -289,6 +294,9 @@
       </div>
       <p class="section-note">收藏只記錄原裝配置；同一型號若有多顆陀螺，可選擇其中一顆或全部加入。改裝請到配置區操作。</p>
 
+    <div class="add-panel" data-add-panel="stock">
+    <button type="button" id="collectionAddToggle" class="add-panel-toggle" data-add-toggle="stock" aria-expanded="true" aria-controls="collectionAddBody" hidden>新增收藏</button>
+    <div id="collectionAddBody" class="add-panel-body">
     <div class="input-row entry-panel collection-entry-panel">
       <div class="stock-mode-switch" role="group" aria-label="收藏輸入模式">
         <button type="button" class="stock-mode-btn active" data-stock-mode="auto" aria-pressed="true">自動帶入</button>
@@ -317,26 +325,11 @@
 
       <button id="addCollectionBtn" type="button" data-write-action disabled onclick="addRow()">加入原裝收藏</button>
     </div>
-
-    <div class="table-wrap record-card-wrap collection-card-wrap">
-      <table id="beybladeTable">
-        <thead>
-          <tr>
-            <th>型號</th>
-            <th>上蓋</th>
-            <th>紋章鎖</th>
-            <th>主要戰刃</th>
-            <th>超越戰刃</th>
-            <th>金屬戰刃</th>
-            <th>輔助戰刃</th>
-            <th>固鎖</th>
-            <th>軸心</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
     </div>
+    </div>
+
+    <div id="stockViewList" class="collection-view-list" aria-label="原裝陀螺清單" hidden></div>
+
     </section>
 
     <section id="inventorySection" class="tool-section">
@@ -368,6 +361,9 @@
         <span id="inventoryFilterStatus" class="inventory-filter-status" aria-live="polite"></span>
       </div>
 
+    <div class="add-panel" data-add-panel="parts">
+    <button type="button" id="inventoryAddToggle" class="add-panel-toggle" data-add-toggle="parts" aria-expanded="true" aria-controls="inventoryAddBody" hidden>新增額外零件</button>
+    <div id="inventoryAddBody" class="add-panel-body">
     <div class="part-input-row entry-panel">
       <select id="partType">
         <option value="上蓋">上蓋</option>
@@ -384,7 +380,40 @@
       <input type="number" id="partCount" min="1" step="1" inputmode="numeric" placeholder="數量">
       <button data-write-action disabled onclick="addPart()">新增零件</button>
     </div>
+    </div>
+    </div>
 
+    <div id="partViewList" class="collection-view-list" aria-label="額外零件清單" hidden></div>
+
+    </section>
+
+    <!-- Phase 7-2a (R2): the original tables stay the only stored data source.
+         script.js clip-hides these boxes (never display:none / hidden /
+         visibility:hidden, see design/phase7/verification/k1-hidden-table). -->
+    <div id="collectionSourceTables" class="collection-source-tables">
+    <div id="beybladeSourceBox" class="source-table-box" data-source-table="beybladeTable">
+    <div class="table-wrap record-card-wrap collection-card-wrap">
+      <table id="beybladeTable">
+        <thead>
+          <tr>
+            <th>型號</th>
+            <th>上蓋</th>
+            <th>紋章鎖</th>
+            <th>主要戰刃</th>
+            <th>超越戰刃</th>
+            <th>金屬戰刃</th>
+            <th>輔助戰刃</th>
+            <th>固鎖</th>
+            <th>軸心</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    </div>
+    <div id="partSourceBox" class="source-table-box" data-source-table="partTable">
+    <p class="source-edit-note">修改額外零件：在下方表格中修改後按「保存」，或按「取消」（Esc）。</p>
     <div class="table-wrap">
       <table id="partTable">
         <thead>
@@ -398,7 +427,8 @@
         <tbody></tbody>
       </table>
     </div>
-    </section>
+    </div>
+    </div>
 
     <section id="configSection" class="tool-section">
       <div class="section-heading">
@@ -702,7 +732,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20261123-phase7r"></script>
+  <script type="module" src="script.js?v=20261124-phase72a"></script>
   <script src="site-menu.js?v=20261124-v1100"></script>
 </body>
 </html>

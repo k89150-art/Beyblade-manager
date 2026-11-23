@@ -270,7 +270,7 @@
 
 ## D-020：全站導覽改為「收藏／配置／＋新增／賽事／更多」
 
-> 狀態：**已實作，本機 commit，待 push 與部署**（Phase 7-1，2026-11-24，使用者核准規格 `design/phase7/09-phase7-1-navigation-spec.md`）。
+> 狀態：**已部署**（Phase 7-1，`5c32213`，2026-11-24，使用者核准規格 `design/phase7/09-phase7-1-navigation-spec.md`）。
 
 - 手機底部導覽固定五項：收藏（連結，收藏與零件區段皆 active）、配置（連結，配置與歷史測試區段 active）、＋新增（按鈕，開啟快速新增選單）、賽事（連結）、更多（按鈕，開啟側欄；其他頁面時為 active）。競賽統計、說明頁、主題設定與管理入口移到「更多」。
 - 「＋新增」選單五項：新增收藏（`index.html#add-collection`，聚焦商品型號）、新增零件（`index.html#add-part`，聚焦零件名稱）、建立配置（Quick Editor）、新增比賽（`tournament.html#add-tournament`，聚焦日期）、記錄回合（開啟賽事頁）。只導向既有頁面與欄位，不寫入任何資料。電腦版在側欄上方有同一個「新增」按鈕。
@@ -278,6 +278,17 @@
 - 鍵盤：選單支援方向鍵、Home／End，Escape 與點擊外部關閉並把焦點還給觸發按鈕。
 - 導覽資料與 active 判斷集中在 `site-menu.js` 的純函式區塊，由 `tests/site-navigation.test.mjs` 驗證。之後再改變底部導覽或側欄結構仍需使用者核准。
 - 本階段不改變收藏／庫存的頁面結構（「零件」分頁化屬後續 Phase），不改資料格式、儲存流程或 Firebase。
+
+## D-021：收藏與零件分頁、原始表格＋獨立顯示層（Phase 7-2）
+
+> 狀態：**設計已定案（T1、P2、R2、V3、G2、Q1、S1、U2、D1、N2），7-2a 已在本機實作、未 commit、未部署**（2026-11-24）。規格：`design/phase7/10-phase7-2-collection-parts-review.md`（第三部分為技術補強）。
+
+- 收藏頁分為「原裝陀螺」「零件」兩個真正的分頁（T1）；`#collectionSection`、`#inventorySection` 仍是兩個分頁區段，id 不變。
+- `#beybladeTable`、`#partTable` 原始表格仍是唯一儲存來源（R2）。`getTableData()`、`collectCurrentData()`、D-018 儲存協定、D-015 型錄升級、`deleteRow`／`editRow`／`saveEditRow` 都不修改。原始表格放在分頁區段之外的 `#collectionSourceTables`，只能以 clip 方式隱藏（`.is-source-hidden`＋`inert`＋`aria-hidden`）；`display:none`、`hidden`、`visibility:hidden` 會改變 `innerText` 讀到的資料，禁止使用（K-1 驗證）。
+- 顯示層（`script.js` 的 `Phase 7-2a collection view (R2)` 區塊與 `collection-view.js`）只讀原始列並在表格外畫清單；刪除、修改以原始列自己的按鈕呼叫既有函式，呼叫前確認原始列仍存在且內容未變。修改額外零件時直接顯示原始表格讓使用者在原列編輯（不做代理輸入）。初始化或渲染失敗時自動回到原始表格介面。
+- 新增表單維持原位置，改為可收合（Q1）；清單為空時自動展開。登出、切換帳號或首次登入時清空新增表單（F-04 草稿擷取之後），同一帳號重複事件與雲端快照不清除。
+- 快速新增（D-020）：`#add-collection`／`#add-part` 切到對應分頁、展開表單並聚焦 `#model`／`#partName`；`site-menu.js` 未修改。
+- 7-2b～7-2d（搜尋篩選排序、P2 四數字、U2、D1、詳細面板）尚未實作。
 
 ## 現況與舊描述的差異
 

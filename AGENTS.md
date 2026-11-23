@@ -13,6 +13,7 @@
 ## 2. 主要檔案與職責
 
 - `index.html`、`script.js`、`style.css`：收藏、額外零件庫存、配置、歷史測試及 Quick Editor。
+- `collection-view.js`：收藏／零件顯示層的純函式（Phase 7-2，無 DOM、無寫入）；`#beybladeTable`、`#partTable` 原始表格仍是唯一儲存來源，只能以 clip 方式隱藏，不得使用 `display:none`、`hidden`、`visibility:hidden`（D-021）。
 - `site-menu.js`、`site-menu.css`：全站側欄、手機底部導覽、說明頁捷徑、深色／米色主題與 UI 偏好。
 - `tournament.html`、`tournament.js`：賽事、對戰輪次、輪空／不戰晉級與參賽結果。
 - `competition-stats.*`：只呈現可驗證的客觀競賽統計。
@@ -102,7 +103,7 @@
 依修改範圍執行針對性測試，完成實質修改時至少執行：
 
 ```powershell
-node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs tests/collection-sync.test.mjs tests/assembly-rules.test.mjs tests/site-navigation.test.mjs
+node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs tests/collection-sync.test.mjs tests/assembly-rules.test.mjs tests/site-navigation.test.mjs tests/collection-view.test.mjs
 node --experimental-vm-modules scripts/validate-site.mjs
 node scripts/build-site.mjs
 git diff --check

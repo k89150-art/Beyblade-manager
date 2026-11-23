@@ -183,5 +183,5 @@ test("script.js loads the rules module with a cache version and keeps no model-o
   assert.match(script, /from "\.\/assembly-rules\.js\?v=20261123-phase7r";/);
   assert.doesNotMatch(script, /NO_RATCHET_MODELS/);
   assert.doesNotMatch(script, /codeMatch\[1\]\.endsWith\("5"\)/);
-  assert.match(fs.readFileSync("index.html", "utf8"), /src="script\.js\?v=20261123-phase7r"/);
+  assert.match(fs.readFileSync("index.html", "utf8"), /src="script\.js\?v=20261124-phase72a"/);
 });

@@ -4,7 +4,7 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Phase 7-1 已正式部署完成）
+- 目前執行者：無（Phase 7-2a 已在本機實作並完成登入後 Emulator 驗收，已本機 commit 兩筆（設計驗證與 7-2a 實作，訊息 docs(phase7): add collection and parts design verification、feat(collection): implement phase 7-2a tabs and read-only views），未 push、未部署）
 - 寫入範圍：目前沒有進行中的寫入任務
 - 正式版本：`5c32213934b9e955b9e4222f1b6fb14fb34b6cde`（`origin/main`，GitHub Pages deployment `8005259788` success）。本筆部署紀錄 commit 只在本機，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`。
@@ -33,6 +33,35 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（Phase 7-2a，登入後整合驗收，未修改程式）
+
+- 任務：以完整網站程式＋Firebase Emulator 補做登入後真實頁面驗收（CRUD、Q1-E1、K4-E1／E2、D-018 衝突）。未修改任何專案程式。
+- 環境與隔離：測試副本在被 Git 忽略的 `exports/emulator-ui-72a/`（`site/` 為專案根目錄 35 個網站檔案的複本）。只有兩個檔案的副本被修改，其餘 33 個與專案逐位元組相同：`script.js`（Firebase 設定改為 `demo-beyblade-72a-ui`、連線 Auth Emulator 127.0.0.1:9199 與 Firestore Emulator 127.0.0.1:8185、非 localhost 拒絕執行；因內建瀏覽器窗格不支援彈出視窗，登入改用 `signInWithRedirect`，仍是同一個 Google provider）、`site-menu.js`（同一份 demo 設定；管理選單檢查先建立 Auth 時也連 Emulator）。頁面實際回報 projectId `demo-beyblade-72a-ui`；網路紀錄中 Firestore 讀寫全部為 `127.0.0.1:8185/v1/projects/demo-beyblade-72a-ui`，沒有任何 https 請求。測試帳號 tester-a／tester-b@example.test 只存在 Emulator。
+- 結果（全部在真實頁面、真實 `addRow`／`addPart`／`deleteRow`／`editRow`／`saveEditRow`／`cancelEditRow`／D-018／F-04 程式上執行；確認對話框以記錄並回答的方式取代原生 confirm，因窗格無法點選原生對話框）：
+  - CRUD：新增 UX-01、新增 BX-01×3 刪第二顆（以元素參照確認刪的是第二列）、新增 UX-21 套組由成員刪除（既有確認列出三顆、整組刪除）、新增零件、修改保存、修改後確認取消仍在編輯、Esc 取消、刪除零件：全部 PASS；每步原始表格、R2 顯示層與 Emulator 文件一致。
+  - 非寫入操作（切分頁、篩選、搜尋、收合、鍵盤）與重新整理：Emulator `updateTime` 不變；重新整理後登入保持、資料與重新整理前一致。
+  - Q1-E1：A 輸入未送出內容＋開啟零件編輯 → 另一分頁登出 → 11 個新增欄位清空、類別回「上蓋」、搜尋清空、F-04 提示（遮蔽 email、未登入不可下載）→ 另一分頁以 B 登入 → B 看不到 A 的輸入或草稿、B 的文件未建立 → 切回 A → 草稿依原規則（完整 email、可捨棄；此草稿只有編輯視窗、無資料表可下載）→ 同 UID 遠端快照時輸入保留：全部 PASS。
+  - K4-E1（同款多顆）、K4-E2（套組）、修改版本：另一分頁刪除或修改後，本分頁原始列已重建，帶舊目標的點擊只提示「資料已更新」，沒有確認、沒有刪除或進入編輯：PASS。
+  - D-018：兩分頁幾乎同時刪除同一資料表的不同列 → 後送出者被拒絕並顯示衝突、未寫入，雲端只有先送出者的變更；衝突期間顯示層按鈕停用；「載入雲端最新資料」後恢復：PASS。
+- 發現：
+  - 測試副本初版的 Auth 初始化競態（`site-menu.js` 先建立 Auth，`connectAuthEmulator` 拋錯導致 `script.js` 停止）。只存在於測試副本（正式版不呼叫 `connectAuthEmulator`），已在副本修正。該次載入出現一筆來源未確認的 400 錯誤，推測是未連 Emulator 的 Auth 實例嘗試向 Google token 服務刷新 Emulator 假 token（只含假 token 與 demo-api-key，未記錄到請求，未涉及正式資料）。
+  - 背景分頁不執行 requestAnimationFrame，R2 顯示層在分頁回到前景的第一個畫格才更新；期間舊目標仍由操作前檢查擋下。非缺陷，不需修改。
+  - 既有文案：三顆的 UX-21 套組刪除確認仍寫「雙陀螺套組」（7-2a 前就存在）。
+- 未驗證：正式版的 `signInWithPopup` 流程（測試副本改用 redirect）；Safari／iOS。
+- Commit / Deploy：已與 7-2a 實作一起本機 commit（見上方「目前執行者」），未 push、未部署；Emulator 與測試伺服器已關閉。
+
+### 2026-11-24 — Claude Code（Phase 7-2a，本機實作，未 commit）
+
+- 任務：依使用者核准的 Phase 7-2a（T1 分頁、R2 基礎顯示層、Q1 可收合新增表單、D-020 快速新增銜接、Q1 跨帳號清除），規格 `design/phase7/10-phase7-2-collection-parts-review.md`（含第三部分技術補強）。決策記錄為 D-021。
+- 主要內容：收藏頁改為「原裝陀螺／零件」分頁；原始 `#beybladeTable`、`#partTable` 移到分頁區段外的 `#collectionSourceTables`，標記不變，只以 clip＋`inert`＋`aria-hidden` 隱藏；新的顯示層讀原始列畫清單（每列一項），刪除／修改以原始列按鈕呼叫既有 `deleteRow`／`editRow`，呼叫前確認原始列仍存在且內容未變；修改額外零件時直接顯示原始表格在原列編輯；初始化失敗回到原始表格。新增表單原位包成可收合面板（清單為空時展開）。`#add-collection`／`#add-part` 切分頁、展開、聚焦既有欄位（`site-menu.js` 未改）。`handleAuthStateChange` 在 F-04 草稿擷取與 `cancelSessionInteractions()` 後清空新增表單並重設顯示層搜尋與篩選（同 UID 不清）。零件篩選在顯示層啟用時不再隱藏原始列。
+- 未修改：D-018 區段、`getTableData`、`collectCurrentData`、`applyDataToTables`、D-015 函式、`deleteRow`／`editRow`／`saveEditRow`、`getTotalParts`、`collection-sync.js`、`site-menu.js`、Firebase／Rules／Schema、型錄、競賽統計（`tests/collection-view.test.mjs` 以雜湊鎖定 10 個區段與 `50169d7` 相同）。7-2b～7-2d 功能（搜尋排序、P2、V3、S1、U2、D1、詳細面板、N2）未實作。
+- 修改檔案：`index.html`（結構、`style.css?v=20261124-phase72a`、`script.js?v=20261124-phase72a`）、`script.js`、`style.css`、`collection-view.js`（新）、`tests/collection-view.test.mjs`（新，20 項）、`tests/helpers/manager-page-harness.mjs`（新增選用參數 `extraElements`）、`tests/assembly-rules.test.mjs`／`tests/collection-sync.test.mjs`（script 快取版本字串）、`README.md`／`AGENTS.md`（測試指令、模組說明）、`docs/PROJECT_DECISIONS.md`（D-021；D-020 狀態改為已部署）、`docs/PROJECT_ARCHITECTURE.md`、`design/phase7/`（規格狀態、`verification/phase7-2a/`）。
+- 測試（使用者 Windows 本機，Node 24.18）：14 個測試檔 333/333 PASS（313＋新增 20）；Q1 突變測試（移除清除呼叫）5 項失敗、還原後全過；validate PASS；build PASS（35 files）；`git diff --check` PASS。瀏覽器整合驗證 `design/phase7/verification/phase7-2a/`（真實原始碼切片＋真實頁面與樣式，Chromium 156）：390／768／1440 × 深色／米色各 29 項＋失敗回退 5 項，179/179 PASS（K-1、A-01～A-05、A-08、R2、D-020、Q1、K4-01／04／06、K5）。本機預覽（未登入）：6 種寬度／主題無水平捲動、分頁與 clip 正確、Console Error 0；375 寬實際操作 ＋新增→新增零件／新增收藏、同 hash 重按、側欄「零件」、分頁方向鍵／End 皆正確。
+- Emulator：`exports/firebase-emulator-6a`（`demo-beyblade-h2-test`，8185／9199）對含 7-2a 修改的工作樹執行 M01–M16 PASS 16／FAIL 0（D-018 交易與 F-04）。結果檔「專案檔案是否未被修改：否」是因為執行期間本人同時編輯 `docs/PROJECT_ARCHITECTURE.md`、`docs/PROJECT_DECISIONS.md`，非 Emulator 寫入。
+- 未執行／未驗證：Q1-E1、K4-E1／E2 等以真實登入 UI 操作的 Emulator 情境（現有 Emulator 工具以陣列代替頁面，沒有新增表單與顯示層）；登入後在真實頁面新增、刪除、修改的操作；Safari／iOS（K-2）；大量收藏的效能（K-3）。
+- 已知問題（既有、未修正）：收藏或配置上蓋欄含連續空白／TAB 時，D-018 載入後取得的畫面基準與卡片樣式套用後讀到的值不同，可能被視為有變更（見 `design/phase7/verification/phase7-2a/README.md`）；需調整 D-018 基準時點，超出本階段授權。
+- Commit / Deploy：本機 commit（feat(collection): implement phase 7-2a tabs and read-only views），未 push、未部署。
 
 ### 2026-11-24 — Claude Code（Phase 7-1，正式部署）
 

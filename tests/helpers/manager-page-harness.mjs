@@ -84,7 +84,10 @@ export function createManagerDevice({
   saveTimeoutMs = 15000,
   upgrade = null,
   retryDelaysMs = [0, 0, 0, 0],
-  admin = false
+  admin = false,
+  // Phase 7-2a: extra element ids (for example the add-form fields) that the
+  // page code may read or clear through document.getElementById.
+  extraElements = []
 } = {}) {
   const screen = { tables: collectionModule.pickCollectionTables(null) };
   const effects = { alerts: [], confirms: [], status: [], cancels: 0, rebuilds: 0, listeners: [], warnings: [], authUi: [], downloads: [] };
@@ -95,7 +98,7 @@ export function createManagerDevice({
   const elements = new Map(["collectionSyncNotice", "collectionSyncMessage", "collectionRetryBtn",
     "collectionLoadCloudBtn", "collectionKeepLocalBtn", "retryDataLoadBtn", "syncStatus",
     "adminUidInput", "adminReturnBtn", "collectionDraftNotice", "collectionDraftMessage",
-    "collectionDraftDownloadBtn", "collectionDraftDismissBtn"].map(id => [id, { ...createElement(), value: "", style: {} }]));
+    "collectionDraftDownloadBtn", "collectionDraftDismissBtn", ...extraElements].map(id => [id, { ...createElement(), value: "", style: {} }]));
   const body = { ...createElement(), appendChild() {} };
   const blobs = new Map();
 

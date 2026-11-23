@@ -61,6 +61,13 @@ Firebase Web SDK 目前由 `https://www.gstatic.com/firebasejs/11.2.0/` 載入�
 - `site-menu.js` 是 `HELP_NAV_ITEMS`、`SIDE_MENU_ITEMS`、`QUICK_ACTIONS`、側欄、手機底部導覽（收藏／配置／＋新增／賽事／更多，D-020）、「＋新增」快速選單、active 狀態、主題與版本顯示的主要來源。導覽 HTML 與 active 判斷在檔內 `nav model (pure …)` 區塊，不依賴 DOM，由 `tests/site-navigation.test.mjs` 測試。快速新增以 hash（`#add-collection`、`#add-part`、`#add-tournament`）導向既有欄位，只捲動與聚焦，不寫入資料。
 - `site-menu.css` 提供共用導覽、主題與 typography tokens；Phase 7-1 新增 `--ui-*` 設計 tokens（深色與米色各一組）與快速選單樣式（桌面 popover、≤820px 底部 sheet）。
 - 說明頁：`home.html`、`guide.html`、`changelog.html`、`privacy.html`、`about.html`、`contact.html`。
+
+### 收藏／零件顯示層（Phase 7-2a，D-021）
+
+- `index.html`：分頁列 `#collectionTabs`（原裝陀螺／零件），分頁區段沿用 `#collectionSection`、`#inventorySection`；新增表單包在 `#collectionAddBody`、`#inventoryAddBody`（可收合，欄位 id 不變）；顯示清單 `#stockViewList`、`#partViewList`；原始表格移到兩個區段之外的 `#collectionSourceTables`（`#beybladeSourceBox`、`#partSourceBox`）。
+- 資料流：Firestore 快照 → `applyDataToTables` 建立原始列（不變）→ 既有 `installUiSummaryObservers` 的 MutationObserver → `refreshUi` → `scheduleCollectionViewRender`（每畫格最多一次）→ `renderCollectionView` 以 `readSourceRowSnapshot`（與 `getTableData` 相同讀法）讀原始列，交給 `collection-view.js` 的純函式產生清單，只寫入兩個顯示清單容器。儲存仍由既有函式從原始表格收集（D-018）。
+- 原始表格的隱藏只能用 `.is-source-hidden`（clip-path）＋`inert`＋`aria-hidden`；零件篩選在顯示層啟用時不再對原始列設 `hidden`。
+- 帳號切換：`handleAuthStateChange` 在 F-04 草稿擷取與 `cancelSessionInteractions()` 之後呼叫 `resetQuickAddFormsForAccountChange`，清空新增表單並重設顯示層搜尋與篩選。
 - `retire-analysis-cache.js` 只處理已退役分析頁的舊網址／快取標記。
 
 ## 3. 資料與模組相依
