@@ -4,10 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（v1.12.0 正式上線進行中；ChatGPT 已核准發布準備）
-- 寫入範圍：v1.12.0 release commit（版本、更新紀錄、使用說明、相關測試、本文件）
-- 正式版本：`c18a33f181d7af842a97732f7dc76bb8f79b0a2d`（v1.11.0，`origin/main`，GitHub Pages deployment `8011069119` success）。本筆部署紀錄 commit 只在本機，未 push。
-- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 功能已本機 commit `4267bee`（未 push）；Phase 7-2c／7-2d 尚未授權。
+- 目前執行者：無（v1.12.0 已正式部署）
+- 寫入範圍：目前沒有進行中的寫入任務
+- 正式版本：`b006f165a68a6d652ac13589cb38ac16ddd59ac9`（v1.12.0，`origin/main`，GitHub Pages deployment `8012230899` success）。本筆部署紀錄 commit 只在本機，未 push。
+- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c／7-2d 尚未授權。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -34,7 +34,20 @@
 
 ## 最新紀錄
 
-### 2026-11-24 — Claude Code（v1.12.0 發布準備，本機修改，未 commit）
+### 2026-11-24 — Claude Code（v1.12.0／Phase 7-2b，正式部署）
+
+- 任務：ChatGPT 核准 v1.12.0 發布準備後，使用者授權 release commit、正式備份驗證、push、GitHub Pages 部署與唯讀驗收。
+- 正式 commit：`b006f165a68a6d652ac13589cb38ac16ddd59ac9`（`chore(release): prepare v1.12.0 inventory release`），連同 `6f3f2b5`（v1.11.0 部署紀錄）與 `4267bee`（Phase 7-2b 功能）以 fast-forward 推送 `c18a33f..b006f16`，未 force push。
+- 備份：`C:BeybladeBackupseyblade-appData-backup-20261124-060036.json`（使用者以管理員帳號建立，40,317 bytes）；建立時間 2026-11-23T22:00:36.612Z（台灣 06:00:36）；來源 `k89150-web-login`、`users/{uid}/appData/main`；文件數 2（summary 2）；`verify-backup.mjs` PASS；`integrity.documentsSha256` `4a602c7d98721c05e93d99d760dcf9c7ae67ddcb0750bdddca9576bd765524b8`；檔案 SHA-256 `10b7c2896e5b3a0b00091dad2e0fd45eab5959b3089bf7449e445f30809df414`。未還原、未匯入、未寫入；備份工具伺服器已關閉。
+- Push 前：Node 350/350；validate-site PASS；build-site PASS（35 files）；`git diff --check` 通過；工作樹乾淨；遠端無新 commit；`origin/main..HEAD` 無 Rules、Schema、型錄、競賽統計資料或交易協定變更（`competition-stats.html` 只有快取參數）；A-09 只有已核准的 deleteRow／editRow D1 差異；使用者確認所有裝置舊分頁與 PWA 已關閉。
+- 部署：GitHub Pages build `built`；deployment `8012230899`（`github-pages`）success；workflow `pages build and deployment` run `45275656136` success。
+- 部署後唯讀驗收（未登入，內建瀏覽器）：18 個正式檔案（11 頁、`site-menu.js`／`.css`、`script.js`、`collection-view.js`、`style.css`、`collection-sync.js`、`stock-catalog-names.js`）與 commit 逐位元組相同；`SITE_VERSION` v1.12.0，側欄顯示 v1.12.0；首頁載入 `script.js?v=20261124-phase72b`、`site-menu.js?v=20261124-v1120`；五個 `partsSummary*` 摘要存在、舊 id 不存在；原裝陀螺搜尋欄存在且輸入搜尋不出錯（未登入顯示「登入後會顯示你的收藏。」）；零件分頁顯示新說明與摘要；更新紀錄最新為 v1.12.0（6 點）、歷史版本 v1.2.0～v1.11.0；使用說明第三節「零件庫存」9 點、無「使用中」；375px 與 1024px 無水平捲動；資源無 4xx／5xx；Console Error 0。
+- 未驗證：登入後的零件卡片、配置引用／超用數字、搜尋結果與 D1 提示在正式資料上的顯示（只在 Emulator 與瀏覽器 harness 驗證過）；登入後 CRUD；正式 `signInWithPopup`；Safari／iOS。
+- 既有問題（未處理）：D-018 基準遇連續空白；配置排序造成 configTable 順序後續改寫；三顆一組套組仍顯示「雙陀螺套組」；後備版面順序。
+- 資料庫／部署風險：未部署 Rules、未寫入正式 Firestore、未建立測試資料。
+- Commit / Deploy：已部署 `b006f16`；本筆紀錄為本機 commit，未 push。
+
+### 2026-11-24 — Claude Code（v1.12.0 發布準備，已 release commit `b006f16`）
 
 - 任務：ChatGPT 複審通過 Phase 7-2b commit 後，授權只更新版本、更新紀錄、使用說明與直接相關的測試及交接文件；不得 commit、push、deploy 或寫入正式 Firestore。
 - 主要內容：`SITE_VERSION` v1.11.0 → v1.12.0（只改常數）；11 個載入 `site-menu.js` 的頁面快取參數 `20261124-v1110` → `20261124-v1120`，其他資源快取版本不變（`site-menu.css` 仍為 `v1100`，`style.css`／`script.js` 仍為 `phase72b`）。changelog 新增「v1.12.0｜零件庫存與配置引用」六點（只描述 7-2b 已完成功能），v1.11.0 移入歷史版本（v1.2.0～v1.11.0）。guide 第二節加入原裝陀螺搜尋與英文名限制、刪除影響提示；第三節改名「零件庫存」，說明四個數字、超用、摘要、只有額外持有可改刪、同名多筆各自修改／刪除、刪除／減量／改名提示、無對應引用；移除「配置使用中」說明；常見問題指向零件分頁的可用／超用。
