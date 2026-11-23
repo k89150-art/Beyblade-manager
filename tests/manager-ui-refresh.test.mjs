@@ -3,6 +3,7 @@ import fs from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 import { DATA_SESSION_STATES, createDataSessionGuard } from "../data-session-guard.js";
+import * as assemblyRulesModule from "../assembly-rules.js";
 
 const html = fs.readFileSync("index.html", "utf8");
 const script = fs.readFileSync("script.js", "utf8");
@@ -339,7 +340,7 @@ test("internal compatibility model keeps special ratchet protections", () => {
   assert.ok(start >= 0 && end > start);
 
   const alerts = [];
-  const context = { alert: message => alerts.push(message) };
+  const context = { ...assemblyRulesModule, isOfficialSimpleRatchet: assemblyRulesModule.isSimpleRatchet, alert: message => alerts.push(message) };
   vm.runInNewContext(`${script.slice(start, end)}\nthis.ruleApi = { getBaseModelCode, validateRatchetRules };`, context);
 
   assert.equal(context.ruleApi.getBaseModelCode("UX-19 CUSTOM"), "UX-19");

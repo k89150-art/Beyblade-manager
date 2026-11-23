@@ -19,6 +19,13 @@ import {
   startCollectionTransaction,
   waitForCollectionTransaction
 } from "./collection-sync.js?v=20261030-phase5b";
+import {
+  evaluateAssembly,
+  newAssemblyViolations,
+  isIntegratedRatchetBlade,
+  isIntegratedRatchetBit,
+  isSimpleRatchet as isOfficialSimpleRatchet
+} from "./assembly-rules.js?v=20261123-phase7r";
 
 import {
   getAuth,
@@ -348,7 +355,6 @@ const RANDOM_BOOSTER_MODELS = new Set([
   "BX-48", "CX-17", "BX-50", "CX-18"
 ]);
 
-const NO_RATCHET_MODELS = new Set(["UX-19", "UX-20"]);
 
 function getRandomBoosterBaseModel(model) {
   const normalized = normalizeModel(model).toUpperCase().trim();
@@ -380,8 +386,11 @@ function isRandomBooster(model) {
   return RANDOM_BOOSTER_MODELS.has(baseModel);
 }
 
+// Phase 7-R: the ratchet rules live in assembly-rules.js (official sources in
+// design/phase7/01). They are decided by blade name and bit code; the model
+// check for UX-19／UX-20 is kept there for existing configs.
 function isNoRatchetModel(model) {
-  return NO_RATCHET_MODELS.has(getBaseModelCode(model));
+  return isIntegratedRatchetBlade("", model);
 }
 
 function getAxisCode(axis) {
@@ -391,48 +400,54 @@ function getAxisCode(axis) {
 }
 
 function isNoRatchetAxis(axis) {
-  return getAxisCode(axis) === "TR";
+  return isIntegratedRatchetBit(axis);
 }
 
-function shouldUseNoRatchet(model, axis) {
-  return isNoRatchetModel(model) || isNoRatchetAxis(axis);
+function shouldUseNoRatchet(model, axis, layer = "") {
+  return evaluateAssembly({ model, layer, axis }).noRatchet;
 }
 
-function getNoRatchetFixValue(model, axis, value) {
-  return shouldUseNoRatchet(model, axis) && !value ? "-" : value;
+function getNoRatchetFixValue(model, axis, value, layer = "") {
+  return shouldUseNoRatchet(model, axis, layer) && !value ? "-" : value;
 }
 
 function isSimpleRatchet(ratchet) {
-  const text = String(ratchet || "").trim();
-  if (!text || text === "-") return false;
-
-  const codeMatch = text.match(/\d+\s*-\s*(\d+)/);
-  if (codeMatch) {
-    return codeMatch[1].endsWith("5");
-  }
-
-  return text.endsWith("5");
+  return isOfficialSimpleRatchet(ratchet);
 }
 
-function validateRatchetRules(model, axis, ratchet) {
-  const fix = String(ratchet || "").trim();
-
-  if (isNoRatchetAxis(axis) && fix && fix !== "-") {
-    alert("Tr 軸無法使用固鎖。");
+function validateRatchetRules(model, axis, ratchet, layer = "") {
+  const { violations } = evaluateAssembly({ model, layer, fix: ratchet, axis });
+  if (violations.length) {
+    alert(violations[0].message);
     return false;
   }
-
-  if (isNoRatchetModel(model) && fix && fix !== "-") {
-    alert(`${getBaseModelCode(model)} 無法使用固鎖。`);
-    return false;
-  }
-
-  if (getBaseModelCode(model) === "UX-16" && !isSimpleRatchet(fix)) {
-    alert("時鐘幻象只能使用簡易固鎖");
-    return false;
-  }
-
   return true;
+}
+
+// New configs follow the official rules. An edited config is blocked only by a
+// violation it did not already have; existing data stays editable after a warning.
+function checkConfigAssemblyRules(model, layer, fix, axis) {
+  const after = evaluateAssembly({ model, layer, fix, axis });
+  if (!after.violations.length) return true;
+  if (!configEditorRow) {
+    alert(after.violations[0].message);
+    return false;
+  }
+  const cells = configEditorRow.cells;
+  const before = evaluateAssembly({
+    model: cells[0]?.innerText.trim() || "",
+    layer: cells[1]?.innerText.trim() || "",
+    fix: cells[7]?.innerText.trim() || "",
+    axis: cells[8]?.innerText.trim() || ""
+  });
+  const added = newAssemblyViolations(before, after);
+  if (added.length) {
+    alert(added[0].message);
+    return false;
+  }
+  return confirm(`這個配置原本就不符合官方組裝規則：${after.violations.map(item => item.message).join(" ")}
+
+仍要儲存這次修改嗎？`);
 }
 
 function getSeriesFromModel(model) {
@@ -1426,9 +1441,9 @@ function saveConfigEditRow(button) {
   const auxSel = getEditCellValue(row, 6);
   let fixSel = getEditCellValue(row, 7);
   const axisSel = getEditCellValue(row, 8);
-  fixSel = getNoRatchetFixValue(model, axisSel, fixSel);
+  fixSel = getNoRatchetFixValue(model, axisSel, fixSel, layerSel);
 
-  if (!validateRatchetRules(model, axisSel, fixSel)) return;
+  if (!checkConfigAssemblyRules(model, layerSel, fixSel, axisSel)) return;
 
   let layer = "-";
   let lockPart = "-";
@@ -2566,9 +2581,9 @@ function addManualStockRow() {
   const aux = getValue("aux");
   let fix = getValue("fix");
   const axis = getValue("axis");
-  fix = getNoRatchetFixValue(model, axis, fix);
+  fix = getNoRatchetFixValue(model, axis, fix, layerInput);
 
-  if (!validateRatchetRules(model, axis, fix)) return;
+  if (!validateRatchetRules(model, axis, fix, layerInput)) return;
 
   let layer = "-";
   let lockPart = "-";
@@ -3637,7 +3652,8 @@ function updateNoRatchetConfigOption() {
 
   if (!modelInput || !fixSelect) return;
 
-  const noRatchet = shouldUseNoRatchet(modelInput.value, axisSelect?.value || "");
+  const layerSelect = document.getElementById(selectorMap["上蓋"]);
+  const noRatchet = shouldUseNoRatchet(modelInput.value, axisSelect?.value || "", layerSelect?.value || "");
   let option = fixSelect.querySelector('option[value="-"]');
 
   if (noRatchet) {

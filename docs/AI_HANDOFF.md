@@ -4,9 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Phase 6D-2 已正式部署完成，等待 ChatGPT 最終確認）
+- 目前執行者：無（Claude Code 完成 Phase 7-R 組裝規則修正，本機 commit，等待審查與 push／部署授權）
 - 寫入範圍：目前沒有進行中的寫入任務
-- 正式版本：`2c8e4a85cb572dd959a87416324d8dc3b963717e`（`origin/main`，GitHub Pages deployment `7986025514` success）。本筆部署紀錄 commit 只在本機，未 push。
+- 正式版本：`2c8e4a85cb572dd959a87416324d8dc3b963717e`（`origin/main`，GitHub Pages deployment `7986025514` success）。本機另有部署紀錄 commit 與 Phase 7-R commit，未 push。
+- Phase 7 設計文件在未追蹤的 `design/phase7/`（是否 commit 待使用者決定）。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -32,6 +33,15 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-23 — Claude Code（Phase 7-R，組裝規則修正）
+
+- 任務：依使用者核准的 `design/phase7/07-rules-fix-spec.md`，修正現行程式與官方組裝規則不一致之處（D-019）。Phase 7 設計方向已定案：A 工作台骨架、賽事回合記錄採 C 大按鈕面板、手機底部導覽「收藏／配置／＋新增／賽事／更多」、庫存併入收藏「零件」分頁、官方規則阻擋儲存；其餘 UI 改造尚未實作。
+- 主要內容：新增 `assembly-rules.js`；`script.js` 的規則函式改為呼叫它（函式名稱與呼叫端保留），惡魔冥界與 Op 軸不再被要求填固鎖，擋下 UX 擴展戰刃＋Tr／Op、時鐘幻象非白名單固鎖；修改既有配置只擋新產生的違規。`index.html` 改為 `script.js?v=20261123-phase7r`。收藏儲存版本列維持 5B。交易、Session、賽事、型錄、統計、資料格式皆未修改。
+- 修改檔案：`assembly-rules.js`（新）、`script.js`、`index.html`、`tests/assembly-rules.test.mjs`（新）、`tests/collection-autofill-safety.test.mjs`、`tests/manager-ui-refresh.test.mjs`、`tests/collection-sync.test.mjs`、`README.md`／`AGENTS.md`（測試指令）、`docs/PROJECT_DECISIONS.md`（D-019）、`docs/PROJECT_ARCHITECTURE.md`、`docs/AI_HANDOFF.md`。
+- 測試（使用者 Windows 本機，Node 24.18）：12 個測試檔 307/307 PASS（296＋新增 11）；型錄 234 筆官方產品全部通過規則；規則 mutation 7 項皆被測到；validate PASS；build PASS（34 files，含新模組）；`git diff --check` PASS；本機預覽主頁載入新模組 200、Console Error 0、390／1440 無 overflow。配置編輯器需登入，該路徑以 VM 執行真實程式驗證，未在瀏覽器中實際操作。未修改交易流程，未跑 Emulator。
+- 部署注意：需另行授權；比照 D-017／D-018 程序（備份、關閉舊分頁、確認載入 `script.js?v=20261123-phase7r`）。舊版分頁仍會要求惡魔冥界／Op 填固鎖，但不會破壞資料。
+- Commit / Deploy：本機 commit，未 push、未部署。
 
 ### 2026-11-23 — Claude Code（Phase 6D-2，正式部署）
 

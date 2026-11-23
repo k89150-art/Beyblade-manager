@@ -91,6 +91,10 @@ Firebase Web SDK 目前由 `https://www.gstatic.com/firebasejs/11.2.0/` 載入�
 - CX：紋章鎖 → 金屬戰刃（存在時）或主要戰刃 → 超越戰刃 → 輔助戰刃 → 固鎖 → 軸心。
 - 不存在的零件不建立空標籤。
 
+### 組裝規則（D-019）
+
+`assembly-rules.js` 是純函式模組，由 `script.js` 以帶版本號的 import 載入（`?v=20261123-phase7r`）。`validateRatchetRules`、`shouldUseNoRatchet`、`getNoRatchetFixValue` 與配置儲存前的 `checkConfigAssemblyRules` 都改為呼叫它，依上蓋名稱與軸心代號判斷無固鎖與官方限制。規則不寫入 Firestore，也不修改既有資料。
+
 ### 收藏型錄升級（D-015）
 
 - 載入時只有 `stockAutoFilled` 明確為 `true`（或本站儲存的字串 `"true"`）的收藏，會由 `upgradeStoredStockItem()` 依官方型錄更新；其餘收藏原樣顯示、原樣存回，不觸發自動寫回。

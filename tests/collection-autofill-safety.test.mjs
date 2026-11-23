@@ -5,6 +5,7 @@ import vm from "node:vm";
 import { createDataSessionGuard, createSessionSnapshotGate, DATA_SESSION_STATES } from "../data-session-guard.js";
 import { attachCatalogNames, getOfficialStockCode } from "../stock-catalog-names.js";
 import * as collectionSyncModule from "../collection-sync.js";
+import * as assemblyRulesModule from "../assembly-rules.js";
 
 // H-1 / D-015: run the real script.js collection code against the real
 // catalog files, with an in-memory DOM and Firestore mocks. Nothing here reads
@@ -120,6 +121,8 @@ function createHarness({ source = managerSource, loadCatalog = true } = {}) {
   const effects = { saves: 0, listeners: [] };
   const context = {
     ...collectionSyncModule,
+    ...assemblyRulesModule,
+    isOfficialSimpleRatchet: assemblyRulesModule.isSimpleRatchet,
     isReadOnly: () => false,
     document: dom.document,
     getOfficialStockCode,
@@ -275,6 +278,45 @@ test("H-1 #8: a manual add is marked false, saved and reloaded without change", 
 
   const reloaded = createHarness();
   assert.deepEqual(loadAndRead(reloaded, saved), saved);
+});
+
+test("Phase 7-R: manual entry applies the official assembly rules by blade and bit", () => {
+  const ready = () => {
+    const h = createHarness();
+    const token = h.guard.begin({ ownerUid: "user-a" });
+    h.guard.markReady(token);
+    h.alerts = [];
+    h.context.alert = message => h.alerts.push(String(message));
+    return h;
+  };
+  const base = { lock: "", primaryBlade: "", transcendBlade: "", metalBlade: "", aux: "" };
+
+  // 惡魔冥界 (UX-21-01) has an integrated ratchet: saved with "-" instead of demanding one.
+  const nether = ready();
+  Object.assign(nether.dom.inputs, base, { model: "UX-21", layer: "惡魔冥界", fix: "", axis: "Z" });
+  nether.api.addManualStockRow();
+  assert.equal(nether.effects.saves, 1, nether.alerts.join(" / "));
+  assert.deepEqual([...nether.api.getTableData("beybladeTable", true)[0].cells.slice(7)], ["-", "Z"]);
+
+  // Another bey of the same UX-21 set still needs its ratchet.
+  const wolf = ready();
+  Object.assign(wolf.dom.inputs, base, { model: "UX-21", layer: "霜輝銀狼", fix: "9-70", axis: "R" });
+  wolf.api.addManualStockRow();
+  assert.equal(wolf.effects.saves, 1, wolf.alerts.join(" / "));
+  assert.deepEqual([...wolf.api.getTableData("beybladeTable", true)[0].cells.slice(7)], ["9-70", "R"]);
+
+  // Blocked combinations: nothing saved, rule message shown.
+  for (const [inputs, pattern] of [
+    [{ model: "UX-20", layer: "榮耀戰神", fix: "", axis: "Tr" }, /不能使用 Tr／Op/],
+    [{ model: "UX-16", layer: "時鐘幻象", fix: "9-60", axis: "B" }, /時鐘幻象只能使用簡易固鎖/],
+    [{ model: "BX-01", layer: "蒼龍爆刃", fix: "3-60", axis: "Op" }, /Op 軸無法使用固鎖/]
+  ]) {
+    const h = ready();
+    Object.assign(h.dom.inputs, base, inputs);
+    h.api.addManualStockRow();
+    assert.equal(h.effects.saves, 0, JSON.stringify(inputs));
+    assert.match(h.alerts.join(" / "), pattern);
+  }
 });
 
 test("H-1 #9: choosing an official product still auto-fills and stores the explicit marker and recordId", () => {
