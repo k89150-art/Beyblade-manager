@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Phase 7-1 導覽已完成本機 commit，待授權部署）
+- 目前執行者：無（Phase 7-1 已正式部署完成）
 - 寫入範圍：目前沒有進行中的寫入任務
-- 正式版本：`f1df0bc5da31eeaed64c6ea5a32e5074f4a731fa`（`origin/main`，GitHub Pages deployment `7989712953` success）。本機 `main` 領先 3 個 commit（`38afe4d` 部署紀錄、`64263e4` Phase 7 設計文件、Phase 7-1 導覽），皆未 push。
+- 正式版本：`5c32213934b9e955b9e4222f1b6fb14fb34b6cde`（`origin/main`，GitHub Pages deployment `8005259788` success）。本筆部署紀錄 commit 只在本機，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -33,6 +33,18 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（Phase 7-1，正式部署）
+
+- 任務：經使用者授權 push 並部署 Phase 7-1（全站導覽，D-020）。
+- 部署前檢查：乾淨 clone 發現 `tests/site-navigation.test.mjs` 讀取 `site-menu.css` 未正規化換行，在 Windows（`core.autocrlf=true`）checkout 下失敗 1 項；經使用者同意另以 `5c32213` 修正（只改測試）。修正後乾淨 clone 313/313 PASS、validate PASS、build PASS（34 files）。差異只含導覽、頁面版本字串、說明文字、測試與文件；資料、儲存、同步、組裝規則、型錄、統計、Firebase、workflow 檔案皆未變更。`design/` 已確認不含個人資料或金鑰（部署後會公開可讀）。
+- Push：`git push origin main`，`f1df0bc..5c32213`（快轉，無 force push），共 4 個 commit：`38afe4d`、`64263e4`、`1b6a989`、`5c32213`。推送前確認遠端仍為 `f1df0bc`、工作區乾淨。
+- 正式版本：`5c32213934b9e955b9e4222f1b6fb14fb34b6cde`。GitHub Pages（legacy，`main` 根目錄）建置 `built`；deployment `8005259788` success；workflow run `45221998763` success。
+- 部署前：備份以既有 `C:\BeybladeBackups\beyblade-appData-backup-20261123-062202.json` 為準（檔案可正常解析；本機找不到 `verify-backup.mjs`，本次未重新以該工具驗證）；舊分頁關閉以使用者授權回覆為確認（比照 Phase 7-R）。本次未改變任何儲存路徑。
+- 部署後唯讀驗收（瀏覽器確認沒有 Firebase 登入資料，未登入狀態）：17 個正式檔案與 commit 逐位元組相同。主頁（375 寬）載入 `site-menu.js?v=20261124-v1100`、`script.js`／`assembly-rules.js?v=20261123-phase7r`（未變），顯示 v1.10.0 與「收藏儲存版本：5B（交易保護）」；底部導覽「收藏／配置／＋新增／賽事／更多」、收藏 active；＋新增開啟五項、Escape 關閉並還原焦點。賽事頁載入 `tournament.js?v=20261029-phase4b1`（未變）、賽事 active、日期欄位存在。競賽統計（1024 寬）側欄有新增按鈕、競賽統計 active、底部導覽隱藏。三頁無水平 overflow，Console Error 0。
+- 未驗證：未登入，未在正式網站實際新增收藏、零件或比賽（只驗證導向與聚焦）。
+- 正式 Firestore：部署過程沒有任何寫入；Rules、Schema 未修改。
+- Commit / Deploy：`5c32213` 已 push 並部署；本筆紀錄為本機 commit，未 push。
 
 ### 2026-11-24 — Claude Code（Phase 7-1，導覽骨架）
 
