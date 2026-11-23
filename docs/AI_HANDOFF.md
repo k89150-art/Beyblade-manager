@@ -4,10 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Phase 7-2b 已本機 commit，未 push、未部署，等待 ChatGPT 複審；正式版本仍為 v1.11.0）
-- 寫入範圍：目前沒有進行中的寫入任務
+- 目前執行者：Claude Code（v1.12.0 正式上線進行中；ChatGPT 已核准發布準備）
+- 寫入範圍：v1.12.0 release commit（版本、更新紀錄、使用說明、相關測試、本文件）
 - 正式版本：`c18a33f181d7af842a97732f7dc76bb8f79b0a2d`（v1.11.0，`origin/main`，GitHub Pages deployment `8011069119` success）。本筆部署紀錄 commit 只在本機，未 push。
-- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b～7-2d 尚未授權。
+- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 功能已本機 commit `4267bee`（未 push）；Phase 7-2c／7-2d 尚未授權。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -34,7 +34,19 @@
 
 ## 最新紀錄
 
-### 2026-11-24 — Claude Code（Phase 7-2b，本機實作，未 commit）
+### 2026-11-24 — Claude Code（v1.12.0 發布準備，本機修改，未 commit）
+
+- 任務：ChatGPT 複審通過 Phase 7-2b commit 後，授權只更新版本、更新紀錄、使用說明與直接相關的測試及交接文件；不得 commit、push、deploy 或寫入正式 Firestore。
+- 主要內容：`SITE_VERSION` v1.11.0 → v1.12.0（只改常數）；11 個載入 `site-menu.js` 的頁面快取參數 `20261124-v1110` → `20261124-v1120`，其他資源快取版本不變（`site-menu.css` 仍為 `v1100`，`style.css`／`script.js` 仍為 `phase72b`）。changelog 新增「v1.12.0｜零件庫存與配置引用」六點（只描述 7-2b 已完成功能），v1.11.0 移入歷史版本（v1.2.0～v1.11.0）。guide 第二節加入原裝陀螺搜尋與英文名限制、刪除影響提示；第三節改名「零件庫存」，說明四個數字、超用、摘要、只有額外持有可改刪、同名多筆各自修改／刪除、刪除／減量／改名提示、無對應引用；移除「配置使用中」說明；常見問題指向零件分頁的可用／超用。
+- 修改檔案：`site-menu.js`、`about.html`、`admin.html`、`changelog.html`、`competition-stats.html`、`contact.html`、`guide.html`、`home.html`、`index.html`、`privacy.html`、`tournament.html`、`user-view.html`、`tests/collection-view.test.mjs`、`tests/help-pages.test.mjs`、`tests/manager-ui-refresh.test.mjs`、`docs/AI_HANDOFF.md`。
+- 測試：Node 350/350；validate-site PASS；build-site PASS（35 files）；`git diff --check` 通過。測試只更新版本字串、快取參數與更新紀錄位置／日期次數，未放寬功能斷言。
+- D1 失敗處理：影響計算發生例外時 `impactTextOrEmpty` 記錄 `console.warn` 並回傳空字串，只顯示原本的確認文字（畫面上與「沒有影響」相同，不會顯示錯誤的「沒有影響」結論）。
+- Branch / HEAD：`main` / `4267bee`（Phase 7-2b 功能 commit），領先 `origin/main`（`c18a33f`，v1.11.0）2 筆。
+- Git status：上列檔案於 release commit `chore(release): prepare v1.12.0 inventory release` 提交。
+- 未完成事項：v1.12.0 尚在發布準備，未 commit、未部署；正式網站仍為 v1.11.0。Phase 7-2c／7-2d 尚未授權。
+- Commit / Deploy：已 release commit；正式部署見上方紀錄。
+
+### 2026-11-24 — Claude Code（Phase 7-2b，本機實作，已 commit `4267bee`）
 
 - 任務：使用者授權實作 P2＋S1＋U2＋D1（階段調整：V3、篩選、排序延至 7-2c；詳細面板維持 7-2d；記錄於規格 10 第四部分與 D-021）。
 - 主要內容：零件分頁依「類別＋名稱」彙總，顯示原裝內含／額外持有／配置引用／可用（超用），同名多筆額外列在卡片內各自修改／刪除，原裝內含只讀；列出「無對應的配置引用」。摘要改為原裝內含／額外持有／配置引用／超用品項／無對應引用（新 id `partsSummary*`，舊「使用中」公式不再顯示）。原裝陀螺分頁新增搜尋（型號、中文名、零件、只經明確自動帶入標記＋型錄 `recordId` 的英文名、套組代碼），換帳號時清除。刪除收藏、刪除套組、刪除額外零件、減少數量、改名時，在既有 confirm 文字後加入「不足／找不到對應／原本就不夠」提示，只提示不阻擋。

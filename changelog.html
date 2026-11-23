@@ -35,6 +35,22 @@
     <nav class="site-nav help-page-nav" data-help-nav aria-label="說明頁面捷徑"></nav>
 
     <div class="info-card">
+      <div class="version-title">v1.12.0｜零件庫存與配置引用</div>
+      <div class="version-meta">2026-11-24</div>
+      <ul class="update-list">
+        <li><span class="change-tag">零件</span>「零件」分頁改為一種零件一張卡片，同時顯示原裝收藏內含的數量與另外新增的額外持有數量。</li>
+        <li><span class="change-tag">零件</span>每張卡片顯示配置引用次數與目前可用數量；配置引用超過持有數量時改為「超用」提示，上方摘要也會統計超用品項。</li>
+        <li><span class="change-tag">零件</span>同名的額外零件若分成多筆新增，會在同一張卡片內分別列出，每一筆仍可各自修改或刪除。</li>
+        <li><span class="change-tag">收藏</span>「原裝陀螺」分頁新增搜尋，可用中文名稱、型號與零件名稱搜尋；以「自動帶入」加入的商品也可用英文名稱搜尋。</li>
+        <li><span class="change-tag">資料保護</span>刪除收藏、刪除額外零件、減少數量或改名時，若會讓配置的零件不夠用或找不到對應，確認視窗會先列出受影響的配置；配置本身不會被修改。</li>
+        <li><span class="change-tag">零件</span>配置使用了目前沒有持有的零件名稱時，會在零件清單下方列為「無對應的配置引用」，方便找出改名或刪除造成的差異。</li>
+      </ul>
+    </div>
+
+    <details class="version-archive">
+      <summary>歷史版本（v1.2.0～v1.11.0）</summary>
+
+    <div class="info-card">
       <div class="version-title">v1.11.0｜收藏與零件分頁</div>
       <div class="version-meta">2026-11-24</div>
       <ul class="update-list">
@@ -46,9 +62,6 @@
         <li><span class="change-tag">資料保護</span>修改、刪除、雲端儲存與多裝置衝突保護都沿用原本的流程；原本的資料表格仍是唯一的資料來源，資料格式沒有改變。</li>
       </ul>
     </div>
-
-    <details class="version-archive">
-      <summary>歷史版本（v1.2.0～v1.10.0）</summary>
 
     <div class="info-card">
       <div class="version-title">v1.10.0｜導覽調整與組裝規則更新</div>
@@ -295,6 +308,6 @@
     </div>
     </details>
   </div>
-<script src="site-menu.js?v=20261124-v1110"></script>
+<script src="site-menu.js?v=20261124-v1120"></script>
 </body>
 </html>
