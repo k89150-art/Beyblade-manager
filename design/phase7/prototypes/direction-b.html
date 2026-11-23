@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方向 B 收藏圖鑑｜原型</title>
+<style>
+:root{--bg:#0b0f1a;--panel:#141b2b;--line:#26314a;--text:#eef2ff;--muted:#93a0bf;--bx:#3b82f6;--ux:#a855f7;--cx:#f97316}
+[data-theme="beige"]{--bg:#f3ece1;--panel:#fffaf2;--line:#e2d6c4;--text:#2a241c;--muted:#7d705f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 system-ui,"Noto Sans TC",sans-serif}
+.proto-bar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;padding:8px 16px;background:#000a;color:#fff;font-size:13px}
+.proto-bar button{background:#ffffff22;color:#fff;border:1px solid #ffffff44;border-radius:6px;padding:4px 10px}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.tabs{display:flex;gap:4px;margin:8px 0 16px}.tabs span{padding:10px 18px;border-radius:12px 12px 0 0;background:var(--panel);color:var(--muted)}.tabs span.on{color:var(--text);box-shadow:inset 0 -3px 0 var(--cx)}
+.hero{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.ring{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center}
+.ring svg{flex:none}.ring b{font-size:20px}
+h3{margin:18px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.bey{border-radius:16px;padding:12px;min-height:170px;position:relative;color:#fff;overflow:hidden}
+.bey.bx{background:linear-gradient(150deg,#1e3a8a,#3b82f6)}.bey.ux{background:linear-gradient(150deg,#581c87,#a855f7)}.bey.cx{background:linear-gradient(150deg,#7c2d12,#f97316)}
+.bey .disc{width:84px;height:84px;border-radius:50%;margin:6px auto 10px;background:radial-gradient(circle,#ffffff55 20%,#ffffff22 21%,#ffffff22 45%,#ffffff44 46%,transparent 47%),conic-gradient(#ffffff33 0 25%,transparent 0 50%,#ffffff33 0 75%,transparent 0)}
+.bey small{opacity:.8}
+.bey .flag{position:absolute;top:8px;right:8px;font-size:10px;background:#0006;border-radius:6px;padding:1px 6px}
+.workshop{display:grid;grid-template-columns:260px 1fr;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+.explode{display:flex;flex-direction:column;align-items:center;gap:8px}
+.ly{height:30px;border-radius:15px;display:grid;place-items:center;font-size:12px;color:#fff;border:2px dashed transparent}
+.ly.empty{background:transparent;border-color:var(--line);color:var(--muted)}
+.box{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}
+.part{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center;font-size:12px}
+.dots{letter-spacing:2px;color:var(--cx)}
+.note{color:var(--muted);font-size:12px}
+@media(max-width:800px){.hero{grid-template-columns:1fr}.workshop{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="proto-bar">方向 B：收藏圖鑑（原型，假資料；圖形為抽象示意，不使用官方圖片）
+  <button onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='beige'?'':'beige'">切換深色／米色</button>
+  <a href="index.html" style="color:#9cf">← 原型索引</a></div>
+<div class="wrap">
+  <div class="tabs"><span class="on">圖鑑</span><span>組裝工坊</span><span>賽事</span><span>統計</span></div>
+  <div class="hero">
+    <div class="ring"><svg width="64" height="64" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#26314a" stroke-width="5"/><circle cx="18" cy="18" r="15" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="58 100" transform="rotate(-90 18 18)"/></svg><div><b>BX 58%</b><div class="note">型錄 86 款中擁有 50 款</div></div></div>
+    <div class="ring"><svg width="64" height="64" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#26314a" stroke-width="5"/><circle cx="18" cy="18" r="15" fill="none" stroke="#a855f7" stroke-width="5" stroke-dasharray="41 100" transform="rotate(-90 18 18)"/></svg><div><b>UX 41%</b><div class="note">完成度只計算「型錄中已擁有幾款」</div></div></div>
+    <div class="ring"><svg width="64" height="64" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#26314a" stroke-width="5"/><circle cx="18" cy="18" r="15" fill="none" stroke="#f97316" stroke-width="5" stroke-dasharray="27 100" transform="rotate(-90 18 18)"/></svg><div><b>CX 27%</b><div class="note">不評價稀有度或強弱</div></div></div>
+  </div>
+  <h3>原裝陀螺（依系列分區）</h3>
+  <div class="grid">
+    <div class="bey bx"><div class="disc"></div><b>蒼龍爆刃</b><br><small>UX-01｜1-60 A</small></div>
+    <div class="bey ux"><span class="flag">固鎖一體</span><div class="disc"></div><b>榮耀戰神</b><br><small>UX-20｜LF</small></div>
+    <div class="bey cx"><div class="disc"></div><b>龍王閃擊</b><br><small>CX-13｜B K 1-50 I</small></div>
+    <div class="bey cx"><span class="flag">軸心一體</span><div class="disc"></div><b>天馬爆擊</b><br><small>CX-07｜A Tr</small></div>
+    <div class="bey ux"><span class="flag">簡易固鎖</span><div class="disc"></div><b>時鐘幻象</b><br><small>UX-16｜9-65 B</small></div>
+  </div>
+  <h3>組裝工坊（疊層組裝）</h3>
+  <div class="workshop">
+    <div class="explode">
+      <div class="ly" style="width:70px;background:#6b7280">紋章鎖：龍王</div>
+      <div class="ly" style="width:170px;background:#c084fc">超越戰刃：B</div>
+      <div class="ly" style="width:150px;background:#94a3b8">金屬戰刃：閃擊</div>
+      <div class="ly" style="width:130px;background:#d97706">輔助戰刃：K</div>
+      <div class="ly empty" style="width:110px">放入固鎖</div>
+      <div class="ly empty" style="width:46px">軸心</div>
+      <div class="note">CX 四件戰刃：6 層；標準三件式：3 層；一體式：少一層</div>
+    </div>
+    <div><div class="note">零件盒（點選或拖放到左側空層）</div>
+      <div class="box">
+        <div class="part">1-50<br><span class="dots">●</span></div><div class="part">1-60<br><span class="dots">●●</span></div><div class="part">3-60<br><span class="dots">●●●</span></div>
+        <div class="part">9-65<br><span class="dots">●</span></div><div class="part">I<br><span class="dots">●●</span></div><div class="part">LF<br><span class="dots">○</span></div>
+      </div>
+      <p class="note">●＝可用；○＝全部被占用。優點是直覺；缺點是大量零件時捲動多、比對困難。</p></div>
+  </div>
+</div>
+</body>
+</html>

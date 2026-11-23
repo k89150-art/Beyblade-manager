@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>戰鬥陀螺管理器 A＋C 整合原型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: prototype shell (top bar + options) around one or two app instances.
+   Each app instance is a CSS container: at <= 760px it switches to the phone layout. */
+:root{--shell-bg:#e9e6df;--shell-fg:#24211c;--shell-muted:#6d665a;--shell-line:#d3ccbf;--shell-panel:#f7f5f0;
+  --display:"Space Grotesk","Noto Sans TC",system-ui,sans-serif;--body:"Noto Sans TC",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root{--shell-bg:#0b0e12;--shell-fg:#e4e9ef;--shell-muted:#8e99a6;--shell-line:#2a323d;--shell-panel:#141a21;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--shell-bg);color:var(--shell-fg);font:14px/1.55 var(--body);padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));padding-block:0 32px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid #4f8cff;outline-offset:2px}
+.shell-bar{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:10px 0;background:var(--shell-bg);border-bottom:1px solid var(--shell-line);margin-bottom:12px}
+.shell-bar h1{font:700 15px/1.2 var(--display);margin:0;margin-right:auto}
+.shell-bar .grp{display:flex;gap:4px;align-items:center}
+.shell-bar .grp span{color:var(--shell-muted);font-size:12px;margin-right:2px}
+.seg-s button{border:1px solid var(--shell-line);background:var(--shell-panel);border-radius:7px;padding:4px 10px;font-size:13px}
+.seg-s button[aria-pressed="true"]{border-color:#4f8cff;box-shadow:inset 0 0 0 1px #4f8cff}
+.stage{display:flex;gap:16px;align-items:flex-start;justify-content:center}
+.stage .dev{display:grid;gap:6px;justify-items:center;min-width:0}
+.stage .dev>small{color:var(--shell-muted)}
+.dev-desktop{flex:1 1 0;width:100%;max-width:1280px;justify-items:stretch}
+.dev-desktop .app{height:820px;width:100%}
+.dev-phone{flex:0 0 auto}
+.dev-phone .app{width:390px;max-width:calc(100vw - 24px);height:800px;border-radius:30px}
+@media (max-width:1180px){.stage.compare{flex-direction:column;align-items:center}}
+.notice{max-width:1280px;margin:0 auto 12px;color:var(--shell-muted);font-size:13px}
+/* design options panel */
+.opt-panel{position:fixed;right:12px;top:58px;z-index:60;width:min(380px,calc(100vw - 24px));max-height:calc(100vh - 80px);overflow:auto;background:var(--shell-panel);border:1px solid var(--shell-line);border-radius:12px;padding:14px;box-shadow:0 18px 40px #0004;display:grid;gap:12px}
+.opt-panel[hidden]{display:none}
+.opt-panel h2{font:700 15px var(--display);margin:0}
+.opt-panel fieldset{border:1px solid var(--shell-line);border-radius:10px;padding:8px 10px;margin:0;display:grid;gap:6px}
+.opt-panel legend{font-weight:700;font-size:13px;padding:0 4px}
+.opt-panel label{display:flex;gap:8px;align-items:flex-start;font-size:13px}
+.opt-panel .st{font-size:11px;color:var(--shell-muted)}
+
+/* ================= app ================= */
+.app{--bg:#0f1318;--panel:#161c23;--panel2:#1d252e;--raise:#232c37;--line:#2a3440;--fg:#e7ecf2;--muted:#8d98a6;
+  --accent:#4f8cff;--accent-fg:#fff;--ok:#3fb27f;--warn:#e0a23b;--bad:#e5534b;--bx:#4f8cff;--ux:#a371f7;--cx:#f0883e;
+  --arena:#0a0d11;--arena-line:#2a2f37;--me:#3fd08a;--op:#ff6b5e;
+  container:app/inline-size;position:relative;overflow:hidden;background:var(--bg);color:var(--fg);border:1px solid var(--shell-line);border-radius:14px;display:grid;grid-template-rows:auto auto 1fr auto;font-size:13.5px}
+.app[data-theme="beige"]{--bg:#f1eadf;--panel:#fbf7f0;--panel2:#f3ece1;--raise:#ebe2d3;--line:#ddd1bf;--fg:#2a251f;--muted:#776b5c;--accent:#2d68d4;
+  --arena:#1c1a17;--arena-line:#3a352e;--ok:#23855a;--warn:#a96d0c;--bad:#c13b32}
+.app *{min-width:0}
+.app h2,.app h3,.app h4{font-family:var(--display);margin:0;text-wrap:balance}
+.app h2{font-size:18px}.app h3{font-size:15px}.app h4{font-size:13.5px}
+.muted{color:var(--muted)}.small{font-size:12px}.num{font-variant-numeric:tabular-nums}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}
+.grid{display:grid;gap:10px}
+/* top bar */
+.topbar{display:flex;gap:10px;align-items:center;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{display:flex;gap:8px;align-items:center;font:700 14px var(--display);white-space:nowrap;background:none;border:0;padding:0}
+.brand i{width:26px;height:26px;border-radius:50%;background:conic-gradient(var(--bx) 0 33%,var(--ux) 0 66%,var(--cx) 0);display:inline-block;box-shadow:inset 0 0 0 6px var(--panel)}
+.gsearch{position:relative;flex:1;max-width:520px}
+.gsearch input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:7px 12px}
+.gresults{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 30px #0006;max-height:360px;overflow:auto;padding:6px}
+.gresults h5{margin:6px 6px 2px;font-size:11px;color:var(--muted);letter-spacing:.06em}
+.gresults button{display:block;width:100%;text-align:left;background:none;border:0;border-radius:7px;padding:6px 8px}
+.gresults button:hover{background:var(--panel2)}
+.syncpill{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.dot.w{background:var(--warn)}.dot.b{background:var(--bad)}
+.btn{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:6px 12px;white-space:nowrap}
+.btn:hover{background:var(--raise)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:600}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 50%,var(--line))}
+.btn.sm{padding:3px 9px;font-size:12px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.iconbtn{border:1px solid var(--line);background:var(--panel2);border-radius:8px;width:32px;height:32px;display:inline-grid;place-items:center}
+/* banner */
+.banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 14px;border-bottom:1px solid var(--line);font-size:13px}
+.banner.w{background:color-mix(in srgb,var(--warn) 16%,var(--panel))}.banner.b{background:color-mix(in srgb,var(--bad) 14%,var(--panel))}
+.banner:empty{display:none}
+/* body */
+.body{display:grid;grid-template-columns:200px 1fr;min-height:0}
+.sidenav{background:var(--panel);border-right:1px solid var(--line);padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow:auto}
+.sidenav small{color:var(--muted);font-size:11px;letter-spacing:.06em;padding:10px 10px 4px}
+.sidenav button{display:flex;gap:10px;align-items:center;text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;color:var(--muted)}
+.sidenav button[aria-current="page"]{background:var(--panel2);color:var(--fg);box-shadow:inset 3px 0 0 var(--accent)}
+.sidenav button:hover{color:var(--fg)}
+.sidenav svg{width:18px;height:18px;flex:none}
+.sidenav .new{margin:4px 0 8px;justify-content:center;background:var(--accent);color:var(--accent-fg);font-weight:600}
+.main{overflow:auto;padding:16px;display:grid;gap:14px;align-content:start;position:relative}
+svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* cards / lists */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:left}
+.kpi b{display:block;font:700 22px var(--display);font-variant-numeric:tabular-nums}
+.kpi span{color:var(--muted);font-size:12px}
+.tri{display:flex;gap:4px;margin-top:6px}.tri i{height:6px;border-radius:3px;display:block}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;padding:8px 12px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--fg);border-color:var(--accent);font-weight:600}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toolbar input[type=search],.toolbar select{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:3px 11px;font-size:12px;color:var(--muted)}
+.chip[aria-pressed="true"]{color:var(--fg);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--panel))}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px;align-items:start}
+.list{display:grid;gap:6px;align-content:start}
+.item{display:grid;grid-template-columns:5px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;text-align:left;width:100%}
+.item[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.stripe{width:5px;align-self:stretch;border-radius:3px;background:var(--muted)}
+.s-BX{background:var(--bx)}.s-UX{background:var(--ux)}.s-CX{background:var(--cx)}
+.ttl{font-weight:600}.code{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.pills{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.p{font-size:11.5px;padding:1px 7px;border-radius:5px;background:var(--panel2);border:1px solid var(--line)}
+.p.k{color:var(--muted)}
+.tag{font-size:11px;padding:1px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.tag.w{color:var(--warn);border-color:var(--warn)}.tag.b{color:var(--bad);border-color:var(--bad)}.tag.ok{color:var(--ok);border-color:var(--ok)}.tag.a{color:var(--accent);border-color:var(--accent)}
+.tags{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.cards .item{grid-template-columns:5px minmax(0,1fr);align-items:start}
+.detail{position:sticky;top:0;display:grid;gap:10px}
+dl.kv{display:grid;grid-template-columns:78px minmax(0,1fr);gap:4px 10px;margin:0}
+dl.kv dt{color:var(--muted)}dl.kv dd{margin:0}
+.meter{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.meter div{background:var(--panel2);border-radius:8px;padding:6px 8px}
+.meter b{display:block;font:700 18px var(--display);font-variant-numeric:tabular-nums}
+.meter span{font-size:11px;color:var(--muted)}
+.empty{color:var(--muted);padding:24px;text-align:center;border:1px dashed var(--line);border-radius:10px}
+.sectionh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px}
+table.t th,table.t td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+table.t th{color:var(--muted);font-weight:500}
+.tscroll{overflow-x:auto}
+/* ===== C: arena ===== */
+.arena{background:var(--arena);color:#eef2f6;border:1px solid var(--arena-line);border-radius:14px;padding:14px;display:grid;gap:12px}
+.arena .muted{color:#9aa3ae}
+.board{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-align:center;gap:8px}
+.board .side small{display:block;color:#9aa3ae;font-size:12px}
+.board .sc{font:700 54px/1 var(--display);font-variant-numeric:tabular-nums}
+.board .me{color:var(--me)}.board .op{color:var(--op)}
+.board .mid{display:grid;gap:4px;justify-items:center}
+.pips{display:flex;gap:4px}.pips i{width:12px;height:12px;border-radius:3px;background:#2b313a;display:block}.pips i.on{background:currentColor}
+.rp{display:grid;gap:8px}
+.rp .lbl{font-size:12px;color:#9aa3ae}
+.bigs{display:grid;gap:8px}
+.bigs.two{grid-template-columns:1fr 1fr}.bigs.four{grid-template-columns:repeat(4,1fr)}.bigs.three{grid-template-columns:repeat(3,1fr)}
+.bigs button{min-height:52px;border-radius:12px;border:1px solid #333a44;background:#151a20;color:#eef2f6;font-weight:600;padding:6px}
+.bigs button small{display:block;font-weight:400;color:#9aa3ae;font-size:11.5px}
+.bigs button[aria-pressed="true"]{border-color:#4f8cff;box-shadow:inset 0 0 0 2px #4f8cff;background:#18233a}
+.bigs.res button[data-v="win"][aria-pressed="true"]{border-color:var(--me);box-shadow:inset 0 0 0 2px var(--me);background:#123022}
+.bigs.res button[data-v="lose"][aria-pressed="true"]{border-color:var(--op);box-shadow:inset 0 0 0 2px var(--op);background:#331716}
+.arena input{background:#151a20;border:1px solid #333a44;border-radius:10px;padding:10px;color:#eef2f6}
+.arena .go{min-height:52px;border:0;border-radius:12px;background:#4f8cff;color:#fff;font-weight:700;font-size:15px}
+.arena .go[disabled]{opacity:.45}
+.tl{display:grid;gap:8px}
+.match{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;gap:8px}
+.match.cur{border-color:var(--accent)}
+.mres{font:700 15px var(--display);font-variant-numeric:tabular-nums}
+.win{color:var(--ok)}.lose{color:var(--bad)}
+.tcard{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:left;width:100%}
+.tcard[aria-current="true"]{border-color:var(--accent)}
+.datebox{background:var(--panel2);border-radius:8px;text-align:center;padding:4px 0;font-variant-numeric:tabular-nums}
+.datebox b{display:block;font:700 18px var(--display)}
+/* stats */
+.bar{height:8px;background:var(--panel2);border-radius:4px;overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.src{font-size:12px;color:var(--muted)}
+.warnline{font-size:12px;color:var(--warn)}
+details.def summary{cursor:pointer;font-weight:600}
+details.def dl{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;margin:8px 0 0}
+details.def dt{font-weight:600}
+/* overlay */
+.overlay{position:absolute;inset:0;z-index:40;background:#0008;display:flex;align-items:center;justify-content:center;padding:16px}
+.dialog{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:min(620px,100%);max-height:100%;overflow:auto;padding:16px;display:grid;gap:12px;box-shadow:0 24px 50px #0007}
+.dialog.wide{width:min(860px,100%)}
+.dialog header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.field{display:grid;gap:4px}
+.field label{font-size:12px;color:var(--muted)}
+.field input,.field select,.field textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%}
+.form2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* assembler */
+.structs{display:flex;gap:6px;flex-wrap:wrap}
+.structs button{border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:6px 10px;text-align:left}
+.structs button small{display:block;color:var(--muted);font-size:11px}
+.structs button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.asmgrid{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:14px}
+.slot{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px;align-items:center}
+.slot label{font-size:12px;color:var(--muted)}
+.slot select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%}
+.slot .fixed{border:1px dashed var(--warn);color:var(--warn);border-radius:8px;padding:7px 10px;font-size:12.5px}
+.checks{display:grid;gap:4px;font-size:12.5px}
+.c-ok{color:var(--ok)}.c-w{color:var(--warn)}.c-b{color:var(--bad)}.c-i{color:var(--muted)}
+.stack{display:grid;gap:4px;justify-items:center;align-content:start;padding:8px;background:var(--panel2);border-radius:10px}
+.stack span{height:22px;border-radius:11px;display:grid;place-items:center;font-size:11px;color:#fff;padding:0 8px;max-width:100%;overflow:hidden;white-space:nowrap}
+.stack span.int{outline:2px dashed var(--warn);outline-offset:1px}
+/* bottom nav (phone) */
+.bnav{display:none}
+.fab-menu{position:absolute;left:12px;right:12px;bottom:76px;z-index:35;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px;display:grid;gap:4px;box-shadow:0 14px 30px #0007}
+.fab-menu button{text-align:left;background:var(--panel2);border:0;border-radius:10px;padding:12px}
+.sheet-close{display:none}
+/* ===== phone layout (container query) ===== */
+@container app (max-width:760px){
+  .topbar{padding:10px 12px;gap:8px}
+  .brand span{display:none}
+  .gsearch{max-width:none}
+  .syncpill b{display:none}
+  .topnew{display:none}
+  .body{grid-template-columns:1fr}
+  .sidenav{display:none}
+  .main{padding:12px;gap:12px;padding-bottom:20px}
+  .kpis{grid-template-columns:1fr 1fr}
+  .split{grid-template-columns:1fr}
+  .detail.desk{display:none}
+  .cards{grid-template-columns:1fr}
+  .bnav{display:grid;grid-template-columns:repeat(5,1fr);background:var(--panel);border-top:1px solid var(--line);padding:6px 0 14px}
+  .bnav button{display:grid;justify-items:center;gap:2px;background:none;border:0;color:var(--muted);font-size:10.5px;padding:2px 0;min-height:44px}
+  .bnav button[aria-current="page"]{color:var(--fg)}
+  .bnav .plus span{display:grid;place-items:center;width:44px;height:44px;margin-top:-20px;border-radius:50%;background:var(--accent);color:var(--accent-fg);box-shadow:0 8px 18px #0007}
+  .overlay{align-items:flex-end;padding:0}
+  .dialog{border-radius:18px 18px 0 0;width:100%;max-height:92%}
+  .dialog.wide{width:100%}
+  .sheet-close{display:inline-grid}
+  .form2{grid-template-columns:1fr}
+  .asmgrid{grid-template-columns:1fr}
+  .stack{display:none}
+  .board .sc{font-size:44px}
+  .bigs.four{grid-template-columns:1fr 1fr}
+  .tcard{grid-template-columns:44px minmax(0,1fr) auto}
+  .hide-phone{display:none!important}
+}
+@container app (min-width:761px){.hide-desk{display:none!important}}
+@media (prefers-reduced-motion:no-preference){.item,.tcard,.btn,.chip{transition:background .15s,border-color .15s}}
+</style>
+</head>
+<body>
+<header class="shell-bar">
+  <h1>A＋C 整合原型（假資料，不連 Firebase）</h1>
+  <div class="grp seg-s" role="group" aria-label="檢視"><span>檢視</span>
+    <button type="button" data-shell="view" data-v="compare">並排</button>
+    <button type="button" data-shell="view" data-v="desktop">桌面</button>
+    <button type="button" data-shell="view" data-v="phone">手機</button></div>
+  <div class="grp seg-s" role="group" aria-label="主題"><span>主題</span>
+    <button type="button" data-shell="theme" data-v="dark">深色</button>
+    <button type="button" data-shell="theme" data-v="beige">米色</button></div>
+  <div class="grp seg-s"><button type="button" data-shell="opts">設計選項（待決定）</button>
+    <button type="button" data-shell="reset">重設資料</button></div>
+</header>
+<p class="notice">兩個裝置共用同一份假資料：在一邊新增或修改，另一邊立即反映。組裝規則直接內嵌正式網站的 <code>assembly-rules.js</code>（D-019），與正式行為一致。所有確認視窗都是頁內對話框。</p>
+<div id="stage" class="stage"></div>
+<aside id="optPanel" class="opt-panel" hidden></aside>
+
+<script>
+/* ===== Official assembly rules: injected verbatim from assembly-rules.js by build.mjs ===== */
+const Rules = (() => {
+// --- assembly-rules.js (verbatim, exports removed) ---
+// Phase 7-R: official BEYBLADE X assembly rules (design/phase7/01-beyblade-x-assembly-rules.md).
+// Pure module: no DOM, no Firebase, no data writes. Rules are decided by the
+// blade (上蓋) name and the bit (軸心) code, not by the internal config model,
+// because a config's model is borrowed from the first collection row with the
+// same blade (UX-21 is a three-bey set where only 惡魔冥界 has an integrated ratchet).
+
+// Blades with an integrated ratchet: no ratchet, no ratchet-integrated bit.
+// Official: https://beyblade.takaratomy.co.jp/beyblade-x/help/noratchet/
+const INTEGRATED_RATCHET_BLADES = Object.freeze(["彈丸獅鷲", "榮耀戰神", "惡魔冥界"]);
+// Bits with an integrated ratchet (cannot be split; no separate ratchet).
+// Official: CX-07 / CX-11 instruction sheets.
+const INTEGRATED_RATCHET_BITS = Object.freeze(["Tr", "Op"]);
+// Blades that accept only simple (O-joint) ratchets and no ratchet-integrated bit.
+// Official: https://beyblade.takaratomy.co.jp/beyblade-x/help/ratchet/
+const SIMPLE_RATCHET_ONLY_BLADES = Object.freeze(["時鐘幻象"]);
+// Simple (O-joint) ratchets listed by official sources.
+const SIMPLE_RATCHETS = Object.freeze(["3-85", "4-55", "M-85", "9-65", "7-55", "M-65"]);
+// Kept from the previous model-based rules so existing configs behave the same.
+const LEGACY_NO_RATCHET_MODELS = Object.freeze(["UX-19", "UX-20"]);
+const LEGACY_SIMPLE_RATCHET_ONLY_MODELS = Object.freeze(["UX-16"]);
+
+const FULL_WIDTH = /[！-～]/g;
+const DASHES = /[‐-―−﹘﹣－]/g;
+
+function toHalfWidth(value) {
+  return String(value ?? "").replace(FULL_WIDTH, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)).replace(/　/g, " ");
+}
+
+function normalizeName(value) {
+  return toHalfWidth(value).replace(/\s+/g, "").trim();
+}
+
+function normalizeRatchetCode(value) {
+  return toHalfWidth(value).replace(DASHES, "-").replace(/\s+/g, "").toUpperCase();
+}
+
+// Leading letters of the bit, upper-cased ("Tr" → "TR", "op" → "OP", "LF" → "LF").
+function bitCode(value) {
+  const match = toHalfWidth(value).trim().match(/^[A-Za-z]+/);
+  return match ? match[0].toUpperCase() : "";
+}
+
+function baseModelCode(model) {
+  const match = toHalfWidth(model).toUpperCase().trim().match(/^(UX|BX|CX)\s*-?\s*(\d+)/);
+  return match ? `${match[1]}-${String(Number(match[2])).padStart(2, "0")}` : "";
+}
+
+const INTEGRATED_BLADE_SET = new Set(INTEGRATED_RATCHET_BLADES.map(normalizeName));
+const INTEGRATED_BIT_SET = new Set(INTEGRATED_RATCHET_BITS.map(code => code.toUpperCase()));
+const SIMPLE_ONLY_BLADE_SET = new Set(SIMPLE_RATCHET_ONLY_BLADES.map(normalizeName));
+const SIMPLE_RATCHET_SET = new Set(SIMPLE_RATCHETS.map(normalizeRatchetCode));
+const LEGACY_NO_RATCHET_SET = new Set(LEGACY_NO_RATCHET_MODELS);
+const LEGACY_SIMPLE_ONLY_SET = new Set(LEGACY_SIMPLE_RATCHET_ONLY_MODELS);
+
+function isIntegratedRatchetBlade(layer, model = "") {
+  return INTEGRATED_BLADE_SET.has(normalizeName(layer)) || LEGACY_NO_RATCHET_SET.has(baseModelCode(model));
+}
+
+function isIntegratedRatchetBit(axis) {
+  return INTEGRATED_BIT_SET.has(bitCode(axis));
+}
+
+function isSimpleRatchetOnlyBlade(layer, model = "") {
+  return SIMPLE_ONLY_BLADE_SET.has(normalizeName(layer)) || LEGACY_SIMPLE_ONLY_SET.has(baseModelCode(model));
+}
+
+function isSimpleRatchet(ratchet) {
+  return SIMPLE_RATCHET_SET.has(normalizeRatchetCode(ratchet));
+}
+
+function hasRatchet(fix) {
+  const text = String(fix ?? "").trim();
+  return Boolean(text) && text !== "-";
+}
+
+function bladeLabel(layer, model) {
+  const name = String(layer ?? "").trim();
+  return name && name !== "-" ? name : baseModelCode(model) || "這個上蓋";
+}
+
+// Returns whether the ratchet slot is replaced by an integrated part, and the
+// official-rule violations of this combination (first one is the most specific).
+function evaluateAssembly({ model = "", layer = "", fix = "", axis = "" } = {}) {
+  const integratedBlade = isIntegratedRatchetBlade(layer, model);
+  const integratedBit = isIntegratedRatchetBit(axis);
+  const simpleOnly = isSimpleRatchetOnlyBlade(layer, model);
+  const violations = [];
+  const blade = bladeLabel(layer, model);
+  const bit = String(axis ?? "").trim();
+
+  if (integratedBlade && integratedBit) {
+    violations.push({ id: "integrated-blade-integrated-bit", message: `${blade} 是固鎖一體型上蓋，不能使用 Tr／Op 這類固鎖一體型軸心。` });
+  }
+  if (integratedBlade && hasRatchet(fix)) {
+    violations.push({ id: "integrated-blade-ratchet", message: `${blade} 是固鎖一體型上蓋，無法使用固鎖。` });
+  }
+  if (integratedBit && !integratedBlade && hasRatchet(fix)) {
+    violations.push({ id: "integrated-bit-ratchet", message: `${bit} 軸無法使用固鎖（固鎖一體型軸心）。` });
+  }
+  if (simpleOnly && (integratedBit || !isSimpleRatchet(fix))) {
+    violations.push({ id: "simple-ratchet-only", message: `時鐘幻象只能使用簡易固鎖（${SIMPLE_RATCHETS.join("、")}），也不能使用 Tr／Op。` });
+  }
+
+  return { noRatchet: integratedBlade || integratedBit, violations };
+}
+
+// Violations present in `after` that `before` did not already have.
+function newAssemblyViolations(before, after) {
+  const existing = new Set((before?.violations || []).map(item => item.id));
+  return (after?.violations || []).filter(item => !existing.has(item.id));
+}
+
+// --- end assembly-rules.js ---
+return { INTEGRATED_RATCHET_BLADES, INTEGRATED_RATCHET_BITS, SIMPLE_RATCHET_ONLY_BLADES, SIMPLE_RATCHETS,
+  evaluateAssembly, newAssemblyViolations, isIntegratedRatchetBlade, isIntegratedRatchetBit, isSimpleRatchetOnlyBlade, isSimpleRatchet, bitCode };
+})();
+</script>
+<script>
+"use strict";
+/* ================= sample data (from the project's user-confirmed catalog) ================= */
+const CATALOG = [{"id":"UX-01","code":"UX-01","name":"蒼龍爆刃","asm":"STANDARD","rm":"standard","set":null,"parts":{"blade":"蒼龍爆刃","ratchet":"1-60","bit":"A"},"ib":null},{"id":"BX-01","code":"BX-01","name":"蒼龍神劍","asm":"STANDARD","rm":"standard","set":null,"parts":{"blade":"蒼龍神劍","ratchet":"3-60","bit":"F"},"ib":null},{"id":"BX-02","code":"BX-02","name":"惡魔紅鐮","asm":"STANDARD","rm":"standard","set":null,"parts":{"blade":"惡魔紅鐮","ratchet":"4-60","bit":"T"},"ib":null},{"id":"BX-03","code":"BX-03","name":"魔導幻箭","asm":"STANDARD","rm":"standard","set":null,"parts":{"blade":"魔導幻箭","ratchet":"4-80","bit":"B"},"ib":null},{"id":"UX-03","code":"UX-03","name":"魔導神杖","asm":"STANDARD","rm":"standard","set":null,"parts":{"blade":"魔導神杖","ratchet":"5-70","bit":"DB"},"ib":null},{"id":"UX-16-01","code":"UX-16-01","name":"時鐘幻象","asm":"STANDARD","rm":"standard","set":null,"parts":{"blade":"時鐘幻象","ratchet":"9-65","bit":"B"},"ib":null},{"id":"UX-19","code":"UX-19","name":"彈丸獅鷲","asm":"UX_EXPAND","rm":"integrated_blade_ratchet","set":null,"parts":{"blade":"彈丸獅鷲","bit":"H"},"ib":null},{"id":"UX-20","code":"UX-20","name":"榮耀戰神","asm":"UX_EXPAND","rm":"integrated_blade_ratchet","set":null,"parts":{"blade":"榮耀戰神","bit":"LF"},"ib":null},{"id":"UX-21-01","code":"UX-21","name":"惡魔冥界","asm":"UX_EXPAND","rm":"integrated_blade_ratchet","set":"UX-21","parts":{"blade":"惡魔冥界","bit":"Z"},"ib":null},{"id":"UX-21-02","code":"UX-21","name":"霜輝銀狼","asm":"STANDARD","rm":"standard","set":"UX-21","parts":{"blade":"霜輝銀狼","ratchet":"9-70","bit":"R"},"ib":null},{"id":"UX-21-03","code":"UX-21","name":"飛龍旋翼","asm":"STANDARD","rm":"standard","set":"UX-21","parts":{"blade":"飛龍旋翼","ratchet":"8-80","bit":"B"},"ib":null},{"id":"CX-01","code":"CX-01","name":"蒼龍勇氣","asm":"CX_3P","rm":"standard","set":null,"parts":{"lockChip":"蒼龍","mainBlade":"勇氣","assistBlade":"S","ratchet":"6-60","bit":"V"},"ib":null},{"id":"CX-07","code":"CX-07","name":"天馬爆擊","asm":"CX_INTEGRATED","rm":"integrated_ratchet_bit","set":null,"parts":{"lockChip":"天馬","mainBlade":"爆擊","assistBlade":"A","bit":"Tr"},"ib":"Tr"},{"id":"CX-11-01","code":"CX-11-01","name":"帝王威能","asm":"CX_INTEGRATED","rm":"integrated_ratchet_bit","set":null,"parts":{"lockChip":"帝王","mainBlade":"威能","assistBlade":"H"},"ib":"Op"},{"id":"CX-13","code":"CX-13","name":"龍王閃擊","asm":"CX_4P","rm":"standard","set":null,"parts":{"lockChip":"龍王","metalBlade":"閃擊","overBlade":"B","assistBlade":"K","ratchet":"1-50","bit":"I"},"ib":null},{"id":"BX-50-04","code":"BX-50-04","name":"幽靈元魂","asm":"STANDARD","rm":"standard","set":null,"parts":{"blade":"幽靈元魂","ratchet":"M-85","bit":"DS"},"ib":null},{"id":"UX-15-01","code":"UX-15-01","name":"鮫鯊狂鱗","asm":"STANDARD","rm":"standard","set":null,"parts":{"blade":"鮫鯊狂鱗","ratchet":"4-50","bit":"UF"},"ib":null},{"id":"BX-00-01-01","code":"BX-00","name":"歐比王肯諾比","asm":"STANDARD","rm":"standard","set":"BX-00-01","parts":{"blade":"歐比王肯諾比","ratchet":"4-60","bit":"P"},"ib":null},{"id":"BX-00-01-02","code":"BX-00","name":"葛里維斯將軍","asm":"STANDARD","rm":"standard","set":"BX-00-01","parts":{"blade":"葛里維斯將軍","ratchet":"3-80","bit":"HN"},"ib":null},{"id":"BX-00-STORM-PEGASIS","code":"BX-00","name":"暴風天馬","asm":"STANDARD","rm":"standard","set":null,"parts":{"blade":"暴風天馬","ratchet":"3-70","bit":"RA"},"ib":null}];
+const SCORE_TYPES = { extreme:{label:"極限勝利",point:3}, over:{label:"擊飛勝利",point:2}, burst:{label:"爆裂勝利",point:2}, spin:{label:"迴轉勝利",point:1} };
+const DELETE_REASONS = ["不好用","好用，暫時拆掉","普通","無感","打錯，不記錄"];
+const PART_TYPES = ["上蓋","紋章鎖","主要戰刃","超越戰刃","金屬戰刃","輔助戰刃","固鎖","軸心"];
+const CX_TYPES = ["紋章鎖","主要戰刃","超越戰刃","金屬戰刃","輔助戰刃"];
+const HELP_PAGES = ["首頁介紹","開始使用","使用教學","更新紀錄","隱私權政策","關於本站","聯絡方式"];
+
+const uid = (() => { let n = 1000; return p => `${p}${++n}`; })();
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const seriesOf = code => (String(code).match(/^(BX|UX|CX)/)||[])[1] || (String(code).startsWith("BXG")?"BX":"BX");
+
+function fromCatalog(rec, auto = true, setInst = null) {
+  const p = rec.parts;
+  return { id: uid("b"), recordId: rec.id, code: rec.code, name: rec.name, asm: rec.asm, auto, setInst,
+    blade: p.blade || "", lockChip: p.lockChip || "", mainBlade: p.mainBlade || "", overBlade: p.overBlade || "", metalBlade: p.metalBlade || "",
+    assistBlade: p.assistBlade || "", ratchet: p.ratchet || "", bit: p.bit || rec.ib || "", ib: rec.ib || "", added: Date.now() };
+}
+const byId = id => CATALOG.find(r => r.id === id);
+function seed() {
+  const setInst = uid("set");
+  const coll = ["UX-01","BX-01","BX-02","UX-03","UX-16-01","UX-19","UX-20","CX-01","CX-07","CX-11-01","CX-13","BX-50-04","UX-15-01"].map((id, i) => ({...fromCatalog(byId(id)), added: i}));
+  ["UX-21-01","UX-21-02","UX-21-03"].forEach((id, i) => coll.push({...fromCatalog(byId(id), true, setInst), added: 20 + i}));
+  coll.push({ id: uid("b"), recordId: "", code: "BX-02", name: "惡魔紅鐮（手動）", asm: "STANDARD", auto: false, setInst: null,
+    blade: "惡魔紅鐮", lockChip:"", mainBlade:"", overBlade:"", metalBlade:"", assistBlade:"", ratchet:"9-60", bit:"GF", ib:"", added: 30 });
+  return {
+    collection: coll,
+    parts: [
+      { id: uid("p"), type: "固鎖", name: "1-60", count: 2 }, { id: uid("p"), type: "固鎖", name: "9-60", count: 1 },
+      { id: uid("p"), type: "固鎖", name: "4-55", count: 1 }, { id: uid("p"), type: "固鎖", name: "3-60", count: 1 },
+      { id: uid("p"), type: "軸心", name: "R", count: 1 }, { id: uid("p"), type: "軸心", name: "H", count: 1 },
+      { id: uid("p"), type: "軸心", name: "LF", count: 1 }, { id: uid("p"), type: "輔助戰刃", name: "J", count: 1 },
+      { id: uid("p"), type: "上蓋", name: "鮫鯊狂鱗", count: 1 }
+    ],
+    configs: [
+      cfg("std", { layer: "魔導神杖", fix: "1-60", axis: "R" }),
+      cfg("std", { layer: "鮫鯊狂鱗", fix: "1-60", axis: "LF" }),
+      cfg("cx3", { lock: "蒼龍", main: "勇氣", assist: "S", fix: "9-60", axis: "H" }),
+      cfg("cx4", { lock: "龍王", over: "B", metal: "閃擊", assist: "K", fix: "1-50", axis: "I" }),
+      cfg("std", { layer: "榮耀戰神", fix: "-", axis: "LF" }),
+      cfg("std", { layer: "惡魔冥界", fix: "3-60", axis: "Z", legacy: true })
+    ],
+    history: [
+      { id: uid("h"), label: "蒼龍神劍 3-60 F", result: "不好用", note: "爆裂太多", date: "2026/11/10", cfg: { kind: "std", layer: "蒼龍神劍", fix: "3-60", axis: "F" } },
+      { id: uid("h"), label: "時鐘幻象 9-65 B", result: "好用，暫時拆掉", note: "", date: "2026/11/02", cfg: { kind: "std", layer: "時鐘幻象", fix: "9-65", axis: "B" } }
+    ],
+    tournaments: [],
+    sync: "clean", signedIn: true
+  };
+}
+function cfg(kind, f) {
+  return { id: uid("c"), kind, layer: f.layer || "", lock: f.lock || "", main: f.main || "", over: f.over || "", metal: f.metal || "",
+    assist: f.assist || "", fix: f.fix || "", axis: f.axis || "", legacy: !!f.legacy, created: Date.now() };
+}
+function seedTournaments(S) {
+  const label = c => configLabel(c);
+  const [c1, c2, , c4, c5] = S.configs;
+  S.tournaments = [
+    { id: uid("t"), name: "11/30 店家賽", date: "2026-11-30", location: "台北", count: 8, note: "", finished: false, matches: [
+      { id: uid("m"), opponent: "對手未到", adv: "walkover", deck: [], rounds: [] },
+      { id: uid("m"), opponent: "阿華", deck: [label(c1), label(c4), label(c5)], rounds: [
+        r("win","over",label(c1)), r("lose","burst",label(c4)), r("win","extreme",label(c5)) , r("win","spin",label(c1)) ] },
+      { id: uid("m"), opponent: "小明", deck: [label(c1), label(c4), label(c5)], rounds: [ r("win","over",label(c1)), r("lose","burst",label(c4)), r("win","spin",label(c5)) ] }
+    ]},
+    { id: uid("t"), name: "11/16 社團賽", date: "2026-11-16", location: "新竹", count: 4, note: "", finished: true, matches: [
+      { id: uid("m"), opponent: "小傑", deck: [label(c2), label(c4), label(c5)], rounds: [ r("win","extreme",label(c2)), r("win","over",label(c4)) ] },
+      { id: uid("m"), opponent: "阿德", deck: [label(c2), label(c4), label(c5)], rounds: [ r("lose","extreme",label(c4)), r("win","spin",label(c2)), r("lose","over",label(c5)) ] }
+    ]}
+  ];
+  function r(result, type, bey) { return { id: uid("r"), result, type, point: SCORE_TYPES[type].point, bey, note: "" }; }
+}
+let S = seed(); seedTournaments(S);
+
+/* ================= derived data ================= */
+const isCxAsm = b => String(b.asm).startsWith("CX_");
+function collectionPartList(b) {
+  const out = [];
+  if (b.blade && !isCxAsm(b)) out.push(["上蓋", b.blade]);
+  if (b.lockChip) out.push(["紋章鎖", b.lockChip]);
+  if (b.metalBlade) out.push(["金屬戰刃", b.metalBlade]);
+  if (b.mainBlade) out.push(["主要戰刃", b.mainBlade]);
+  if (b.overBlade) out.push(["超越戰刃", b.overBlade]);
+  if (b.assistBlade) out.push(["輔助戰刃", b.assistBlade]);
+  if (b.ratchet) out.push(["固鎖", b.ratchet]);
+  if (b.bit) out.push(["軸心", b.bit]);
+  return out;
+}
+function configPartList(c) {
+  const out = [];
+  if (c.kind === "std") { if (c.layer) out.push(["上蓋", c.layer]); }
+  else {
+    if (c.lock) out.push(["紋章鎖", c.lock]);
+    if (c.kind === "cx3" && c.main) out.push(["主要戰刃", c.main]);
+    if (c.kind === "cx4") { if (c.over) out.push(["超越戰刃", c.over]); if (c.metal) out.push(["金屬戰刃", c.metal]); }
+    if (c.assist) out.push(["輔助戰刃", c.assist]);
+  }
+  if (c.fix && c.fix !== "-") out.push(["固鎖", c.fix]);
+  if (c.axis) out.push(["軸心", c.axis]);
+  return out;
+}
+function configLabel(c) {
+  const head = c.kind === "std" ? c.layer : c.kind === "cx3" ? `${c.lock}${c.main}${c.assist}` : `${c.lock}${c.metal}${c.over}${c.assist}`;
+  return [head, c.fix && c.fix !== "-" ? c.fix : "", c.axis].filter(Boolean).join(" ");
+}
+const structLabel = k => ({ std: "標準三件式", cx3: "CX 三件戰刃", cx4: "CX 四件戰刃" }[k]);
+function configModel(c) {
+  if (c.kind !== "std") return "CX-CUSTOM";
+  const b = S.collection.find(x => x.blade === c.layer && !isCxAsm(x));
+  return b ? `${b.recordId || b.code} CUSTOM` : "BX-CUSTOM";
+}
+const ruleInput = c => ({ model: configModel(c), layer: c.kind === "std" ? c.layer : "", fix: c.fix, axis: c.axis });
+const evalCfg = c => Rules.evaluateAssembly(ruleInput(c));
+const key = (t, n) => `${t}|${n}`;
+function inventory() {
+  const m = new Map();
+  const get = (t, n) => { const k = key(t, n); if (!m.has(k)) m.set(k, { type: t, name: n, fromBeys: [], extra: 0, extraId: null, refs: [], rounds: 0 }); return m.get(k); };
+  S.collection.forEach(b => collectionPartList(b).forEach(([t, n]) => get(t, n).fromBeys.push(b)));
+  S.parts.forEach(p => { const e = get(p.type, p.name); e.extra += p.count; e.extraId = p.id; });
+  S.configs.forEach(c => configPartList(c).forEach(([t, n]) => get(t, n).refs.push(c)));
+  const byLabel = new Map(S.configs.map(c => [configLabel(c), c]));
+  S.tournaments.forEach(t => t.matches.forEach(mt => mt.rounds.forEach(rd => { const c = byLabel.get(rd.bey); if (c) configPartList(c).forEach(([ty, n]) => get(ty, n).rounds++); })));
+  m.forEach(e => { e.owned = e.fromBeys.length + e.extra; e.used = e.refs.length; e.avail = e.owned - e.used; });
+  return m;
+}
+function matchScore(mt) {
+  let me = 0, op = 0; mt.rounds.forEach(r => r.result === "win" ? me += r.point : op += r.point); return { me, op };
+}
+function matchOutcome(mt) {
+  if (mt.adv) return "advance";
+  const { me, op } = matchScore(mt); return me >= 4 ? "win" : op >= 4 ? "lose" : "open";
+}
+function standing(t) {
+  const R = Math.max(1, Math.ceil(Math.log2(Math.max(2, t.count))));
+  let adv = 0;
+  for (const mt of t.matches) {
+    const o = matchOutcome(mt);
+    if (o === "win" || o === "advance") adv++;
+    else if (o === "lose") { const best = 2 ** (R - adv - 1) + 1, worst = 2 ** (R - adv); return best === worst ? `第 ${best} 名` : `第 ${best}–${worst} 名`; }
+    else return `第 ${adv + 1} 輪進行中`;
+  }
+  if (adv >= R) return "冠軍（第 1 名）";
+  return t.matches.length ? `已晉級第 ${adv + 1} 輪` : "尚未開始";
+}
+const currentMatch = t => [...t.matches].reverse().find(m => !m.adv && matchOutcome(m) === "open") || null;
+function partsOverused(c, inv) { return configPartList(c).filter(([t, n]) => (inv.get(key(t, n))?.avail ?? 0) < 0); }
+
+/* ================= instances & rendering ================= */
+const UI_DEFAULT = () => ({ route: "home", ctab: "beys", conTab: "list", sel: {}, q: "", gq: "", f: { series: "all", struct: "all", ptype: "all", sort: "default", availOnly: false, view: "cards", cq: "", cstruct: "all" },
+  tsel: null, overlay: null, fab: false, statCat: "blades", statExpand: false, statQ: "", statBlade: null, statTab: "combos", sheetDetail: null, rp: null });
+const SHELL = { view: "compare", theme: "dark", opts: { nav: "n1", board: "top", tour3: "on" } };
+const instances = [];
+function mountStage() {
+  const stage = document.getElementById("stage");
+  stage.className = "stage " + SHELL.view;
+  stage.innerHTML = "";
+  instances.length = 0;
+  const kinds = SHELL.view === "compare" ? ["desktop", "phone"] : [SHELL.view];
+  kinds.forEach(kind => {
+    const dev = document.createElement("div");
+    dev.className = `dev dev-${kind}`;
+    const app = document.createElement("div");
+    app.className = "app";
+    app.setAttribute("role", "application");
+    app.setAttribute("aria-label", kind === "phone" ? "手機版原型" : "桌面版原型");
+    dev.append(app);
+    const cap = document.createElement("small");
+    cap.textContent = kind === "phone" ? "手機（390 寬）" : "桌面";
+    dev.append(cap);
+    stage.append(dev);
+    const inst = { kind, app, ui: instances.find(i => i.kind === kind)?.ui || UI_DEFAULT() };
+    instances.push(inst);
+    wire(inst);
+  });
+  renderAll();
+}
+function renderAll() { instances.forEach(render); renderShell(); }
+
+const ICON = {
+  home: '<path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  coll: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+  cfg: '<path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/>',
+  tour: '<path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M5 5H3v2a3 3 0 0 0 3 3M19 5h2v2a3 3 0 0 1-3 3M12 13v4M8 20h8"/>',
+  stat: '<path d="M5 19V9M12 19V5M19 19v-7"/>',
+  more: '<circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', close: '<path d="M6 6l12 12M18 6L6 18"/>', search: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/>'
+};
+const icon = (n, cls = "i") => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICON[n]}</svg>`;
+const ROUTES = [["home","首頁","home"],["collection","收藏","coll"],["configs","配置","cfg"],["tournaments","賽事","tour"],["stats","競賽統計","stat"],["more","更多","more"]];
+
+function render(inst) {
+  const { ui, app } = inst;
+  const focus = document.activeElement && app.contains(document.activeElement) ? { k: document.activeElement.dataset.fk, s: document.activeElement.selectionStart, e: document.activeElement.selectionEnd } : null;
+  app.dataset.theme = SHELL.theme;
+  const scrollTop = app.querySelector(".main")?.scrollTop || 0;
+  app.innerHTML = topbar(inst) + banner() + `<div class="body">${sidenav(inst)}<main class="main" data-main>${page(inst)}</main></div>` + bottomnav(inst)
+    + (ui.fab ? fabMenu() : "") + (ui.overlay ? overlay(inst) : "");
+  const main = app.querySelector(".main"); if (main && !ui._resetScroll) main.scrollTop = scrollTop; ui._resetScroll = false;
+  if (focus?.k) { const el = app.querySelector(`[data-fk="${focus.k}"]`); if (el) { el.focus(); try { if (focus.s != null) el.setSelectionRange(focus.s, focus.e); } catch {} } }
+}
+
+function topbar(inst) {
+  const { ui } = inst;
+  const sync = { clean: ["", "已同步"], conflict: ["b", "同步衝突"], pending: ["w", "尚未儲存"], unknown: ["w", "結果待確認"], draft: ["w", "有未儲存資料"] }[S.sync];
+  return `<div class="topbar">
+    <button type="button" class="brand" data-act="nav" data-v="home" title="首頁"><i></i><span>戰鬥陀螺管理器</span></button>
+    <div class="gsearch"><input type="search" placeholder="搜尋陀螺、零件、配置、比賽…" aria-label="全站搜尋" data-fk="gq" data-in="gq" value="${esc(ui.gq)}">${ui.gq ? globalResults(ui.gq) : ""}</div>
+    <button type="button" class="syncpill" data-act="nav" data-v="more" data-anchor="sync"><span class="dot ${sync[0]}"></span><b>${sync[1]}</b></button>
+    <button type="button" class="btn pri topnew hide-phone" data-act="newcfg">＋ 建立配置</button>
+  </div>`;
+}
+function banner() {
+  const B = {
+    conflict: ["b", `其他裝置已修改「額外零件庫存」，和這個畫面尚未儲存的變更衝突，這次沒有儲存任何資料。`, `<button class="btn sm" data-act="sync" data-v="clean">載入雲端最新資料</button><button class="btn sm danger" data-act="sync" data-v="clean">以我的版本覆蓋</button>`],
+    pending: ["w", "尚未儲存到雲端：目前無法連線。變更仍保留在這個畫面，恢復連線後會自動重試。", `<button class="btn sm" data-act="sync" data-v="clean">立即重試</button>`],
+    unknown: ["w", "無法確認最近一次儲存是否完成。恢復連線後會自動確認並重試，不會重複寫入。", `<button class="btn sm" data-act="sync" data-v="clean">立即重試</button>`],
+    draft: ["w", "a***@example.test 已在其他分頁或裝置登出。這個分頁保留了該帳號 1 份尚未儲存到雲端的變更，請用原帳號重新登入後才能下載或捨棄。", `<button class="btn sm" data-act="sync" data-v="clean">（示範）以原帳號登入</button>`]
+  }[S.sync];
+  return B ? `<div class="banner ${B[0]}" role="alert"><span>${B[1]}</span>${B[2]}</div>` : `<div class="banner"></div>`;
+}
+function sidenav(inst) {
+  const r = inst.ui.route;
+  return `<nav class="sidenav" aria-label="主要導覽">
+    <button type="button" class="new" data-act="fab">${icon("plus")}新增</button>
+    ${ROUTES.slice(0, 5).map(([k, l, ic]) => `<button type="button" data-act="nav" data-v="${k}" ${r === k ? 'aria-current="page"' : ""}>${icon(ic)}${l}</button>`).join("")}
+    <small>其他</small>
+    <button type="button" data-act="nav" data-v="more" ${r === "more" ? 'aria-current="page"' : ""}>${icon("more")}更多與設定</button>
+  </nav>`;
+}
+function bottomnav(inst) {
+  const r = inst.ui.route;
+  const sets = {
+    n1: [["collection","收藏","coll"],["configs","配置","cfg"],["+"],["tournaments","賽事","tour"],["more","更多","more"]],
+    n2: [["home","首頁","home"],["collection","收藏","coll"],["+"],["configs","配置","cfg"],["tournaments","賽事","tour"]]
+  }[SHELL.opts.nav];
+  return `<nav class="bnav" aria-label="底部導覽">${sets.map(([k, l, ic]) => k === "+"
+    ? `<button type="button" class="plus" data-act="fab" aria-label="新增"><span>${icon("plus")}</span>新增</button>`
+    : `<button type="button" data-act="nav" data-v="${k}" ${r === k || (k === "more" && r === "stats") ? 'aria-current="page"' : ""}>${icon(ic)}${l}</button>`).join("")}</nav>`;
+}
+function fabMenu() {
+  return `<div class="fab-menu" role="menu">
+    <button type="button" data-act="addbey">＋ 新增收藏</button>
+    <button type="button" data-act="addpart">＋ 新增零件</button>
+    <button type="button" data-act="newcfg">＋ 建立配置</button>
+    <button type="button" data-act="newtour">＋ 新增比賽</button>
+    <button type="button" data-act="quickround">● 記錄回合（進行中的比賽）</button>
+    <button type="button" data-act="fab" class="muted">取消</button></div>`;
+}
+function globalResults(q) {
+  const s = q.trim().toLowerCase(); if (!s) return "";
+  const hit = t => String(t).toLowerCase().includes(s);
+  const beys = S.collection.filter(b => hit(b.name) || hit(b.code) || collectionPartList(b).some(([, n]) => hit(n))).slice(0, 5);
+  const inv = [...inventory().values()].filter(e => hit(e.name) || hit(e.type)).slice(0, 5);
+  const cfgs = S.configs.filter(c => hit(configLabel(c))).slice(0, 5);
+  const ts = S.tournaments.filter(t => hit(t.name) || t.matches.some(m => hit(m.opponent))).slice(0, 4);
+  const sect = (h, items) => items.length ? `<h5>${h}</h5>${items.join("")}` : "";
+  const body = sect("原裝陀螺", beys.map(b => `<button type="button" data-act="goto" data-r="collection" data-t="beys" data-id="${b.id}">${esc(b.name)} <span class="code">${esc(b.code)}</span></button>`))
+    + sect("零件", inv.map(e => `<button type="button" data-act="goto" data-r="collection" data-t="parts" data-id="${esc(key(e.type, e.name))}">${esc(e.type)}｜${esc(e.name)} <span class="code">可用 ${e.avail}</span></button>`))
+    + sect("配置", cfgs.map(c => `<button type="button" data-act="goto" data-r="configs" data-id="${c.id}">${esc(configLabel(c))}</button>`))
+    + sect("賽事", ts.map(t => `<button type="button" data-act="goto" data-r="tournaments" data-id="${t.id}">${esc(t.name)}</button>`));
+  return `<div class="gresults" role="listbox">${body || '<p class="muted small" style="margin:8px">沒有符合的項目</p>'}</div>`;
+}
+
+/* ================= pages ================= */
+function page(inst) {
+  return ({ home: pHome, collection: pCollection, configs: pConfigs, tournaments: pTournaments, stats: pStats, more: pMore })[inst.ui.route](inst);
+}
+function pHome(inst) {
+  const inv = inventory();
+  const all = [...inv.values()];
+  const owned = all.reduce((a, e) => a + e.owned, 0), used = all.reduce((a, e) => a + Math.min(e.owned, e.used), 0);
+  const live = S.tournaments.find(t => !t.finished);
+  const cm = live && currentMatch(live);
+  const todo = [];
+  S.configs.forEach(c => { const o = partsOverused(c, inv); if (o.length) todo.push(`<button type="button" class="item" data-act="goto" data-r="configs" data-id="${c.id}"><span class="stripe" style="background:var(--warn)"></span><span>配置「${esc(configLabel(c))}」的 ${esc(o.map(x => x[1]).join("、"))} 引用超過持有量</span><span class="tag w">庫存</span></button>`); });
+  S.configs.filter(c => evalCfg(c).violations.length).forEach(c => todo.push(`<button type="button" class="item" data-act="goto" data-r="configs" data-id="${c.id}"><span class="stripe" style="background:var(--warn)"></span><span>舊配置「${esc(configLabel(c))}」不符合官方組裝規則</span><span class="tag w">規則</span></button>`));
+  if (cm) todo.push(`<button type="button" class="item" data-act="goto" data-r="tournaments" data-id="${live.id}"><span class="stripe" style="background:var(--accent)"></span><span>${esc(live.name)}：對 ${esc(cm.opponent)} 的對局進行中</span><span class="tag a">賽事</span></button>`);
+  return `<div class="sectionh"><h2>首頁工作台</h2><span class="muted small">收藏儲存版本：5B（交易保護）</span></div>
+  <div class="kpis">
+    <button type="button" class="kpi" data-act="nav" data-v="collection"><b>${S.collection.length}</b><span>原裝陀螺</span></button>
+    <button type="button" class="kpi" data-act="goto" data-r="collection" data-t="parts"><b class="num">${owned - used}<small class="muted" style="font-size:13px"> / ${owned}</small></b><span>零件可用／持有</span>
+      <span class="tri" aria-hidden="true"><i style="flex:${owned - used};background:var(--ok)"></i><i style="flex:${used};background:var(--accent)"></i></span></button>
+    <button type="button" class="kpi" data-act="nav" data-v="configs"><b>${S.configs.length}</b><span>配置｜拆解紀錄 ${S.history.length}</span></button>
+    <button type="button" class="kpi" data-act="nav" data-v="tournaments"><b>${S.tournaments.filter(t => !t.finished).length}</b><span>進行中比賽｜共 ${S.tournaments.length}</span></button>
+  </div>
+  <div class="split">
+    <div class="grid">
+      ${live ? `<section class="arena" aria-label="近期賽事"><div class="row between"><b>${esc(live.name)}</b><span class="muted small">${esc(standing(live))}</span></div>
+        ${cm ? scoreboard(cm) : `<p class="muted">目前沒有進行中的對局。</p>`}
+        <div class="row"><button type="button" class="go" style="flex:1;min-height:44px" data-act="goto" data-r="tournaments" data-id="${live.id}">${cm ? "繼續記錄回合" : "前往比賽"}</button></div></section>` : `<div class="empty">沒有進行中的比賽</div>`}
+      <section class="card grid"><div class="sectionh"><h3>需要處理</h3><span class="muted small">${todo.length} 項</span></div>
+        <div class="list">${todo.join("") || '<p class="muted">目前沒有需要處理的項目。</p>'}</div></section>
+    </div>
+    <div class="grid">
+      <section class="card grid"><h3>常用操作</h3>
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <button type="button" class="btn" data-act="addbey">新增收藏</button><button type="button" class="btn" data-act="addpart">新增零件</button>
+          <button type="button" class="btn pri" data-act="newcfg">建立配置</button><button type="button" class="btn" data-act="newtour">新增比賽</button></div></section>
+      <section class="card grid"><div class="sectionh"><h3>最近配置</h3><button type="button" class="btn sm" data-act="nav" data-v="configs">全部</button></div>
+        <div class="list">${[...S.configs].sort((a, b) => b.created - a.created).slice(0, 4).map(c => cfgRow(c, inst, inv)).join("")}</div></section>
+      <section class="card grid"><h3>同步</h3><div class="row"><span class="dot ${S.sync === "clean" ? "" : "w"}"></span><span>${S.sync === "clean" ? "已同步，沒有衝突或未儲存資料" : "需要處理，請查看頂部提示"}</span></div></section>
+    </div>
+  </div>`;
+}
+
+/* ---------- collection ---------- */
+function beyStructure(b) { return b.asm === "UX_EXPAND" ? "固鎖一體" : b.asm === "CX_INTEGRATED" ? "軸心一體" : b.asm === "CX_4P" ? "CX 四件" : b.asm === "CX_3P" ? "CX 三件" : "標準"; }
+function beyParts(b) {
+  const parts = b.asm === "CX_4P" ? [["紋章鎖", b.lockChip], ["金屬戰刃", b.metalBlade], ["超越戰刃", b.overBlade], ["輔助戰刃", b.assistBlade]]
+    : isCxAsm(b) ? [["紋章鎖", b.lockChip], ["主要戰刃", b.mainBlade], ["輔助戰刃", b.assistBlade]] : [["上蓋", b.blade]];
+  parts.push(["固鎖", b.asm === "UX_EXPAND" ? "戰刃一體式" : b.ib ? "固鎖／軸心一體式" : b.ratchet], ["軸心", b.bit]);
+  return parts.filter(([, v]) => v);
+}
+function pCollection(inst) {
+  const { ui } = inst;
+  return `<div class="sectionh"><h2>收藏</h2><div class="row"><button type="button" class="btn" data-act="addpart">＋ 零件</button><button type="button" class="btn pri" data-act="addbey">＋ 收藏</button></div></div>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-act="ctab" data-v="beys" aria-selected="${ui.ctab === "beys"}">原裝陀螺 ${S.collection.length}</button>
+    <button type="button" role="tab" data-act="ctab" data-v="parts" aria-selected="${ui.ctab === "parts"}">零件 ${inventory().size}</button></div>
+  ${ui.ctab === "beys" ? pBeys(inst) : pParts(inst)}`;
+}
+function pBeys(inst) {
+  const { ui } = inst, f = ui.f;
+  const q = ui.q.trim().toLowerCase();
+  let list = S.collection.filter(b => (f.series === "all" || seriesOf(b.code) === f.series) && (f.struct === "all" || beyStructure(b) === f.struct)
+    && (!q || [b.name, b.code, ...collectionPartList(b).map(x => x[1])].some(t => String(t).toLowerCase().includes(q))));
+  const order = { UX: 0, BX: 1, CX: 2 };
+  const sorts = { default: (a, b) => (order[seriesOf(a.code)] - order[seriesOf(b.code)]) || a.code.localeCompare(b.code, "zh-Hant", { numeric: true }),
+    code: (a, b) => a.code.localeCompare(b.code, "zh-Hant", { numeric: true }), name: (a, b) => a.name.localeCompare(b.name, "zh-Hant"), recent: (a, b) => b.added - a.added };
+  list.sort(sorts[f.sort] || sorts.default);
+  const sel = S.collection.find(b => b.id === ui.sel.bey) || null;
+  const chips = (k, vals) => vals.map(([v, l]) => `<button type="button" class="chip" data-act="filter" data-k="${k}" data-v="${v}" aria-pressed="${f[k] === v}">${l}</button>`).join("");
+  return `<div class="toolbar"><input type="search" placeholder="搜尋型號、名稱或零件" aria-label="搜尋收藏" data-fk="cq" data-in="q" value="${esc(ui.q)}">
+    <select aria-label="排序" data-sel="sort">${[["default","預設（UX→BX→CX）"],["code","型號"],["name","名稱"],["recent","最近加入"]].map(([v, l]) => `<option value="${v}" ${f.sort === v ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <div class="row">${chips("view", [["cards","卡片"],["list","清單"]])}</div></div>
+  <div class="toolbar">${chips("series", [["all","全部"],["BX","BX"],["UX","UX"],["CX","CX"]])}<span class="muted small">｜</span>${chips("struct", [["all","所有結構"],["標準","標準"],["CX 三件","CX 三件"],["CX 四件","CX 四件"],["固鎖一體","固鎖一體"],["軸心一體","軸心一體"]])}</div>
+  <div class="split"><div class="${f.view === "cards" ? "cards" : "list"}">${list.map(b => `<button type="button" class="item" data-act="selbey" data-id="${b.id}" aria-current="${sel?.id === b.id}">
+      <span class="stripe s-${seriesOf(b.code)}"></span><span><span class="ttl">${esc(b.name)}</span> <span class="code">${esc(b.code)}</span>
+      <span class="pills">${beyParts(b).map(([t, v]) => `<span class="p">${f.view === "list" ? "" : `<span class="k">${t} </span>`}${esc(v)}</span>`).join("")}</span></span>
+      ${f.view === "list" ? `<span class="tags">${b.setInst ? '<span class="tag">套組</span>' : ""}<span class="tag">${b.auto ? "自動帶入" : "手動"}</span></span>` : ""}</button>`).join("") || '<div class="empty">沒有符合的原裝陀螺</div>'}</div>
+    <aside class="detail desk">${sel ? beyDetail(sel) : '<div class="empty">選擇一顆陀螺查看詳細資料</div>'}</aside></div>`;
+}
+function beyDetail(b) {
+  return `<section class="card grid"><div class="sectionh"><h3>${esc(b.name)}</h3><button type="button" class="iconbtn sheet-close" data-act="closesheet" aria-label="關閉">${icon("close")}</button></div>
+    <div class="row"><span class="tag">${esc(b.code)}</span><span class="tag">${beyStructure(b)}</span><span class="tag">${b.auto ? "型錄自動帶入" : "手動輸入"}</span>${b.setInst ? '<span class="tag">套組</span>' : ""}</div>
+    <dl class="kv">${beyParts(b).map(([t, v]) => `<dt>${t}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+    <p class="muted small" style="margin:0">零件顯示順序依 D-004。${b.auto ? "型錄升級只套用在明確標記為自動帶入的資料（D-015）。" : "手動資料不會被型錄自動覆寫（D-015）。"}</p>
+    <div class="row"><button type="button" class="btn sm" data-act="cfgfrombey" data-id="${b.id}">用這顆建立配置</button><button type="button" class="btn sm danger" data-act="delbey" data-id="${b.id}">刪除</button></div></section>`;
+}
+function pParts(inst) {
+  const { ui } = inst, f = ui.f;
+  const q = ui.q.trim().toLowerCase();
+  const inv = inventory();
+  let list = [...inv.values()].filter(e => (f.ptype === "all" || (f.ptype === "CX" ? CX_TYPES.includes(e.type) : e.type === f.ptype))
+    && (!f.availOnly || e.avail > 0) && (!q || `${e.type} ${e.name}`.toLowerCase().includes(q)));
+  const sorts = { default: (a, b) => PART_TYPES.indexOf(a.type) - PART_TYPES.indexOf(b.type) || a.name.localeCompare(b.name, "zh-Hant", { numeric: true }),
+    avail: (a, b) => b.avail - a.avail, name: (a, b) => a.name.localeCompare(b.name, "zh-Hant", { numeric: true }), used: (a, b) => b.used - a.used };
+  list.sort(sorts[f.psort || "default"]);
+  const all = [...inv.values()];
+  const owned = all.reduce((a, e) => a + e.owned, 0), used = all.reduce((a, e) => a + Math.min(e.owned, e.used), 0);
+  const sel = inv.get(ui.sel.part) || null;
+  const chips = [["all","全部"],["上蓋","上蓋"],["固鎖","固鎖"],["軸心","軸心"],["CX","CX 分件"]].map(([v, l]) => `<button type="button" class="chip" data-act="filter" data-k="ptype" data-v="${v}" aria-pressed="${f.ptype === v}">${l}</button>`).join("");
+  return `<div class="kpis"><div class="kpi"><b>${inv.size}</b><span>零件種類</span></div><div class="kpi"><b>${owned}</b><span>持有總數（原裝＋額外）</span></div>
+    <div class="kpi"><b>${used}</b><span>配置引用（使用中）</span></div><div class="kpi"><b>${owned - used}</b><span>可用</span></div></div>
+  <div class="toolbar"><input type="search" placeholder="搜尋零件" aria-label="搜尋零件" data-fk="pq" data-in="q" value="${esc(ui.q)}">
+    <select aria-label="排序" data-sel="psort">${[["default","類別"],["name","名稱"],["avail","可用量"],["used","引用量"]].map(([v, l]) => `<option value="${v}" ${(f.psort || "default") === v ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <button type="button" class="chip" data-act="filter" data-k="availOnly" data-v="toggle" aria-pressed="${f.availOnly}">只看可用</button></div>
+  <div class="toolbar">${chips}</div>
+  <div class="split"><div class="list">${list.map(e => `<button type="button" class="item" data-act="selpart" data-id="${esc(key(e.type, e.name))}" aria-current="${sel === e}">
+      <span class="stripe" style="background:${CX_TYPES.includes(e.type) ? "var(--cx)" : e.type === "上蓋" ? "var(--ux)" : "var(--bx)"}"></span>
+      <span><span class="code">${esc(e.type)}</span> <span class="ttl">${esc(e.name)}</span></span>
+      <span class="tags"><span class="tag">持有 ${e.owned}</span><span class="tag a">引用 ${e.used}</span><span class="tag ${e.avail > 0 ? "ok" : e.avail < 0 ? "b" : "w"}">可用 ${e.avail}</span></span></button>`).join("") || '<div class="empty">沒有符合的零件</div>'}</div>
+    <aside class="detail desk">${sel ? partDetail(sel) : '<div class="empty">選擇零件查看持有、引用與出賽紀錄</div>'}</aside></div>`;
+}
+function partDetail(e) {
+  return `<section class="card grid"><div class="sectionh"><h3>${esc(e.type)}｜${esc(e.name)}</h3><button type="button" class="iconbtn sheet-close" data-act="closesheet" aria-label="關閉">${icon("close")}</button></div>
+    <div class="meter"><div><b>${e.owned}</b><span>持有</span></div><div><b>${e.used}</b><span>配置引用</span></div><div><b style="color:${e.avail < 0 ? "var(--bad)" : "inherit"}">${e.avail}</b><span>可用</span></div></div>
+    <dl class="kv"><dt>持有來源</dt><dd>${e.fromBeys.map(b => `${esc(b.name)}（原裝）`).join("、") || "—"}${e.extra ? `${e.fromBeys.length ? "、" : ""}額外零件 ×${e.extra}` : ""}</dd>
+      <dt>配置引用</dt><dd>${e.refs.map(c => esc(configLabel(c))).join("、") || "沒有配置使用"}</dd>
+      <dt>出賽使用</dt><dd>${e.rounds} 回合<div class="muted small">依賽事回合紀錄的陀螺文字比對配置；配置改名或修改後的舊回合、自填陀螺不會計入。</div></dd></dl>
+    ${e.extra ? `<div class="row"><button type="button" class="btn sm" data-act="editpart" data-id="${e.extraId}">修改額外數量</button><button type="button" class="btn sm danger" data-act="delpart" data-id="${e.extraId}">刪除額外零件</button></div>` : '<p class="muted small" style="margin:0">這個零件只來自原裝陀螺；要減少請刪除對應的收藏。</p>'}
+  </section>`;
+}
+
+/* ---------- configs ---------- */
+function cfgRow(c, inst, inv) {
+  const v = evalCfg(c).violations, over = partsOverused(c, inv);
+  const s = c.kind === "std" ? seriesOf(configModel(c)) : "CX";
+  return `<button type="button" class="item" data-act="selcfg" data-id="${c.id}" aria-current="${inst.ui.sel.cfg === c.id}"><span class="stripe s-${s}"></span>
+    <span><span class="ttl">${esc(configLabel(c))}</span><span class="pills"><span class="p k">${structLabel(c.kind)}</span>${c.fix === "-" ? '<span class="p k">無固鎖（一體式）</span>' : ""}</span></span>
+    <span class="tags">${v.length ? '<span class="tag w">規則</span>' : ""}${over.length ? '<span class="tag b">庫存</span>' : ""}</span></button>`;
+}
+function pConfigs(inst) {
+  const { ui } = inst, f = ui.f, inv = inventory();
+  const q = f.cq.trim().toLowerCase();
+  const list = S.configs.filter(c => (f.cstruct === "all" || c.kind === f.cstruct) && (!q || configLabel(c).toLowerCase().includes(q) || configPartList(c).some(([, n]) => n.toLowerCase().includes(q))));
+  const sel = S.configs.find(c => c.id === ui.sel.cfg) || null;
+  return `<div class="sectionh"><h2>配置</h2><button type="button" class="btn pri" data-act="newcfg">＋ 建立配置</button></div>
+  <div class="tabs" role="tablist"><button type="button" role="tab" data-act="contab" data-v="list" aria-selected="${ui.conTab === "list"}">我的配置 ${S.configs.length}</button>
+    <button type="button" role="tab" data-act="contab" data-v="history" aria-selected="${ui.conTab === "history"}">拆解紀錄 ${S.history.length}</button></div>
+  ${ui.conTab === "history" ? pHistory() : `<div class="toolbar"><input type="search" placeholder="搜尋配置或零件（例如 1-60）" aria-label="搜尋配置" data-fk="cfq" data-in="cq" value="${esc(f.cq)}">
+    ${[["all","全部"],["std","標準三件式"],["cx3","CX 三件"],["cx4","CX 四件"]].map(([v, l]) => `<button type="button" class="chip" data-act="filter" data-k="cstruct" data-v="${v}" aria-pressed="${f.cstruct === v}">${l}</button>`).join("")}</div>
+  <div class="split"><div class="list">${list.map(c => cfgRow(c, inst, inv)).join("") || '<div class="empty">沒有符合的配置</div>'}</div>
+    <aside class="detail desk">${sel ? cfgDetail(sel, inv) : '<div class="empty">選擇配置查看零件、規則與庫存</div>'}</aside></div>`}`;
+}
+function cfgDetail(c, inv) {
+  const v = evalCfg(c).violations, over = partsOverused(c, inv);
+  return `<section class="card grid"><div class="sectionh"><h3>${esc(configLabel(c))}</h3><button type="button" class="iconbtn sheet-close" data-act="closesheet" aria-label="關閉">${icon("close")}</button></div>
+    <div class="row"><span class="tag">${structLabel(c.kind)}</span><span class="tag">內部型號 ${esc(configModel(c))}</span></div>
+    <dl class="kv">${configPartList(c).map(([t, n]) => { const e = inv.get(key(t, n)); return `<dt>${t}</dt><dd>${esc(n)} <span class="muted small">持有 ${e?.owned ?? 0}｜引用 ${e?.used ?? 0}</span></dd>`; }).join("")}${c.fix === "-" ? `<dt>固鎖</dt><dd>無（${Rules.isIntegratedRatchetBit(c.axis) ? "與軸心一體" : "戰刃內建"}）</dd>` : ""}</dl>
+    ${v.length ? `<div class="checks">${v.map(x => `<span class="c-w">！ ${esc(x.message)}</span>`).join("")}<span class="c-i">舊資料只警告，仍可開啟與原樣儲存（D-019）。</span></div>` : '<div class="checks"><span class="c-ok">✓ 符合官方組裝規則</span></div>'}
+    ${over.length ? `<div class="checks"><span class="c-b">✕ ${esc(over.map(x => x[1]).join("、"))} 的配置引用超過持有量</span></div>` : ""}
+    <div class="row"><button type="button" class="btn sm" data-act="editcfg" data-id="${c.id}">修改</button><button type="button" class="btn sm" data-act="dupcfg" data-id="${c.id}">複製</button>
+      <button type="button" class="btn sm danger" data-act="delcfg" data-id="${c.id}">拆解</button></div></section>`;
+}
+function pHistory() {
+  return `<div class="list">${S.history.map(h => `<div class="item"><span class="stripe" style="background:${/不好/.test(h.result) ? "var(--bad)" : /好用/.test(h.result) ? "var(--ok)" : "var(--muted)"}"></span>
+    <span><span class="ttl">${esc(h.label)}</span><span class="pills"><span class="p">${esc(h.result)}</span>${h.note ? `<span class="p k">${esc(h.note)}</span>` : ""}<span class="p k">${esc(h.date)}</span></span></span>
+    <span class="row"><button type="button" class="btn sm" data-act="restore" data-id="${h.id}">還原為配置</button><button type="button" class="btn sm danger" data-act="delhist" data-id="${h.id}">刪除</button></span></div>`).join("") || '<div class="empty">還沒有拆解紀錄</div>'}</div>
+  <p class="muted small">拆解配置時選擇原因會留下紀錄；選「打錯，不記錄」則不留。</p>`;
+}
+
+/* ---------- tournaments (C) ---------- */
+function scoreboard(mt) {
+  const { me, op } = matchScore(mt);
+  const pips = (n, cls) => `<span class="pips ${cls}">${[0, 1, 2, 3].map(i => `<i class="${i < Math.min(n, 4) ? "on" : ""}"></i>`).join("")}</span>`;
+  return `<div class="board" role="group" aria-label="比分"><div class="side"><small>我方</small><div class="sc me">${me}</div>${pips(me, "me")}</div>
+    <div class="mid"><small class="muted">對手 ${esc(mt.opponent)}</small><b>第 ${mt.rounds.length + 1} 回合</b><small class="muted">先到 4 分</small></div>
+    <div class="side"><small>對手</small><div class="sc op">${op}</div>${pips(op, "op")}</div></div>`;
+}
+function roundPanel(inst, t, mt) {
+  const rp = inst.ui.rp && inst.ui.rp.m === mt.id ? inst.ui.rp : (inst.ui.rp = { m: mt.id, bey: 0, res: "win", type: "over", note: "" });
+  const pt = SCORE_TYPES[rp.type].point, { me, op } = matchScore(mt);
+  const nm = me + (rp.res === "win" ? pt : 0), no = op + (rp.res === "lose" ? pt : 0);
+  const out = nm >= 4 ? "這回合後：本局勝利" : no >= 4 ? "這回合後：本局落敗" : "這回合後：仍在進行";
+  return `<div class="rp"><span class="lbl">本回合陀螺（本場三顆）</span>
+    <div class="bigs three">${mt.deck.map((d, i) => `<button type="button" data-act="rp" data-k="bey" data-v="${i}" aria-pressed="${rp.bey === i}">${esc(d)}</button>`).join("")}</div>
+    <div class="bigs two res">${[["win","我方得分"],["lose","我方失分"]].map(([v, l]) => `<button type="button" data-act="rp" data-k="res" data-v="${v}" aria-pressed="${rp.res === v}">${l}</button>`).join("")}</div>
+    <div class="bigs four">${Object.entries(SCORE_TYPES).map(([v, s]) => `<button type="button" data-act="rp" data-k="type" data-v="${v}" aria-pressed="${rp.type === v}">${s.label}<small>${s.point} 分</small></button>`).join("")}</div>
+    <input type="text" placeholder="回合備註（選填）" aria-label="回合備註" data-fk="rpn" data-in="rpnote" value="${esc(rp.note)}">
+    <span class="lbl">${rp.res === "win" ? "我方" : "對手"} +${pt}，比分變成 ${nm}：${no}｜${out}</span>
+    <button type="button" class="go" data-act="addround" data-t="${t.id}" data-m="${mt.id}">記錄回合</button></div>`;
+}
+function pTournaments(inst) {
+  const { ui } = inst;
+  const sorted = [...S.tournaments].sort((a, b) => b.date.localeCompare(a.date));
+  const t = S.tournaments.find(x => x.id === ui.tsel) || null;
+  const list = `<div class="list">${sorted.map(x => { const d = x.date.split("-"); return `<button type="button" class="tcard" data-act="seltour" data-id="${x.id}" aria-current="${t?.id === x.id}">
+      <span class="datebox"><small>${d[1]} 月</small><b>${d[2]}</b></span><span><span class="ttl">${esc(x.name)}</span><span class="pills"><span class="p k">${esc(x.location || "—")}</span><span class="p k">${x.count} 人</span></span></span>
+      <span class="tags"><span class="tag ${x.finished ? "ok" : "a"}">${x.finished ? "已完成" : "進行中"}</span><span class="tag">${esc(standing(x))}</span></span></button>`; }).join("") || '<div class="empty">還沒有比賽</div>'}</div>`;
+  if (!t) return `<div class="sectionh"><h2>賽事</h2><button type="button" class="btn pri" data-act="newtour">＋ 新增比賽</button></div>
+    <p class="muted small" style="margin:0">賽事儲存版本：4B-1（交易保護）</p>${list}`;
+  const cm = currentMatch(t);
+  const boardTop = SHELL.opts.board === "top";
+  const arena = cm && !t.finished ? `<section class="arena" aria-label="記錄回合">${scoreboard(cm)}${roundPanel(inst, t, cm)}</section>` : "";
+  return `<div class="row"><button type="button" class="btn sm" data-act="seltour" data-id="">← 比賽列表</button><span class="muted small">賽事儲存版本：4B-1（交易保護）</span></div>
+  <div class="sectionh"><div><h2>${esc(t.name)}</h2><span class="muted small">${esc(t.date)}｜${esc(t.location || "—")}｜${t.count} 人｜${esc(standing(t))}</span></div>
+    <div class="row">${t.finished ? `<span class="tag ok">已完成</span>` : `<button type="button" class="btn sm" data-act="finishtour" data-id="${t.id}">完成比賽</button>`}
+      <button type="button" class="btn sm" data-act="edittour" data-id="${t.id}">修改</button><button type="button" class="btn sm danger" data-act="deltour" data-id="${t.id}">刪除</button></div></div>
+  ${t.finished ? '<p class="muted small" style="margin:0">比賽已完成：對局與回合已鎖定。按「修改」會重新開啟。</p>' : ""}
+  ${boardTop ? arena : ""}
+  <div class="sectionh"><h3>對局</h3>${t.finished ? "" : `<div class="row"><button type="button" class="btn sm" data-act="advance" data-t="${t.id}" data-v="bye">輪空／種子</button><button type="button" class="btn sm" data-act="advance" data-t="${t.id}" data-v="walkover">對手未到</button><button type="button" class="btn sm pri" data-act="addmatch" data-t="${t.id}">＋ 新增對局</button></div>`}</div>
+  <div class="tl">${t.matches.map((m, i) => matchCard(inst, t, m, i, cm, boardTop)).join("") || '<div class="empty">還沒有對局</div>'}</div>`;
+}
+function matchCard(inst, t, m, i, cm, boardTop) {
+  const o = matchOutcome(m), { me, op } = matchScore(m);
+  const status = m.adv ? `<span class="tag ok">直接晉級</span>` : o === "win" ? `<span class="mres win">${me}：${op} 本局勝利</span>` : o === "lose" ? `<span class="mres lose">${me}：${op} 本局落敗</span>` : `<span class="mres">${me}：${op} 進行中</span>`;
+  const inline = !boardTop && cm && cm.id === m.id && !t.finished ? `<section class="arena">${scoreboard(m)}${roundPanel(inst, t, m)}</section>` : "";
+  return `<article class="match ${cm?.id === m.id ? "cur" : ""}"><div class="sectionh"><b>第 ${i + 1} 場｜${esc(m.opponent)}</b>${status}</div>
+    ${m.adv ? `<span class="muted small">${m.adv === "bye" ? "輪空／種子晉級" : "對手棄權／未到"}，算作晉級一輪，不記錄回合。</span>` : `<span class="muted small">本場陀螺：${m.deck.map(esc).join("、")}</span>
+    ${m.rounds.length ? `<div class="tscroll"><table class="t"><thead><tr><th>回合</th><th>使用陀螺</th><th>得失分</th><th>方式</th><th>分數</th><th></th></tr></thead><tbody>${m.rounds.map((r, j) => `<tr><td>${j + 1}</td><td>${esc(r.bey)}</td><td class="${r.result === "win" ? "win" : "lose"}">${r.result === "win" ? "我方得分" : "我方失分"}</td><td>${SCORE_TYPES[r.type].label}</td><td class="num">${r.point}</td><td>${t.finished ? "" : `<button type="button" class="btn sm danger" data-act="delround" data-t="${t.id}" data-m="${m.id}" data-id="${r.id}">刪除</button>`}</td></tr>`).join("")}</tbody></table></div>` : '<span class="muted small">還沒有回合</span>'}`}
+    ${inline}
+    ${t.finished ? "" : `<div class="row">${m.adv ? "" : `<button type="button" class="btn sm" data-act="editmatch" data-t="${t.id}" data-m="${m.id}">修改對局</button>`}<button type="button" class="btn sm danger" data-act="delmatch" data-t="${t.id}" data-m="${m.id}">刪除對局</button></div>`}</article>`;
+}
+
+/* ---------- stats (read-only, objective) ---------- */
+const STAT = {
+  blades: [["魔導神杖","Wizard Rod",25],["鮫鯊狂鱗","Shark Scale",17],["天馬爆擊","Pegasus Blast",9],["榮耀戰神","Glory Valkyrie",6],["蒼龍勇氣","Dran Brave",5],["惡魔冥界","Hells Nether",4],["時鐘幻象","Clock Mirage",4],["龍王閃擊","Bahamut Blitz",3],["霜輝銀狼","Silver Wolf",3],["飛龍旋翼","Wyvern Hover",2],["彈丸獅鷲","Bullet Griffon",2],["帝王威能","Emperor Might",1]],
+  ratchets: [["1-60",21],["9-60",14],["3-60",9],["4-55",7],["M-85",5],["7-55",4],["9-65",3],["5-70",2]],
+  bits: [["R",18],["LF",12],["H",9],["K",7],["I",5],["Tr",3],["Op",2],["B",2]],
+  assistBlades: [["J",22],["W",15],["S",11],["K",8],["H",6],["B",4]]
+};
+function pStats(inst) {
+  const { ui } = inst;
+  const cats = [["blades","上蓋"],["ratchets","固鎖"],["bits","軸心"],["assistBlades","輔助戰刃"]];
+  const rows = STAT[ui.statCat];
+  const shown = ui.statExpand ? rows : rows.slice(0, 10);
+  const max = Math.max(...rows.map(r => r.at(-1)));
+  const q = ui.statQ.trim().toLowerCase();
+  const found = q ? STAT.blades.filter(b => b[0].toLowerCase().includes(q) || b[1].toLowerCase().includes(q)) : [];
+  const bd = STAT.blades.find(b => b[0] === ui.statBlade);
+  return `<div class="sectionh"><h2>競賽統計</h2><span class="muted small">示意數據；正式頁內容與定義不變</span></div>
+  ${bd ? statDetail(ui, bd) : `<section class="card grid"><div class="sectionh"><div><span class="muted small">METABEYS</span><h3>Part Popularity</h3></div><span class="muted small">依來源名次 · 初始 Top 10</span></div>
+    <div class="tabs" role="tablist">${cats.map(([k, l]) => `<button type="button" role="tab" data-act="statcat" data-v="${k}" aria-selected="${ui.statCat === k}">${l}</button>`).join("")}</div>
+    <div class="tscroll"><table class="t"><thead><tr><th>名次</th><th>零件</th><th>Part Popularity</th><th style="width:40%"></th></tr></thead><tbody>
+      ${shown.map((r, i) => `<tr><td class="num">${i + 1}</td><td>${ui.statCat === "blades" ? `<button type="button" class="btn sm" data-act="statblade" data-v="${esc(r[0])}">${esc(r[0])}</button> <span class="muted small">${esc(r[1])}</span>` : esc(r[0])}</td><td class="num">${r.at(-1)}%</td><td><div class="bar"><i style="width:${(r.at(-1) / max) * 100}%"></i></div></td></tr>`).join("")}</tbody></table></div>
+    ${rows.length > 10 ? `<button type="button" class="btn sm" data-act="statexpand">${ui.statExpand ? "收合至 Top 10" : `查看完整排行（${rows.length} 筆）`}</button>` : ""}
+    <p class="src">來源：MetaBeys｜擷取日期 2026-10-14（示意）</p></section>
+  <section class="card grid"><div><span class="muted small">BEYWATCH</span><h3>上蓋搜尋與詳細</h3></div>
+    <input type="search" placeholder="搜尋上蓋（中文、英文）" aria-label="搜尋上蓋" data-fk="sq" data-in="statQ" value="${esc(ui.statQ)}" style="background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px">
+    <div class="list">${found.map(b => `<button type="button" class="item" data-act="statblade" data-v="${esc(b[0])}"><span class="stripe"></span><span>${esc(b[0])} <span class="code">${esc(b[1])}</span></span><span class="tag">查看</span></button>`).join("")}</div>
+    <p class="src">來源：Beywatch｜來源更新 2026-10-18（示意）</p></section>`}
+  <details class="def card"><summary>統計指標怎麼看？</summary><dl><dt>Part Popularity</dt><dd>MetaBeys 原站的零件使用熱門度。</dd><dt>Usage</dt><dd>Beywatch 原站的上蓋使用占比。</dd><dt>Pick %</dt><dd>指定上蓋使用該固鎖或軸心的選用占比。</dd><dt>1st Rate</dt><dd>Beywatch 原站定義的第一名比例指標。</dd><dt>Top Cuts</dt><dd>Beywatch 記錄的前段／上位出現數。</dd></dl></details>
+  <p class="warnline">以上數據依來源網站的統計定義呈現，不等同完整對戰勝率，也不代表本站推薦。</p>
+  <p class="muted small">MetaBeys 與 Beywatch 分開呈現，不合併或換算。</p>`;
+}
+function statDetail(ui, b) {
+  const tabs = [["combos","完整配置"],["ratchets","固鎖"],["bits","軸心"]];
+  const data = { combos: [[`${b[1]} 1-60R`,"38.2%","41"],[`${b[1]} 9-60LF`,"31.0%","22"],[`${b[1]} 4-55H`,"28.5%","9"]], ratchets: [["1-60","44.1%","39.0%"],["9-60","22.3%","31.5%"],["4-55","10.2%","28.0%"]], bits: [["Rush (R)","40.6%","37.2%"],["Low Flat (LF)","21.4%","33.0%"],["Hexa (H)","12.9%","30.1%"]] }[ui.statTab];
+  const head = ui.statTab === "combos" ? ["配置（來源原文）","1st Rate","Top Cuts"] : ["零件","Pick %","1st Rate"];
+  return `<section class="card grid"><button type="button" class="btn sm" data-act="statblade" data-v="" style="justify-self:start">← 返回排行</button>
+    <div class="sectionh"><div><h3>${esc(b[0])}</h3><span class="muted small">${esc(b[1])}</span></div><span class="tag ok">有排名</span></div>
+    <div class="meter"><div><b>${b[2]}%</b><span>Usage</span></div><div><b>34.5%</b><span>1st Rate</span></div><div><b>126</b><span>Top Cuts</span></div></div>
+    <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" data-act="stattab" data-v="${k}" aria-selected="${ui.statTab === k}">${l}</button>`).join("")}</div>
+    <div class="tscroll"><table class="t"><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${data.map(r => `<tr>${r.map(x => `<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <p class="src">來源：Beywatch｜示意數據</p></section>`;
+}
+
+/* ---------- more ---------- */
+function pMore(inst) {
+  const syncBtn = (v, l) => `<button type="button" class="chip" data-act="sync" data-v="${v}" aria-pressed="${S.sync === v}">${l}</button>`;
+  return `<h2>更多與設定</h2>
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
+    <section class="card grid" id="sync"><h3>帳號與同步</h3>
+      <div class="row between"><span>${S.signedIn ? "已登入：a@example.test" : "尚未登入"}</span><button type="button" class="btn sm" data-act="signin">${S.signedIn ? "登出" : "使用 Google 登入"}</button></div>
+      <p class="muted small" style="margin:0">收藏儲存版本：5B（交易保護）｜賽事儲存版本：4B-1（交易保護）</p>
+      <span class="muted small">同步狀態示範（正式網站由交易結果決定）：</span>
+      <div class="row">${syncBtn("clean","正常")}${syncBtn("conflict","衝突")}${syncBtn("pending","離線未儲存")}${syncBtn("unknown","結果不明")}${syncBtn("draft","其他分頁登出")}</div></section>
+    <section class="card grid"><h3>競賽統計</h3><p class="muted small" style="margin:0">MetaBeys Part Popularity 與 Beywatch 上蓋統計。</p><button type="button" class="btn" data-act="nav" data-v="stats">開啟競賽統計</button></section>
+    <section class="card grid"><h3>外觀</h3><div class="row"><button type="button" class="chip" data-act="theme" data-v="dark" aria-pressed="${SHELL.theme === "dark"}">深色</button><button type="button" class="chip" data-act="theme" data-v="beige" aria-pressed="${SHELL.theme === "beige"}">米色</button></div>
+      <p class="muted small" style="margin:0">桌面側欄收合、主題偏好沿用現有設定（只存在這台裝置）。</p></section>
+    <section class="card grid"><h3>說明</h3><div class="list">${HELP_PAGES.map(h => `<button type="button" class="item" data-act="help" data-v="${h}"><span class="stripe"></span><span>${h}</span><span class="tag">說明頁</span></button>`).join("")}</div></section>
+    <section class="card grid"><h3>管理（僅管理員可見）</h3><p class="muted small" style="margin:0">管理員後台與使用者唯讀檢視，權限與內容不變。</p><button type="button" class="btn" data-act="help" data-v="管理員後台">管理員後台</button></section>
+    <section class="card grid"><h3>關於</h3><p class="muted small" style="margin:0">網站版本 v1.9.2（示意）。可加入主畫面（PWA）。</p></section>
+  </div>`;
+}
+
+/* ================= overlays ================= */
+function overlay(inst) {
+  const o = inst.ui.overlay;
+  const body = ({ confirm: ovConfirm, asm: ovAsm, addbey: ovAddBey, part: ovPart, delcfg: ovDelCfg, tour: ovTour, match: ovMatch, detail: ovDetail, info: ovInfo })[o.type](inst, o);
+  return `<div class="overlay"><div class="dialog ${o.type === "asm" ? "wide" : ""}" role="dialog" aria-modal="true" data-stop>${body}</div></div>`;
+}
+const dlgHead = t => `<header><h3>${t}</h3><button type="button" class="iconbtn" data-act="close" aria-label="關閉">${icon("close")}</button></header>`;
+function ovConfirm(inst, o) { return `${dlgHead(o.title)}<p style="margin:0;white-space:pre-line">${esc(o.text)}</p><div class="row" style="justify-content:flex-end"><button type="button" class="btn" data-act="close">取消</button><button type="button" class="btn ${o.danger ? "danger" : "pri"}" data-act="confirmok">${esc(o.ok || "確定")}</button></div>`; }
+function ovInfo(inst, o) { return `${dlgHead(o.title)}<p style="margin:0;white-space:pre-line">${esc(o.text)}</p><div class="row" style="justify-content:flex-end"><button type="button" class="btn pri" data-act="close">知道了</button></div>`; }
+function ovDetail(inst, o) {
+  const inv = inventory();
+  if (o.kind === "bey") { const b = S.collection.find(x => x.id === o.id); return b ? beyDetail(b) : ""; }
+  if (o.kind === "part") { const e = inv.get(o.id); return e ? partDetail(e) : ""; }
+  if (o.kind === "cfg") { const c = S.configs.find(x => x.id === o.id); return c ? cfgDetail(c, inv) : ""; }
+  return "";
+}
+
+/* ---------- assembler ---------- */
+function optionsFor(type, d, inv) {
+  const m = new Map();
+  inv.forEach(e => { if (e.type === type) m.set(e.name, e); });
+  return [...m.values()].sort((a, b) => a.name.localeCompare(b.name, "zh-Hant", { numeric: true }));
+}
+function remainingFor(e, d) {
+  const editing = d.editId ? S.configs.find(c => c.id === d.editId) : null;
+  const self = editing && configPartList(editing).some(([t, n]) => t === e.type && n === e.name) ? 1 : 0;
+  return e.avail + self;
+}
+function draftToCfg(d) { return { kind: d.kind, layer: d.layer, lock: d.lock, main: d.main, over: d.over, metal: d.metal, assist: d.assist, fix: d.fix, axis: d.axis }; }
+function asmState(d) {
+  const c = draftToCfg(d);
+  const intBlade = d.kind === "std" && Rules.isIntegratedRatchetBlade(d.layer, configModel(c));
+  const intBit = Rules.isIntegratedRatchetBit(d.axis);
+  // Like production: an integrated part only fills an EMPTY ratchet with "-"; an existing ratchet stays and is flagged.
+  const fix = intBlade || intBit ? (d.fix || "-") : d.fix;
+  const ev = Rules.evaluateAssembly({ ...ruleInput({ ...c, fix }) });
+  return { intBlade, intBit, fix, ev, simpleOnly: d.kind === "std" && Rules.isSimpleRatchetOnlyBlade(d.layer, configModel(c)) };
+}
+function ovAsm(inst, o) {
+  const d = o.d, inv = inventory(), st = asmState(d);
+  const slot = (label, field, type, opts = {}) => {
+    if (opts.fixed) return `<div class="slot"><label>${label}</label><div class="fixed">${opts.fixed}</div></div>`;
+    const list = optionsFor(type, d, inv);
+    return `<div class="slot"><label for="${field}-${inst.kind}">${label}</label><select id="${field}-${inst.kind}" data-asm="${field}"><option value="">${opts.emptyLabel || `選擇${label}`}</option>${list.map(e => {
+      const left = remainingFor(e, d), why = opts.reason ? opts.reason(e.name) : "";
+      const cur = d[field] === e.name;
+      const disabled = (!cur && left <= 0) || (!!why && !cur);
+      return `<option value="${esc(e.name)}" ${cur ? "selected" : ""} ${disabled ? "disabled" : ""}>${esc(e.name)}｜剩 ${left}${why ? `｜${why}` : ""}</option>`; }).join("")}</select></div>`;
+  };
+  const ratchetReason = st.simpleOnly ? n => Rules.isSimpleRatchet(n) ? "" : "時鐘幻象只能用簡易固鎖" : null;
+  const bitReason = st.intBlade ? n => Rules.isIntegratedRatchetBit(n) ? "固鎖一體型上蓋不能用" : "" : st.simpleOnly ? n => Rules.isIntegratedRatchetBit(n) ? "時鐘幻象不能用" : "" : null;
+  const ratchetSlot = (st.intBlade || st.intBit) && !d.fix
+    ? slot("固鎖", "fix", "固鎖", { fixed: st.intBlade ? "無獨立固鎖：固鎖與上蓋一體（官方）" : `無獨立固鎖：${esc(d.axis)} 是固鎖一體型軸心（官方）` })
+    : slot("固鎖", "fix", "固鎖", { reason: ratchetReason, emptyLabel: st.intBlade || st.intBit ? "無固鎖（一體式，建議改回）" : "" });
+  const slots = d.kind === "std" ? [slot("上蓋", "layer", "上蓋"), ratchetSlot, slot("軸心", "axis", "軸心", { reason: bitReason })]
+    : d.kind === "cx3" ? [slot("紋章鎖", "lock", "紋章鎖"), slot("主要戰刃", "main", "主要戰刃"), slot("輔助戰刃", "assist", "輔助戰刃"), ratchetSlot, slot("軸心", "axis", "軸心")]
+    : [slot("紋章鎖", "lock", "紋章鎖"), slot("超越戰刃", "over", "超越戰刃"), slot("金屬戰刃", "metal", "金屬戰刃"), slot("輔助戰刃", "assist", "輔助戰刃"), ratchetSlot, slot("軸心", "axis", "軸心")];
+  const checks = asmChecks(d, st, inv);
+  const colors = { 上蓋: "#4f8cff", 紋章鎖: "#6b7280", 主要戰刃: "#ea7a2a", 超越戰刃: "#b77ef0", 金屬戰刃: "#8e99a8", 輔助戰刃: "#c98d15", 固鎖: "#2f9a6a", 軸心: "#6f7a87" };
+  const layers = (d.kind === "std" ? [["上蓋", d.layer]] : d.kind === "cx3" ? [["紋章鎖", d.lock], ["主要戰刃", d.main], ["輔助戰刃", d.assist]] : [["紋章鎖", d.lock], ["超越戰刃", d.over], ["金屬戰刃", d.metal], ["輔助戰刃", d.assist]]);
+  if (!(st.intBlade || st.intBit) || d.fix) layers.push(["固鎖", d.fix]);
+  layers.push(["軸心", d.axis]);
+  return `${dlgHead(d.editId ? "修改配置" : o.dup ? "複製配置" : "建立配置")}
+    <div class="structs" role="group" aria-label="組裝結構">${[["std","標準三件式","BX／UX：上蓋＋固鎖＋軸心"],["cx3","CX 三件戰刃","紋章鎖＋主要戰刃＋輔助戰刃"],["cx4","CX 四件戰刃","紋章鎖＋超越＋金屬＋輔助"]].map(([k, l, s]) => `<button type="button" data-act="asmkind" data-v="${k}" aria-pressed="${d.kind === k}">${l}<small>${s}</small></button>`).join("")}</div>
+    <p class="muted small" style="margin:0">固鎖一體型上蓋（彈丸獅鷲、榮耀戰神、惡魔冥界）與固鎖一體型軸心（Tr、Op）會自動取消固鎖欄位，不需另選結構。</p>
+    <div class="asmgrid"><div class="grid">${slots.join("")}<div class="checks" aria-live="polite">${checks.map(([c, t]) => `<span class="c-${c}">${{ ok: "✓", w: "！", b: "✕", i: "・" }[c]} ${esc(t)}</span>`).join("")}</div></div>
+      <div class="stack" aria-hidden="true"><span style="background:transparent;color:var(--muted)">組合預覽（上→下）</span>${layers.map(([t, v]) => `<span style="width:${{ 紋章鎖: 70, 超越戰刃: 170, 金屬戰刃: 150, 主要戰刃: 150, 上蓋: 150, 輔助戰刃: 130, 固鎖: 110, 軸心: 56 }[t]}px;background:${v ? colors[t] : "transparent"};${v ? "" : "border:1px dashed var(--line);color:var(--muted)"}" class="${(st.intBlade && t === "上蓋") || (st.intBit && t === "軸心") ? "int" : ""}">${esc(v || t)}</span>`).join("")}</div></div>
+    <div class="row" style="justify-content:flex-end"><button type="button" class="btn" data-act="close">取消</button><button type="button" class="btn pri" data-act="savecfg">${d.editId ? "儲存修改" : "儲存配置"}</button></div>`;
+}
+function asmChecks(d, st, inv) {
+  const out = [];
+  const req = d.kind === "std" ? [["layer", "上蓋"], ["axis", "軸心"]] : d.kind === "cx3" ? [["lock", "紋章鎖"], ["main", "主要戰刃"], ["assist", "輔助戰刃"], ["axis", "軸心"]] : [["lock", "紋章鎖"], ["over", "超越戰刃"], ["metal", "金屬戰刃"], ["assist", "輔助戰刃"], ["axis", "軸心"]];
+  if (!(st.intBlade || st.intBit)) req.splice(req.length - 1, 0, ["fix", "固鎖"]);
+  const missing = req.filter(([k]) => !d[k]).map(([, l]) => l);
+  if (missing.length) out.push(["i", `尚未選擇：${missing.join("、")}`]);
+  // An empty ratchet on 時鐘幻象 is reported as "not chosen yet", not as a rule error.
+  st.ev.violations.filter(v => !(v.id === "simple-ratchet-only" && !d.fix && !st.intBit)).forEach(v => out.push(["b", `${v.message}（官方規則，不能儲存）`]));
+  if (d.kind === "cx4") out.push(["ok", "CX 四件需要金屬戰刃與超越戰刃（官方：缺金屬戰刃不可使用）"]);
+  if (d.kind === "cx4" && d.axis && Rules.isIntegratedRatchetBit(d.axis)) out.push(["w", "Tr／Op 裝在 CX 四件戰刃下：官方未說明，僅提示"]);
+  const c = { ...draftToCfg(d), fix: st.fix };
+  configPartList(c).forEach(([t, n]) => { const e = inv.get(key(t, n)); if (e && remainingFor(e, d) <= 0) out.push(["b", `${t} ${n} 已經沒有庫存（被 ${e.refs.filter(r => r.id !== d.editId).map(configLabel).join("、")} 使用）`]); });
+  const label = configLabel(c);
+  if (!missing.length && S.history.some(h => h.label === label)) out.push(["w", "這個組合以前拆解過，可在「拆解紀錄」查看原因"]);
+  if (!missing.length && !st.ev.violations.length && !out.some(x => x[0] === "b")) out.push(["ok", "符合官方組裝規則，庫存足夠"]);
+  return out;
+}
+function saveCfg(inst) {
+  const d = inst.ui.overlay.d, st = asmState(d), inv = inventory();
+  const checks = asmChecks(d, st, inv);
+  if (checks.some(([c, t]) => c === "i")) return info(inst, "還不能儲存", checks.find(([c]) => c === "i")[1]);
+  const c = { ...draftToCfg(d), fix: st.fix };
+  const stock = checks.find(([cl, t]) => cl === "b" && /沒有庫存/.test(t));
+  if (stock) return info(inst, "還不能儲存", stock[1]);
+  const after = Rules.evaluateAssembly(ruleInput(c));
+  const commit = () => {
+    if (d.editId) Object.assign(S.configs.find(x => x.id === d.editId), c, { legacy: false });
+    else S.configs.push({ ...cfg(c.kind, c), fix: c.fix });
+    inst.ui.overlay = null; inst.ui.sel.cfg = d.editId || S.configs.at(-1).id; renderAll();
+  };
+  if (!after.violations.length) return commit();
+  if (!d.editId) return info(inst, "不能儲存", after.violations[0].message);
+  const before = Rules.evaluateAssembly(ruleInput(S.configs.find(x => x.id === d.editId)));
+  const added = Rules.newAssemblyViolations(before, after);
+  if (added.length) return info(inst, "不能儲存", added[0].message);
+  ask(inst, "這個配置原本就不符合官方組裝規則", `${after.violations.map(v => v.message).join("\n")}\n\n仍要儲存這次修改嗎？`, "仍要儲存", commit);
+}
+function openAsm(inst, base, opts = {}) {
+  const d = base ? { kind: base.kind, layer: base.layer, lock: base.lock, main: base.main, over: base.over, metal: base.metal, assist: base.assist, fix: base.fix === "-" ? "" : base.fix, axis: base.axis, editId: opts.edit ? base.id : null }
+    : { kind: "std", layer: "", lock: "", main: "", over: "", metal: "", assist: "", fix: "", axis: "", editId: null };
+  if (opts.edit && base.fix === "-") d.fix = "";
+  inst.ui.fab = false; inst.ui.overlay = { type: "asm", d, dup: !!opts.dup };
+}
+
+/* ---------- add bey / parts ---------- */
+function ovAddBey(inst, o) {
+  const code = o.code.trim().toUpperCase().replace(/\s+/g, "");
+  const norm = c => c.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const matches = code ? CATALOG.filter(r => norm(r.code) === norm(code) || norm(r.id) === norm(code)) : [];
+  const shared = matches.length > 1 && !matches.every(m => m.set && m.set === matches[0].set);
+  const isSet = matches.length > 1 && !shared;
+  return `${dlgHead("新增收藏")}
+    <div class="row">${["auto","manual"].map(m => `<button type="button" class="chip" data-act="beymode" data-v="${m}" aria-pressed="${o.mode === m}">${m === "auto" ? "自動帶入" : "手動輸入"}</button>`).join("")}</div>
+    ${o.mode === "auto" ? `<div class="field"><label for="bc-${inst.kind}">商品型號（例如 UX-21、BX-00、CX-13）</label><input id="bc-${inst.kind}" data-fk="bc" data-in="ovcode" value="${esc(o.code)}" placeholder="UX-01"></div>
+      ${!code ? '<p class="muted small" style="margin:0">輸入型號後顯示將加入的原裝配置。</p>' : !matches.length ? '<p class="c-w small" style="margin:0">找不到這個型號（原型只有部分型錄資料）。可以改用手動輸入。</p>'
+        : shared ? `<p class="small muted" style="margin:0">共用型號，請選擇要加入的陀螺：</p><div class="list">${matches.map(m => `<button type="button" class="item" data-act="addcat" data-v="${m.id}"><span class="stripe s-${seriesOf(m.code)}"></span><span>${esc(m.name)} <span class="code">${esc(m.parts.ratchet || "")} ${esc(m.parts.bit || m.ib || "")}</span></span><span class="tag">加入</span></button>`).join("")}</div><button type="button" class="btn" data-act="addcatall">全部加入（${matches.length} 顆）</button>`
+        : `<div class="list">${matches.map(m => `<div class="item"><span class="stripe s-${seriesOf(m.code)}"></span><span><span class="ttl">${esc(m.name)}</span><span class="pills">${beyParts(fromCatalog(m)).map(([t, v]) => `<span class="p"><span class="k">${t} </span>${esc(v)}</span>`).join("")}</span></span><span></span></div>`).join("")}</div>
+          <button type="button" class="btn pri" data-act="addcatall">${isSet ? `加入套組（${matches.length} 顆）` : "加入收藏"}</button>`}`
+    : `<div class="form2">${[["mcode","型號"],["mblade","上蓋"],["mfix","固鎖（一體式可留空）"],["mbit","軸心"]].map(([k, l]) => `<div class="field"><label for="${k}-${inst.kind}">${l}</label><input id="${k}-${inst.kind}" data-fk="${k}" data-in="ov:${k}" value="${esc(o[k] || "")}"></div>`).join("")}</div>
+      <p class="muted small" style="margin:0">原型只示範 BX／UX 手動欄位；正式網站的 CX 分件欄位全部保留。手動資料標記為非自動帶入（D-015），並套用同一套官方組裝規則（D-019）。</p>
+      <div class="row" style="justify-content:flex-end"><button type="button" class="btn pri" data-act="addmanual">手動加入</button></div>`}`;
+}
+function ovPart(inst, o) {
+  return `${dlgHead(o.id ? "修改額外零件" : "新增額外零件")}
+    <div class="form2"><div class="field"><label for="pt-${inst.kind}">類別</label><select id="pt-${inst.kind}" data-ov="ptype">${PART_TYPES.map(t => `<option ${o.ptype === t ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+      <div class="field"><label for="pn-${inst.kind}">零件名稱</label><input id="pn-${inst.kind}" data-fk="pn" data-in="ov:name" value="${esc(o.name)}" placeholder="例如 1-60、R、閃擊"></div>
+      <div class="field"><label for="pc-${inst.kind}">數量</label><input id="pc-${inst.kind}" type="number" min="1" step="1" data-fk="pc" data-in="ov:count" value="${esc(o.count)}"></div></div>
+    <div class="row" style="justify-content:flex-end"><button type="button" class="btn" data-act="close">取消</button><button type="button" class="btn pri" data-act="savepart">${o.id ? "保存修改" : "加入零件"}</button></div>`;
+}
+function ovDelCfg(inst, o) {
+  const c = S.configs.find(x => x.id === o.id);
+  return `${dlgHead("拆解配置")}<p style="margin:0">「${esc(configLabel(c))}」拆解後零件會回到可用數量。</p>
+    <div class="field"><label for="dr-${inst.kind}">拆解原因（必填）</label><select id="dr-${inst.kind}" data-ov="reason"><option value="">請選擇</option>${DELETE_REASONS.map(r => `<option ${o.reason === r ? "selected" : ""}>${r}</option>`).join("")}</select></div>
+    <div class="field"><label for="dn-${inst.kind}">備註（選填）</label><input id="dn-${inst.kind}" data-fk="dn" data-in="ov:note" value="${esc(o.note || "")}"></div>
+    <p class="muted small" style="margin:0">選「打錯，不記錄」直接刪除；其他原因會留下拆解紀錄，可之後還原。</p>
+    <div class="row" style="justify-content:flex-end"><button type="button" class="btn" data-act="close">取消</button><button type="button" class="btn danger" data-act="dodelcfg" ${o.reason ? "" : "disabled"}>確認拆解</button></div>`;
+}
+function ovTour(inst, o) {
+  return `${dlgHead(o.id ? "修改比賽" : "新增比賽")}<div class="form2">
+    ${[["date","日期","date"],["name","比賽名稱","text"],["location","地點","text"],["count","總人數（含自己，至少 2）","number"]].map(([k, l, ty]) => `<div class="field"><label for="t${k}-${inst.kind}">${l}</label><input id="t${k}-${inst.kind}" type="${ty}" data-fk="t${k}" data-in="ov:${k}" value="${esc(o[k] ?? "")}"></div>`).join("")}</div>
+    <div class="field"><label for="tnote-${inst.kind}">備註</label><input id="tnote-${inst.kind}" data-fk="tnote" data-in="ov:note" value="${esc(o.note || "")}"></div>
+    ${o.id && o.finished ? '<p class="c-w small" style="margin:0">這場比賽已完成；保存後會重新開啟，才能修改對局。</p>' : ""}
+    <div class="row" style="justify-content:flex-end"><button type="button" class="btn" data-act="close">取消</button><button type="button" class="btn pri" data-act="savetour">${o.id ? "保存並進入編輯" : "新增比賽"}</button></div>`;
+}
+function deckDupHint(deck) {
+  if (SHELL.opts.tour3 !== "on") return "";
+  const byLabel = new Map(S.configs.map(c => [configLabel(c), c]));
+  const seen = new Map(), dups = new Set();
+  // Official B4 regulation: no repeated parts across the three beys; lock chips may repeat,
+  // except ワルキューレ and エンペラー (catalog names 戰神, 帝王; mapping confirmed by the user 2026-11-23), one each.
+  const LIMITED_LOCK_CHIPS = ["戰神", "帝王"];
+  deck.forEach(txt => { const c = byLabel.get(txt); if (!c) return; configPartList(c).forEach(([t, n]) => {
+    if (t === "紋章鎖" && !LIMITED_LOCK_CHIPS.includes(n)) return;
+    const k = key(t, n); if (seen.has(k) && seen.get(k) !== txt) dups.add(`${t} ${n}`); seen.set(k, txt); }); });
+  return `<p class="${dups.size ? "c-w" : "c-ok"} small" style="margin:0">${dups.size ? `！3on3 提示：三顆之間有重複零件 ${[...dups].join("、")}` : "✓ 3on3 提示：三顆之間沒有重複零件"} <span class="tag">官方規則・只提示不阻擋</span></p>`;
+}
+function ovMatch(inst, o) {
+  const opts = S.configs.map(configLabel);
+  return `${dlgHead(o.mid ? "修改對局" : "新增對局")}
+    <div class="field"><label for="mo-${inst.kind}">對手名稱</label><input id="mo-${inst.kind}" data-fk="mo" data-in="ov:opponent" value="${esc(o.opponent)}"></div>
+    ${[0, 1, 2].map(i => `<div class="form2"><div class="field"><label for="md${i}-${inst.kind}">使用陀螺 ${i + 1}（從配置選）</label><select id="md${i}-${inst.kind}" data-ov="deck${i}"><option value="">選擇配置</option>${opts.map(t => `<option ${o.deck[i] === t ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></div>
+      <div class="field"><label for="mc${i}-${inst.kind}">或自填（優先）</label><input id="mc${i}-${inst.kind}" data-fk="mc${i}" data-in="ov:custom${i}" value="${esc(o["custom" + i] || "")}"></div></div>`).join("")}
+    ${deckDupHint([0, 1, 2].map(i => o["custom" + i] || o.deck[i]).filter(Boolean))}
+    ${o.mid ? '<p class="muted small" style="margin:0">取代正式網站現在的連續輸入框；修改中的草稿與衝突對照規則沿用 D-017。</p>' : ""}
+    <div class="row" style="justify-content:flex-end"><button type="button" class="btn" data-act="close">取消</button><button type="button" class="btn pri" data-act="savematch">${o.mid ? "儲存修改" : "新增對局"}</button></div>`;
+}
+
+/* ================= interactions ================= */
+function ask(inst, title, text, ok, fn, danger = false) { inst.ui.overlay = { type: "confirm", title, text, ok, fn, danger }; renderAll(); }
+function info(inst, title, text) { inst.ui.overlay = { type: "info", title, text }; renderAll(); }
+const isPhone = inst => inst.app.clientWidth <= 760;
+function wire(inst) {
+  const { app, ui } = inst;
+  app.addEventListener("click", e => {
+    if (e.target.classList.contains("overlay")) { ui.overlay = null; return renderAll(); }
+    const el = e.target.closest("[data-act]"); if (!el || !app.contains(el)) { if (ui.gq && !e.target.closest(".gsearch")) { ui.gq = ""; render(inst); } return; }
+    act(inst, el.dataset.act, el);
+  });
+  app.addEventListener("input", e => {
+    const k = e.target.dataset.in; if (!k) return;
+    if (k.startsWith("ov:")) { ui.overlay[k.slice(3)] = e.target.value; }
+    else if (k === "ovcode") ui.overlay.code = e.target.value;
+    else if (k === "rpnote") { ui.rp.note = e.target.value; return; }
+    else if (k === "cq") ui.f.cq = e.target.value;
+    else ui[k] = e.target.value;
+    renderAll();
+  });
+  app.addEventListener("change", e => {
+    const t = e.target;
+    if (t.dataset.sel) { ui.f[t.dataset.sel] = t.value; return renderAll(); }
+    if (t.dataset.asm) { const d = ui.overlay.d; d[t.dataset.asm] = t.value; return renderAll(); }
+    if (t.dataset.ov) { const o = ui.overlay; const k = t.dataset.ov; if (k.startsWith("deck")) o.deck[+k.slice(4)] = t.value; else o[k] = t.value; return renderAll(); }
+  });
+  app.addEventListener("keydown", e => { if (e.key === "Escape" && (ui.overlay || ui.fab || ui.gq)) { ui.overlay = null; ui.fab = false; ui.gq = ""; renderAll(); } });
+}
+function act(inst, a, el) {
+  const { ui } = inst, v = el.dataset.v, id = el.dataset.id;
+  const t = S.tournaments.find(x => x.id === (el.dataset.t || id));
+  const go = r => { ui.route = r; ui.fab = false; ui.gq = ""; ui._resetScroll = true; };
+  switch (a) {
+    case "nav": go(v); if (v === "tournaments") ui.tsel = null; break;
+    case "goto": go(el.dataset.r);
+      if (el.dataset.r === "collection") { ui.ctab = el.dataset.t; if (el.dataset.t === "beys") ui.sel.bey = id; else ui.sel.part = id; if (isPhone(inst)) ui.overlay = { type: "detail", kind: el.dataset.t === "beys" ? "bey" : "part", id }; }
+      if (el.dataset.r === "configs") { ui.conTab = "list"; ui.sel.cfg = id; if (isPhone(inst)) ui.overlay = { type: "detail", kind: "cfg", id }; }
+      if (el.dataset.r === "tournaments") ui.tsel = id; break;
+    case "fab": ui.fab = !ui.fab; break;
+    case "ctab": ui.ctab = v; ui.q = ""; break;
+    case "contab": ui.conTab = v; break;
+    case "filter": ui.f[el.dataset.k] = v === "toggle" ? !ui.f[el.dataset.k] : v; break;
+    case "selbey": ui.sel.bey = id; if (isPhone(inst)) ui.overlay = { type: "detail", kind: "bey", id }; break;
+    case "selpart": ui.sel.part = id; if (isPhone(inst)) ui.overlay = { type: "detail", kind: "part", id }; break;
+    case "selcfg": ui.sel.cfg = id; if (isPhone(inst)) ui.overlay = { type: "detail", kind: "cfg", id }; break;
+    case "closesheet": case "close": ui.overlay = null; break;
+    case "confirmok": { const fn = ui.overlay.fn; ui.overlay = null; fn(); return; }
+    case "theme": SHELL.theme = v; break;
+    case "sync": S.sync = v; break;
+    case "signin": S.signedIn = !S.signedIn; break;
+    case "help": info(inst, v, `「${v}」頁面內容沿用現有說明頁，這裡只示範入口位置。`); return;
+    /* configs */
+    case "newcfg": openAsm(inst, null); go(ui.route); break;
+    case "editcfg": openAsm(inst, S.configs.find(c => c.id === id), { edit: true }); break;
+    case "dupcfg": openAsm(inst, S.configs.find(c => c.id === id), { dup: true }); break;
+    case "cfgfrombey": { const b = S.collection.find(x => x.id === id);
+      const base = b.asm === "CX_4P" ? { kind: "cx4", lock: b.lockChip, over: b.overBlade, metal: b.metalBlade, assist: b.assistBlade, fix: b.ratchet, axis: b.bit }
+        : isCxAsm(b) ? { kind: "cx3", lock: b.lockChip, main: b.mainBlade, assist: b.assistBlade, fix: b.ratchet || "", axis: b.bit } : { kind: "std", layer: b.blade, fix: b.ratchet || "", axis: b.bit };
+      openAsm(inst, { layer: "", lock: "", main: "", over: "", metal: "", assist: "", ...base }, { dup: true }); break; }
+    case "asmkind": Object.assign(ui.overlay.d, { kind: v, layer: "", lock: "", main: "", over: "", metal: "", assist: "", fix: "", axis: "" }); break;
+    case "savecfg": saveCfg(inst); return;
+    case "delcfg": ui.overlay = { type: "delcfg", id, reason: "", note: "" }; break;
+    case "dodelcfg": { const o = ui.overlay, c = S.configs.find(x => x.id === o.id);
+      if (o.reason !== "打錯，不記錄") S.history.unshift({ id: uid("h"), label: configLabel(c), result: o.reason, note: o.note || "", date: new Date().toLocaleDateString("zh-TW"), cfg: { ...c } });
+      S.configs = S.configs.filter(x => x.id !== o.id); ui.overlay = null; ui.sel.cfg = null; break; }
+    case "restore": { const h = S.history.find(x => x.id === id);
+      ask(inst, "還原為配置", `要把「${h.label}」還原為配置嗎？`, "還原", () => {
+        const inv = inventory(), c = { ...cfg(h.cfg.kind, h.cfg), fix: h.cfg.fix };
+        const short = configPartList(c).filter(([tt, n]) => (inv.get(key(tt, n))?.avail ?? 0) <= 0);
+        if (short.length) return info(inst, "無法還原", `${short.map(x => x.join(" ")).join("、")} 已經沒有庫存。`);
+        S.configs.push(c); renderAll(); }); return; }
+    case "delhist": ask(inst, "刪除拆解紀錄", "確定要刪除這筆拆解紀錄嗎？", "刪除", () => { S.history = S.history.filter(h => h.id !== id); renderAll(); }, true); return;
+    /* collection */
+    case "addbey": ui.fab = false; ui.overlay = { type: "addbey", mode: "auto", code: "" }; break;
+    case "beymode": ui.overlay.mode = v; break;
+    case "addcat": case "addcatall": {
+      const norm = c => c.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      const code = ui.overlay.code; const all = CATALOG.filter(r => norm(r.code) === norm(code) || norm(r.id) === norm(code));
+      const pick = a === "addcat" ? all.filter(r => r.id === v) : all;
+      const setInst = pick.length > 1 && pick.every(p => p.set && p.set === pick[0].set) ? uid("set") : null;
+      pick.forEach(r => S.collection.push({ ...fromCatalog(r, true, setInst), added: Date.now() }));
+      ui.overlay = null; ui.route = "collection"; ui.ctab = "beys"; ui.sel.bey = S.collection.at(-1).id; break; }
+    case "addmanual": { const o = ui.overlay;
+      if (!o.mcode || !o.mblade || !o.mbit) return info(inst, "還不能加入", "請輸入型號、上蓋與軸心。");
+      const fix = Rules.evaluateAssembly({ model: o.mcode, layer: o.mblade, axis: o.mbit }).noRatchet && !o.mfix ? "-" : (o.mfix || "");
+      const ev = Rules.evaluateAssembly({ model: o.mcode, layer: o.mblade, fix, axis: o.mbit });
+      if (ev.violations.length) return info(inst, "不能加入", ev.violations[0].message);
+      if (!fix) return info(inst, "還不能加入", "請輸入固鎖。");
+      S.collection.push({ id: uid("b"), recordId: "", code: o.mcode.toUpperCase(), name: o.mblade, asm: Rules.isIntegratedRatchetBlade(o.mblade, o.mcode) ? "UX_EXPAND" : "STANDARD", auto: false, setInst: null,
+        blade: o.mblade, lockChip: "", mainBlade: "", overBlade: "", metalBlade: "", assistBlade: "", ratchet: fix === "-" ? "" : fix, bit: o.mbit, ib: "", added: Date.now() });
+      ui.overlay = null; ui.route = "collection"; ui.ctab = "beys"; ui.sel.bey = S.collection.at(-1).id; break; }
+    case "delbey": { const b = S.collection.find(x => x.id === id);
+      const group = b.setInst ? S.collection.filter(x => x.setInst === b.setInst) : [b];
+      const inv = inventory();
+      const affected = S.configs.filter(c => configPartList(c).some(([tt, n]) => { const e = inv.get(key(tt, n)); return e && e.fromBeys.some(x => group.includes(x)) && e.owned - 1 < e.used; }));
+      ask(inst, "刪除收藏", `${group.length > 1 ? `「${b.code}」是套組，會一起刪除：${group.map(x => x.name).join("、")}。` : `確定要刪除「${b.code} ${b.name}」嗎？`}${affected.length ? `\n\n刪除後這些配置的零件會超過持有量：\n${affected.map(configLabel).join("\n")}` : ""}`, "刪除", () => {
+        S.collection = S.collection.filter(x => !group.includes(x)); ui.sel.bey = null; renderAll(); }, true); return; }
+    case "addpart": ui.fab = false; ui.overlay = { type: "part", ptype: "固鎖", name: "", count: "1" }; break;
+    case "editpart": { const p = S.parts.find(x => x.id === id); ui.overlay = { type: "part", id, ptype: p.type, name: p.name, count: String(p.count) }; break; }
+    case "savepart": { const o = ui.overlay, n = Number(o.count);
+      if (!o.name.trim()) return info(inst, "還不能保存", "請輸入零件名稱。");
+      if (!Number.isInteger(n) || n <= 0) return info(inst, "還不能保存", "數量必須是大於 0 的整數。");
+      const doit = () => { if (o.id) Object.assign(S.parts.find(x => x.id === o.id), { type: o.ptype, name: o.name.trim(), count: n }); else S.parts.push({ id: uid("p"), type: o.ptype, name: o.name.trim(), count: n });
+        ui.overlay = null; ui.route = "collection"; ui.ctab = "parts"; ui.sel.part = key(o.ptype, o.name.trim()); renderAll(); };
+      if (o.id) return ask(inst, "保存修改", "確定要保存這次修改嗎？", "保存", doit); doit(); return; }
+    case "delpart": { const p = S.parts.find(x => x.id === id), e = inventory().get(key(p.type, p.name));
+      const after = e.owned - p.count, over = e.used - after;
+      ask(inst, "刪除額外零件", `類別：${p.type}，名稱：${p.name}，數量 ${p.count}${over > 0 ? `\n\n刪除後持有 ${after}，但有 ${e.used} 個配置引用，會超過持有量：\n${e.refs.map(configLabel).join("\n")}` : ""}`, "刪除", () => {
+        S.parts = S.parts.filter(x => x !== p); ui.sel.part = null; renderAll(); }, true); return; }
+    /* tournaments */
+    case "seltour": ui.tsel = id || null; ui.rp = null; ui._resetScroll = true; break;
+    case "newtour": go("tournaments"); ui.overlay = { type: "tour", date: "2026-12-07", name: "", location: "", count: "8", note: "" }; break;
+    case "edittour": ui.overlay = { type: "tour", id: t.id, date: t.date, name: t.name, location: t.location, count: String(t.count), note: t.note, finished: t.finished }; break;
+    case "savetour": { const o = ui.overlay, n = Number(o.count);
+      if (!o.date || !o.name.trim() || !(n >= 2)) return info(inst, "還不能保存", "請填寫日期、比賽名稱，人數至少 2。");
+      if (o.id) Object.assign(S.tournaments.find(x => x.id === o.id), { date: o.date, name: o.name.trim(), location: o.location, count: n, note: o.note, finished: false });
+      else { const nt = { id: uid("t"), date: o.date, name: o.name.trim(), location: o.location, count: n, note: o.note, finished: false, matches: [] }; S.tournaments.push(nt); ui.tsel = nt.id; }
+      ui.overlay = null; break; }
+    case "finishtour": ask(inst, "完成比賽", `目前名次：${standing(t)}${currentMatch(t) ? "\n\n還有進行中的對局，名次可能不是最終結果。" : ""}\n\n完成後對局與回合會鎖定。`, "完成", () => { t.finished = true; renderAll(); }); return;
+    case "deltour": ask(inst, "刪除比賽", `確定要刪除「${t.name}」嗎？`, "刪除", () => { S.tournaments = S.tournaments.filter(x => x !== t); ui.tsel = null; renderAll(); }, true); return;
+    case "advance": ask(inst, v === "bye" ? "輪空／種子" : "對手未到", `${v === "bye" ? "輪空／種子，直接晉級" : "對手棄權／未到，直接晉級"}？`, "確定", () => {
+      t.matches.push({ id: uid("m"), opponent: v === "bye" ? "輪空" : "對手未到", adv: v, deck: [], rounds: [] }); renderAll(); }); return;
+    case "addmatch": ui.overlay = { type: "match", tid: t.id, opponent: "", deck: ["", "", ""] }; break;
+    case "editmatch": { const m = t.matches.find(x => x.id === el.dataset.m); ui.overlay = { type: "match", tid: t.id, mid: m.id, opponent: m.opponent, deck: [...m.deck] }; break; }
+    case "savematch": { const o = ui.overlay, tt = S.tournaments.find(x => x.id === o.tid);
+      const deck = [0, 1, 2].map(i => (o["custom" + i] || "").trim() || o.deck[i]);
+      if (!o.opponent.trim() || deck.some(x => !x)) return info(inst, "還不能儲存", "請填寫對手名稱與三顆使用陀螺。");
+      if (o.mid) Object.assign(tt.matches.find(x => x.id === o.mid), { opponent: o.opponent.trim(), deck });
+      else tt.matches.push({ id: uid("m"), opponent: o.opponent.trim(), deck, rounds: [] });
+      ui.overlay = null; ui.rp = null; break; }
+    case "delmatch": ask(inst, "刪除對局", "確定要刪除這場對局嗎？", "刪除", () => { t.matches = t.matches.filter(x => x.id !== el.dataset.m); renderAll(); }, true); return;
+    case "rp": ui.rp[el.dataset.k] = el.dataset.k === "bey" ? +v : v; break;
+    case "addround": { const m = t.matches.find(x => x.id === el.dataset.m), rp = ui.rp;
+      m.rounds.push({ id: uid("r"), result: rp.res, type: rp.type, point: SCORE_TYPES[rp.type].point, bey: m.deck[rp.bey], note: rp.note });
+      ui.rp = { m: m.id, bey: rp.bey, res: "win", type: "over", note: "" }; break; }
+    case "delround": ask(inst, "刪除回合", "確定要刪除這個回合嗎？", "刪除", () => { const m = t.matches.find(x => x.id === el.dataset.m); m.rounds = m.rounds.filter(r => r.id !== id); renderAll(); }, true); return;
+    case "quickround": { const live = S.tournaments.find(x => !x.finished && currentMatch(x)) || S.tournaments.find(x => !x.finished); go("tournaments");
+      if (live) { ui.tsel = live.id; if (!currentMatch(live)) return info(inst, "沒有進行中的對局", `「${live.name}」目前沒有進行中的對局，請先新增對局。`); }
+      else return info(inst, "沒有進行中的比賽", "請先新增比賽與對局。"); break; }
+    /* stats */
+    case "statcat": ui.statCat = v; ui.statExpand = false; break;
+    case "statexpand": ui.statExpand = !ui.statExpand; break;
+    case "statblade": ui.statBlade = v || null; ui.statTab = "combos"; break;
+    case "stattab": ui.statTab = v; break;
+  }
+  renderAll();
+}
+
+/* ================= shell ================= */
+function renderShell() {
+  document.querySelectorAll("[data-shell=view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === SHELL.view)));
+  document.querySelectorAll("[data-shell=theme]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === SHELL.theme)));
+  const p = document.getElementById("optPanel");
+  if (p.hidden) return;
+  const radio = (name, v, label, status, note) => `<label><input type="radio" name="${name}" value="${v}" ${SHELL.opts[name] === v ? "checked" : ""} data-opt="${name}"><span><b>${label}</b> <span class="st">${status}</span><br><span class="st">${note}</span></span></label>`;
+  p.innerHTML = `<div class="row between" style="display:flex;justify-content:space-between"><h2>設計選項（待決定）</h2><button type="button" class="btn sm" data-shell="opts">關閉</button></div>
+    <p class="st" style="margin:0">切換後兩個裝置同時更新。只有「已核准」標示的項目是先前定案。</p>
+    <fieldset><legend>手機底部導覽</legend>
+      ${radio("nav", "n1", "收藏／配置／＋新增／賽事／更多", "已確認（2026-11-23）", "首頁從左上標誌進入；競賽統計在「更多」。")}
+      ${radio("nav", "n2", "首頁／收藏／＋新增／配置／賽事", "未採用", "保留作為比較。")}</fieldset>
+    <fieldset><legend>賽事比分板位置</legend>
+      ${radio("board", "top", "固定在比賽頁頂部", "已確認（2026-11-23）", "打開比賽就能記錄回合，對局清單在下方。")}
+      ${radio("board", "inline", "放在進行中的對局卡內", "未採用", "保留作為比較。")}</fieldset>
+    <fieldset><legend>3on3 重複零件提示</legend>
+      ${radio("tour3", "on", "開啟（只提示）", "已確認（2026-11-23）", "依官方大賽規則，三顆之間不得重複零件；只提示，不阻擋。")}
+      ${radio("tour3", "off", "不加入", "未採用", "保留作為比較。")}</fieldset>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-shell]"); if (!b) return;
+  const k = b.dataset.shell;
+  if (k === "view") { SHELL.view = b.dataset.v; mountStage(); }
+  if (k === "theme") { SHELL.theme = b.dataset.v; renderAll(); }
+  if (k === "opts") { const p = document.getElementById("optPanel"); p.hidden = !p.hidden; renderShell(); }
+  if (k === "reset") { S = seed(); seedTournaments(S); instances.forEach(i => { i.ui = UI_DEFAULT(); }); renderAll(); }
+});
+document.getElementById("optPanel").addEventListener("change", e => { const n = e.target.dataset.opt; if (n) { SHELL.opts[n] = e.target.value; renderAll(); } });
+if (window.matchMedia("(max-width: 700px)").matches) SHELL.view = "phone";
+mountStage();
+</script>
+</body>
+</html>

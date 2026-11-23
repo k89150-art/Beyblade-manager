@@ -1,0 +1,398 @@
+<title>戰鬥陀螺管理器 Phase 7 整合設計</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: review sheet. Top = decision status; then desktop screens (A skeleton), then phone screens; C panel only inside tournament round recording. */
+:root{
+  --bg:#f2f0eb; --surface:#fbfaf7; --surface2:#ebe7df; --line:#d5cfc3; --fg:#23211d; --muted:#6b655a;
+  --accent:#2d68d4; --ok:#22845a; --warn:#b27410; --bad:#c13b32;
+  /* app mock tokens: the site's own dark theme */
+  --a-bg:#0f141a; --a-panel:#161d26; --a-panel2:#1d2631; --a-line:#2a3441; --a-fg:#e6ebf1; --a-muted:#8b97a5; --a-accent:#4f8cff;
+  --a-bx:#4f8cff; --a-ux:#a371f7; --a-cx:#f0883e; --a-ok:#3fb27f; --a-warn:#e0a23b; --a-bad:#e5534b;
+  --display:"Space Grotesk","Noto Sans TC",system-ui,sans-serif; --body:"Noto Sans TC",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#11151b;--surface:#19202a;--surface2:#212935;--line:#313b48;--fg:#e6ebf1;--muted:#97a2b0;--accent:#6b9cff;--ok:#4cc38a;--warn:#e0a83b;--bad:#ef6b62;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11151b;--surface:#19202a;--surface2:#212935;--line:#313b48;--fg:#e6ebf1;--muted:#97a2b0;--accent:#6b9cff;--ok:#4cc38a;--warn:#e0a83b;--bad:#ef6b62;color-scheme:dark}
+/* cream app theme (D-001): same structure, colour tokens only */
+.app.cream,.phone.cream{--a-bg:#f1eadf;--a-panel:#fbf7f0;--a-panel2:#f2ebdf;--a-line:#ddd1bf;--a-fg:#2b2620;--a-muted:#776b5c;--a-accent:#2f6fd6}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.65 var(--body);margin:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 56px}
+.wrap{max-width:1160px;margin:0 auto;display:grid;gap:36px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
+h1{font-size:clamp(24px,4vw,34px)}h2{font-size:21px}h3{font-size:15px}
+.lede{color:var(--muted);max-width:70ch;margin:6px 0 0}
+section{display:grid;gap:14px}
+.status{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.st{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.st h3{font-size:13px;letter-spacing:.04em;margin-bottom:6px}
+.st ul{margin:0;padding-left:18px}.st li{margin:2px 0}
+.st.done{border-top:3px solid var(--ok)}.st.no{border-top:3px solid var(--muted)}.st.wait{border-top:3px solid var(--warn)}
+.pend{display:inline-block;font-size:11px;padding:0 6px;border-radius:4px;border:1px dashed var(--warn);color:var(--warn);vertical-align:1px;margin-left:4px;white-space:nowrap}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;padding:5px 12px;cursor:pointer}
+.toolbar button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cap{font-size:13px;color:var(--muted)}
+/* ---------- app mock ---------- */
+.app{background:var(--a-bg);color:var(--a-fg);border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:12.5px;line-height:1.5}
+.a-top{display:flex;gap:8px;align-items:center;padding:8px 12px;background:var(--a-panel);border-bottom:1px solid var(--a-line);flex-wrap:wrap}
+.a-search{flex:1 1 180px;min-width:0;background:var(--a-bg);border:1px solid var(--a-line);border-radius:7px;padding:5px 10px;color:var(--a-muted)}
+.a-sync{display:flex;gap:6px;align-items:center;color:var(--a-muted);font-size:11.5px}.dot{width:8px;height:8px;border-radius:50%;background:var(--a-ok)}
+.a-btn{background:var(--a-accent);color:#fff;border-radius:7px;padding:5px 10px;white-space:nowrap;font-weight:500}
+.a-btn.ghost{background:transparent;color:var(--a-fg);border:1px solid var(--a-line)}
+.a-body{display:grid;grid-template-columns:132px minmax(0,1fr)}
+.a-nav{background:var(--a-panel);border-right:1px solid var(--a-line);padding:10px 8px;display:grid;gap:2px;align-content:start}
+.a-nav span{padding:6px 8px;border-radius:6px;color:var(--a-muted)}.a-nav span.on{background:var(--a-panel2);color:var(--a-fg)}
+.a-nav small{color:var(--a-muted);font-size:10px;padding:8px 8px 2px;letter-spacing:.05em}
+.a-main{padding:12px;display:grid;gap:10px;min-width:0}
+.a-split{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:10px}
+.a-card{background:var(--a-panel);border:1px solid var(--a-line);border-radius:9px;padding:10px;min-width:0}
+.a-card h4{margin:0 0 6px;font-size:13px}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{font-size:11px;padding:2px 9px;border-radius:999px;border:1px solid var(--a-line);color:var(--a-muted);background:var(--a-panel2)}
+.chip.on{color:var(--a-fg);border-color:var(--a-accent)}
+.rows{display:grid;gap:5px;align-content:start}
+.a-split{align-items:start}
+.r{display:grid;grid-template-columns:4px 70px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 8px;background:var(--a-panel);border:1px solid var(--a-line);border-radius:7px}
+.r.sel{box-shadow:inset 0 0 0 1px var(--a-accent);border-color:var(--a-accent)}
+.stripe{width:4px;height:22px;border-radius:2px}.bx{background:var(--a-bx)}.ux{background:var(--a-ux)}.cx{background:var(--a-cx)}
+.code{font-variant-numeric:tabular-nums;color:var(--a-muted);font-size:11px}
+.tags{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.tag{font-size:10.5px;padding:0 6px;border-radius:4px;border:1px solid var(--a-line);color:var(--a-muted);white-space:nowrap}
+.tag.w{color:var(--a-warn);border-color:var(--a-warn)}.tag.ok{color:var(--a-ok);border-color:var(--a-ok)}
+.parts{display:flex;gap:4px;flex-wrap:wrap}.p{font-size:11px;padding:1px 7px;border-radius:4px;background:var(--a-panel2);border:1px solid var(--a-line)}
+dl.kv{display:grid;grid-template-columns:62px minmax(0,1fr);gap:3px 8px;margin:0}dl.kv dt{color:var(--a-muted)}dl.kv dd{margin:0}
+.muted{color:var(--a-muted)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.kpi{background:var(--a-panel);border:1px solid var(--a-line);border-radius:8px;padding:7px}.kpi b{display:block;font-size:17px;font-variant-numeric:tabular-nums}.kpi span{font-size:10.5px;color:var(--a-muted)}
+/* assembler (slot-based, A) */
+.drawer{background:var(--a-panel);border:1px solid var(--a-line);border-radius:9px;padding:10px;display:grid;gap:6px;min-width:0}
+.structs{display:flex;gap:4px;flex-wrap:wrap}
+.structs button{font:inherit;font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--a-line);background:var(--a-panel2);color:var(--a-fg);cursor:pointer}
+.structs button[aria-pressed="true"]{border-color:var(--a-accent);box-shadow:inset 0 0 0 1px var(--a-accent)}
+.slot{display:grid;grid-template-columns:88px minmax(0,1fr) 46px;gap:6px;align-items:center;padding:5px 7px;border:1px solid var(--a-line);border-radius:6px;background:var(--a-bg)}
+.slot .n{color:var(--a-muted);font-size:11px}.slot .l{text-align:right;font-size:11px;color:var(--a-ok)}.slot .l.z{color:var(--a-bad)}
+.slot.fixed{border-style:dashed;color:var(--a-muted)}
+.chk{display:grid;gap:2px;font-size:11.5px}.c-ok{color:var(--a-ok)}.c-w{color:var(--a-warn)}.c-no{color:var(--a-bad)}
+/* tournament */
+.match{border:1px solid var(--a-line);border-radius:8px;padding:8px;display:grid;gap:6px;background:var(--a-panel)}
+.match-h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.score-mini{font-variant-numeric:tabular-nums;font-weight:700}
+.rtable{width:100%;border-collapse:collapse;font-size:11.5px}.rtable td,.rtable th{padding:3px 5px;border-bottom:1px solid var(--a-line);text-align:left;white-space:nowrap}.rtable th{color:var(--a-muted);font-weight:500}
+/* C round panel */
+.rp{background:var(--a-panel2);border:1px solid var(--a-line);border-radius:10px;padding:10px;display:grid;gap:8px}
+.rp-board{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-align:center}
+.rp-board b{font-size:30px;font-variant-numeric:tabular-nums;line-height:1.1}.me{color:var(--a-ok)}.op{color:var(--a-bad)}
+.rp-label{font-size:11px;color:var(--a-muted)}
+.seg{display:grid;gap:6px}
+.seg.two{grid-template-columns:1fr 1fr}.seg.four{grid-template-columns:repeat(2,1fr)}
+.seg.beys{grid-template-columns:1fr}
+.seg button{font:inherit;font-size:13px;min-height:44px;border-radius:9px;border:1px solid var(--a-line);background:var(--a-panel);color:var(--a-fg);cursor:pointer;padding:6px}
+.seg button small{display:block;font-size:11px;color:var(--a-muted)}
+.seg button[aria-pressed="true"]{border-color:var(--a-accent);box-shadow:inset 0 0 0 2px var(--a-accent)}
+.seg.res button[data-v="win"][aria-pressed="true"]{border-color:var(--a-ok);box-shadow:inset 0 0 0 2px var(--a-ok)}
+.seg.res button[data-v="lose"][aria-pressed="true"]{border-color:var(--a-bad);box-shadow:inset 0 0 0 2px var(--a-bad)}
+.rp input{font:inherit;font-size:13px;padding:9px 10px;border-radius:8px;border:1px solid var(--a-line);background:var(--a-panel);color:var(--a-fg);min-width:0}
+.rp .go{min-height:46px;border:0;border-radius:10px;background:var(--a-accent);color:#fff;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.preview{font-size:11.5px;color:var(--a-muted)}
+/* phones */
+.phones{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+.ph{display:grid;gap:6px;justify-items:center}
+.phone{width:100%;max-width:280px;height:540px;border:1px solid var(--line);border-radius:26px;overflow:hidden;position:relative;background:var(--a-bg);color:var(--a-fg);font-size:12px;line-height:1.5}
+.ph-top{padding:12px 12px 6px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.ph-body{padding:0 10px;display:grid;gap:6px}
+.bn{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);background:var(--a-panel);border-top:1px solid var(--a-line);padding:6px 0 12px;text-align:center;font-size:10px;color:var(--a-muted)}
+.bn i{display:block;font-style:normal;font-size:12px;font-weight:700;font-family:var(--display)}
+.bn .on{color:var(--a-fg)}
+.bn .plus i{display:grid;place-items:center;width:38px;height:38px;margin:-18px auto 0;border-radius:50%;background:var(--a-accent);color:#fff;font-size:20px;font-family:var(--body);font-weight:400;box-shadow:0 6px 14px #0006}
+.qmenu{position:absolute;left:10px;right:10px;bottom:62px;background:var(--a-panel2);border:1px solid var(--a-line);border-radius:12px;padding:6px;display:grid;gap:4px;box-shadow:0 10px 24px #0007}
+.qmenu span{padding:9px 10px;border-radius:8px;background:var(--a-panel)}
+.bn-note{position:absolute;left:8px;right:8px;bottom:50px;font-size:10px;text-align:center;color:var(--a-warn)}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow:auto;background:var(--a-panel);border-top:1px solid var(--a-line);border-radius:16px 16px 0 0;padding:10px;display:grid;gap:7px;box-shadow:0 -12px 30px #0007}
+.grab{width:38px;height:4px;border-radius:2px;background:var(--a-line);margin:0 auto 2px}
+.banner{background:color-mix(in srgb,var(--a-warn) 18%,var(--a-panel));border:1px solid var(--a-warn);border-radius:8px;padding:7px 9px;font-size:11.5px}
+.fab{position:absolute;right:14px;bottom:62px;width:46px;height:46px;border-radius:50%;background:var(--a-accent);color:#fff;display:grid;place-items:center;font-size:22px;box-shadow:0 6px 16px #0006}
+/* tables in sheet */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table.map{width:100%;border-collapse:collapse;font-size:14px}
+table.map th,table.map td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.map th{color:var(--muted);font-weight:500;white-space:nowrap}
+table.map tr:last-child td{border-bottom:0}
+.pend-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.pend-list li{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:8px;padding:9px 12px}
+@media (max-width:900px){.status{grid-template-columns:1fr}.a-body{grid-template-columns:1fr}.a-nav{display:none}.a-split{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Phase 7 整合設計：A 工作台骨架＋回合記錄面板</h1>
+  <p class="lede">依使用者已確認的方向整合：全站採用 A 工作台的版面與操作方式；只有賽事的「新增回合」改用 C 的大按鈕面板。以下全部是示意畫面（假資料），沒有修改正式網站、Firestore、Rules 或資料結構。標示 <span class="pend">待決定</span> 的地方維持現狀，等使用者決定。</p>
+</header>
+
+<section aria-labelledby="st">
+  <h2 id="st">決定狀態</h2>
+  <div class="status">
+    <div class="st done"><h3>已定案</h3><ul><li>A 工作台：全站骨架（頂列、側欄、清單＋詳細面板、手機底部抽屜）</li><li>C：只用在賽事的「新增回合」大按鈕面板</li><li>手機底部導覽：收藏／配置／＋新增／賽事／更多</li><li>官方明確規定的組裝限制阻擋儲存；舊配置只警告</li><li>額外零件庫存併入收藏，成為「零件」分頁；競賽統計移到「更多」</li></ul></div>
+    <div class="st no"><h3>未選定</h3><ul><li>B 收藏圖鑑、圖卡牆</li><li>B 的疊層組裝器（組裝器維持 A 的零件槽形式）</li><li>C 的整頁儀表板、比分板首頁、個人實戰紀錄</li></ul></div>
+    <div class="st wait"><h3>待決定（維持現狀）</h3><ul><li>是否新增首頁工作台</li><li>第一批功能範圍</li></ul></div>
+  </div>
+</section>
+
+<section aria-labelledby="dk">
+  <h2 id="dk">桌面版（1440 寬示意）</h2>
+  <div class="toolbar"><span class="cap">網站主題：</span><button type="button" id="th-dark" aria-pressed="true">深色</button><button type="button" id="th-cream" aria-pressed="false">米色</button><span class="cap">兩個主題結構相同，只換色彩（D-001）。</span></div>
+
+  <h3>1. 收藏：清單＋右側詳細面板</h3>
+  <div class="app" role="img" aria-label="桌面收藏頁示意">
+    <div class="a-top"><span class="a-search">搜尋型號、陀螺名稱、零件…</span><span class="a-sync"><span class="dot"></span>已同步｜收藏儲存版本：5B（交易保護）</span><span class="a-btn">＋ 建立配置</span></div>
+    <div class="a-body">
+      <nav class="a-nav"><small>主要功能</small><span class="on">收藏</span><span>配置紀錄</span><span>賽事</span><small>更多</small><span>競賽統計</span><span>說明</span><span>主題／帳號</span></nav>
+      <div class="a-main">
+        <div class="toolbar" style="justify-content:space-between"><div class="chips"><span class="chip on">原裝陀螺</span><span class="chip">零件</span></div><div class="chips"><span class="chip on">全部 42</span><span class="chip">BX</span><span class="chip">UX</span><span class="chip">CX</span><span class="chip">固鎖一體</span><span class="chip">軸心一體</span></div><span class="a-btn">＋ 新增收藏</span></div>
+        <div class="a-split">
+          <div class="rows">
+            <div class="r"><span class="stripe ux"></span><span class="code">UX-01</span><span>蒼龍爆刃<div class="parts"><span class="p">上蓋 蒼龍爆刃</span><span class="p">固鎖 1-60</span><span class="p">軸心 A</span></div></span><span class="tags"><span class="tag">自動帶入</span></span></div>
+            <div class="r sel"><span class="stripe cx"></span><span class="code">CX-13</span><span>龍王閃擊<div class="parts"><span class="p">紋章鎖 龍王</span><span class="p">金屬 閃擊</span><span class="p">超越 B</span><span class="p">輔助 K</span><span class="p">1-50</span><span class="p">I</span></div></span><span class="tags"><span class="tag">自動帶入</span></span></div>
+            <div class="r"><span class="stripe ux"></span><span class="code">UX-20</span><span>榮耀戰神<div class="parts"><span class="p">上蓋 榮耀戰神</span><span class="p">固鎖 戰刃一體式</span><span class="p">軸心 LF</span></div></span><span class="tags"><span class="tag w">固鎖一體</span></span></div>
+            <div class="r"><span class="stripe bx"></span><span class="code">BX-00</span><span>暴風天馬<div class="parts"><span class="p">3-70</span><span class="p">RA</span></div></span><span class="tags"><span class="tag">手動</span></span></div>
+          </div>
+          <div class="a-card"><h4>CX-13 龍王閃擊</h4>
+            <dl class="kv"><dt>紋章鎖</dt><dd>龍王</dd><dt>金屬戰刃</dt><dd>閃擊</dd><dt>超越戰刃</dt><dd>B</dd><dt>輔助戰刃</dt><dd>K</dd><dt>固鎖</dt><dd>1-50</dd><dt>軸心</dt><dd>I</dd><dt>來源</dt><dd>型錄自動帶入（D-015 標記保留）</dd></dl>
+            <p class="muted" style="margin:8px 0 4px">零件顯示順序依 D-004。</p>
+            <div class="toolbar"><span class="a-btn ghost">刪除</span><span class="muted">套組會一起刪除，需確認</span></div>
+          </div>
+        </div>
+      </div></div></div>
+  <p class="cap">保留：自動帶入、共用型號候選、套組一次加入、手動輸入、刪除確認、D-015 型錄升級。新增的只有搜尋與篩選（只影響畫面，不改儲存順序）。左側導覽採已定案的分類：收藏（原裝陀螺／零件）、配置紀錄、賽事，其餘在「更多」。</p>
+
+  <h3>2. 收藏 → 零件分頁（原「額外零件庫存」）</h3>
+  <div class="app" role="img" aria-label="桌面庫存頁示意">
+    <div class="a-top"><span class="a-search">搜尋零件…</span><span class="a-sync"><span class="dot"></span>已同步</span><span class="a-btn">＋ 新增零件</span></div>
+    <div class="a-body">
+      <nav class="a-nav"><small>主要功能</small><span class="on">收藏</span><span>配置紀錄</span><span>賽事</span><small>更多</small><span>競賽統計</span><span>說明</span><span>主題／帳號</span></nav>
+      <div class="a-main">
+        <div class="chips"><span class="chip">原裝陀螺</span><span class="chip on">零件</span></div><div class="kpis"><div class="kpi"><b>58</b><span>零件種類</span></div><div class="kpi"><b>163</b><span>持有總數</span></div><div class="kpi"><b>45</b><span>使用中</span></div><div class="kpi"><b>118</b><span>可用</span></div></div>
+        <div class="chips"><span class="chip on">全部</span><span class="chip">上蓋</span><span class="chip">固鎖</span><span class="chip">軸心</span><span class="chip">CX 分件</span></div>
+        <div class="a-split">
+          <div class="rows">
+            <div class="r sel"><span class="stripe bx"></span><span class="code">固鎖</span><span>1-60</span><span class="tags"><span class="tag">持有 3</span><span class="tag">使用 2</span><span class="tag ok">可用 1</span></span></div>
+            <div class="r"><span class="stripe ux"></span><span class="code">軸心</span><span>LF</span><span class="tags"><span class="tag">持有 1</span><span class="tag w">可用 0</span></span></div>
+            <div class="r"><span class="stripe cx"></span><span class="code">金屬戰刃</span><span>閃擊</span><span class="tags"><span class="tag">持有 2</span><span class="tag ok">可用 1</span></span></div>
+          </div>
+          <div class="a-card"><h4>固鎖 1-60</h4>
+            <dl class="kv"><dt>持有</dt><dd>3（收藏原裝 2＋額外 1）</dd><dt>使用中</dt><dd>2</dd><dt>可用</dt><dd>1</dd></dl>
+            <p class="muted" style="margin:8px 0 2px">被這些配置使用</p><div class="rows"><div class="muted">蒼龍爆刃 1-60 A</div><div class="muted">魔導神杖 1-60 H</div></div>
+            <div class="toolbar" style="margin-top:8px"><span class="a-btn ghost">修改</span><span class="a-btn ghost">刪除</span></div></div>
+        </div></div></div></div>
+  <p class="cap">原「額外零件庫存」的所有功能搬到這個分頁，資料仍是 partTable，不改格式。保留：8 種類別、數量驗證、修改與刪除確認、搜尋、五個分類、摘要計算方式（沿用 getUsedParts）。「被這些配置使用」與刪除時列出受影響配置是新增的只讀提示。</p>
+
+  <h3>3. 配置紀錄＋組裝器（零件槽形式）</h3>
+  <div class="app" role="img" aria-label="桌面配置與組裝器示意">
+    <div class="a-top"><span class="a-search">搜尋配置或零件…</span><span class="a-sync"><span class="dot"></span>已同步</span><span class="a-btn">＋ 建立配置</span></div>
+    <div class="a-body">
+      <nav class="a-nav"><small>主要功能</small><span>收藏</span><span class="on">配置紀錄</span><span>賽事</span><small>更多</small><span>競賽統計</span><span>說明</span><span>主題／帳號</span></nav>
+      <div class="a-main"><div class="a-split" style="grid-template-columns:minmax(0,1fr) 330px">
+        <div class="rows">
+          <div class="chips"><span class="chip on">我的配置 17</span><span class="chip">歷史測試 9</span></div>
+          <div class="r"><span class="stripe ux"></span><span class="code">標準</span><span>蒼龍爆刃<div class="parts"><span class="p">1-60</span><span class="p">A</span></div></span><span class="tags"><span class="tag">⋯</span></span></div>
+          <div class="r"><span class="stripe cx"></span><span class="code">CX 四件</span><span>龍王閃擊 BK<div class="parts"><span class="p">1-50</span><span class="p">I</span></div></span><span class="tags"><span class="tag">⋯</span></span></div>
+          <div class="r"><span class="stripe ux"></span><span class="code">固鎖一體</span><span>榮耀戰神<div class="parts"><span class="p">LF</span></div></span><span class="tags"><span class="tag">⋯</span></span></div>
+          <p class="muted">⋯ 選單：修改、刪除（選原因後記入歷史測試，「打錯，不記錄」不寫歷史）。</p>
+        </div>
+        <div class="drawer" id="asm-desk"></div>
+      </div></div></div></div>
+  <p class="cap">組裝器先選結構，只出現該結構需要的零件槽，旁邊顯示剩餘數量；儲存仍寫入現有 9 欄 cells。已定案：官方明確規定的組合限制會阻擋儲存（✕），官方未說明的只提示（！）。已經存在、違反新規則的舊配置只顯示警告，仍可開啟與儲存；只有新建或修改後「新產生」的違規才阻擋。「輔助戰刃 G × 主戰刃エクリプス」因無法確認 G 是否為官方グラビティ，暫不啟用。</p>
+
+  <h3>4. 賽事：清單＋比賽詳細；新增回合使用 C 面板</h3>
+  <div class="app" role="img" aria-label="桌面賽事頁示意">
+    <div class="a-top"><span class="a-search">搜尋比賽…</span><span class="a-sync"><span class="dot"></span>已同步｜賽事儲存版本：4B-1（交易保護）</span><span class="a-btn">＋ 新增比賽</span></div>
+    <div class="a-body">
+      <nav class="a-nav"><small>主要功能</small><span>收藏</span><span>配置紀錄</span><span class="on">賽事</span><small>更多</small><span>競賽統計</span><span>說明</span><span>主題／帳號</span></nav>
+      <div class="a-main"><div class="a-split" style="grid-template-columns:230px minmax(0,1fr)">
+        <div class="rows">
+          <div class="chips"><span class="chip on">進行中 1</span><span class="chip">已完成 6</span></div>
+          <div class="r sel" style="grid-template-columns:4px minmax(0,1fr) auto"><span class="stripe bx"></span><span>11/30 店家賽<div class="muted">8 人｜第 3 輪進行中</div></span><span></span></div>
+          <div class="r" style="grid-template-columns:4px minmax(0,1fr) auto"><span class="stripe" style="background:var(--a-line)"></span><span>11/16 社團賽<div class="muted">第 3–4 名</div></span><span class="tags"><span class="tag ok">完成</span></span></div>
+        </div>
+        <div style="display:grid;gap:8px;min-width:0">
+          <div class="toolbar" style="justify-content:space-between"><div><b>11/30 店家賽</b> <span class="muted">台北｜8 人｜第 3 輪進行中</span></div><div class="toolbar"><span class="a-btn ghost">修改</span><span class="a-btn ghost">完成</span><span class="a-btn ghost">刪除</span></div></div>
+          <div class="a-split" style="grid-template-columns:minmax(0,1fr) 260px">
+            <div class="rows">
+              <div class="match"><div class="match-h"><b>第 1 場｜對手未到</b><span class="tag ok">直接晉級</span></div></div>
+              <div class="match"><div class="match-h"><b>第 2 場｜阿華</b><span class="score-mini">4：1 本局勝利</span></div></div>
+              <div class="match"><div class="match-h"><b>第 3 場｜小明</b><span class="score-mini">3：2 進行中</span></div>
+                <div style="overflow-x:auto"><table class="rtable"><tr><th>回合</th><th>使用陀螺</th><th>得失分</th><th>方式</th><th>分數</th></tr>
+                  <tr><td>1</td><td>蒼龍爆刃 1-60 A</td><td>我方得分</td><td>擊飛勝利</td><td>2</td></tr>
+                  <tr><td>2</td><td>龍王閃擊 BK</td><td>我方失分</td><td>爆裂勝利</td><td>2</td></tr>
+                  <tr><td>3</td><td>榮耀戰神 LF</td><td>我方得分</td><td>迴轉勝利</td><td>1</td></tr></table></div>
+                <div class="toolbar"><span class="a-btn ghost">修改對局</span><span class="a-btn ghost">刪除對局</span></div></div>
+              <div class="toolbar"><span class="a-btn ghost">＋ 新增對局</span><span class="a-btn ghost">輪空／種子</span><span class="a-btn ghost">對手未到</span></div>
+            </div>
+            <div class="rp" id="rp-desk"></div>
+          </div>
+        </div>
+      </div></div></div></div>
+  <p class="cap">賽事頁維持 A 的清單＋詳細版面；比分板與大按鈕只出現在「新增回合」面板內。回合欄位與現有表單一一對應：使用陀螺（本場三顆）、我方得分／失分、四種得分方式、備註。計分、4 分勝負、單淘汰名次、已完成鎖定、草稿保留與交易保護都沿用現有程式。</p>
+
+  <h3>5. 同步提示（所有頁面頂部）</h3>
+  <div class="app" role="img" aria-label="同步衝突橫幅示意"><div class="a-main">
+    <div class="banner">其他裝置已修改「額外零件庫存」，和這個畫面尚未儲存的變更衝突，這次沒有儲存任何資料。<b>載入雲端最新資料</b>｜<b>以我的版本覆蓋</b></div>
+    <p class="muted" style="margin:0">文字與兩個按鈕的確認流程沿用現有 collection-sync 行為；未儲存資料（F-04）的提示與下載也放在同一位置，帳號隔離規則不變。</p></div></div>
+</section>
+
+<section aria-labelledby="mb">
+  <h2 id="mb">手機版（375 寬示意）</h2>
+  <p class="lede">手機不是桌面縮小：新增與編輯一律用底部抽屜，清單一欄、觸控目標至少 44px。底部導覽採已定案的「收藏／配置／＋新增／賽事／更多」。</p>
+  <div class="phones">
+    <div class="ph"><div class="phone">
+      <div class="ph-top"><b>收藏</b><span class="a-sync"><span class="dot"></span>已同步</span></div>
+      <div class="ph-body"><div class="chips"><span class="chip on">原裝陀螺</span><span class="chip">零件</span></div><span class="a-search">搜尋…</span><div class="chips"><span class="chip on">全部</span><span class="chip">BX</span><span class="chip">UX</span><span class="chip">CX</span></div>
+        <div class="r" style="grid-template-columns:4px minmax(0,1fr) auto"><span class="stripe ux"></span><span>蒼龍爆刃<div class="code">UX-01｜1-60 A</div></span><span class="tag">⋯</span></div>
+        <div class="r" style="grid-template-columns:4px minmax(0,1fr) auto"><span class="stripe cx"></span><span>龍王閃擊<div class="code">CX-13｜B K 1-50 I</div></span><span class="tag">⋯</span></div>
+        <div class="r" style="grid-template-columns:4px minmax(0,1fr) auto"><span class="stripe ux"></span><span>榮耀戰神<div class="code">UX-20｜LF</div></span><span class="tag w">一體</span></div></div>
+            <div class="bn"><span class="on"><i>●</i>收藏</span><span><i>≡</i>配置</span><span class="plus"><i>＋</i>新增</span><span><i>◆</i>賽事</span><span><i>⋯</i>更多</span></div>
+    </div><span class="cap">收藏清單（原裝陀螺／零件分頁）</span></div>
+
+    <div class="ph"><div class="phone">
+      <div class="ph-top"><b>配置紀錄</b><span class="a-sync"><span class="dot"></span>已同步</span></div>
+      <div class="ph-body"><div class="r" style="grid-template-columns:4px minmax(0,1fr)"><span class="stripe ux"></span><span>蒼龍爆刃 1-60 A</span></div><div class="r" style="grid-template-columns:4px minmax(0,1fr)"><span class="stripe cx"></span><span>龍王閃擊 BK 1-50 I</span></div></div>
+      <div class="qmenu"><span>＋ 新增收藏</span><span>＋ 新增零件</span><span>＋ 建立配置</span><span>＋ 新增比賽／記錄回合</span></div>
+      <div class="bn"><span><i>●</i>收藏</span><span class="on"><i>≡</i>配置</span><span class="plus"><i>＋</i>新增</span><span><i>◆</i>賽事</span><span><i>⋯</i>更多</span></div>
+    </div><span class="cap">中間「＋新增」選單（任何頁面都可開啟）</span></div>
+
+    <div class="ph"><div class="phone">
+      <div class="ph-top"><b>收藏</b></div>
+      <div class="sheet"><div class="grab"></div><b>新增收藏</b>
+        <div class="chips"><span class="chip on">自動帶入</span><span class="chip">手動輸入</span></div>
+        <span class="a-search" style="color:var(--a-fg)">BX-00</span>
+        <span class="muted">共用型號，請選擇（或全部加入）：</span>
+        <div class="rows"><div class="r" style="grid-template-columns:minmax(0,1fr)">歐比王肯諾比 4-60 P</div><div class="r" style="grid-template-columns:minmax(0,1fr)">暴風天馬 3-70 RA</div><div class="r" style="grid-template-columns:minmax(0,1fr)">… 共 9 個候選</div></div>
+        <span class="a-btn ghost" style="text-align:center;padding:9px">全部加入（9 顆）</span></div>
+    </div><span class="cap">新增收藏抽屜：沿用型號解析、候選選擇與套組規則</span></div>
+
+    <div class="ph"><div class="phone">
+      <div class="ph-top"><b>配置紀錄</b></div>
+      <div class="sheet"><div class="grab"></div><b>建立配置</b><div id="asm-phone" style="display:grid;gap:6px"></div>
+        <span class="a-btn" style="text-align:center;padding:10px">儲存配置</span></div>
+    </div><span class="cap">組裝器抽屜：與桌面同一套零件槽（可點選結構）</span></div>
+
+    <div class="ph"><div class="phone">
+      <div class="ph-top"><b>11/30 店家賽</b><span class="tag">8 人</span></div>
+      <div class="ph-body">
+        <div class="match"><div class="match-h"><b>第 2 場｜阿華</b><span class="score-mini">4：1</span></div></div>
+        <div class="match"><div class="match-h"><b>第 3 場｜小明</b><span class="score-mini">3：2</span></div><span class="muted">回合 1 擊飛 +2｜回合 2 爆裂 −2｜回合 3 迴轉 +1</span>
+          <span class="a-btn" style="text-align:center;padding:9px">＋ 新增回合</span><span class="a-btn ghost" style="text-align:center;padding:7px">修改對局</span></div>
+        <span class="a-btn ghost" style="text-align:center;padding:8px">＋ 新增對局</span></div>
+      <div class="bn"><span><i>●</i>收藏</span><span><i>≡</i>配置</span><span class="plus"><i>＋</i>新增</span><span class="on"><i>◆</i>賽事</span><span><i>⋯</i>更多</span></div>
+    </div><span class="cap">比賽詳細：A 的清單形式</span></div>
+
+    <div class="ph"><div class="phone">
+      <div class="ph-top"><b>第 3 場｜小明</b></div>
+      <div class="sheet" style="max-height:94%"><div class="grab"></div><div class="rp" id="rp-phone" style="background:transparent;border:0;padding:0"></div></div>
+    </div><span class="cap">新增回合：C 的大按鈕面板（可點選試用）</span></div>
+
+    <div class="ph"><div class="phone">
+      <div class="ph-top"><b>第 3 場｜小明</b></div>
+      <div class="sheet"><div class="grab"></div><b>修改對局</b>
+        <label class="muted">對手名稱</label><span class="a-search" style="color:var(--a-fg)">小明</span>
+        <label class="muted">使用陀螺 1／2／3（從配置選或自填）</label>
+        <span class="a-search" style="color:var(--a-fg)">蒼龍爆刃 1-60 A ▾</span><span class="a-search" style="color:var(--a-fg)">龍王閃擊 BK 1-50 I ▾</span><span class="a-search" style="color:var(--a-fg)">榮耀戰神 LF ▾</span>
+        <span class="a-btn" style="text-align:center;padding:9px">儲存修改</span>
+        <span class="muted">取代現在連續的 prompt()；草稿與衝突對照規則不變。</span></div>
+    </div><span class="cap">修改對局面板（A 形式）</span></div>
+  </div>
+</section>
+
+<section aria-labelledby="mp">
+  <h2 id="mp">現有功能在整合設計中的位置</h2>
+  <div class="tbl"><table class="map">
+    <thead><tr><th>現有功能</th><th>整合設計中的位置</th><th>保存方式</th></tr></thead>
+    <tbody>
+      <tr><td>登入／登出、同步狀態、兩個版本列</td><td>頂列；版本列文字不變</td><td>原樣</td></tr>
+      <tr><td>衝突處理、立即重試、F-04 未儲存資料</td><td>頂部橫幅＋原有按鈕</td><td>換殼，確認文字與帳號隔離不變</td></tr>
+      <tr><td>收藏自動帶入、候選、套組、手動輸入、刪除</td><td>收藏清單＋新增抽屜＋詳細面板</td><td>換殼（同一函式）</td></tr>
+      <tr><td>額外零件庫存新增／修改／刪除／搜尋／分類／摘要</td><td>收藏 → 零件分頁＋詳細面板</td><td>換殼＋只讀提示</td></tr>
+      <tr><td>Quick Editor、無固鎖選項、庫存檢查、歷史重複提醒</td><td>組裝器（零件槽）</td><td>換殼；規則行為不變，除非另行核准</td></tr>
+      <tr><td>配置 ⋯ 選單、刪除原因、歷史測試還原／刪除</td><td>配置紀錄清單＋歷史測試分頁</td><td>換殼</td></tr>
+      <tr><td>新增／修改／完成／刪除比賽、輪空、對手未到、新增／刪除對局</td><td>賽事清單＋比賽詳細</td><td>換殼（D-017 交易不變）</td></tr>
+      <tr><td>新增回合</td><td>C 大按鈕面板</td><td>換殼（欄位與 addRound 相同）</td></tr>
+      <tr><td>修改對局（現為 prompt()）</td><td>修改對局面板</td><td>換殼（草稿與衝突規則不變）</td></tr>
+      <tr><td>競賽統計、管理員、使用者檢視、說明頁、主題、側欄收合</td><td>「更多」分區；套用 A 的元件與色彩</td><td>內容原樣</td></tr>
+    </tbody></table></div>
+</section>
+
+<section aria-labelledby="pd">
+  <h2 id="pd">仍待使用者決定</h2>
+  <ul class="pend-list">
+    
+    
+    <li>是否新增首頁工作台（摘要與待處理清單），以及 PWA 起始頁是否改變。</li>
+    <li>組裝規則細節：型錄中的輔助戰刃 G 是否為官方グラビティ（未確認前，G × エクリプス 不啟用）。</li>
+    <li>第一批實作範圍與順序。</li>
+    <li>B 的圖卡牆或疊層圖日後是否作為選用的「展示模式」（目前未選定）。</li>
+  </ul>
+</section>
+</div>
+
+<script>
+const STRUCTS = [
+  {id:'std', label:'標準三件式', slots:[['上蓋','蒼龍爆刃 ▾','1'],['固鎖','1-60 ▾','1'],['軸心','A ▾','0']], checks:[['no','軸心 A 已用完（被「蒼龍爆刃 3-60 A」使用）']]},
+  {id:'cx3', label:'CX 三件', slots:[['紋章鎖','龍王 ▾','1'],['主要戰刃','勇氣 ▾','1'],['輔助戰刃','S ▾','1'],['固鎖','6-60 ▾','2'],['軸心','V ▾','1']], checks:[['ok','庫存足夠']]},
+  {id:'cx4', label:'CX 四件', slots:[['紋章鎖','龍王 ▾','1'],['超越戰刃','B ▾','1'],['金屬戰刃','閃擊 ▾','1'],['輔助戰刃','K ▾','1'],['固鎖','1-50 ▾','1'],['軸心','I ▾','1']], checks:[['ok','庫存足夠'],['ok','有金屬戰刃（官方規則：缺少時不能儲存）']]},
+  {id:'ib', label:'固鎖一體式戰刃', slots:[['上蓋','榮耀戰神 ▾','1'],['固鎖','— 一體，無獨立固鎖 —',''],['軸心','LF ▾','1']], checks:[['ok','UX-19、UX-20、UX-21 惡魔冥界：固鎖槽停用（官方）'],['ok','軸心選單不列 Tr／Op；選到時不能儲存（官方）']]},
+  {id:'it', label:'固鎖一體式軸心', slots:[['紋章鎖','天馬 ▾','1'],['主要戰刃','爆擊 ▾','1'],['輔助戰刃','A ▾','1'],['固鎖','— 與軸心一體 —',''],['軸心','Tr ▾','1']], checks:[['ok','Tr、Op：固鎖槽停用（官方）'],['w','裝在 CX 四件戰刃下：官方未說明，只提示不阻擋']]},
+  {id:'sr', label:'限用簡易固鎖', slots:[['上蓋','時鐘幻象 ▾','1'],['固鎖','9-65 ▾','1'],['軸心','B ▾','1']], checks:[['ok','只列出官方簡易固鎖：3-85、4-55、M-85、9-65、7-55、M-65'],['ok','一般固鎖與 Tr／Op 不列入選單；舊資料若違反會警告（官方）']]}
+];
+function renderAsm(el, id, compact){
+  const s = STRUCTS.find(x => x.id === id);
+  el.innerHTML = `${compact?'':'<b>建立配置</b>'}<div class="structs" role="group" aria-label="組裝結構">${STRUCTS.map(x => `<button type="button" data-id="${x.id}" aria-pressed="${x.id===id}">${x.label}</button>`).join('')}</div>`
+    + s.slots.map(([n,v,l]) => l==='' ? `<div class="slot fixed"><span class="n">${n}</span><span>${v}</span><span></span></div>`
+      : `<div class="slot"><span class="n">${n}</span><span>${v}</span><span class="l ${l==='0'?'z':''}">剩 ${l}</span></div>`).join('')
+    + `<div class="chk">${s.checks.map(([c,t]) => `<span class="${c==='ok'?'c-ok':c==='w'?'c-w':'c-no'}">${c==='ok'?'✓':c==='w'?'！':'✕'} ${t}</span>`).join('')}</div>`
+    + (compact?'':'<span class="a-btn" style="text-align:center;padding:7px">儲存配置</span>');
+  el.querySelectorAll('.structs button').forEach(b => b.addEventListener('click', () => renderAsm(el, b.dataset.id, compact)));
+}
+renderAsm(document.getElementById('asm-desk'), 'cx4', false);
+renderAsm(document.getElementById('asm-phone'), 'ib', true);
+
+// Round panel (C): fields map 1:1 to the existing addRound form.
+const TYPES = [['extreme','極限勝利',3],['over','擊飛勝利',2],['burst','爆裂勝利',2],['spin','迴轉勝利',1]];
+const BEYS = ['蒼龍爆刃 1-60 A','龍王閃擊 BK 1-50 I','榮耀戰神 LF'];
+function renderRound(el){
+  const st = {bey:0, res:'win', type:'over', me:3, op:2};
+  function draw(){
+    const t = TYPES.find(x => x[0]===st.type);
+    const me = st.me + (st.res==='win'?t[2]:0), op = st.op + (st.res==='lose'?t[2]:0);
+    const outcome = me>=4 ? '這回合後：本局勝利' : op>=4 ? '這回合後：本局落敗' : '這回合後：仍在進行';
+    el.innerHTML = `
+      <div class="rp-board"><div><div class="rp-label">我方</div><b class="me">${st.me}</b></div><div class="rp-label">先到 4 分<br>第 4 回合</div><div><div class="rp-label">對手</div><b class="op">${st.op}</b></div></div>
+      <div class="rp-label">本回合陀螺（本場三顆）</div>
+      <div class="seg beys" role="group" aria-label="本回合陀螺">${BEYS.map((b,i)=>`<button type="button" data-k="bey" data-v="${i}" aria-pressed="${st.bey===i}">${b}</button>`).join('')}</div>
+      <div class="seg two res" role="group" aria-label="得失分">${[['win','我方得分'],['lose','我方失分']].map(([v,l])=>`<button type="button" data-k="res" data-v="${v}" aria-pressed="${st.res===v}">${l}</button>`).join('')}</div>
+      <div class="seg four" role="group" aria-label="得分方式">${TYPES.map(([v,l,p])=>`<button type="button" data-k="type" data-v="${v}" aria-pressed="${st.type===v}">${l}<small>${p} 分</small></button>`).join('')}</div>
+      <input type="text" id="${el.id}-note" placeholder="回合備註（選填）" aria-label="回合備註">
+      <div class="preview">${st.res==='win'?'我方':'對手'} +${t[2]}，比分變成 ${me}：${op}｜${outcome}</div>
+      <button type="button" class="go">新增回合</button>
+      <div class="preview">比賽已完成、離線、儲存中或沒有寫入權限時，整個面板停用（沿用現有寫入閘門）。</div>`;
+    el.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+      const k = b.dataset.k; st[k] = k==='bey' ? Number(b.dataset.v) : b.dataset.v; draw();
+    }));
+  }
+  draw();
+}
+renderRound(document.getElementById('rp-desk'));
+renderRound(document.getElementById('rp-phone'));
+
+// App theme preview (dark / cream), mock only.
+const apps = () => document.querySelectorAll('.app, .phone');
+function setTheme(cream){
+  apps().forEach(a => a.classList.toggle('cream', cream));
+  document.getElementById('th-dark').setAttribute('aria-pressed', String(!cream));
+  document.getElementById('th-cream').setAttribute('aria-pressed', String(cream));
+}
+document.getElementById('th-dark').addEventListener('click', () => setTheme(false));
+document.getElementById('th-cream').addEventListener('click', () => setTheme(true));
+</script>

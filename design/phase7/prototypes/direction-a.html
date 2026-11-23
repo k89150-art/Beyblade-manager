@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方向 A 工作台｜原型</title>
+<style>
+:root{--bg:#0d1117;--panel:#151b23;--panel2:#1c2430;--line:#2a3442;--text:#e6edf3;--muted:#8b97a6;--accent:#4f8cff;--ok:#3fb27f;--warn:#e0a23b;--bad:#e5534b;--bx:#4f8cff;--ux:#a371f7;--cx:#f0883e;--radius:10px}
+[data-theme="beige"]{--bg:#f1eadf;--panel:#fbf7f0;--panel2:#f3ece1;--line:#ddd2c2;--text:#2b2620;--muted:#7a6f61;--accent:#2f6fd6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 system-ui,"Noto Sans TC",sans-serif}
+.proto-bar{position:sticky;top:0;z-index:10;display:flex;gap:8px;align-items:center;padding:8px 16px;background:#000a;backdrop-filter:blur(6px);color:#fff;font-size:13px}
+.proto-bar button{background:#ffffff22;color:#fff;border:1px solid #ffffff44;border-radius:6px;padding:4px 10px;cursor:pointer}
+h2.sec{margin:28px 16px 8px;font-size:15px;color:var(--muted);font-weight:600}
+.frame{margin:0 16px 24px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg)}
+.desk{display:grid;grid-template-columns:64px 1fr;min-height:560px}
+.rail{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 0}
+.rail a{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;color:var(--muted);text-decoration:none;font-size:11px}
+.rail a.on{background:var(--panel2);color:var(--text)}
+.top{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+.search{flex:1;max-width:480px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--muted)}
+.sync{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.main{padding:16px;display:grid;gap:16px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
+.kpi b{display:block;font-size:24px;font-variant-numeric:tabular-nums}.kpi span{color:var(--muted);font-size:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
+.card h3{margin:0 0 8px;font-size:14px}
+.todo li{margin:4px 0}.todo .w{color:var(--warn)}
+.split{display:grid;grid-template-columns:1fr 340px;gap:16px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--muted);background:var(--panel2)}
+.chip.on{color:var(--text);border-color:var(--accent)}
+.list{display:grid;gap:6px}
+.item{display:grid;grid-template-columns:6px 90px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.item.sel{outline:2px solid var(--accent)}
+.bar{width:6px;height:32px;border-radius:3px}.bx{background:var(--bx)}.ux{background:var(--ux)}.cx{background:var(--cx)}
+.code{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
+.tags{display:flex;gap:4px;flex-wrap:wrap}.tag{font-size:11px;padding:1px 6px;border-radius:4px;background:var(--panel2);border:1px solid var(--line)}
+.tag.int{border-color:var(--warn);color:var(--warn)}
+.detail dl{display:grid;grid-template-columns:80px 1fr;gap:4px 8px;margin:0}.detail dt{color:var(--muted)}
+.uses{margin-top:10px;font-size:13px}.uses li{margin:2px 0}
+/* assembler */
+.asm{display:grid;grid-template-columns:1fr 200px;gap:16px}
+.structs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.structs button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px}
+.structs button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--panel2))}
+.slot{display:grid;grid-template-columns:96px 1fr 70px;gap:8px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;background:var(--panel)}
+.slot .name{color:var(--muted);font-size:12px}.slot .pick{background:var(--panel2);border-radius:6px;padding:6px 8px}
+.slot .left{font-size:12px;text-align:right;color:var(--ok)}.slot .left.zero{color:var(--bad)}
+.slot.fixed{opacity:.75;border-style:dashed}
+.checks{margin-top:10px;display:grid;gap:4px;font-size:13px}.ok{color:var(--ok)}.w{color:var(--warn)}.no{color:var(--bad)}
+.stack{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px}
+.layer{width:150px;height:26px;border-radius:13px;display:grid;place-items:center;font-size:11px;color:#fff}
+.layer.blade{background:#4f8cff}.layer.lock{background:#6e7781;width:70px}.layer.main{background:#f0883e}.layer.metal{background:#9aa4b2}.layer.over{background:#c38df5;width:170px}.layer.assist{background:#d29922;width:130px}.layer.ratchet{background:#3fb27f;width:110px}.layer.bit{background:#8b949e;width:46px;border-radius:0 0 23px 23px;height:34px}.layer.merged{outline:2px dashed var(--warn)}
+.note{font-size:12px;color:var(--muted)}
+/* mobile */
+.phones{display:flex;gap:20px;flex-wrap:wrap;padding:16px}
+.phone{width:300px;height:620px;border:1px solid var(--line);border-radius:28px;overflow:hidden;position:relative;background:var(--bg)}
+.phone .ptop{padding:14px 14px 8px;display:flex;justify-content:space-between;align-items:center}
+.phone .pbody{padding:0 12px;display:grid;gap:8px}
+.bottom{position:absolute;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(5,1fr);background:var(--panel);border-top:1px solid var(--line);padding:6px 0 12px}
+.bottom span{display:grid;place-items:center;font-size:10px;color:var(--muted);gap:2px}.bottom span i{font-style:normal;font-size:16px}
+.bottom span.on{color:var(--text)}.bottom .fab i{background:var(--accent);color:#fff;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;margin-top:-18px}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--panel);border-radius:18px 18px 0 0;border-top:1px solid var(--line);padding:12px;height:78%;box-shadow:0 -10px 30px #0006}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:8px}.big button{padding:14px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:15px}
+.big button.win{border-color:var(--ok)}.big button.lose{border-color:var(--bad)}
+.score{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.score button{padding:12px 0;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}
+@media (max-width:900px){.split,.asm{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.desk{grid-template-columns:1fr}.rail{display:none}}
+</style>
+</head>
+<body>
+<div class="proto-bar">方向 A：工作台（原型，假資料，不連 Firebase）
+  <button onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='beige'?'':'beige'">切換深色／米色</button>
+  <a href="index.html" style="color:#9cf">← 原型索引</a></div>
+
+<h2 class="sec">桌面｜首頁工作台</h2>
+<div class="frame"><div class="desk">
+  <nav class="rail"><a class="on">首頁</a><a>收藏</a><a>配置</a><a>賽事</a><a>統計</a><a>更多</a></nav>
+  <div>
+    <div class="top"><div class="search">搜尋陀螺、零件、配置、比賽…</div><div class="sync"><span class="dot"></span>已同步｜收藏儲存版本：5B（交易保護）</div><button class="btn">＋ 建立配置</button></div>
+    <div class="main">
+      <div class="kpis">
+        <div class="kpi"><b>42</b><span>原裝陀螺</span></div>
+        <div class="kpi"><b>118 / 163</b><span>零件可用／持有</span></div>
+        <div class="kpi"><b>17</b><span>配置</span></div>
+        <div class="kpi"><b>1</b><span>進行中比賽</span></div>
+      </div>
+      <div class="split">
+        <div class="card"><h3>最近配置</h3>
+          <div class="list">
+            <div class="item"><span class="bar bx"></span><span class="code">BX 標準</span><span>蒼龍爆刃 1-60 A</span><span class="tags"><span class="tag">可用</span></span></div>
+            <div class="item"><span class="bar cx"></span><span class="code">CX 四件戰刃</span><span>龍王 閃擊 B K 1-50 I</span><span class="tags"><span class="tag">可用</span></span></div>
+            <div class="item"><span class="bar ux"></span><span class="code">戰刃一體式固鎖</span><span>榮耀戰神 LF</span><span class="tags"><span class="tag int">無固鎖槽</span></span></div>
+          </div></div>
+        <div class="card"><h3>需要處理</h3><ul class="todo">
+          <li class="w">配置「鮫鯊狂鱗 4-50 UF」的 UF 已被另一配置占用</li>
+          <li>比賽「11/30 店家賽」第 3 場尚未記錄回合</li>
+          <li>同步：目前沒有衝突或未儲存資料</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<h2 class="sec">桌面｜收藏 → 零件（清單＋右側詳細面板）</h2>
+<div class="frame"><div class="desk">
+  <nav class="rail"><a>首頁</a><a class="on">收藏</a><a>配置</a><a>賽事</a><a>統計</a><a>更多</a></nav>
+  <div>
+    <div class="top"><div class="search">在零件中搜尋…</div><button class="btn ghost">原裝陀螺</button><button class="btn">零件</button></div>
+    <div class="main"><div class="split">
+      <div>
+        <div class="filters"><span class="chip on">全部</span><span class="chip">上蓋</span><span class="chip">固鎖</span><span class="chip">軸心</span><span class="chip">CX 分件</span><span class="chip">只看可用</span></div>
+        <div class="list">
+          <div class="item sel"><span class="bar bx"></span><span class="code">固鎖</span><span>1-60</span><span class="tags"><span class="tag">持有 3</span><span class="tag">使用中 2</span><span class="tag">可用 1</span></span></div>
+          <div class="item"><span class="bar ux"></span><span class="code">軸心</span><span>LF</span><span class="tags"><span class="tag">持有 1</span><span class="tag">可用 0</span></span></div>
+          <div class="item"><span class="bar cx"></span><span class="code">金屬戰刃</span><span>閃擊</span><span class="tags"><span class="tag">持有 2</span><span class="tag">可用 1</span></span></div>
+        </div>
+      </div>
+      <div class="card detail"><h3>固鎖 1-60</h3>
+        <dl><dt>持有</dt><dd>3（原裝 2＋額外 1）</dd><dt>使用中</dt><dd>2</dd><dt>可用</dt><dd>1</dd></dl>
+        <div class="uses"><b>來源</b><ul><li>UX-01 蒼龍爆刃</li><li>BX-xx（原裝）</li><li>額外庫存 ×1</li></ul>
+        <b>被這些配置使用</b><ul><li>蒼龍爆刃 1-60 A</li><li>魔導神杖 1-60 H</li></ul></div>
+        <p class="note">刪除額外庫存時，若會讓使用中數量超過持有，先列出受影響的配置再確認。</p>
+      </div>
+    </div></div>
+  </div>
+</div></div>
+
+<h2 class="sec">組裝器｜依結構切換零件槽（可點選上方結構）</h2>
+<div class="frame"><div class="main">
+  <div class="structs" id="structs"></div>
+  <div class="asm">
+    <div><div id="slots"></div><div class="checks" id="checks"></div></div>
+    <div class="card"><div class="note">疊層示意（上→下）</div><div class="stack" id="stack"></div></div>
+  </div>
+  <p class="note">示意中的規則：「官方確認」才會阻擋儲存，「待確認」只提示。最終規則以 01 研究報告與使用者核准為準。寫入仍是現有 9 欄 cells，無固鎖存成「-」。</p>
+</div></div>
+
+<h2 class="sec">手機｜底部導覽、零件、組裝抽屜、記錄回合</h2>
+<div class="phones">
+  <div class="phone"><div class="ptop"><b>收藏</b><span class="sync"><span class="dot"></span>已同步</span></div>
+    <div class="pbody"><div class="search">搜尋…</div>
+      <div class="filters"><span class="chip on">原裝陀螺</span><span class="chip">零件</span><span class="chip">BX</span><span class="chip">UX</span><span class="chip">CX</span></div>
+      <div class="item"><span class="bar ux"></span><span class="code">UX-20</span><span>榮耀戰神</span><span class="tags"><span class="tag int">一體</span></span></div>
+      <div class="item"><span class="bar cx"></span><span class="code">CX-13</span><span>龍王閃擊</span><span></span></div>
+      <div class="item"><span class="bar bx"></span><span class="code">BX-01</span><span>蒼龍爆刃</span><span></span></div>
+      <p class="note">左滑：修改／拆解｜右下＋：新增收藏</p></div>
+    <div class="bottom"><span><i>⌂</i>首頁</span><span class="on"><i>▦</i>收藏</span><span class="fab"><i>＋</i>組裝</span><span><i>⚑</i>賽事</span><span><i>⋯</i>更多</span></div></div>
+  <div class="phone"><div class="ptop"><b>配置</b></div><div class="pbody"><div class="note">背景內容</div></div>
+    <div class="sheet"><div class="grab"></div><b>建立配置</b>
+      <div class="structs" style="margin-top:8px"><button class="on">標準三件</button><button>CX 三件</button><button>CX 四件</button><button>一體式</button></div>
+      <div class="slot"><span class="name">上蓋</span><span class="pick">蒼龍爆刃</span><span class="left">剩 1</span></div>
+      <div class="slot"><span class="name">固鎖</span><span class="pick">1-60</span><span class="left">剩 1</span></div>
+      <div class="slot"><span class="name">軸心</span><span class="pick">A</span><span class="left zero">剩 0</span></div>
+      <div class="checks"><span class="no">✕ 軸心 A 已用完（被「蒼龍爆刃 3-60 A」使用）</span></div>
+      <button class="btn" style="width:100%;margin-top:8px">儲存配置</button></div>
+    <div class="bottom"><span><i>⌂</i>首頁</span><span><i>▦</i>收藏</span><span class="fab on"><i>＋</i>組裝</span><span><i>⚑</i>賽事</span><span><i>⋯</i>更多</span></div></div>
+  <div class="phone"><div class="ptop"><b>第 3 場｜對手：小明</b><span class="code">我 2：1 對手</span></div>
+    <div class="pbody"><div class="note">本場陀螺</div>
+      <div class="filters"><span class="chip on">蒼龍爆刃 1-60 A</span><span class="chip">龍王閃擊</span><span class="chip">榮耀戰神 LF</span></div>
+      <div class="big"><button class="win">勝</button><button class="lose">負</button></div>
+      <div class="score"><button>X 3</button><button>O 2</button><button>B 2</button><button>S 1</button></div>
+      <input placeholder="備註（選填）" style="padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text)">
+      <button class="btn">記錄回合</button>
+      <p class="note">取代現在的連續 prompt()；計分與 4 分勝負規則沿用 SCORE_TYPES。</p><p class="note" style="color:var(--warn)">！3on3 提示：「蒼龍爆刃 1-60 A」與「榮耀戰神 LF」沒有重複零件；如有重複會在此列出（官方規則，只提示不阻擋）。</p></div>
+    <div class="bottom"><span><i>⌂</i>首頁</span><span><i>▦</i>收藏</span><span class="fab"><i>＋</i>組裝</span><span class="on"><i>⚑</i>賽事</span><span><i>⋯</i>更多</span></div></div>
+</div>
+
+<script>
+// Prototype only: structures follow the project's catalog fields (assemblySystem / ratchetMode).
+const STRUCTS = [
+  {id:'std', label:'標準三件式（BX／UX）', slots:[['上蓋','blade','蒼龍爆刃',1],['固鎖','ratchet','1-60',1],['軸心','bit','A',2]],
+   checks:[['ok','庫存足夠'],['ok','結構：上蓋＋固鎖＋軸心']]},
+  {id:'cx3', label:'CX 三件戰刃', slots:[['紋章鎖','lock','龍王',1],['主要戰刃','main','勇氣',1],['輔助戰刃','assist','S',1],['固鎖','ratchet','6-60',1],['軸心','bit','V',1]],
+   checks:[['ok','結構：紋章鎖＋主要戰刃＋輔助戰刃＋固鎖＋軸心']]},
+  {id:'cx4', label:'CX 四件戰刃', slots:[['紋章鎖','lock','龍王',1],['超越戰刃','over','B',1],['金屬戰刃','metal','閃擊',1],['輔助戰刃','assist','K',1],['固鎖','ratchet','1-50',0],['軸心','bit','I',1]],
+   checks:[['no','固鎖 1-50 已用完'],['ok','金屬戰刃必須存在（官方）'],['ok','結構：紋章鎖＋超越戰刃＋金屬戰刃＋輔助戰刃＋固鎖＋軸心']]},
+  {id:'intBlade', label:'戰刃一體式固鎖（UX-19／20／21-01）', slots:[['上蓋（含固鎖）','blade','榮耀戰神',1],['固鎖','fixed','— 一體式，無獨立固鎖 —',null],['軸心','bit','LF',1]],
+   checks:[['ok','固鎖槽停用，存成「-」（官方：UX 擴展戰刃不能裝固鎖）'],['ok','軸心選單排除 Tr／Op（官方禁止）']]},
+  {id:'intBit', label:'固鎖一體式軸心（Tr／Op）', slots:[['紋章鎖','lock','天馬',1],['主要戰刃','main','爆擊',1],['輔助戰刃','assist','A',1],['固鎖','fixed','— 與軸心一體 —',null],['軸心（含固鎖）','bit','Tr',1]],
+   checks:[['ok','選到 Tr／Op 時固鎖槽停用（官方：不能拆成固鎖＋軸心）'],['ok','也可裝在 BX／UX 上蓋下（官方）'],['w','裝在 CX 四件戰刃下：官方未說明，只提示']]},
+  {id:'simple', label:'限用簡易固鎖（UX-16）', slots:[['上蓋','blade','時鐘幻象',1],['固鎖','ratchet','9-65',1],['軸心','bit','B',1]],
+   checks:[['ok','固鎖選單只列出官方簡易固鎖白名單（O 型：3-85、4-55、M-85、9-65、7-55、M-65）'],['ok','排除 Tr／Op（官方禁止）']]}
+];
+const LAYER = {blade:'blade',lock:'lock',main:'main',metal:'metal',over:'over',assist:'assist',ratchet:'ratchet',bit:'bit'};
+function render(id){
+  const s = STRUCTS.find(x=>x.id===id);
+  document.getElementById('structs').innerHTML = STRUCTS.map(x=>`<button class="${x.id===id?'on':''}" onclick="render('${x.id}')">${x.label}</button>`).join('');
+  document.getElementById('slots').innerHTML = s.slots.map(([n,k,v,left])=>k==='fixed'
+    ? `<div class="slot fixed"><span class="name">${n}</span><span class="pick">${v}</span><span class="left"></span></div>`
+    : `<div class="slot"><span class="name">${n}</span><span class="pick">${v} ▾</span><span class="left ${left===0?'zero':''}">剩 ${left}</span></div>`).join('');
+  document.getElementById('checks').innerHTML = s.checks.map(([c,t])=>`<span class="${c}">${c==='ok'?'✓':c==='w'?'！':'✕'} ${t}</span>`).join('');
+  const order = ['lock','blade','main','over','metal','assist','ratchet','bit']; // 官方：鎖定晶片→超越→金屬→輔助
+  const layers = s.slots.filter(x=>x[1]!=='fixed').map(x=>x[1]).sort((a,b)=>order.indexOf(a)-order.indexOf(b));
+  const merged = s.slots.some(x=>x[1]==='fixed');
+  document.getElementById('stack').innerHTML = layers.map(k=>`<div class="layer ${LAYER[k]} ${merged&&((id==='intBlade'&&k==='blade')||(id==='intBit'&&k==='bit'))?'merged':''}">${s.slots.find(x=>x[1]===k)[0]}</div>`).join('')
+    + (merged?'<div class="note">虛線＝一體式零件</div>':'');
+}
+render('std');
+</script>
+</body>
+</html>

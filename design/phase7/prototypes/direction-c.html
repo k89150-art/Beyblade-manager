@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方向 C 競技儀表板｜原型</title>
+<style>
+:root{--bg:#07090d;--panel:#10141b;--line:#232a35;--text:#f3f6fa;--muted:#8a94a3;--win:#22c55e;--lose:#ef4444;--hi:#facc15}
+[data-theme="beige"]{--bg:#efe7da;--panel:#fbf6ee;--line:#dccfbb;--text:#231e17;--muted:#776a59}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,"Noto Sans TC",sans-serif}
+.proto-bar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;padding:8px 16px;background:#000a;color:#fff;font-size:13px}
+.proto-bar button{background:#ffffff22;color:#fff;border:1px solid #ffffff44;border-radius:6px;padding:4px 10px}
+.wrap{max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:14px}
+.board{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-align:center}
+.board .s{font-size:56px;font-weight:800;font-variant-numeric:tabular-nums}.board .me{color:var(--win)}.board .op{color:var(--lose)}
+.row{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card h3{margin:0 0 10px;font-size:14px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}td,th{padding:6px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{color:var(--muted);font-weight:500}
+.barh{height:8px;border-radius:4px;background:var(--line);overflow:hidden}.barh i{display:block;height:100%;background:var(--hi)}
+.tl{display:grid;gap:8px}.m{display:grid;grid-template-columns:70px 1fr 70px;gap:8px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:10px}
+.w{color:var(--win)}.l{color:var(--lose)}.note{color:var(--muted);font-size:12px}
+@media(max-width:800px){.row{grid-template-columns:1fr}.board .s{font-size:40px}}
+</style>
+</head>
+<body>
+<div class="proto-bar">方向 C：競技儀表板（原型，假資料）
+  <button onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='beige'?'':'beige'">切換深色／米色</button>
+  <a href="index.html" style="color:#9cf">← 原型索引</a></div>
+<div class="wrap">
+  <div class="board"><div><div class="note">我</div><div class="s me">3</div></div><div><b>11/30 店家賽｜第 3 場</b><div class="note">對手：小明｜先到 4 分勝</div></div><div><div class="note">對手</div><div class="s op">2</div></div></div>
+  <div class="row">
+    <div class="card"><h3>本次比賽對局</h3><div class="tl">
+      <div class="m"><span>第 1 場</span><span>對手未到（直接晉級）</span><span class="w">晉級</span></div>
+      <div class="m"><span>第 2 場</span><span>對手 阿華｜4：1</span><span class="w">勝</span></div>
+      <div class="m"><span>第 3 場</span><span>對手 小明｜3：2 進行中</span><span>…</span></div>
+    </div><p class="note">名次依現有單淘汰計算（calculateTournamentStanding）。</p></div>
+    <div class="card"><h3>我的配置實戰紀錄（只用自己的回合資料）</h3>
+      <table><tr><th>配置</th><th>出場回合</th><th>勝回合</th></tr>
+        <tr><td>蒼龍爆刃 1-60 A</td><td>9</td><td>6</td></tr>
+        <tr><td>龍王閃擊 B K 1-50 I</td><td>7</td><td>3</td></tr>
+        <tr><td>榮耀戰神 LF</td><td>4</td><td>2</td></tr></table>
+      <p class="note">描述性統計，不排名、不推薦、不推估勝率。</p></div>
+  </div>
+  <div class="card"><h3>競賽統計摘要（MetaBeys Part Popularity，與 Beywatch 分開呈現）</h3>
+    <table><tr><th>上蓋</th><th>Part Popularity</th><th></th></tr>
+      <tr><td>魔導神杖</td><td>示意</td><td style="width:40%"><div class="barh"><i style="width:80%"></i></div></td></tr>
+      <tr><td>鮫鯊狂鱗</td><td>示意</td><td><div class="barh"><i style="width:62%"></i></div></td></tr></table>
+    <p class="note">數值與定義沿用現有競賽統計頁；此處只是入口摘要。</p></div>
+</div>
+</body>
+</html>
