@@ -28,14 +28,18 @@ import {
 } from "./assembly-rules.js?v=20261123-phase7r";
 import {
   COLLECTION_VIEW_TABS,
-  buildPartItems,
   buildStockItems,
   collectionHashTarget,
+  computeImpact,
+  computePartsModel,
+  filterPartItems,
+  filterStockItems,
+  formatImpactText,
   isAddPanelOpen,
   listNotice,
   otherTab,
   rowSignature
-} from "./collection-view.js?v=20261124-phase72a";
+} from "./collection-view.js?v=20261124-phase72b";
 
 import {
   getAuth,
@@ -1072,7 +1076,7 @@ window.deleteRow = async function (button) {
         .map(candidate => candidate.cells[1]?.innerText.trim() || candidate.cells[0]?.innerText.trim() || "")
         .filter(Boolean)
         .join("、");
-      const ok = confirm(`「${setCode}」是雙陀螺套組。確定要一起刪除「${names}」嗎？`);
+      const ok = confirm(`「${setCode}」是雙陀螺套組。確定要一起刪除「${names}」嗎？` + (typeof getStockDeleteImpactText === "function" ? getStockDeleteImpactText(setRows, "整組刪除後") : ""));
       if (!ok) return;
 
       setRows.forEach(candidate => candidate.remove());
@@ -1083,7 +1087,7 @@ window.deleteRow = async function (button) {
     }
 
     if (model || layer) deleteName = `${model} ${layer}`.trim();
-    const ok = confirm(`確定要刪除「${deleteName}」嗎？`);
+    const ok = confirm(`確定要刪除「${deleteName}」嗎？` + (typeof getStockDeleteImpactText === "function" ? getStockDeleteImpactText([row]) : ""));
     if (!ok) return;
   }
 
@@ -1092,7 +1096,7 @@ window.deleteRow = async function (button) {
     const name = row.cells[1]?.innerText.trim() || "";
     const count = row.cells[2]?.innerText.trim() || "";
     if (type || name) deleteName = `${type}：${name}，數量 ${count}`;
-    const ok = confirm(`確定要刪除「${deleteName}」嗎？`);
+    const ok = confirm(`確定要刪除「${deleteName}」嗎？` + (typeof getPartDeleteImpactText === "function" ? getPartDeleteImpactText(row) : ""));
     if (!ok) return;
   }
 
@@ -1205,7 +1209,7 @@ window.saveEditRow = function (button, tableType) {
     return;
   }
 
-  const ok = confirm("確定要保存這次修改嗎？");
+  const ok = confirm("確定要保存這次修改嗎？" + (tableType === "part" && typeof getPartEditImpactText === "function" ? getPartEditImpactText(button) : ""));
 
   if (!ok) return;
 
@@ -2922,37 +2926,22 @@ function setUiSummaryValue(id, value) {
 
 function updateUiSummaries() {
   const collectionRows = document.querySelectorAll("#beybladeTable tbody tr");
-  const inventoryRows = document.querySelectorAll("#partTable tbody tr");
   const configRows = document.querySelectorAll("#configTable tbody tr");
   const historyRows = document.querySelectorAll("#historyTable tbody tr");
-  const inventoryByPart = new Map();
-  let inventoryTotal = 0;
-
-  inventoryRows.forEach(row => {
-    const type = row.cells[0]?.innerText.trim() || "";
-    const name = row.cells[1]?.innerText.trim() || "";
-    const count = Number(row.cells[2]?.innerText.trim() || 0);
-    if (!type || !name || !Number.isFinite(count)) return;
-
-    const key = `${type}\u0000${name}`;
-    inventoryByPart.set(key, (inventoryByPart.get(key) || 0) + count);
-    inventoryTotal += count;
-  });
-
-  const usedParts = getUsedParts();
-  let inventoryUsed = 0;
-
-  inventoryByPart.forEach((count, key) => {
-    const [type, name] = key.split("\u0000");
-    inventoryUsed += Math.min(count, usedParts[type]?.[name] || 0);
-  });
 
   setUiSummaryValue("collectionCount", collectionRows.length);
-  setUiSummaryValue("inventoryKinds", inventoryByPart.size);
-  setUiSummaryValue("inventoryKindSummary", inventoryByPart.size);
-  setUiSummaryValue("inventoryTotal", inventoryTotal);
-  setUiSummaryValue("inventoryUsed", inventoryUsed);
-  setUiSummaryValue("inventoryAvailable", Math.max(0, inventoryTotal - inventoryUsed));
+  // Phase 7-2b (U2): the parts summary comes from the read-only parts model.
+  // 「配置引用」 is how many times configurations name a part, not actual use;
+  // the former 「使用中」 (sum of min(extra, used)) is no longer shown.
+  const parts = typeof computeCollectionPartsModel === "function" ? computeCollectionPartsModel().totals : null;
+  if (parts) {
+    setUiSummaryValue("inventoryKinds", parts.kinds);
+    setUiSummaryValue("partsSummaryOriginal", parts.orig);
+    setUiSummaryValue("partsSummaryExtra", parts.extra);
+    setUiSummaryValue("partsSummaryReferences", parts.refs);
+    setUiSummaryValue("partsSummaryOverused", parts.overused);
+    setUiSummaryValue("partsSummaryUnmatched", parts.orphans);
+  }
   setUiSummaryValue("configCount", configRows.length);
   setUiSummaryValue("historyCount", historyRows.length);
 }
@@ -3836,16 +3825,44 @@ function renderStockViewItem(item) {
   </article>`;
 }
 
+// P2: one card per part (type + name). Original-collection quantities are
+// read-only; every original extra row keeps its own 修改／刪除.
+function renderExtraRowLine(row, index, total, label) {
+  const name = total > 1 ? `額外第 ${index + 1} 筆` : "額外持有";
+  const counted = partMapHasCount(row.counts);
+  const actions = row.editing
+    ? '<span class="cv-editing">修改中：請在下方表格保存或取消</span>'
+    : `${row.actions.edit ? `<button type="button" class="cv-action" data-write-action data-view-action="edit" data-view-key="${row.key}"${row.actions.editDisabled ? " disabled" : ""} aria-label="修改 ${label}（${name}）">修改</button>` : ""}${row.actions.delete ? `<button type="button" class="cv-action cv-action-danger" data-write-action data-view-action="delete" data-view-key="${row.key}"${row.actions.deleteDisabled ? " disabled" : ""} aria-label="刪除 ${label}（${name}）">刪除</button>` : ""}`;
+  return `<li class="cv-extra-row${row.editing ? " is-editing" : ""}"><span>${name}：數量 <strong>${escapeHtml(row.countText)}</strong>${counted ? "" : "（未計入）"}</span>${actions ? `<span class="cv-actions">${actions}</span>` : ""}</li>`;
+}
+
+function partMapHasCount(map) {
+  return Object.values(map || {}).some(names => Object.keys(names || {}).length > 0);
+}
+
 function renderPartViewItem(item) {
   const label = escapeHtml(`${item.type} ${item.name}`.trim());
-  const actions = item.editing
-    ? '<span class="cv-editing">修改中：請在下方表格保存或取消</span>'
-    : `${item.canEdit ? `<button type="button" class="cv-action" data-write-action data-view-action="edit" data-view-key="${item.key}"${item.editDisabled ? " disabled" : ""} aria-label="修改 ${label}">修改</button>` : ""}${item.canDelete ? `<button type="button" class="cv-action cv-action-danger" data-write-action data-view-action="delete" data-view-key="${item.key}"${item.deleteDisabled ? " disabled" : ""} aria-label="刪除 ${label}">刪除</button>` : ""}`;
-  return `<article class="cv-item cv-part-item${item.editing ? " is-editing" : ""}" data-inventory-tone="${escapeHtml(item.tone)}">
+  const over = item.avail < 0;
+  const editing = item.extraRows.some(row => row.editing);
+  const refs = item.configs.length ? `<p class="cv-refs">配置引用：${escapeHtml(item.configs.slice(0, 3).join("、"))}${item.configs.length > 3 ? ` 等 ${item.configs.length} 個` : ""}</p>` : "";
+  const extraLines = item.extraRows.map((row, index) => renderExtraRowLine(row, index, item.extraRows.length, label)).join("");
+  return `<article class="cv-item cv-part-item${editing ? " is-editing" : ""}${over ? " is-over" : ""}" data-inventory-tone="${escapeHtml(getInventoryTypeTone(item.type))}">
     <div class="cv-head"><span class="cv-type">${escapeHtml(item.type)}</span><strong class="cv-title">${escapeHtml(item.name)}</strong></div>
-    <span class="cv-count">數量 <strong>${escapeHtml(item.count)}</strong></span>
-    ${actions ? `<div class="cv-actions">${actions}</div>` : ""}
+    <dl class="cv-nums">
+      <div><dt>原裝內含</dt><dd>${item.orig}</dd></div>
+      <div><dt>額外持有</dt><dd>${item.extra}</dd></div>
+      <div><dt>配置引用</dt><dd>${item.ref}</dd></div>
+      <div class="cv-avail"><dt>${over ? "超用" : "可用"}</dt><dd>${Math.abs(item.avail)}</dd></div>
+    </dl>
+    ${refs}
+    ${extraLines ? `<ul class="cv-extra-rows">${extraLines}</ul>` : ""}
   </article>`;
+}
+
+function renderUnmatchedReferences(orphans) {
+  if (!orphans.length) return "";
+  const lines = orphans.map(entry => `<li>${escapeHtml(entry.type)}「${escapeHtml(entry.name)}」：被 ${entry.ref} 個配置引用（${escapeHtml(entry.configs.slice(0, 3).join("、"))}${entry.configs.length > 3 ? ` 等 ${entry.configs.length} 個` : ""}），但目前沒有持有這個名稱。</li>`).join("");
+  return `<section class="cv-unmatched" aria-label="無對應的配置引用"><h3>無對應的配置引用（${orphans.length}）</h3><ul>${lines}</ul><p>可能是零件改名或刪除造成；只提示，配置不會被修改。</p></section>`;
 }
 
 function writeViewList(list, notice, itemsHtml) {
@@ -3884,46 +3901,43 @@ function renderCollectionView() {
   const refs = new Map();
 
   const stockRows = Array.from(document.querySelectorAll("#beybladeTable tbody tr"));
-  const stockItems = buildStockItems(stockRows.map(row => {
+  const stockSnapshots = stockRows.map(row => {
     const snapshot = readSourceRowSnapshot(row, "beybladeTable");
     const key = getCollectionViewKey(row);
     const remove = getSourceRowButton(row, "deleteRow");
     refs.set(key, { row, tableId: "beybladeTable", signature: rowSignature(snapshot) });
     return { ...snapshot, key, display: getStockViewDisplay(row, snapshot.cells), actions: { delete: Boolean(remove), deleteDisabled: Boolean(remove?.disabled) } };
+  });
+  const stockItems = buildStockItems(stockSnapshots).map((item, index) => ({
+    ...item,
+    englishName: getReliableEnglishName(stockSnapshots[index].meta),
+    setCode: stockSnapshots[index].meta.stockSetId || "",
+    productCode: stockSnapshots[index].meta.stockProductCode || ""
   }));
+  const shownStock = filterStockItems(stockItems, document.getElementById("stockSearchInput")?.value || "");
 
   const partRows = Array.from(document.querySelectorAll("#partTable tbody tr"));
-  const query = document.getElementById("inventorySearchInput")?.value || "";
-  const partItems = buildPartItems(partRows.map(row => {
-    const snapshot = readSourceRowSnapshot(row, "partTable");
-    const key = getCollectionViewKey(row);
-    const edit = getSourceRowButton(row, "editRow");
-    const remove = getSourceRowButton(row, "deleteRow");
-    refs.set(key, { row, tableId: "partTable", signature: rowSignature(snapshot) });
-    return {
-      ...snapshot,
-      key,
-      tone: getInventoryTypeTone(snapshot.cells[0] || ""),
-      actions: { edit: Boolean(edit), delete: Boolean(remove), editDisabled: Boolean(edit?.disabled), deleteDisabled: Boolean(remove?.disabled) }
-    };
-  }), {
+  partRows.forEach(row => {
+    refs.set(getCollectionViewKey(row), { row, tableId: "partTable", signature: rowSignature(readSourceRowSnapshot(row, "partTable")) });
+  });
+  const partsModel = computeCollectionPartsModel();
+  const shownParts = filterPartItems(partsModel.items, {
     matchesType: type => inventoryTypeMatchesFilter(type, inventoryFilterType),
-    query,
-    rank: getInventoryTypeDisplayRank
+    query: document.getElementById("inventorySearchInput")?.value || ""
   });
 
   collectionViewState.refs = refs;
   writeViewList(document.getElementById("stockViewList"),
-    listNotice({ signedIn, loading, total: stockRows.length, shown: stockItems.length, kind: "stock" }),
-    stockItems.map(renderStockViewItem).join(""));
+    listNotice({ signedIn, loading, total: stockRows.length, shown: shownStock.length, kind: "stock" }),
+    shownStock.map(renderStockViewItem).join(""));
   writeViewList(document.getElementById("partViewList"),
-    listNotice({ signedIn, loading, total: partRows.length, shown: partItems.length, kind: "parts" }),
-    partItems.map(renderPartViewItem).join(""));
+    listNotice({ signedIn, loading, total: partsModel.items.length, shown: shownParts.length, kind: "parts" }),
+    shownParts.map(renderPartViewItem).join("") + renderUnmatchedReferences(partsModel.orphans));
 
   const stockCount = document.getElementById("collectionTabStockCount");
   if (stockCount) stockCount.textContent = String(stockRows.length);
   const partsCount = document.getElementById("collectionTabPartsCount");
-  if (partsCount) partsCount.textContent = String(partRows.length);
+  if (partsCount) partsCount.textContent = String(partsModel.items.length);
   setAddPanelOpen("stock", isAddPanelOpen(collectionViewState.addChoice.stock, stockRows.length));
   setAddPanelOpen("parts", isAddPanelOpen(collectionViewState.addChoice.parts, partRows.length));
 
@@ -3975,6 +3989,8 @@ function runCollectionViewAction(button) {
 function resetCollectionViewState() {
   const search = document.getElementById("inventorySearchInput");
   if (search) search.value = "";
+  const stockSearch = document.getElementById("stockSearchInput");
+  if (stockSearch) stockSearch.value = "";
   inventoryFilterType = "all";
   document.querySelectorAll("[data-inventory-filter]").forEach(button => {
     const active = button.dataset.inventoryFilter === "all";
@@ -4044,6 +4060,8 @@ function installCollectionView() {
       setCollectionTab(keys[event.key], { focusTab: true, updateHash: true });
     });
 
+    document.getElementById("stockSearchInput")?.addEventListener("input", scheduleCollectionViewRender);
+
     ["stockViewList", "partViewList"].forEach(id => {
       document.getElementById(id).addEventListener("click", event => {
         const button = event.target.closest("[data-view-action]");
@@ -4079,6 +4097,144 @@ function installCollectionView() {
   }
 }
 /* ===== Phase 7-2a collection view (R2): end ===== */
+
+/* ===== Phase 7-2b parts model (P2 / U2 / D1, read-only): begin ===== */
+// Read-only. One part map per original row, built with the same rules as
+// getTotalParts / getUsedParts and the real addStock (neither function is
+// changed). tests/collection-parts.test.mjs checks that the per-row maps add up
+// to getTotalParts() and getUsedParts(). Nothing here writes or changes rows.
+function emptyPartMap() {
+  const map = {};
+  partTypes.forEach(type => { map[type] = {}; });
+  return map;
+}
+
+// Same as one iteration of getTotalParts over #beybladeTable.
+function collectionRowPartCounts(row) {
+  const counts = emptyPartMap();
+  const persistedCells = getPersistedRowCells(row);
+  const model = persistedCells[0] || "";
+  const series = getSeriesFromModel(model);
+  const cxAssembly = String(row.dataset.stockAssemblySystem || "").startsWith("CX_");
+  partTypes.forEach(type => {
+    const name = getPersistedStockName(row, beybladeCellMap[type]);
+    if (type === "上蓋" && (cxAssembly || (series === "CX" && !isRandomBooster(model)))) return;
+    addStock(counts, type, name, 1);
+  });
+  return counts;
+}
+
+// Same as one iteration of getTotalParts over #partTable, except that a count
+// that is not a finite number (for example "abc") is not counted. getTotalParts
+// would turn such a value into NaN; here the row stays visible as 未計入 so it
+// can be fixed, and no total becomes NaN. getTotalParts itself is unchanged.
+function extraPartCountsFromCells(cells) {
+  const counts = emptyPartMap();
+  const type = cells[0] || "";
+  const name = cells[1] || "";
+  const count = Number(cells[2] || 0);
+  if (!Number.isFinite(count)) return counts;
+  if (partTypes.includes(type)) addStock(counts, type, name, count);
+  return counts;
+}
+
+// used: one iteration of getUsedParts. excluded: a CX (non-booster) config
+// stores its combined blade name in the 上蓋 cell; getUsedParts counts it, but
+// getTotalParts never holds it (addConfig skips it in its stock check too).
+function configRowPartUse(row) {
+  const used = emptyPartMap();
+  const excluded = emptyPartMap();
+  partTypes.forEach(type => addStock(used, type, getPersistedStockName(row, configCellMap[type]), 1));
+  const model = getPersistedRowCells(row)[0] || "";
+  if (getSeriesFromModel(model) === "CX" && !isRandomBooster(model)) {
+    addStock(excluded, "上蓋", getPersistedStockName(row, configCellMap["上蓋"]), 1);
+  }
+  return { used, excluded };
+}
+
+function getConfigRowLabel(row) {
+  const cells = getPersistedRowCells(row);
+  return [cells[1], cells[7], cells[8]].filter(value => value && value !== "-").join(" ") || cells[0] || "配置";
+}
+
+function computeCollectionPartsModel() {
+  const stockRows = Array.from(document.querySelectorAll("#beybladeTable tbody tr"))
+    .map(row => ({ counts: collectionRowPartCounts(row) }));
+  const extraRows = Array.from(document.querySelectorAll("#partTable tbody tr")).map(row => {
+    const cells = getPersistedRowCells(row);
+    const edit = getSourceRowButton(row, "editRow");
+    const remove = getSourceRowButton(row, "deleteRow");
+    return {
+      key: getCollectionViewKey(row),
+      row,
+      type: cells[0] || "",
+      name: cells[1] || "",
+      countText: cells[2] || "",
+      counts: extraPartCountsFromCells(cells),
+      editing: row.dataset.editing === "true",
+      actions: { edit: Boolean(edit), delete: Boolean(remove), editDisabled: Boolean(edit?.disabled), deleteDisabled: Boolean(remove?.disabled) }
+    };
+  });
+  const configRows = Array.from(document.querySelectorAll("#configTable tbody tr"))
+    .map(row => ({ label: getConfigRowLabel(row), ...configRowPartUse(row) }));
+  return computePartsModel({ stockRows, extraRows, configRows }, { rank: getInventoryTypeDisplayRank });
+}
+
+// S1: an English name only through a recordId that this page itself stored
+// with an explicit auto-fill marker, and only once the catalog is loaded.
+function getReliableEnglishName(meta) {
+  if (!isExplicitStockAutoFilled(meta?.stockAutoFilled)) return "";
+  const recordId = String(meta?.stockRecordId || "").trim();
+  if (!recordId) return "";
+  return stockProductsByRecordId.get(recordId)?.displayNameEn || "";
+}
+
+// D1: text appended to the existing confirmations. Read-only; any failure
+// returns "" so the original confirmation and flow are never affected.
+function impactTextOrEmpty(build) {
+  try {
+    return build();
+  } catch (error) {
+    console.warn("配置引用提示無法計算，已略過。", error);
+    return "";
+  }
+}
+
+function getStockDeleteImpactText(rows, verb = "刪除後") {
+  return impactTextOrEmpty(() => formatImpactText(
+    computeImpact(computeCollectionPartsModel(), { remove: rows.map(collectionRowPartCounts), mode: "delete" }),
+    { verb }
+  ));
+}
+
+function getPartDeleteImpactText(row) {
+  return impactTextOrEmpty(() => formatImpactText(
+    computeImpact(computeCollectionPartsModel(), { remove: [extraPartCountsFromCells(getPersistedRowCells(row))], mode: "delete" }),
+    { verb: "刪除後" }
+  ));
+}
+
+// Reads the edit inputs the same way saveEditRow does, before its confirmation.
+function getPartEditImpactText(button) {
+  return impactTextOrEmpty(() => {
+    const row = button.parentElement.parentElement;
+    const oldCells = getPersistedRowCells(row);
+    const type = row.cells[0]?.querySelector("select")?.value ?? oldCells[0];
+    const name = (row.cells[1]?.querySelector("input")?.value ?? oldCells[1]).trim();
+    const count = Number((row.cells[2]?.querySelector("input")?.value ?? oldCells[2]).trim());
+    if (!name || !Number.isFinite(count) || count <= 0) return "";
+    const remove = [extraPartCountsFromCells(oldCells)];
+    const add = [extraPartCountsFromCells([type, name, String(count)])];
+    if (type !== oldCells[0] || name !== oldCells[1]) {
+      return formatImpactText(computeImpact(computeCollectionPartsModel(), { remove, add, mode: "rename" }), { verb: "變更後", oldName: oldCells[1] });
+    }
+    if (count < Number(oldCells[2] || 0)) {
+      return formatImpactText(computeImpact(computeCollectionPartsModel(), { remove, add, mode: "reduce" }), { verb: "數量減少後" });
+    }
+    return "";
+  });
+}
+/* ===== Phase 7-2b parts model (P2 / U2 / D1, read-only): end ===== */
 
 function updateNoRatchetConfigOption() {
   const modelInput = document.getElementById("confModel");

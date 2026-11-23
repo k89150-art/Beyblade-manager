@@ -4,7 +4,7 @@
 
 ## 協調狀態
 
-- 目前執行者：無（v1.11.0／Phase 7-2a 已正式部署完成）
+- 目前執行者：無（Phase 7-2b 已本機 commit，未 push、未部署，等待 ChatGPT 複審；正式版本仍為 v1.11.0）
 - 寫入範圍：目前沒有進行中的寫入任務
 - 正式版本：`c18a33f181d7af842a97732f7dc76bb8f79b0a2d`（v1.11.0，`origin/main`，GitHub Pages deployment `8011069119` success）。本筆部署紀錄 commit 只在本機，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b～7-2d 尚未授權。
@@ -33,6 +33,19 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（Phase 7-2b，本機實作，未 commit）
+
+- 任務：使用者授權實作 P2＋S1＋U2＋D1（階段調整：V3、篩選、排序延至 7-2c；詳細面板維持 7-2d；記錄於規格 10 第四部分與 D-021）。
+- 主要內容：零件分頁依「類別＋名稱」彙總，顯示原裝內含／額外持有／配置引用／可用（超用），同名多筆額外列在卡片內各自修改／刪除，原裝內含只讀；列出「無對應的配置引用」。摘要改為原裝內含／額外持有／配置引用／超用品項／無對應引用（新 id `partsSummary*`，舊「使用中」公式不再顯示）。原裝陀螺分頁新增搜尋（型號、中文名、零件、只經明確自動帶入標記＋型錄 `recordId` 的英文名、套組代碼），換帳號時清除。刪除收藏、刪除套組、刪除額外零件、減少數量、改名時，在既有 confirm 文字後加入「不足／找不到對應／原本就不夠」提示，只提示不阻擋。
+- 計算：新增唯讀區塊 `Phase 7-2b parts model`，以與 `getTotalParts` 相同的規則逐列建立零件數量（使用真實 `addStock`）；配置引用＝`getUsedParts` 逐列結果減去 CX（非抽包）配置的組合上蓋。`getTotalParts`／`getUsedParts` 本體未修改。
+- 受保護函式：`deleteRow` 三行、`saveEditRow` 一行，只在 confirm 字串後附加提示（提示計算失敗回傳空字串）；A-09 兩段雜湊更新為 `0bc3c60c31499a7c`、`8be3b0baca010150`，其餘八段不變。D-018、D-015、F-04、Rules、Schema、型錄、競賽統計未修改；沒有新增寫入路徑。
+- 修改檔案：`collection-view.js`、`script.js`、`index.html`（搜尋框、摘要、零件區標題與說明、快取版本 `phase72b`）、`style.css`、`tests/collection-parts.test.mjs`（新，15 項）、`tests/collection-view.test.mjs`、`tests/manager-ui-refresh.test.mjs`（K-7 斷言依 P-5 替換）、`tests/assembly-rules.test.mjs`／`tests/collection-sync.test.mjs`（快取版本）、`README.md`／`AGENTS.md`（測試指令）、`docs/PROJECT_DECISIONS.md`、`design/phase7/`（規格 10 第四部分、`verification/phase7-2b/`）。
+- 測試：15 個測試檔 350/350 PASS；突變測試（移除 CX 排除、移除 D1 提示、移除無效數量判斷）皆被測到；validate、build、`git diff --check` 見本次回報。瀏覽器整合 174/174（`design/phase7/verification/phase7-2b/`）。Emulator（`exports/emulator-ui-72b/`，`demo-beyblade-72b-ui`，完整網站測試副本只改 Firebase 設定與 Emulator 連線）：以真實表單建立資料後，P2／U2 數字與手算一致、S1 英文名搜尋正確；D1 刪除收藏、刪除零件、改名三次取消後 Emulator `updateTime` 與四表指紋不變；確定刪除零件後只寫入預期資料，畫面出現無對應引用。
+- 提交前修正（使用者核准）：額外零件數量不是有限數字（例如 "abc"、"NaN"、"Infinity"）時，P2 不計入（卡片標「未計入」、摘要不出現 NaN）；既有 `getTotalParts` 對這類值會得到 NaN／Infinity，本體未修改，只有這類列與它不同（測試已註明）。正式備份 20261124-050655 的 19 筆額外零件沒有這類數量。
+- 發現（既有、非 7-2b）：新增配置後 `saveData` 先以新增順序儲存，80ms 後既有 `installConfigSort` 才排序畫面，下一次任何儲存會把 `configTable` 以排序後的順序重寫（內容相同、只有順序）。
+- 未驗證：正式網站登入流程、Safari／iOS；版本號與說明頁尚未更新（未授權）。
+- Commit / Deploy：未 commit、未 push、未部署。
 
 ### 2026-11-24 — Claude Code（v1.11.0／Phase 7-2a，正式部署）
 

@@ -60,8 +60,11 @@ test("list notices: signed out, loading, empty, no match", () => {
   assert.match(listNotice({ signedIn: false, kind: "stock" }), /登入後會顯示你的收藏/);
   assert.match(listNotice({ signedIn: true, loading: true, total: 0, shown: 0, kind: "parts" }), /正在載入/);
   assert.match(listNotice({ signedIn: true, loading: false, total: 0, shown: 0, kind: "stock" }), /尚無收藏/);
-  assert.match(listNotice({ signedIn: true, loading: false, total: 0, shown: 0, kind: "parts" }), /尚無額外零件/);
-  assert.match(listNotice({ signedIn: true, loading: false, total: 4, shown: 0, kind: "parts" }), /沒有符合條件/);
+  // Phase 7-2b (P2): the parts tab lists every held part, not only extra rows.
+  assert.match(listNotice({ signedIn: false, kind: "parts" }), /登入後會顯示你的零件/);
+  assert.match(listNotice({ signedIn: true, loading: false, total: 0, shown: 0, kind: "parts" }), /尚無零件。加入原裝收藏，或按「新增額外零件」開始/);
+  assert.match(listNotice({ signedIn: true, loading: false, total: 4, shown: 0, kind: "parts" }), /沒有符合條件的零件/);
+  assert.match(listNotice({ signedIn: true, loading: false, total: 4, shown: 0, kind: "stock" }), /沒有符合條件的收藏/);
   assert.equal(listNotice({ signedIn: true, loading: false, total: 4, shown: 4, kind: "parts" }), "");
 });
 
@@ -140,9 +143,9 @@ test("Q1: add forms stay where they were, wrapped in collapsible panels with the
 });
 
 test("cache versions for the changed files", () => {
-  assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261124-phase72a" \/>/);
-  assert.match(html, /<script type="module" src="script\.js\?v=20261124-phase72a"><\/script>/);
-  assert.match(script, /from "\.\/collection-view\.js\?v=20261124-phase72a";/);
+  assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261124-phase72b" \/>/);
+  assert.match(html, /<script type="module" src="script\.js\?v=20261124-phase72b"><\/script>/);
+  assert.match(script, /from "\.\/collection-view\.js\?v=20261124-phase72b";/);
   // v1.11.0 only changes SITE_VERSION in site-menu.js; the D-020 navigation itself is unchanged.
   assert.match(html, /<script src="site-menu\.js\?v=20261124-v1110"><\/script>/);
   assert.match(html, /<link rel="stylesheet" href="site-menu\.css\?v=20261124-v1100" \/>/);
@@ -199,7 +202,7 @@ test("R2: the display layer never writes data, cells or row metadata", () => {
   assert.match(viewBlock, /if \(!isCollectionViewActive\(\) \|\| collectionViewState\.renderQueued\) return;/);
 });
 
-test("A-09: D-018, D-015, F-04 capture, table reads and row edit/delete code are byte-for-byte unchanged", () => {
+test("A-09: D-018, D-015, F-04 capture and table reads are byte-for-byte unchanged; row edit/delete only gained the approved D1 confirm text", () => {
   const sha = text => crypto.createHash("sha256").update(text).digest("hex").slice(0, 16);
   // Hashes of the same ranges in 50169d7 (Phase 7-1, before 7-2a).
   const expected = [
@@ -209,8 +212,11 @@ test("A-09: D-018, D-015, F-04 capture, table reads and row edit/delete code are
     ["function getStoredItemExtras(", "function clearAllTables(", "70d4d345da4b1036"],
     ["function chooseStockProductForStoredItem(", "function createStockSetInstanceId(", "410384c3e2c96a4c"],
     ["function getStockNameFromCell(", "function escapeHtml(", "bf558aecdc0ad038"],
-    ["window.deleteRow = async function", "/* ====== 表格內修改功能", "b2d3025d2f9d948b"],
-    ["window.editRow = function", "function rebuildRow(", "e3d6abe8c11d47eb"],
+    // Phase 7-2b (D1, approved): only the confirm() strings gained a read-only hint
+    // (3 lines in deleteRow, 1 line in saveEditRow); see tests/collection-parts.test.mjs.
+    // Previous hashes (50169d7..6f3f2b5): b2d3025d2f9d948b, e3d6abe8c11d47eb.
+    ["window.deleteRow = async function", "/* ====== 表格內修改功能", "0bc3c60c31499a7c"],
+    ["window.editRow = function", "function rebuildRow(", "8be3b0baca010150"],
     ["function captureOrphanedCollectionDraft(", "// Phase 7-2a (Q1)", "b6c58c122f6809ff"],
     ["function getTotalParts(", "function setUiSummaryValue(", "813fc6a101343c44"]
   ];
@@ -326,4 +332,14 @@ test("Q1-06 / F-04: the draft of A is captured exactly as before, without add-fo
   assert.doesNotMatch(JSON.stringify(draft), /UX-01|A 的零件|手動上蓋/, "add-form text is not part of the draft");
   assert.equal(field("model").value, "");
   assert.equal(A.context.buildOrphanedDraftExport().drafts.length, 0, "B cannot export the draft of A");
+});
+
+test("S1 wiring: stock search box in the stock tab, cleared on account change, re-renders on input", () => {
+  const collection = between(html, '<section id="collectionSection"', "</section>");
+  assert.match(collection, /<input id="stockSearchInput" type="search" autocomplete="off" placeholder="搜尋型號、名稱、零件或英文名">/);
+  const reset = between(viewBlock, "function resetCollectionViewState(", "function failCollectionView(");
+  assert.match(reset, /const stockSearch = document\.getElementById\("stockSearchInput"\);\n  if \(stockSearch\) stockSearch\.value = "";/);
+  assert.match(viewBlock, /document\.getElementById\("stockSearchInput"\)\?\.addEventListener\("input", scheduleCollectionViewRender\);/);
+  assert.match(viewBlock, /englishName: getReliableEnglishName\(stockSnapshots\[index\]\.meta\)/);
+  assert.match(viewBlock, /const shownStock = filterStockItems\(stockItems, document\.getElementById\("stockSearchInput"\)\?\.value \|\| ""\);/);
 });

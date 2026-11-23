@@ -103,7 +103,7 @@
 依修改範圍執行針對性測試，完成實質修改時至少執行：
 
 ```powershell
-node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs tests/collection-sync.test.mjs tests/assembly-rules.test.mjs tests/site-navigation.test.mjs tests/collection-view.test.mjs
+node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs tests/collection-sync.test.mjs tests/assembly-rules.test.mjs tests/site-navigation.test.mjs tests/collection-view.test.mjs tests/collection-parts.test.mjs
 node --experimental-vm-modules scripts/validate-site.mjs
 node scripts/build-site.mjs
 git diff --check

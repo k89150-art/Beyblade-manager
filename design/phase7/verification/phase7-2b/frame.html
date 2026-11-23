@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body>
+<script type="module">
+// Phase 7-2b integration check (P2 / U2 / S1 / D1). Runs the REAL source text of
+// script.js (sliced by markers) on the REAL index.html markup with the REAL
+// style.css / site-menu.css and the REAL catalog files, in a browser.
+// Stubs: sign-in state, write session, saveData (counted, never writes),
+// refreshSelectors, confirm (recorded, answer chosen per step), alert. No Firebase.
+import { fingerprintTable, pickCollectionTables } from "/repo/collection-sync.js";
+import { attachCatalogNames, getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel } from "/repo/stock-catalog-names.js";
+import * as view from "/repo/collection-view.js";
+
+const params = new URLSearchParams(location.search);
+const THEME = params.get("theme") || "dark";
+const report = data => parent.postMessage({ i72b: true, theme: THEME, width: innerWidth, ...data }, "*");
+const frame = () => new Promise(r => setTimeout(r, 60));
+const checks = [];
+const check = (id, ok, detail = "") => checks.push({ id, ok: Boolean(ok), detail: String(detail).slice(0, 400) });
+
+try {
+  const html = await (await fetch("/repo/index.html")).text();
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map(l => l.getAttribute("href")).filter(h => !/^https?:/.test(h));
+  await Promise.all(links.map(href => new Promise(ok => { const l = document.createElement("link"); l.rel = "stylesheet"; l.href = "/repo/" + href; l.onload = l.onerror = ok; document.head.appendChild(l); })));
+  doc.querySelectorAll("script").forEach(s => s.remove());
+  document.body.className = doc.body.className;
+  document.body.innerHTML = doc.body.innerHTML;
+  if (THEME === "beige") document.documentElement.dataset.theme = "beige";
+
+  const src = (await (await fetch("/repo/script.js")).text()).replace(/\r\n/g, "\n");
+  const slice = (a, b) => { const i = src.indexOf(a), j = src.indexOf(b, i + 1); if (i < 0 || j < 0) throw new Error("slice " + a); return src.slice(i, j); };
+  const code = [
+    slice("let inventoryFilterType", "\n") + "\n",
+    slice("const partTypes = [", "function normalizeAllModelCells("),
+    slice("const RANDOM_BOOSTER_MODELS", "// Phase 7-R: the ratchet rules"),
+    slice("function getSeriesFromModel(", "function getConfigStructureModeFromRow("),
+    slice("const TABLE_SORT_ORDER", "function sortConfigTable("),
+    slice("function addStock(", "function closeConfigActionMenus("),
+    slice("function getEditingButtons(", "function normalizeComboValue("),
+    slice("function createHistoryRow(", "function findHistoryByComboKey("),
+    slice("window.deleteRow = async function", "function getConfigEditCurrentValue("),
+    slice("function getTableData(", "/* ===== D-018 collection saves: begin"),
+    slice("const QUICK_ADD_TEXT_FIELD_IDS", "async function handleAuthStateChange("),
+    slice("const STOCK_ROW_METADATA_KEYS", "function applyDataToTables("),
+    slice("function getTotalParts(", "function toHalfWidth("),
+    slice("function installUiSummaryObservers(", "/* ===== Phase 7-2a collection view (R2): begin"),
+    slice("/* ===== Phase 7-2a collection view (R2): begin", "/* ===== Phase 7-2b parts model (P2 / U2 / D1, read-only): end")
+  ].join("\n");
+  const counters = { saveData: 0, confirms: [], alerts: [], answer: true };
+  window.confirm = text => { counters.confirms.push(text); return counters.answer; };
+  window.alert = text => { counters.alerts.push(text); };
+  const [productData, nameData] = await Promise.all([
+    fetch("/repo/stock_products_AUTOFILL_SAFE_2026-07-29-v3.json").then(r => r.json()),
+    fetch("/repo/beyblade_x_model_chinese_english_2026-08-29.json").then(r => r.json())
+  ]);
+  const products = attachCatalogNames(productData.stockProducts, nameData.records);
+  const api = new Function("deps", `
+    const { getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel, view, counters, products } = deps;
+    const { COLLECTION_VIEW_TABS, buildStockItems, collectionHashTarget, computeImpact, computePartsModel, filterPartItems, filterStockItems, formatImpactText, isAddPanelOpen, listNotice, otherTab, rowSignature } = view;
+    const requestAnimationFrame = callback => setTimeout(callback, 16);
+    const DATA_SESSION_STATES = { LOADING: "loading", READY: "ready", ERROR: "error", READONLY: "readonly" };
+    const isReadOnly = () => false;
+    const requireLogin = () => true;
+    const dataSessionGuard = { captureWriteSession: () => ({}), isWriteSessionCurrent: () => true, snapshot: () => ({ state: "ready" }) };
+    const refreshSelectors = () => {};
+    const renderStockAutoPreview = () => {};
+    const askDeleteReasonForConfig = async () => null;
+    const saveData = () => { counters.saveData += 1; };
+    let currentUser = { uid: "user-a" };
+    let stockProductsByRecordId = new Map(products.filter(p => p.autoFillEnabled && !p.needsReview && p.recordId).map(p => [String(p.recordId).trim(), p]));
+    ${code}
+    function load(data) {
+      clearAllTables();
+      data.beybladeTable.forEach(item => createBeybladeRow(item.cells, item.mainStockName, item));
+      data.partTable.forEach(item => createPartRow(item.cells));
+      data.historyTable.forEach(item => createHistoryRow(item));
+      data.configTable.forEach(item => createConfigRow(item.cells, item.mainStockName));
+      sortBeybladeTable();
+    }
+    return { load, collectCurrentData, installCollectionView, installUiSummaryObservers, setCollectionTab, computeCollectionPartsModel,
+      setFilter: v => { inventoryFilterType = v; } };
+  `)({ getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel, view, counters, products });
+
+  const auto = (code, recordId, layer, fix, axis, extra = {}) => ({ cells: [code, layer, "-", "-", "-", "-", "-", fix, axis], mainStockName: "-", stockAutoFilled: "true", stockRecordId: recordId, stockProductCode: code, stockAssemblySystem: "STANDARD", ...extra });
+  const DATA = {
+    beybladeTable: [
+      auto("UX-01", "UX-01", "蒼龍爆刃", "1-60", "A"),
+      auto("BX-01", "BX-01", "蒼龍神劍", "3-60", "F"),
+      auto("BX-01", "BX-01", "蒼龍神劍", "3-60", "F"),
+      auto("BX-00", "BX-00-01-01", "歐比王肯諾比", "4-60", "P", { stockSetId: "BX-00-01", stockSetInstanceId: "set-1" }),
+      auto("BX-00", "BX-00-01-02", "葛里維斯將軍", "3-80", "HN", { stockSetId: "BX-00-01", stockSetInstanceId: "set-1" }),
+      { cells: ["BX-04", "騎士重盾", "-", "-", "-", "-", "-", "3-80", "N"], mainStockName: "-" },               // manual: no English name
+      { cells: ["CX-03", "紋章鎖金屬超越S", "紋章鎖", "超越/金屬", "超越", "金屬", "S", "4-55", "LO"], mainStockName: "", stockAutoFilled: "true", stockRecordId: "CX-03", stockAssemblySystem: "CX_4P" }
+    ],
+    partTable: [
+      { cells: ["固鎖", "3-60", "2"] },
+      { cells: ["軸心", "R", "1"] },
+      { cells: ["軸心", "F", "1"] },
+      { cells: ["軸心", "F", "3"] }
+    ],
+    configTable: [
+      { cells: ["BX-01 CUSTOM", "蒼龍神劍", "-", "-", "-", "-", "-", "3-60", "F"], mainStockName: "-" },
+      { cells: ["BX-CUSTOM", "惡魔重錘", "-", "-", "-", "-", "-", "3-60", "R"], mainStockName: "-" },
+      { cells: ["BX-CUSTOM", "魔導幻箭", "-", "-", "-", "-", "-", "3-60", "R"], mainStockName: "-" },
+      { cells: ["BX-CUSTOM", "騎士重盾", "-", "-", "-", "-", "-", "3-60", "LF"], mainStockName: "-" },
+      { cells: ["CX-CUSTOM", "紋章鎖金屬超越S", "紋章鎖", "超越/金屬", "超越", "金屬", "S", "4-55", "LO"], mainStockName: "" }
+    ],
+    historyTable: []
+  };
+
+  const collect = () => { const out = api.collectCurrentData(); delete out.updatedAt; const t = pickCollectionTables(out); return { json: JSON.stringify(t), prints: Object.values(t).map(fingerprintTable).join("|"), tables: t }; };
+  const rowsOf = id => Array.from(document.querySelectorAll(`#${id} tbody tr`));
+  const text = id => document.getElementById(id)?.textContent;
+
+  api.load(DATA);
+  api.installCollectionView();
+  api.installUiSummaryObservers();
+  await frame(); await frame();
+  const base = collect();
+  const model = api.computeCollectionPartsModel();
+
+  // U2 summary on the page equals the parts model; old ids are gone.
+  check("U2 summary ids show the model totals", text("partsSummaryOriginal") === String(model.totals.orig) && text("partsSummaryExtra") === String(model.totals.extra) && text("partsSummaryReferences") === String(model.totals.refs) && text("partsSummaryOverused") === String(model.totals.overused) && text("partsSummaryUnmatched") === String(model.totals.orphans),
+    JSON.stringify(model.totals));
+  check("U2 old summary ids removed", ["inventoryUsed", "inventoryAvailable", "inventoryTotal", "inventoryKindSummary"].every(id => !document.getElementById(id)));
+  // Hand count from the getTotalParts / getUsedParts rules: original 上蓋 6 + 固鎖 7 + 軸心 7 + CX 4 = 24;
+  // references on held parts 15; 軸心 R over-used; unmatched 上蓋 惡魔重錘, 上蓋 魔導幻箭, 軸心 LF.
+  check("U2 golden on this data (orig 24, extra 7, refs 15, overused 1, unmatched 3)", JSON.stringify(model.totals) === JSON.stringify({ kinds: model.items.length, orig: 24, extra: 7, refs: 15, overused: 1, orphans: 3 }), JSON.stringify(model.totals));
+
+  // P2 cards.
+  api.setCollectionTab("parts"); await frame();
+  const cards = [...document.querySelectorAll("#partViewList .cv-part-item")];
+  const card = (type, name) => cards.find(a => a.querySelector(".cv-type").textContent === type && a.querySelector(".cv-title").textContent === name);
+  const nums = a => [...a.querySelectorAll(".cv-nums dd")].map(d => d.textContent).join("/");
+  check("P2 one card per held part", cards.length === model.items.length, `${cards.length}/${model.items.length}`);
+  check("P2 固鎖 3-60: 原裝 2 / 額外 2 / 引用 4 / 可用 0", nums(card("固鎖", "3-60")) === "2/2/4/0", nums(card("固鎖", "3-60")));
+  check("P2 軸心 R over-used: 0 / 1 / 2 / 超用 1", nums(card("軸心", "R")) === "0/1/2/1" && card("軸心", "R").classList.contains("is-over") && card("軸心", "R").querySelector(".cv-avail dt").textContent === "超用");
+  const fCard = card("軸心", "F");
+  check("P2 same-name extra rows stay separate with their own buttons", fCard.querySelectorAll(".cv-extra-row").length === 2 && fCard.querySelectorAll('[data-view-action="delete"]').length === 2 && new Set([...fCard.querySelectorAll("[data-view-key]")].map(b => b.dataset.viewKey)).size === 2);
+  check("P2 original-only parts have no actions", card("上蓋", "蒼龍爆刃").querySelectorAll("[data-view-action]").length === 0 && nums(card("上蓋", "蒼龍爆刃")) === "1/0/0/1");
+  check("P2 CX combined name is not a part", !card("上蓋", "紋章鎖金屬超越S"));
+  const unmatched = document.querySelector("#partViewList .cv-unmatched");
+  check("P2 unmatched references listed (軸心 LF)", unmatched && /軸心「LF」：被 1 個配置引用（騎士重盾 3-60 LF）/.test(unmatched.textContent), unmatched?.textContent);
+  check("tab count = part kinds", text("collectionTabPartsCount") === String(model.items.length));
+
+  // S1.
+  api.setCollectionTab("stock"); await frame();
+  const search = document.getElementById("stockSearchInput");
+  const shown = async q => { search.value = q; search.dispatchEvent(new Event("input", { bubbles: true })); await frame(); await frame(); return [...document.querySelectorAll("#stockViewList .cv-code")].map(x => x.textContent); };
+  const s1 = { dran: await shown("dran"), obi: await shown("obi-wan"), knight: await shown("knight"), set: await shown("bx-00-01"), part: await shown("3-80"), none: await shown("zzz") };
+  check("S1 English names from the catalog (DranBuster, DranSword)", JSON.stringify(s1.dran) === JSON.stringify(["UX-01", "BX-01", "BX-01"]), JSON.stringify(s1.dran));
+  check("S1 set member English name", JSON.stringify(s1.obi) === JSON.stringify(["BX-00"]), JSON.stringify(s1.obi));
+  check("S1 manual row is not found by an English name", s1.knight.length === 0);
+  check("S1 set code and part search", s1.set.length === 2 && s1.part.length === 2, JSON.stringify([s1.set, s1.part]));
+  check("S1 no match notice", s1.none.length === 0 && /沒有符合條件的收藏/.test(document.querySelector("#stockViewList .cv-notice")?.textContent || ""));
+  await shown("");
+  check("display operations keep data identical and do not save", collect().json === base.json && collect().prints === base.prints && counters.saveData === 0);
+
+  // D1-1 cancel: delete one BX-01 from the view, answer cancel.
+  const bxButton = () => [...document.querySelectorAll("#stockViewList .cv-item")].find(a => a.querySelector(".cv-code").textContent === "BX-01").querySelector('[data-view-action="delete"]');
+  counters.answer = false; bxButton().click(); await frame();
+  check("D1-1 hint in the existing confirmation", counters.confirms.at(-1) === "確定要刪除「BX-01 蒼龍神劍」嗎？\n刪除後，下列零件會不夠配置使用：\n・固鎖 3-60：持有 3，配置引用 4（蒼龍神劍 3-60 F、惡魔重錘 3-60 R、魔導幻箭 3-60 R 等 4 個）\n配置不會被修改。", counters.confirms.at(-1));
+  check("D1 cancel: data unchanged, no save", collect().json === base.json && counters.saveData === 0 && counters.confirms.length === 1);
+
+  // D1-2 set: confirm text, cancel.
+  [...document.querySelectorAll("#stockViewList .cv-item")].find(a => a.querySelector(".cv-code").textContent === "BX-00").querySelector('[data-view-action="delete"]').click(); await frame();
+  check("D1-2 set: no configuration uses the set parts, so the confirmation is unchanged", counters.confirms.at(-1) === "「BX-00」是雙陀螺套組。確定要一起刪除「歐比王肯諾比、葛里維斯將軍」嗎？", counters.confirms.at(-1));
+  check("D1-2 cancel: unchanged, no save", collect().json === base.json && counters.saveData === 0);
+
+  // D1-3 delete an extra row (軸心 R, already short), cancel.
+  api.setCollectionTab("parts"); await frame();
+  const rCard = [...document.querySelectorAll("#partViewList .cv-part-item")].find(a => a.querySelector(".cv-title").textContent === "R");
+  rCard.querySelector('[data-view-action="delete"]').click(); await frame();
+  check("D1-3 already-short line", counters.confirms.at(-1) === "確定要刪除「軸心：R，數量 1」嗎？\n軸心 R 原本就不夠配置使用（持有 1，配置引用 2），變更後會更不足。\n配置不會被修改。", counters.confirms.at(-1));
+  check("D1-3 cancel: unchanged, no save", collect().json === base.json && counters.saveData === 0);
+
+  // D1-4 reduce 3-60 from 2 to 1 through the original row editor, cancel at the save confirmation.
+  const p360 = rowsOf("partTable").find(r => r.cells[1].innerText === "3-60");
+  [...document.querySelectorAll("#partViewList .cv-part-item")].find(a => a.querySelector(".cv-title").textContent === "3-60").querySelector('[data-view-action="edit"]').click();
+  await frame(); await frame();
+  p360.cells[2].querySelector("input").value = "1";
+  window.saveEditRow(p360.cells[p360.cells.length - 1].querySelector('button[onclick^="saveEditRow("]'), "part");
+  check("D1-4 reduce hint", counters.confirms.at(-1) === "確定要保存這次修改嗎？\n數量減少後，下列零件會不夠配置使用：\n・固鎖 3-60：持有 3，配置引用 4（蒼龍神劍 3-60 F、惡魔重錘 3-60 R、魔導幻箭 3-60 R 等 4 個）\n配置不會被修改。", counters.confirms.at(-1));
+  check("D1-4 cancel keeps editing, no save", p360.dataset.editing === "true" && counters.saveData === 0);
+
+  // D1-5 rename R -> R2 on another row (after cancelling the first edit).
+  counters.answer = true;
+  window.cancelEditRow(p360.cells[p360.cells.length - 1].querySelector('button[onclick^="cancelEditRow("]'), "part"); await frame(); await frame();
+  counters.answer = false;
+  const pR = rowsOf("partTable").find(r => r.cells[1].innerText === "R");
+  window.editRow(pR.cells[pR.cells.length - 1].querySelector('button[onclick^="editRow("]'), "part"); await frame();
+  pR.cells[1].querySelector("input").value = "R2";
+  window.saveEditRow(pR.cells[pR.cells.length - 1].querySelector('button[onclick^="saveEditRow("]'), "part");
+  check("D1-5 rename hint", counters.confirms.at(-1) === "確定要保存這次修改嗎？\n改名後，下列配置仍使用舊名稱「R」，將找不到對應零件：\n・軸心 R：惡魔重錘 3-60 R、魔導幻箭 3-60 R\n配置不會自動改名。", counters.confirms.at(-1));
+  counters.answer = true;
+  window.cancelEditRow(pR.cells[pR.cells.length - 1].querySelector('button[onclick^="cancelEditRow("]'), "part"); await frame(); await frame();
+  check("D1 all cancels: data identical to the start, no save", collect().json === base.json && counters.saveData === 0);
+
+  // D1 confirm path: delete one F extra row (no impact) -> one save, exactly that row removed.
+  const fRows = rowsOf("partTable").filter(r => r.cells[1].innerText === "F");
+  const fItem = [...document.querySelectorAll("#partViewList .cv-part-item")].find(a => a.querySelector(".cv-title").textContent === "F");
+  fItem.querySelectorAll('[data-view-action="delete"]')[1].click(); await frame(); await frame();
+  check("confirm path: second F row removed, first kept, one save, no hint", !fRows[1].isConnected && fRows[0].isConnected && counters.saveData === 1 && counters.confirms.at(-1) === "確定要刪除「軸心：F，數量 3」嗎？");
+
+  check("layout no horizontal overflow", document.documentElement.scrollWidth <= innerWidth + 1, `${document.documentElement.scrollWidth}/${innerWidth}`);
+  report({ ok: true, checks });
+} catch (error) {
+  report({ ok: false, error: String(error && error.stack || error), checks });
+}
+</script>
+</body>
+</html>

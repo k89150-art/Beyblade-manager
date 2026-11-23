@@ -260,13 +260,22 @@ test("inventory type colors reuse existing type groups without changing stored v
 });
 
 test("inventory summary stays compact and reuses configuration occupancy", () => {
-  assert.match(html, /id="inventoryKindSummary"/);
-  assert.match(html, /id="inventoryTotal"/);
-  assert.match(html, /id="inventoryUsed"/);
-  assert.match(html, /id="inventoryAvailable"/);
-  assert.match(script, /const usedParts = getUsedParts\(\)/);
-  assert.match(script, /inventoryUsed \+= Math\.min\(count, usedParts\[type\]\?\.\[name\] \|\| 0\)/);
-  assert.match(script, /setUiSummaryValue\("inventoryAvailable", Math\.max\(0, inventoryTotal - inventoryUsed\)\)/);
+  // Phase 7-2b (U2, K-7 approved): the summary shows 原裝內含／額外持有／配置引用／超用品項／
+  // 無對應引用 with new ids. The former 使用中 formula (sum of min(extra, used)) is no longer
+  // shown; its behaviour is kept as an oracle with golden values in
+  // tests/collection-parts.test.mjs (K7-01／K7-02). Replaced here: the ids
+  // inventoryKindSummary／inventoryTotal／inventoryUsed／inventoryAvailable and the three
+  // source patterns of the old formula.
+  for (const id of ["partsSummaryOriginal", "partsSummaryExtra", "partsSummaryReferences", "partsSummaryOverused", "partsSummaryUnmatched"]) {
+    assert.match(html, new RegExp(`id="${id}"`), id);
+  }
+  for (const id of ["inventoryKindSummary", "inventoryTotal", "inventoryUsed", "inventoryAvailable"]) {
+    assert.doesNotMatch(html, new RegExp(`id="${id}"`), id);
+    assert.doesNotMatch(script, new RegExp(`setUiSummaryValue\\("${id}"`), id);
+  }
+  assert.doesNotMatch(html, /<span>使用中<\/span>/);
+  assert.match(html, /<div class="summary-strip parts-summary" aria-label="零件庫存摘要">/);
+  assert.match(script, /const parts = typeof computeCollectionPartsModel === "function" \? computeCollectionPartsModel\(\)\.totals : null;/);
   assert.match(styles, /#inventorySection \.summary-strip > div \{[\s\S]*?min-height: 42px;[\s\S]*?padding: 7px 10px;/);
   assert.match(styles, /@media \(max-width: 600px\) \{[\s\S]*?#inventorySection \.summary-strip \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
   assert.match(styles, /#inventorySection \.summary-strip > div:nth-child\(-n \+ 2\) \{[\s\S]*?border-bottom: 1px solid var\(--manager-divider\);/);

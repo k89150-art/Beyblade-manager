@@ -14,7 +14,7 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20261124-phase72a" />
+  <link rel="stylesheet" href="style.css?v=20261124-phase72b" />
   <link rel="stylesheet" href="site-menu.css?v=20261124-v1100" />
   <style>
 
@@ -328,27 +328,35 @@
     </div>
     </div>
 
+    <div class="stock-search-toolbar">
+      <label class="stock-search">
+        <span class="sr-only">搜尋原裝陀螺</span>
+        <input id="stockSearchInput" type="search" autocomplete="off" placeholder="搜尋型號、名稱、零件或英文名">
+      </label>
+    </div>
+
     <div id="stockViewList" class="collection-view-list" aria-label="原裝陀螺清單" hidden></div>
 
     </section>
 
     <section id="inventorySection" class="tool-section">
       <div class="section-heading">
-        <div><span class="eyebrow">EXTRA PARTS</span><h2>額外零件庫存</h2></div>
+        <div><span class="eyebrow">PARTS</span><h2>零件庫存</h2></div>
         <span class="count-pill"><strong id="inventoryKinds">0</strong> 種</span>
       </div>
-      <p class="section-note">這裡只顯示你另外新增的零件，不重複列出收藏區內整顆陀螺所包含的零件。</p>
+      <p class="section-note">依類別與名稱列出所有持有的零件：「原裝內含」來自原裝收藏，「額外持有」是另外新增的零件。「配置引用」是目前配置使用這個零件名稱的次數，不是比賽使用次數；只有額外持有可以修改或刪除。</p>
 
-      <div class="summary-strip" aria-label="額外零件庫存摘要">
-        <div><span>零件種類</span><strong id="inventoryKindSummary">0</strong></div>
-        <div><span>持有總數</span><strong id="inventoryTotal">0</strong></div>
-        <div><span>使用中</span><strong id="inventoryUsed">0</strong></div>
-        <div><span>可用</span><strong class="accent" id="inventoryAvailable">0</strong></div>
+      <div class="summary-strip parts-summary" aria-label="零件庫存摘要">
+        <div><span>原裝內含</span><strong id="partsSummaryOriginal">0</strong></div>
+        <div><span>額外持有</span><strong id="partsSummaryExtra">0</strong></div>
+        <div><span>配置引用</span><strong id="partsSummaryReferences">0</strong></div>
+        <div><span>超用品項</span><strong class="accent" id="partsSummaryOverused">0</strong></div>
+        <div><span>無對應引用</span><strong id="partsSummaryUnmatched">0</strong></div>
       </div>
 
       <div class="inventory-toolbar" aria-label="庫存搜尋與篩選">
         <label class="inventory-search">
-          <span class="sr-only">搜尋額外零件</span>
+          <span class="sr-only">搜尋零件</span>
           <input id="inventorySearchInput" type="search" autocomplete="off" placeholder="搜尋零件名稱">
         </label>
         <div class="inventory-filters" role="group" aria-label="依零件分類篩選">
@@ -732,7 +740,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20261124-phase72a"></script>
+  <script type="module" src="script.js?v=20261124-phase72b"></script>
   <script src="site-menu.js?v=20261124-v1110"></script>
 </body>
 </html>

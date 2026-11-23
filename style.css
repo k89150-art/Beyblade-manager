@@ -3932,3 +3932,131 @@ html[data-theme="beige"] .cv-action-danger {
     justify-content: center;
   }
 }
+
+/* ===== Phase 7-2b: parts quantities (P2), summary (U2), stock search (S1) ===== */
+.stock-search-toolbar {
+  margin: var(--ui-space-3, 12px) 0 0;
+}
+
+.stock-search input {
+  width: 100%;
+  min-height: var(--ui-touch, 44px);
+}
+
+.manager-page #inventorySection .summary-strip.parts-summary {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.cv-nums {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--ui-space-1, 4px);
+  margin: 0;
+}
+
+.cv-nums > div {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border-radius: var(--ui-radius-sm, 6px);
+  background: var(--ui-surface-raised, #1a222c);
+}
+
+.cv-nums dt {
+  color: var(--ui-text-muted, #8d99a6);
+  font-size: 11.5px;
+}
+
+.cv-nums dd {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.cv-part-item.is-over {
+  border-color: #f0786f;
+}
+
+.cv-part-item.is-over .cv-avail dd,
+.cv-part-item.is-over .cv-avail dt {
+  color: #f0786f;
+}
+
+html[data-theme="beige"] .cv-part-item.is-over {
+  border-color: #b3261e;
+}
+
+html[data-theme="beige"] .cv-part-item.is-over .cv-avail dd,
+html[data-theme="beige"] .cv-part-item.is-over .cv-avail dt {
+  color: #b3261e;
+}
+
+.cv-refs {
+  margin: 0;
+  color: var(--ui-text-muted, #8d99a6);
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+.cv-extra-rows {
+  display: grid;
+  gap: var(--ui-space-1, 4px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cv-extra-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-2, 8px);
+  padding-top: var(--ui-space-1, 4px);
+  border-top: 1px dashed var(--ui-line, #2b3743);
+  font-size: 13px;
+}
+
+.cv-extra-row.is-editing {
+  color: var(--ui-accent, #4b91ff);
+}
+
+.cv-unmatched {
+  grid-column: 1 / -1;
+  padding: var(--ui-space-3, 12px);
+  border: 1px solid #d29922;
+  border-radius: var(--ui-radius-md, 10px);
+  background: var(--ui-surface, #10161d);
+  color: var(--ui-text, #e6ebf1);
+}
+
+.cv-unmatched h3 {
+  margin: 0 0 var(--ui-space-2, 8px);
+  font-size: 15px;
+}
+
+.cv-unmatched ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.cv-unmatched p {
+  margin: var(--ui-space-2, 8px) 0 0;
+  color: var(--ui-text-muted, #8d99a6);
+  font-size: 12.5px;
+}
+
+@media (max-width: 600px) {
+  .manager-page #inventorySection .summary-strip.parts-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .manager-page #inventorySection .summary-strip.parts-summary > div:nth-child(-n + 4) {
+    border-bottom: 1px solid var(--manager-divider);
+  }
+}
