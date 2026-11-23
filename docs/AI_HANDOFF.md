@@ -4,10 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（v1.13.0 正式上線進行中；ChatGPT 已核准 7-2c commit `9d589a9` 與發布流程）
-- 寫入範圍：v1.13.0 release commit（版本、更新紀錄、使用說明、相關測試、本文件）
-- 正式版本：`b006f165a68a6d652ac13589cb38ac16ddd59ac9`（v1.12.0，`origin/main`，GitHub Pages deployment `8012230899` success）。本筆部署紀錄 commit 只在本機，未 push。
-- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已本機 commit（未 push）；Phase 7-2d 尚未授權。
+- 目前執行者：無（v1.13.0 已正式部署）
+- 寫入範圍：目前沒有進行中的寫入任務
+- 正式版本：`c22d712`（v1.13.0，`origin/main`，GitHub Pages deployment `8013363988` success）。本筆部署紀錄 commit 只在本機，未 push。
+- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2d 尚未授權。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -33,6 +33,19 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（v1.13.0／Phase 7-2c，正式部署）
+
+- 任務：ChatGPT 核准 7-2c commit `9d589a9` 與 v1.13.0 發布流程；使用者授權 release commit、push、部署與唯讀驗收。
+- 正式 commit：`c22d712`（`chore(release): prepare v1.13.0 collection controls`），連同 `151b2db`（v1.12.0 部署紀錄）與 `9d589a9`（Phase 7-2c 功能）以 fast-forward 推送 `b006f16..c22d712`，未 force push。
+- 備份：**依使用者指示略過**（使用者回覆「不須備份」）。與授權流程「建立新備份並驗證」的要求不同，已在回報中說明。最近一份已驗證的正式備份為 `C:BeybladeBackupseyblade-appData-backup-20261124-060036.json`（v1.12.0 部署前，2 份文件，PASS）。本版只改顯示層，未改資料格式，未新增寫入路徑。
+- Push 前：Node 359/359；7-2c 瀏覽器 222/222；7-2b 回歸 174/174（暫時修改已還原）；validate PASS；build PASS（35 files）；`git diff --check` 通過；A-09 十段雜湊不變；寫入路徑 `saveData()` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0 不變；遠端無新 commit、可 fast-forward；使用者確認所有裝置舊分頁與 PWA 已關閉。
+- 部署：GitHub Pages build `built`；deployment `8013363988`（`github-pages`）success；workflow run `45284772235` success。
+- 部署後唯讀驗收（未登入，內建瀏覽器）：18 個正式檔案與 commit 逐位元組相同；側欄、使用說明顯示 v1.13.0；首頁載入 `script.js?v=20261124-phase72c`、`site-menu.js?v=20261124-v1130`；1024px 原裝陀螺控制項（系列 chip 全部／UX／BX／CX、來源 全部／自動帶入／手動輸入、排序 預設／型號／名稱）與清單／卡片切換顯示，預設清單，切換卡片與各篩選操作不出錯；零件狀態（全部／可用／已全用／超用）與排序（預設／名稱／可用數量）控制項顯示並可操作；375px 不顯示切換（固定卡片）、控制項顯示；更新紀錄最新 v1.13.0（5 點）、歷史版本 v1.2.0～v1.12.0；使用說明第二節 10 點含系列／來源／排序／清單卡片說明，第三節含狀態篩選；375 與 1024 無水平捲動；資源無 4xx／5xx；Console Error 0。驗收時在內建瀏覽器切換過 V3，最後已切回清單（只影響該瀏覽器的 localStorage）。
+- 未驗證：登入後以正式資料的篩選、排序結果與清單／卡片顯示（只在瀏覽器 harness 與 Emulator 驗證）；登入後 CRUD；正式 `signInWithPopup`；Safari／iOS。
+- 既有問題（未處理）：D-018 基準遇連續空白；配置排序造成 configTable 順序後續改寫；三顆一組套組仍顯示「雙陀螺套組」；後備版面順序。
+- 資料庫／部署風險：未部署 Rules、未寫入正式 Firestore、未建立測試資料。
+- Commit / Deploy：已部署 `c22d712`；本筆紀錄為本機 commit，未 push。Phase 7-2d 尚未授權。
 
 ### 2026-11-24 — Claude Code（v1.13.0 發布準備，release commit）
 
