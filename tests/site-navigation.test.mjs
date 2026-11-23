@@ -112,7 +112,7 @@ test("menu wiring: keyboard, focus return, outside click, and no data writes", (
   assert.match(source, /querySelector\("\.quick-add-backdrop"\)\.addEventListener\("click"/);
   assert.match(source, /window\.addEventListener\("hashchange", handleQuickActionHash\)/);
   assert.doesNotMatch(source, /firebase-firestore|setDoc|runTransaction|updateDoc/, "navigation never writes data");
-  const css = fs.readFileSync("site-menu.css", "utf8");
+  const css = fs.readFileSync("site-menu.css", "utf8").replace(/\r\n/g, "\n");
   assert.match(css, /grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/);
   assert.match(css, /--ui-touch: 44px;/);
   assert.match(css, /html\[data-theme="beige"\] \{\n  --ui-surface:/);
