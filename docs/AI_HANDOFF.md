@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Claude Code 完成 Phase 7-R 組裝規則修正，本機 commit，等待審查與 push／部署授權）
+- 目前執行者：無（Phase 7-R 已正式部署完成）
 - 寫入範圍：目前沒有進行中的寫入任務
-- 正式版本：`2c8e4a85cb572dd959a87416324d8dc3b963717e`（`origin/main`，GitHub Pages deployment `7986025514` success）。本機另有部署紀錄 commit 與 Phase 7-R commit，未 push。
+- 正式版本：`f1df0bc5da31eeaed64c6ea5a32e5074f4a731fa`（`origin/main`，GitHub Pages deployment `7989712953` success）。本筆部署紀錄 commit 只在本機，未 push。
 - Phase 7 設計文件在未追蹤的 `design/phase7/`（是否 commit 待使用者決定）。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -33,6 +33,18 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-23 — Claude Code（Phase 7-R，正式部署）
+
+- 任務：經使用者授權 push 並部署 Phase 7-R（組裝規則修正，D-019）。
+- Push：`git push origin main`，`2c8e4a8..f1df0bc`（快轉，無 force push），共 2 個 commit：`2e3890f`（Phase 6D-2 部署紀錄）、`f1df0bc`（Phase 7-R）。推送前確認遠端仍為 `2c8e4a8`、HEAD 為 `f1df0bc`、工作區只有未追蹤的 `design/`。
+- 正式版本：`f1df0bc5da31eeaed64c6ea5a32e5074f4a731fa`。GitHub Pages（legacy，`main` 根目錄）建置 `built`；deployment `7989712953` success；workflow run `45106257808` success。
+- 部署前：使用者確認舊分頁已關閉（以授權回覆為確認）；備份以 `C:\BeybladeBackups\beyblade-appData-backup-20261123-062202.json` 為準（使用者選擇不另做新備份；部署前再次以 `verify-backup.mjs` 驗證 PASS）。部署前檢查：乾淨 clone 307/307 PASS、validate PASS、build PASS（34 files）、受保護檔案無變更、D-018 儲存區段雜湊不變。
+- 部署後唯讀驗收（瀏覽器沒有 Firebase 登入資料，未登入狀態）：11 個正式檔案與 commit 逐位元組相同；主頁載入 `script.js?v=20261123-phase7r`，`assembly-rules.js?v=20261123-phase7r` 回應 200，版本列「收藏儲存版本：5B（交易保護）」；賽事頁載入 `tournament.js?v=20261029-phase4b1`（未變更）；兩頁 Console Error 0，1440 與 375 寬無水平 overflow。
+- 未驗證：未登入，未在正式網站實際操作配置編輯器（惡魔冥界／Op 自動無固鎖、違規阻擋）；這些路徑只以測試執行真實程式驗證。
+- 正式 Firestore：部署過程沒有任何寫入；Rules、Schema 未修改。
+- 仍待決定（Phase 7）：是否新增首頁工作台、Schema 擴充、型錄譯名核對（BX-50-04、CX-11-02）、輔助戰刃 G 是否為グラビティ、`design/phase7/` 是否 commit；UI 改造（導覽、收藏與零件、組裝器、賽事面板）尚未實作。
+- Commit / Deploy：`f1df0bc` 已 push 並部署；本筆紀錄為本機 commit，未 push。
 
 ### 2026-11-23 — Claude Code（Phase 7-R，組裝規則修正）
 
