@@ -4,7 +4,7 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Phase 7-2a 已在本機實作並完成登入後 Emulator 驗收，已本機 commit 兩筆（設計驗證與 7-2a 實作，訊息 docs(phase7): add collection and parts design verification、feat(collection): implement phase 7-2a tabs and read-only views），未 push、未部署）
+- 目前執行者：Claude Code（v1.11.0 正式上線程序進行中：版本 commit chore(release): prepare v1.11.0 collection UI release，部署前需正式備份與使用者確認舊分頁已關閉；Phase 7-2a 已在本機實作並完成登入後 Emulator 驗收，已本機 commit 兩筆（設計驗證與 7-2a 實作，訊息 docs(phase7): add collection and parts design verification、feat(collection): implement phase 7-2a tabs and read-only views），未 push、未部署）
 - 寫入範圍：目前沒有進行中的寫入任務
 - 正式版本：`5c32213934b9e955b9e4222f1b6fb14fb34b6cde`（`origin/main`，GitHub Pages deployment `8005259788` success）。本筆部署紀錄 commit 只在本機，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`。
@@ -33,6 +33,16 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（Phase 7-2a 部署前版本與說明）
+
+- 任務：部署前只更新版本資訊、更新日誌與使用說明；不改功能。
+- 版本：v1.11.0（Phase 7-2a 為功能更新，沿用 minor 版號慣例；v1.11 未曾使用）。`SITE_VERSION` 只在 `site-menu.js` 定義並顯示於側欄底部，該檔只改這一行；11 頁 `site-menu.js?v=` 改為 `20261124-v1110`，`site-menu.css` 未變維持 `v1100`。
+- 更新日誌：新增 v1.11.0（2026-11-24）六項，只描述已完成的 7-2a；v1.10.0 移入歷史版本（範圍改為 v1.2.0～v1.10.0）。
+- 使用說明：加入分頁切換、展開／收合新增區、手機「＋新增」進入方式、收藏刪除、零件修改（顯示原本表格，保存／取消／Esc）與刪除、登出清除新增區；未描述 7-2b～7-2d。
+- 測試同步（版本字串直接造成）：`help-pages`（site-menu.js 版本、最新版本與日期次數 1→2、歷史範圍）、`manager-ui-refresh`（SITE_VERSION）、`collection-view`（site-menu.js 版本，另加 site-menu.css 仍為 v1100）。
+- 未修改：`script.js`、`index.html` 結構、`style.css`、`collection-view.js`、D-018／D-015／F-04、Rules、Schema、型錄、競賽統計。
+- Commit / Deploy：本機 commit（chore(release): prepare v1.11.0 collection UI release）；push／部署依 v1.11.0 上線程序另行記錄。
 
 ### 2026-11-24 — Claude Code（Phase 7-2a，登入後整合驗收，未修改程式）
 

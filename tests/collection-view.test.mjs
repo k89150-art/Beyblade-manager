@@ -143,7 +143,9 @@ test("cache versions for the changed files", () => {
   assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261124-phase72a" \/>/);
   assert.match(html, /<script type="module" src="script\.js\?v=20261124-phase72a"><\/script>/);
   assert.match(script, /from "\.\/collection-view\.js\?v=20261124-phase72a";/);
-  assert.match(html, /<script src="site-menu\.js\?v=20261124-v1100"><\/script>/, "site-menu.js (D-020) is unchanged");
+  // v1.11.0 only changes SITE_VERSION in site-menu.js; the D-020 navigation itself is unchanged.
+  assert.match(html, /<script src="site-menu\.js\?v=20261124-v1110"><\/script>/);
+  assert.match(html, /<link rel="stylesheet" href="site-menu\.css\?v=20261124-v1100" \/>/);
 });
 
 /* ---------- K-1 hiding rules ---------- */
