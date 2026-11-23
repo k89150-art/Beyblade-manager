@@ -15,8 +15,20 @@ import {
   isAddPanelOpen,
   listNotice,
   otherTab,
-  rowSignature
+  rowSignature,
+  VIEW_MODE_STORAGE_KEY,
+  defaultListControls,
+  filterPartsByStatus,
+  filterStockByControls,
+  filterStockItems,
+  listCountText,
+  normalizeListControls,
+  normalizeViewMode,
+  partStatus,
+  sortPartItems,
+  sortStockItems
 } from "../collection-view.js";
+import vm from "node:vm";
 import { createMockFirestore, userDocPath } from "./helpers/mock-firestore.mjs";
 import { createManagerDevice, partRow } from "./helpers/manager-page-harness.mjs";
 
@@ -143,9 +155,9 @@ test("Q1: add forms stay where they were, wrapped in collapsible panels with the
 });
 
 test("cache versions for the changed files", () => {
-  assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261124-phase72b" \/>/);
-  assert.match(html, /<script type="module" src="script\.js\?v=20261124-phase72b"><\/script>/);
-  assert.match(script, /from "\.\/collection-view\.js\?v=20261124-phase72b";/);
+  assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261124-phase72c" \/>/);
+  assert.match(html, /<script type="module" src="script\.js\?v=20261124-phase72c"><\/script>/);
+  assert.match(script, /from "\.\/collection-view\.js\?v=20261124-phase72c";/);
   // v1.12.0 only changes SITE_VERSION in site-menu.js; the D-020 navigation itself is unchanged.
   assert.match(html, /<script src="site-menu\.js\?v=20261124-v1120"><\/script>/);
   assert.match(html, /<link rel="stylesheet" href="site-menu\.css\?v=20261124-v1100" \/>/);
@@ -341,5 +353,164 @@ test("S1 wiring: stock search box in the stock tab, cleared on account change, r
   assert.match(reset, /const stockSearch = document\.getElementById\("stockSearchInput"\);\n  if \(stockSearch\) stockSearch\.value = "";/);
   assert.match(viewBlock, /document\.getElementById\("stockSearchInput"\)\?\.addEventListener\("input", scheduleCollectionViewRender\);/);
   assert.match(viewBlock, /englishName: getReliableEnglishName\(stockSnapshots\[index\]\.meta\)/);
-  assert.match(viewBlock, /const shownStock = filterStockItems\(stockItems, document\.getElementById\("stockSearchInput"\)\?\.value \|\| ""\);/);
+  // 7-2c: the S1 search result is then filtered by series / source and sorted (display only).
+  assert.match(viewBlock, /filterStockByControls\(filterStockItems\(stockItems, document\.getElementById\("stockSearchInput"\)\?\.value \|\| ""\),/);
+});
+
+/* ---------- Phase 7-2c: V3, stock filters and sorting, part status ---------- */
+
+const stockItem = (key, model, title, { manual = false, editing = false } = {}) => ({
+  key, model, title, editing, manual,
+  series: (model.toUpperCase().match(/^(BX|UX|CX)/) || [])[1] || "OTHER",
+  parts: []
+});
+const STOCK_FIXTURE = [
+  stockItem("a", "UX-01", "巫師之刃"),
+  stockItem("b", "BX-10", "海神衝擊", { manual: true }),
+  stockItem("c", "CX-02", "龍神之刃"),
+  stockItem("d", "UX-01", "巫師之刃"),
+  stockItem("e", "BX-02", "蒼龍騎士"),
+  stockItem("f", "UX-12", "天馬", { manual: true }),
+  stockItem("g", "ZZ-1", "其他商品", { manual: true }),
+  stockItem("h", "BX-1", "惡魔")
+];
+
+// Runs the real sortTable() on a fake tbody whose rows only expose cells[0].innerText.
+function realSortTableOrder(models) {
+  const pieces = [
+    between(script, "function getSeriesFromModel(", "function getConfigStructureModeFromRow("),
+    between(script, "const TABLE_SORT_ORDER", "let _configSortTimer"),
+    between(script, "function sortTable(", "function sortBeybladeTable(")
+  ].join("\n");
+  const rows = models.map((model, index) => ({ index, dataset: {}, cells: [{ innerText: model }] }));
+  const tbody = {
+    rows,
+    querySelector: () => null,
+    querySelectorAll: () => rows.slice(),
+    appendChild(row) { rows.splice(rows.indexOf(row), 1); rows.push(row); }
+  };
+  const context = { document: { querySelector: () => tbody } };
+  vm.createContext(context);
+  vm.runInContext(`${pieces}\nsortTable("beybladeTable");`, context);
+  return rows.map(row => row.index);
+}
+
+test("7-2c V3: list is the default; unknown stored values fall back to the list", () => {
+  assert.equal(VIEW_MODE_STORAGE_KEY, "beybladeCollectionViewMode");
+  assert.equal(normalizeViewMode(null), "list");
+  assert.equal(normalizeViewMode("grid"), "list");
+  assert.equal(normalizeViewMode("card"), "card");
+  assert.deepEqual(defaultListControls(), { stockSeries: "all", stockSource: "all", stockSort: "default", partStatus: "all", partSort: "default" });
+  assert.deepEqual(normalizeListControls({ stockSeries: "OTHER", stockSource: "x", stockSort: "recent", partStatus: "over", partSort: "avail" }),
+    { stockSeries: "all", stockSource: "all", stockSort: "default", partStatus: "over", partSort: "avail" });
+});
+
+test("7-2c stock filters: series (OTHER only under all) and source (manual = the existing 手動 tag)", () => {
+  const keys = list => list.map(item => item.key).join("");
+  assert.equal(keys(filterStockByControls(STOCK_FIXTURE)), "abcdefgh");
+  assert.equal(keys(filterStockByControls(STOCK_FIXTURE, { series: "UX" })), "adf");
+  assert.equal(keys(filterStockByControls(STOCK_FIXTURE, { series: "BX" })), "beh");
+  assert.equal(keys(filterStockByControls(STOCK_FIXTURE, { series: "CX" })), "c");
+  assert.equal(keys(filterStockByControls(STOCK_FIXTURE, { source: "manual" })), "bfg");
+  assert.equal(keys(filterStockByControls(STOCK_FIXTURE, { source: "auto" })), "acdeh");
+  assert.equal(keys(filterStockByControls(STOCK_FIXTURE, { series: "BX", source: "auto" })), "eh");
+  const editing = [...STOCK_FIXTURE, stockItem("x", "CX-09", "修改中", { manual: true, editing: true })];
+  assert.equal(keys(filterStockByControls(editing, { series: "UX", source: "auto" })), "adx", "a row being edited stays visible");
+});
+
+test("7-2c B-03: the default stock sort gives the same order as the real sortTable()", () => {
+  const models = ["CX-02", "BX-10", "UX-12", "BX-2", "UX-01", "ZZ-1", "bx-1", "UX-01", "CX-10", "BX-02"];
+  const items = models.map((model, index) => stockItem(String(index), model, `名稱${index}`));
+  assert.deepEqual(sortStockItems(items).map(item => Number(item.key)), realSortTableOrder(models));
+  assert.deepEqual(sortStockItems(items, "default").map(item => Number(item.key)), realSortTableOrder(models));
+});
+
+test("7-2c stock sorting: model, name, stable ties, input never reordered", () => {
+  const before = STOCK_FIXTURE.map(item => item.key).join("");
+  const keys = list => list.map(item => item.key).join("");
+  assert.equal(keys(sortStockItems(STOCK_FIXTURE, "model")), "hebcadfg");
+  const byName = sortStockItems(STOCK_FIXTURE, "name");
+  for (let i = 1; i < byName.length; i += 1) {
+    assert.ok(byName[i - 1].title.localeCompare(byName[i].title, "zh-Hant", { numeric: true, sensitivity: "base" }) <= 0);
+  }
+  assert.equal(keys(byName.filter(item => item.title === "巫師之刃")), "ad", "same name: table order kept");
+  assert.equal(keys(sortStockItems(STOCK_FIXTURE, "unknown")), keys(sortStockItems(STOCK_FIXTURE, "default")));
+  assert.equal(STOCK_FIXTURE.map(item => item.key).join(""), before, "the input array is not reordered");
+});
+
+const partEntry = (key, name, avail, editing = false) => ({ key, type: "軸心", name, avail, extraRows: editing ? [{ editing: true }] : [] });
+const PART_FIXTURE = [partEntry("p1", "Ball", 2), partEntry("p2", "Accel", 0), partEntry("p3", "Flat", -1), partEntry("p4", "Needle", 0), partEntry("p5", "Rush", -3)];
+
+test("7-2c part status: available > 0, used up = 0, over < 0; an item being edited stays visible", () => {
+  assert.deepEqual(PART_FIXTURE.map(partStatus), ["available", "usedUp", "over", "usedUp", "over"]);
+  const keys = list => list.map(item => item.key).join(",");
+  assert.equal(keys(filterPartsByStatus(PART_FIXTURE, "all")), "p1,p2,p3,p4,p5");
+  assert.equal(keys(filterPartsByStatus(PART_FIXTURE, "available")), "p1");
+  assert.equal(keys(filterPartsByStatus(PART_FIXTURE, "usedUp")), "p2,p4");
+  assert.equal(keys(filterPartsByStatus(PART_FIXTURE, "over")), "p3,p5");
+  assert.equal(keys(filterPartsByStatus([...PART_FIXTURE, partEntry("p6", "Edit", 5, true)], "over")), "p3,p5,p6");
+});
+
+test("7-2c part sorting: default keeps the model order; name; available fewest first; stable", () => {
+  const keys = list => list.map(item => item.key).join(",");
+  const before = keys(PART_FIXTURE);
+  assert.equal(keys(sortPartItems(PART_FIXTURE)), before);
+  assert.notEqual(sortPartItems(PART_FIXTURE), PART_FIXTURE, "a copy, never the model array");
+  assert.equal(keys(sortPartItems(PART_FIXTURE, "name")), "p2,p1,p3,p4,p5");
+  assert.equal(keys(sortPartItems(PART_FIXTURE, "avail")), "p5,p3,p2,p4,p1");
+  assert.equal(keys(PART_FIXTURE), before);
+});
+
+test("7-2c B-01 (pure): search, filters and sorting combine in any order to the same list", () => {
+  const items = buildStockItems([
+    { key: "1", cells: ["UX-01", "巫師之刃", "-", "-", "-", "-", "-", "3-60", "F"], meta: { stockAutoFilled: "true" }, display: { title: "巫師之刃", parts: [{ value: "3-60" }, { value: "F" }] } },
+    { key: "2", cells: ["BX-02", "蒼龍騎士"], meta: {}, display: { title: "蒼龍騎士", parts: [{ value: "3-60" }] } },
+    { key: "3", cells: ["UX-12", "天馬"], meta: {}, display: { title: "天馬", parts: [{ value: "3-60" }] } },
+    { key: "4", cells: ["BX-10", "海神"], meta: { stockAutoFilled: "true" }, display: { title: "海神", parts: [{ value: "4-60" }] } }
+  ]);
+  const controls = { series: "all", source: "manual" };
+  const a = sortStockItems(filterStockByControls(filterStockItems(items, "3-60"), controls), "name");
+  const b = filterStockItems(sortStockItems(filterStockByControls(items, controls), "name"), "3-60");
+  assert.deepEqual(a.map(item => item.key), ["3", "2"]);
+  assert.deepEqual(b.map(item => item.key), a.map(item => item.key));
+  assert.deepEqual(items.map(item => item.key), ["1", "2", "3", "4"], "the built items keep the table order");
+  assert.equal(listCountText(2, 4, "顆"), "顯示 2 / 4 顆");
+  assert.equal(listCountText(0, 0, "種"), "");
+});
+
+test("7-2c wiring: controls on the page, display-only state, reset on account change, V3 in localStorage only", () => {
+  const collection = between(html, '<section id="collectionSection"', "</section>");
+  const inventory = between(html, '<section id="inventorySection"', "</section>");
+  ["all", "UX", "BX", "CX"].forEach(value => assert.match(collection, new RegExp(`data-stock-series="${value}"`)));
+  assert.match(collection, /<select id="stockSourceFilter" autocomplete="off">[\s\S]*value="all"[\s\S]*value="auto"[\s\S]*value="manual"[\s\S]*<\/select>/);
+  assert.match(collection, /<select id="stockSortSelect" autocomplete="off">[\s\S]*value="default"[\s\S]*value="model"[\s\S]*value="name"[\s\S]*<\/select>/);
+  assert.match(inventory, /<select id="partStatusFilter" autocomplete="off">[\s\S]*value="all"[\s\S]*value="available"[\s\S]*value="usedUp"[\s\S]*value="over"[\s\S]*<\/select>/);
+  assert.match(inventory, /<select id="partSortSelect" autocomplete="off">[\s\S]*value="default"[\s\S]*value="name"[\s\S]*value="avail"[\s\S]*<\/select>/);
+  assert.equal((html.match(/data-view-toggle hidden/g) || []).length, 2);
+  assert.equal((html.match(/data-list-controls="(stock|parts)" hidden/g) || []).length, 2);
+  // The rendered lists: search → series/source → sort, and the parts type/search → status → sort.
+  assert.match(viewBlock, /const shownStock = sortStockItems\(\n    filterStockByControls\(filterStockItems\(stockItems, [^\n]+\n      \{ series: controls\.stockSeries, source: controls\.stockSource \}\),\n    controls\.stockSort\);/);
+  assert.match(viewBlock, /const shownParts = sortPartItems\(filterPartsByStatus\(filterPartItems\(partsModel\.items, \{[\s\S]*?\}\), controls\.partStatus\), controls\.partSort\);/);
+  // Account change resets the filters and sorting (not the V3 preference).
+  const reset = between(viewBlock, "function resetCollectionViewState(", "// Phase 7-2c: show the filter");
+  assert.match(reset, /collectionViewState\.controls = defaultListControls\(\);\n  syncListControls\(\);/);
+  assert.doesNotMatch(reset, /viewMode/);
+  // Only the V3 mode touches storage, always inside try / catch; controls are never stored.
+  const storage = viewBlock.match(/localStorage\.\w+\([^)]*\)/g) || [];
+  assert.deepEqual(storage, ["localStorage.getItem(VIEW_MODE_STORAGE_KEY)", "localStorage.setItem(VIEW_MODE_STORAGE_KEY, collectionViewState.viewMode)"]);
+  assert.match(between(viewBlock, "function readStoredViewMode(", "function setViewMode("), /try \{[\s\S]*\} catch \(error\) \{\n    return normalizeViewMode\(null\);/);
+  assert.match(between(viewBlock, "function setViewMode(", "function installListControls("), /try \{\n    localStorage\.setItem[\s\S]*\} catch \(error\) \{/);
+  assert.doesNotMatch(viewCode, /sortTable\(|sortBeybladeTable\(|\.sort\(/, "the display layer never sorts table rows (sorting is in collection-view.js on arrays)");
+  // Fallback hides the new controls with the rest of the display layer.
+  assert.match(between(viewBlock, "function failCollectionView(", "function installCollectionView("), /querySelectorAll\("\[data-list-controls\], \[data-view-toggle\]"\)\.forEach\(element => \{ element\.hidden = true; \}\);/);
+});
+
+test("7-2c V3 CSS: list mode only on desktop; phones always show cards and no toggle", () => {
+  const block = styles.slice(styles.indexOf("/* ===== Phase 7-2c: list controls"));
+  assert.match(block, /\.cv-view-toggle \{\n  display: none;/);
+  const desktop = between(block, "@media (min-width: 821px) {", "@media (max-width: 820px) {");
+  assert.match(desktop, /\.cv-view-toggle \{\n    display: inline-flex;/);
+  assert.match(desktop, /\.collection-view-list\[data-view-mode="list"\] \{/);
+  assert.equal((block.match(/data-view-mode="list"/g) || []).length, (desktop.match(/data-view-mode="list"/g) || []).length, "every list-mode rule is inside the desktop query");
+  assert.doesNotMatch(block, /display:\s*none[^;]*;[^}]*source|\.source-table-box|#beybladeTable|#partTable/);
 });

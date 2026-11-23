@@ -14,7 +14,7 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20261124-phase72b" />
+  <link rel="stylesheet" href="style.css?v=20261124-phase72c" />
   <link rel="stylesheet" href="site-menu.css?v=20261124-v1100" />
   <style>
 
@@ -328,11 +328,38 @@
     </div>
     </div>
 
-    <div class="stock-search-toolbar">
+    <div class="stock-search-toolbar" aria-label="原裝陀螺搜尋、篩選與排序">
       <label class="stock-search">
         <span class="sr-only">搜尋原裝陀螺</span>
         <input id="stockSearchInput" type="search" autocomplete="off" placeholder="搜尋型號、名稱、零件或英文名">
       </label>
+      <div class="cv-list-controls" data-list-controls="stock" hidden>
+      <div class="inventory-filters cv-chips" role="group" aria-label="依系列篩選">
+        <button type="button" class="inventory-filter active" data-stock-series="all" aria-pressed="true">全部</button>
+        <button type="button" class="inventory-filter" data-stock-series="UX" aria-pressed="false">UX</button>
+        <button type="button" class="inventory-filter" data-stock-series="BX" aria-pressed="false">BX</button>
+        <button type="button" class="inventory-filter" data-stock-series="CX" aria-pressed="false">CX</button>
+      </div>
+      <label class="cv-select"><span>來源</span>
+        <select id="stockSourceFilter" autocomplete="off">
+          <option value="all">全部</option>
+          <option value="auto">自動帶入</option>
+          <option value="manual">手動輸入</option>
+        </select>
+      </label>
+      <label class="cv-select"><span>排序</span>
+        <select id="stockSortSelect" autocomplete="off">
+          <option value="default">預設（UX→BX→CX）</option>
+          <option value="model">型號</option>
+          <option value="name">名稱</option>
+        </select>
+      </label>
+      <div class="cv-view-toggle" role="group" aria-label="原裝陀螺顯示方式" data-view-toggle hidden>
+        <button type="button" class="cv-view-button" data-view-mode="list" aria-pressed="true">清單</button>
+        <button type="button" class="cv-view-button" data-view-mode="card" aria-pressed="false">卡片</button>
+      </div>
+      <span id="stockListStatus" class="inventory-filter-status" aria-live="polite"></span>
+      </div>
     </div>
 
     <div id="stockViewList" class="collection-view-list" aria-label="原裝陀螺清單" hidden></div>
@@ -367,6 +394,27 @@
           <button type="button" class="inventory-filter" data-inventory-filter="CX分件" aria-pressed="false">CX 分件</button>
         </div>
         <span id="inventoryFilterStatus" class="inventory-filter-status" aria-live="polite"></span>
+      <div class="cv-list-controls" data-list-controls="parts" hidden>
+      <label class="cv-select"><span>狀態</span>
+        <select id="partStatusFilter" autocomplete="off">
+          <option value="all">全部</option>
+          <option value="available">可用</option>
+          <option value="usedUp">已全用</option>
+          <option value="over">超用</option>
+        </select>
+      </label>
+      <label class="cv-select"><span>排序</span>
+        <select id="partSortSelect" autocomplete="off">
+          <option value="default">預設（類別）</option>
+          <option value="name">名稱</option>
+          <option value="avail">可用數量（少→多）</option>
+        </select>
+      </label>
+      <div class="cv-view-toggle" role="group" aria-label="零件顯示方式" data-view-toggle hidden>
+        <button type="button" class="cv-view-button" data-view-mode="list" aria-pressed="true">清單</button>
+        <button type="button" class="cv-view-button" data-view-mode="card" aria-pressed="false">卡片</button>
+      </div>
+      </div>
       </div>
 
     <div class="add-panel" data-add-panel="parts">
@@ -740,7 +788,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20261124-phase72b"></script>
+  <script type="module" src="script.js?v=20261124-phase72c"></script>
   <script src="site-menu.js?v=20261124-v1120"></script>
 </body>
 </html>

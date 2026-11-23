@@ -4,10 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：無（v1.12.0 已正式部署）
+- 目前執行者：無（Phase 7-2c 已本機 commit，未 push、未部署；正式版本仍為 v1.12.0）
 - 寫入範圍：目前沒有進行中的寫入任務
 - 正式版本：`b006f165a68a6d652ac13589cb38ac16ddd59ac9`（v1.12.0，`origin/main`，GitHub Pages deployment `8012230899` success）。本筆部署紀錄 commit 只在本機，未 push。
-- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c／7-2d 尚未授權。
+- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已本機 commit（未 push）；Phase 7-2d 尚未授權。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -33,6 +33,20 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（Phase 7-2c，本機實作，已本機 commit）
+
+- 任務：使用者授權實作 7-2c：V3 桌面清單／卡片切換、原裝陀螺系列與來源篩選、原裝陀螺排序、零件狀態篩選（另含零件排序，規格 B.4）。不得 commit、push、deploy。
+- 主要內容：`collection-view.js` 新增純函式（`filterStockByControls`、`sortStockItems`／`compareStockDefault`、`partStatus`、`filterPartsByStatus`、`sortPartItems`、`normalizeViewMode`、`defaultListControls`／`normalizeListControls`、`listCountText`），只處理顯示層陣列。`script.js` 只改 Phase 7-2a 顯示層區塊：狀態 `controls`／`viewMode`、`renderCollectionView` 組合（搜尋→系列／來源→排序；類別＋搜尋→狀態→排序）、筆數文字、`syncListControls`／`setListControl`／`readStoredViewMode`／`setViewMode`／`installListControls`、換帳號重設、失敗回退時隱藏控制項。`index.html` 新增兩組控制項（預設 `hidden`，顯示層啟用才出現）；快取 `style.css`／`script.js`／`collection-view.js` 改為 `20261124-phase72c`。`style.css` 新增 7-2c 區塊（V3 清單版面只在 ≥ 821px）。細節見規格 10 第四部分「7-2c 實作細節」。
+- 受保護程式碼：A-09 十段雜湊全部不變（與 7-2b 相同）；D-018、D-015、F-04、`getTableData`／`collectCurrentData`／`applyDataToTables`、`getTotalParts`／`getUsedParts`、7-2b 零件模型區塊、`sortTable`、`applyInventoryFilters`、`collection-sync.js` 都未修改；`collection-view.js` 與 `style.css` 只有新增。寫入路徑 `saveData()` 17→17、`runTransaction(` 呼叫 1→1（含 import 與 `runTransaction:` 屬性名的文字出現次數為 3→3；先前報告的 1 指呼叫點，兩種計法在 `c18a33f`、`4267bee`、`151b2db` 與本次都相同）、`setDoc`／`updateDoc`／`deleteDoc` 0。`localStorage` 只用於 V3 偏好。
+- 測試：Node 359/359（原 350＋`collection-view.test.mjs` 新增 9 項：V3 預設與正規化、系列／來源篩選、以真實 `sortTable` 對照預設排序〔B-03〕、型號／名稱排序與穩定性、零件狀態、零件排序、組合結果與順序無關〔B-01 純函式〕、接線與重設／`localStorage` 只在 try/catch、V3 CSS 只在桌面）。既有斷言修改：快取版本 `phase72b`→`phase72c`（3 檔）；S1 接線斷言原為 `const shownStock = filterStockItems(stockItems, …);`，改為斷言搜尋結果再進入 `filterStockByControls`（搜尋輸入來源不變）。變異檢查：預設排序系列順序對調、狀態 `<0` 改 `<=0`、來源判斷對調，各自使測試失敗。validate PASS；build PASS（35 files）；`git diff --check` 通過。
+- 瀏覽器：`design/phase7/verification/phase7-2c/` 222/222（390／768／1440 × 深色／米色）；同程式重跑 7-2b harness 174/174（暫時修改已還原）。手機 375 卡片、桌面清單目視正常、無水平捲動。
+- Emulator（`exports/emulator-ui-72c/`，Git 忽略的測試複本，只改 Firebase 設定與 Emulator 連線；demo 專案、Emulator 測試帳號）：以真實頁面操作所有篩選／排序／V3 組合兩輪，Emulator 文件 `updateTime` 不變（0 寫入）、原始列物件與順序不變；來源＝手動＋名稱排序時刪除，確認文字為 BX-04，Emulator 只少 BX-04、一次寫入、其餘順序不變；登出時篩選與排序重設、V3 保留；第二個帳號登入為預設狀態，第一個帳號文件未被改動。觀察：同一網址只改 hash 的導覽不重新載入頁面，狀態會延續（正常）；窗格隱藏時 `requestAnimationFrame` 暫停，渲染延後到可見時補上（既有行為）。
+- Branch / HEAD：`main` / `151b2db`（領先 `origin/main` `b006f16` 1 筆部署紀錄）。
+- Git status：上列檔案與新增的 `design/phase7/verification/phase7-2c/` 已於 `feat(collection): implement phase 7-2c list filters and sorting` 提交（本機）。
+- 未完成事項：ChatGPT 已複審並核准本機 commit；未 push、未部署。版本、更新紀錄與使用說明未更新（7-2c 發布準備時處理）。7-2d（詳細面板、手機 sheet）未授權。
+- 已知問題（未處理，沿用）：D-018 基準遇連續空白；配置排序造成 configTable 順序後續改寫；三顆一組套組仍顯示「雙陀螺套組」；後備版面順序；正式 `signInWithPopup` 與 Safari／iOS 未驗證。
+- Commit / Deploy：已本機 commit，未 push、未部署。
 
 ### 2026-11-24 — Claude Code（v1.12.0／Phase 7-2b，正式部署）
 

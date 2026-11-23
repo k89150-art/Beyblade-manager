@@ -38,8 +38,17 @@ import {
   isAddPanelOpen,
   listNotice,
   otherTab,
-  rowSignature
-} from "./collection-view.js?v=20261124-phase72b";
+  rowSignature,
+  VIEW_MODE_STORAGE_KEY,
+  defaultListControls,
+  filterPartsByStatus,
+  filterStockByControls,
+  listCountText,
+  normalizeListControls,
+  normalizeViewMode,
+  sortPartItems,
+  sortStockItems
+} from "./collection-view.js?v=20261124-phase72c";
 
 import {
   getAuth,
@@ -3700,7 +3709,11 @@ const collectionViewState = {
   addChoice: { stock: null, parts: null },
   renderQueued: false,
   refs: new Map(),
-  editingPartRow: null
+  editingPartRow: null,
+  // Phase 7-2c: filters and sorting (display only, reset on account change)
+  // and the V3 list / card mode (a UI preference, kept in localStorage).
+  controls: defaultListControls(),
+  viewMode: "list"
 };
 const collectionViewKeys = new WeakMap();
 let collectionViewKeySequence = 0;
@@ -3914,17 +3927,21 @@ function renderCollectionView() {
     setCode: stockSnapshots[index].meta.stockSetId || "",
     productCode: stockSnapshots[index].meta.stockProductCode || ""
   }));
-  const shownStock = filterStockItems(stockItems, document.getElementById("stockSearchInput")?.value || "");
+  const controls = collectionViewState.controls;
+  const shownStock = sortStockItems(
+    filterStockByControls(filterStockItems(stockItems, document.getElementById("stockSearchInput")?.value || ""),
+      { series: controls.stockSeries, source: controls.stockSource }),
+    controls.stockSort);
 
   const partRows = Array.from(document.querySelectorAll("#partTable tbody tr"));
   partRows.forEach(row => {
     refs.set(getCollectionViewKey(row), { row, tableId: "partTable", signature: rowSignature(readSourceRowSnapshot(row, "partTable")) });
   });
   const partsModel = computeCollectionPartsModel();
-  const shownParts = filterPartItems(partsModel.items, {
+  const shownParts = sortPartItems(filterPartsByStatus(filterPartItems(partsModel.items, {
     matchesType: type => inventoryTypeMatchesFilter(type, inventoryFilterType),
     query: document.getElementById("inventorySearchInput")?.value || ""
-  });
+  }), controls.partStatus), controls.partSort);
 
   collectionViewState.refs = refs;
   writeViewList(document.getElementById("stockViewList"),
@@ -3938,6 +3955,11 @@ function renderCollectionView() {
   if (stockCount) stockCount.textContent = String(stockRows.length);
   const partsCount = document.getElementById("collectionTabPartsCount");
   if (partsCount) partsCount.textContent = String(partsModel.items.length);
+  const stockStatus = document.getElementById("stockListStatus");
+  if (stockStatus) stockStatus.textContent = signedIn ? listCountText(shownStock.length, stockRows.length, "顆") : "";
+  // applyInventoryFilters counts extra rows; the parts tab lists P2 items.
+  const partsStatus = document.getElementById("inventoryFilterStatus");
+  if (partsStatus) partsStatus.textContent = signedIn ? listCountText(shownParts.length, partsModel.items.length, "種") : "";
   setAddPanelOpen("stock", isAddPanelOpen(collectionViewState.addChoice.stock, stockRows.length));
   setAddPanelOpen("parts", isAddPanelOpen(collectionViewState.addChoice.parts, partRows.length));
 
@@ -3998,8 +4020,73 @@ function resetCollectionViewState() {
     button.setAttribute("aria-pressed", String(active));
   });
   collectionViewState.addChoice = { stock: null, parts: null };
+  collectionViewState.controls = defaultListControls();
+  syncListControls();
   applyInventoryFilters();
   scheduleCollectionViewRender();
+}
+
+// Phase 7-2c: show the filter / sort / view-mode state on the controls.
+function syncListControls() {
+  const controls = collectionViewState.controls;
+  document.querySelectorAll("[data-stock-series]").forEach(button => {
+    const active = button.dataset.stockSeries === controls.stockSeries;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  [["stockSourceFilter", "stockSource"], ["stockSortSelect", "stockSort"], ["partStatusFilter", "partStatus"], ["partSortSelect", "partSort"]]
+    .forEach(([id, key]) => {
+      const select = document.getElementById(id);
+      if (select) select.value = controls[key];
+    });
+  document.querySelectorAll("[data-view-mode]").forEach(button => {
+    button.setAttribute("aria-pressed", String(button.dataset.viewMode === collectionViewState.viewMode));
+  });
+  ["stockViewList", "partViewList"].forEach(id => {
+    document.getElementById(id)?.setAttribute("data-view-mode", collectionViewState.viewMode);
+  });
+}
+
+function setListControl(key, value) {
+  collectionViewState.controls = normalizeListControls({ ...collectionViewState.controls, [key]: value });
+  syncListControls();
+  scheduleCollectionViewRender();
+}
+
+// V3: the list / card preference is the only thing kept, and only in
+// localStorage; a storage error never stops the list from showing.
+function readStoredViewMode() {
+  try {
+    return normalizeViewMode(localStorage.getItem(VIEW_MODE_STORAGE_KEY));
+  } catch (error) {
+    return normalizeViewMode(null);
+  }
+}
+
+function setViewMode(mode) {
+  collectionViewState.viewMode = normalizeViewMode(mode);
+  try {
+    localStorage.setItem(VIEW_MODE_STORAGE_KEY, collectionViewState.viewMode);
+  } catch (error) {
+    // Not saved; the current page still switches.
+  }
+  syncListControls();
+}
+
+function installListControls() {
+  collectionViewState.viewMode = readStoredViewMode();
+  document.querySelectorAll("[data-list-controls], [data-view-toggle]").forEach(element => { element.hidden = false; });
+  document.querySelectorAll("[data-stock-series]").forEach(button => {
+    button.addEventListener("click", () => setListControl("stockSeries", button.dataset.stockSeries));
+  });
+  [["stockSourceFilter", "stockSource"], ["stockSortSelect", "stockSort"], ["partStatusFilter", "partStatus"], ["partSortSelect", "partSort"]]
+    .forEach(([id, key]) => {
+      document.getElementById(id)?.addEventListener("change", event => setListControl(key, event.target.value));
+    });
+  document.querySelectorAll("[data-view-mode]").forEach(button => {
+    button.addEventListener("click", () => setViewMode(button.dataset.viewMode));
+  });
+  syncListControls();
 }
 
 // Fallback: the page goes back to the original tables (never an empty page,
@@ -4020,6 +4107,7 @@ function failCollectionView(error) {
       if (element) element.hidden = true;
     });
     document.querySelectorAll("[data-add-toggle]").forEach(toggle => { toggle.hidden = true; });
+    document.querySelectorAll("[data-list-controls], [data-view-toggle]").forEach(element => { element.hidden = true; });
     applyInventoryFilters();
   } catch (fallbackError) {
     console.error(fallbackError);
@@ -4061,6 +4149,7 @@ function installCollectionView() {
     });
 
     document.getElementById("stockSearchInput")?.addEventListener("input", scheduleCollectionViewRender);
+    installListControls();
 
     ["stockViewList", "partViewList"].forEach(id => {
       document.getElementById(id).addEventListener("click", event => {

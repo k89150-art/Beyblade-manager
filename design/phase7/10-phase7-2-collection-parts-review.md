@@ -894,3 +894,12 @@ Firestore 快照 → applyDataToTables（建立 <tr>，D-015 升級只在記憶�
 - P2 的原裝內含以逐列計算（與 `getTotalParts` 相同的規則、使用真實的 `addStock`），並以測試要求「原裝內含＋額外持有＝`getTotalParts()`」；配置引用＝`getUsedParts()` 減去 CX（非抽包）配置的組合上蓋。`getTotalParts`／`getUsedParts` 本體不修改。
 - S1 的套組辨識只用資料中已有的 `stockSetId`／`stockProductCode`（型錄沒有獨立的套組名稱，不推測）。
 - D1 只在 `deleteRow`、`saveEditRow` 的既有 `confirm` 字串後附加提示；提示計算失敗時回傳空字串，不影響原本流程。A-09 中這兩段的雜湊因此更新，其餘八段不變。
+
+7-2c 實作細節（2026-11-24，本機 commit，未部署）：
+- 全部在顯示層的陣列上進行（`collection-view.js` 新增純函式），原始 `<tr>` 不搬動、不設 `hidden`／`order`，不寫入 Firestore。順序：原裝陀螺＝搜尋（S1）→ 系列／來源 → 排序；零件＝類別＋搜尋（既有）→ 狀態 → 排序。
+- 原裝陀螺：系列 chip（全部／UX／BX／CX；其他型號只在「全部」出現）、來源下拉（全部／自動帶入／手動輸入，與既有「手動」標籤同一判斷）、排序下拉（預設＝`sortTable` 相同比較〔測試以真實 `sortTable` 對照〕、型號、名稱；同值保留表格順序）。
+- 零件：狀態下拉（全部／可用 >0／已全用 =0／超用 <0，依 P2 的「可用」）、排序下拉（預設＝P2 模型順序、名稱、可用數量少→多）。修改中的項目在任何篩選下都保留顯示（沿用既有規則）。
+- V3：桌面（≥ 821px）工具列有「清單／卡片」切換，兩個分頁共用一個偏好，預設清單，只存 `localStorage`（`beybladeCollectionViewMode`，讀寫都在 try/catch，失敗回到清單）。手機不顯示切換、固定卡片。清單模式只是 CSS 版面，按鈕與動作與卡片相同。
+- 換帳號（`resetCollectionViewState`）時篩選與排序回到預設；V3 偏好保留（UI 偏好，與主題相同）。篩選與排序不保存，重新整理回到預設；四個下拉加 `autocomplete="off"`，避免瀏覽器還原表單值而與狀態不一致。
+- 零件分頁的「顯示 n / m 種」改以 P2 項目計算（原本由 `applyInventoryFilters` 以額外列計算）；原裝陀螺分頁新增「顯示 n / m 顆」。
+- 已決定但未在此階段處理：詳細面板與手機 sheet（7-2d）。

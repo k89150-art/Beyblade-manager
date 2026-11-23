@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><title>Phase 7-2c integration check</title>
+<style>iframe{border:1px solid #888;height:900px;margin:4px;vertical-align:top}</style></head>
+<body>
+<pre id="out">running…</pre>
+<script>
+const RUNS = [];
+[390, 768, 1440].forEach(w => ["dark", "beige"].forEach(t => RUNS.push({ theme: t, w })));
+const results = [];
+// One frame at a time (focus and timers stay predictable).
+let next = 0;
+function startNext() {
+  const r = RUNS[next++];
+  if (!r) return;
+  const f = document.createElement("iframe");
+  f.style.width = r.w + "px";
+  f.src = `frame.html?theme=${r.theme}&w=${r.w}`;
+  document.body.appendChild(f);
+}
+window.addEventListener("message", e => {
+  if (!e.data || !e.data.i72c) return;
+  results.push(e.data);
+  startNext();
+  if (results.length === RUNS.length) {
+    window.__i72c = results.map(r => ({ theme: r.theme, width: r.width, ok: r.ok, error: r.error,
+      passed: (r.checks || []).filter(c => c.ok).length, total: (r.checks || []).length,
+      failed: (r.checks || []).filter(c => !c.ok) }));
+    window.__checks = results.find(r => r.width === 1440 && r.theme === "dark")?.checks;
+    document.getElementById("out").textContent = JSON.stringify(window.__i72c, null, 1);
+  }
+});
+startNext();
+</script>
+</body></html>
