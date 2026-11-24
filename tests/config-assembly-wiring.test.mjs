@@ -338,10 +338,11 @@ test("A-09 (7-3a): addConfig's cell writes and checkStock are byte-for-byte pinn
 
 /* ---------- config sort (unchanged in 7-3a; regression only) ---------- */
 // The 7-3a "sort before save" change was withdrawn: it fixed addConfig and
-// restoreHistoryRow but not loading unsorted cloud data (the screen is
+// restoreHistoryRow but not loading unsorted cloud data (the screen was
 // re-sorted 80 ms after the D-018 baseline). See
-// design/phase7/verification/phase7-3a/README.md. These tests pin what must
-// keep holding meanwhile.
+// design/phase7/verification/phase7-3a/README.md. D-023 (Phase 7-DC) sorts
+// in applyDataToTables and collectCurrentData instead; the full checks are in
+// tests/data-consistency.test.mjs.
 
 const configOrder = page => page.configCells().map(cells => `${cells[0]}/${cells[1]}`);
 
@@ -379,19 +380,25 @@ test("sort: after the screen re-sorts, editing a config changes that config only
   assert.equal(stored.length, 2);
 });
 
-test("sort: a re-sorted screen never overwrites another device's config change (D-018 conflict)", async () => {
+// Phase 7-3a pinned the known issue here (dirtyTables() was ["configTable"]
+// 250 ms after addConfig because only the order differed). D-023 removed it;
+// the original reproduction stays in design/phase7/verification/phase7-3a/.
+test("sort (D-023): addConfig leaves nothing unsaved, and a real config change still conflicts with another device's", async () => {
   const { mock, page } = await openPage({ configTable: [cfg(["BX-01 CUSTOM", "蒼龍神劍", "-", "-", "-", "-", "-", "3-60", "F"], "-")] });
   await buildNew(page, { 上蓋: "惡魔冥界", 軸心: "Z" });
   await page.wait(250);
-  assert.deepEqual(page.dirtyTables(), ["configTable"], "known issue: only the order differs from the cloud");
-  // Another device adds a config before this page saves again.
+  assert.deepEqual(page.dirtyTables(), [], "the first write already had the sorted order");
+  assert.equal(mock.stats.commits, 1);
+  // Another device adds a config; this page edits a config before seeing it.
   const other = { cells: ["UX-16 CUSTOM", "時鐘幻象", "-", "-", "-", "-", "-", "9-65", "B"], mainStockName: "-" };
   mock.externalMerge(PATH, { configTable: [...mock.read(PATH).configTable, other], updatedAt: 99 });
   const commits = mock.stats.commits;
-  page.context.createPartRow(["軸心", "B", "1"]);
-  page.context.saveData();
+  page.openEditor(page.configRows()[1]);
+  page.build({ 固鎖: "4-60" });
+  page.save();
   await page.settle();
   assert.equal(mock.stats.commits, commits, "nothing written");
   assert.equal(page.page.sync.state, "conflict");
   assert.deepEqual(mock.read(PATH).configTable.at(-1), other, "the other device's config is kept");
+  assert.equal(mock.read(PATH).configTable.find(item => item.cells[1] === "蒼龍神劍").cells[7], "3-60", "this page's edit did not overwrite the cloud");
 });

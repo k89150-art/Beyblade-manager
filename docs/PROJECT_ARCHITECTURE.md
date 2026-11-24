@@ -65,7 +65,7 @@ Firebase Web SDK 目前由 `https://www.gstatic.com/firebasejs/11.2.0/` 載入�
 ### 收藏／零件顯示層（Phase 7-2a，D-021）
 
 - `index.html`：分頁列 `#collectionTabs`（原裝陀螺／零件），分頁區段沿用 `#collectionSection`、`#inventorySection`；新增表單包在 `#collectionAddBody`、`#inventoryAddBody`（可收合，欄位 id 不變）；顯示清單 `#stockViewList`、`#partViewList`；原始表格移到兩個區段之外的 `#collectionSourceTables`（`#beybladeSourceBox`、`#partSourceBox`）。
-- 資料流：Firestore 快照 → `applyDataToTables` 建立原始列（不變）→ 既有 `installUiSummaryObservers` 的 MutationObserver → `refreshUi` → `scheduleCollectionViewRender`（每畫格最多一次）→ `renderCollectionView` 以 `readSourceRowSnapshot`（與 `getTableData` 相同讀法）讀原始列，交給 `collection-view.js` 的純函式產生清單，只寫入兩個顯示清單容器。儲存仍由既有函式從原始表格收集（D-018）。
+- 資料流：Firestore 快照 → `applyDataToTables` 建立原始列（不變）→ 既有 `installUiSummaryObservers` 的 MutationObserver → `refreshUi` → `scheduleCollectionViewRender`（每畫格最多一次）→ `renderCollectionView` 以 `readSourceRowSnapshot`（`getPersistedRowCells`，顯示用）讀原始列，交給 `collection-view.js` 的純函式產生清單，只寫入兩個顯示清單容器。儲存仍由既有函式從原始表格收集（D-018）；自 D-023 起 `getTableData`／`getHistoryData` 改以 `readStoredCellText` 讀儲存值（與顯示狀態無關），顯示層讀法不變。
 - 原始表格的隱藏只能用 `.is-source-hidden`（clip-path）＋`inert`＋`aria-hidden`；零件篩選在顯示層啟用時不再對原始列設 `hidden`。
 - 帳號切換：`handleAuthStateChange` 在 F-04 草稿擷取與 `cancelSessionInteractions()` 之後呼叫 `resetQuickAddFormsForAccountChange`，清空新增表單並重設顯示層搜尋與篩選。
 - `retire-analysis-cache.js` 只處理已退役分析頁的舊網址／快取標記。
@@ -151,7 +151,7 @@ users/{uid}/appData/main
 - `tournamentRecords`：賽事紀錄。
 - `ownerUid`、`ownerEmail`、`updatedAt`：擁有者與同步 metadata。
 
-`script.js` 以 `onSnapshot` 監聽；只有取得非 cache 的首次 snapshot 後才允許寫入。主頁儲存（D-018）以 transaction 單次嘗試並由 `collection-sync.js` 自行重試，只寫入與載入時不同的資料表；交易內逐表比對最新資料與畫面基準，雲端已是預期內容視為已完成，其他差異一律衝突且整次不寫入；離線不排隊，衝突、離線、結果不明時保留畫面變更並在「雲端同步」區提示。Cache metadata（例如短暫斷線）不會重建已確認的畫面，也不會關閉已開啟的 Quick Editor 或刪除 dialog，但在伺服器再次確認前會暫停寫入；相同 cache／server 內容不會重複套用；若伺服器確認文件不存在，第一次寫入只在交易內再次確認不存在時才建立，避免兩個分頁同時以空白或預設資料初始化。`tournament.js` 使用伺服器單次讀取確認資料存在狀態；寫入改為 transaction（D-017），以 `maxAttempts: 1` 單次嘗試並由 `tournament-sync.js` 自行重試，以區分已提交、未提交與結果不明；在交易內以最新的 `tournamentRecords` 重新計算，單場賽事基準不同即拒絕，只更新 `tournamentRecords` 與 `updatedAt`，離線時不送出、不排隊。主頁的登入狀態變更由 `handleAuthStateChange()` 處理（F-04）：其他分頁登出或切換帳號時，先把尚未儲存的收藏資料表保留在本分頁記憶體並提示使用者下載，再清除畫面與 Session；保留的資料不寫入任何帳號、也不會在重新登入後自動提交。兩頁在 loading、error、readonly 或 session 失效時都會阻止寫入並取消舊 session 的待處理 dialog；新增模組時必須明確定義欄位所有權，避免 stale state 覆蓋其他頁面資料。
+`script.js` 以 `onSnapshot` 監聽；只有取得非 cache 的首次 snapshot 後才允許寫入。主頁儲存（D-018）以 transaction 單次嘗試並由 `collection-sync.js` 自行重試，只寫入與載入時不同的資料表（D-023：載入時收藏表與配置表都在取畫面基準前同步排序，收集時也先排序；排序規則不依賴語系；儲存格以 `readStoredCellText` 讀原值，不受顯示狀態影響；載入時不改寫型號）；交易內逐表比對最新資料與畫面基準，雲端已是預期內容視為已完成，其他差異一律衝突且整次不寫入；離線不排隊，衝突、離線、結果不明時保留畫面變更並在「雲端同步」區提示。Cache metadata（例如短暫斷線）不會重建已確認的畫面，也不會關閉已開啟的 Quick Editor 或刪除 dialog，但在伺服器再次確認前會暫停寫入；相同 cache／server 內容不會重複套用；若伺服器確認文件不存在，第一次寫入只在交易內再次確認不存在時才建立，避免兩個分頁同時以空白或預設資料初始化。`tournament.js` 使用伺服器單次讀取確認資料存在狀態；寫入改為 transaction（D-017），以 `maxAttempts: 1` 單次嘗試並由 `tournament-sync.js` 自行重試，以區分已提交、未提交與結果不明；在交易內以最新的 `tournamentRecords` 重新計算，單場賽事基準不同即拒絕，只更新 `tournamentRecords` 與 `updatedAt`，離線時不送出、不排隊。主頁的登入狀態變更由 `handleAuthStateChange()` 處理（F-04）：其他分頁登出或切換帳號時，先把尚未儲存的收藏資料表保留在本分頁記憶體並提示使用者下載，再清除畫面與 Session；保留的資料不寫入任何帳號、也不會在重新登入後自動提交。兩頁在 loading、error、readonly 或 session 失效時都會阻止寫入並取消舊 session 的待處理 dialog；新增模組時必須明確定義欄位所有權，避免 stale state 覆蓋其他頁面資料。
 
 ### 本機資料
 

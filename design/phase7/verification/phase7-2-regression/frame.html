@@ -42,10 +42,10 @@ try {
   const slice = (a, b) => { const i = src.indexOf(a), j = src.indexOf(b, i + 1); if (i < 0 || j < 0) throw new Error("slice " + a); return src.slice(i, j); };
   const code = [
     slice("let inventoryFilterType", "\n") + "\n",
-    slice("const partTypes = [", "function normalizeAllModelCells("),
+    slice("const partTypes = [", "const RANDOM_BOOSTER_MODELS"),
     slice("const RANDOM_BOOSTER_MODELS", "// Phase 7-R: the ratchet rules"),
     slice("function getSeriesFromModel(", "function getConfigStructureModeFromRow("),
-    slice("const TABLE_SORT_ORDER", "function sortConfigTable("),
+    slice("const TABLE_SORT_ORDER", "function getValue("),
     slice("function addStock(", "function closeConfigActionMenus("),
     slice("function getEditingButtons(", "function normalizeComboValue("),
     slice("function createHistoryRow(", "function findHistoryByComboKey("),

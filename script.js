@@ -339,7 +339,12 @@ function normalizeModel(model) {
     return normalizedHyphens.toUpperCase();
   }
 
-  const match = text.match(/^(UX|BX|CX)\s*-?\s*(\d+)(.*)$/i);
+  // D-023 (C): a multi-part code such as UX-21-01 keeps all its number groups
+  // when a suffix follows ("UX-21-01 CUSTOM"). Anything else, including the
+  // already broken "UX-21 -01 CUSTOM", gets the original single-number rule,
+  // so existing stored values are never repaired as a side effect.
+  const match = text.match(/^(UX|BX|CX)\s*-?\s*(\d+(?:-\d+){1,2})(?=\s|$)(.*)$/i)
+    || text.match(/^(UX|BX|CX)\s*-?\s*(\d+)(.*)$/i);
 
   if (!match) return text;
 
@@ -348,29 +353,6 @@ function normalizeModel(model) {
   const rest = (match[3] || "").trim().replace(/\s+/g, " ");
 
   return `${series}-${number}${rest ? " " + rest : ""}`;
-}
-
-function normalizeAllModelCells() {
-  let changed = false;
-
-  ["beybladeTable", "configTable"].forEach(tableId => {
-    const rows = document.querySelectorAll(`#${tableId} tbody tr`);
-
-    rows.forEach(row => {
-      const cell = row.cells[0];
-      if (!cell) return;
-
-      const oldModel = cell.innerText.trim();
-      const newModel = normalizeModel(oldModel);
-
-      if (oldModel !== newModel) {
-        cell.innerText = newModel;
-        changed = true;
-      }
-    });
-  });
-
-  return changed;
 }
 
 // 抽包系列型號（不強制 CX 戰刃規則，也不強制上蓋）
@@ -553,8 +535,43 @@ function buildInternalConfigModel(mode, layer, existingModel = "") {
 
 const TABLE_SORT_ORDER = { UX: 1, BX: 2, CX: 3, OTHER: 4 };
 
-let _configSortTimer = null;
-let _configSorting = false;
+// D-023 (A/B): deterministic model order, independent of the browser's locale
+// and ICU version. Case-insensitive; runs of ASCII digits compare by numeric
+// value (leading zeros ignored); every other character by UTF-16 code unit.
+// On the 2026-11-24 backup this gives exactly the order of the previous
+// localeCompare("zh-Hant", { numeric: true, sensitivity: "base" }).
+function compareSortText(a, b) {
+  const left = String(a).toUpperCase();
+  const right = String(b).toUpperCase();
+  const isDigit = code => code >= 48 && code <= 57;
+  let i = 0;
+  let j = 0;
+
+  while (i < left.length && j < right.length) {
+    const x = left.charCodeAt(i);
+    const y = right.charCodeAt(j);
+
+    if (isDigit(x) && isDigit(y)) {
+      let iEnd = i;
+      let jEnd = j;
+      while (iEnd < left.length && isDigit(left.charCodeAt(iEnd))) iEnd += 1;
+      while (jEnd < right.length && isDigit(right.charCodeAt(jEnd))) jEnd += 1;
+      const leftNumber = left.slice(i, iEnd).replace(/^0+(?=\d)/, "");
+      const rightNumber = right.slice(j, jEnd).replace(/^0+(?=\d)/, "");
+      if (leftNumber.length !== rightNumber.length) return leftNumber.length - rightNumber.length;
+      if (leftNumber !== rightNumber) return leftNumber < rightNumber ? -1 : 1;
+      i = iEnd;
+      j = jEnd;
+      continue;
+    }
+
+    if (x !== y) return x - y;
+    i += 1;
+    j += 1;
+  }
+
+  return (left.length - i) - (right.length - j);
+}
 
 function sortTable(tableId) {
   const tbody = document.querySelector(`#${tableId} tbody`);
@@ -567,13 +584,14 @@ function sortTable(tableId) {
   const rows = Array.from(tbody.querySelectorAll("tr"));
   if (rows.length <= 1) return;
 
+  // Array.prototype.sort is stable: rows with equal keys keep their order.
   const sorted = [...rows].sort((a, b) => {
-    const modelA = a.cells[0]?.innerText.trim() || "";
-    const modelB = b.cells[0]?.innerText.trim() || "";
+    const modelA = readStoredCellText(a.cells[0]).trim();
+    const modelB = readStoredCellText(b.cells[0]).trim();
     const orderA = TABLE_SORT_ORDER[getSeriesFromModel(modelA)] || 99;
     const orderB = TABLE_SORT_ORDER[getSeriesFromModel(modelB)] || 99;
     if (orderA !== orderB) return orderA - orderB;
-    return modelA.localeCompare(modelB, "zh-Hant", { numeric: true, sensitivity: "base" });
+    return compareSortText(modelA, modelB);
   });
 
   const alreadySorted = rows.every((r, i) => r === sorted[i]);
@@ -586,28 +604,12 @@ function sortBeybladeTable() {
   sortTable("beybladeTable");
 }
 
+// D-023 (A/B): the config table is sorted synchronously, like the collection
+// table, when it is built from the cloud (applyDataToTables, before the D-018
+// screen base is taken) and whenever it is collected (collectCurrentData).
+// There is no delayed re-sort after the base any more.
 function sortConfigTable() {
-  if (_configSorting) return;
-  _configSorting = true;
   sortTable("configTable");
-  _configSorting = false;
-}
-
-function scheduleConfigSort() {
-  clearTimeout(_configSortTimer);
-  _configSortTimer = setTimeout(sortConfigTable, 80);
-}
-
-function installConfigSort() {
-  const tbody = document.querySelector("#configTable tbody");
-  if (!tbody) { setTimeout(installConfigSort, 200); return; }
-
-  sortConfigTable();
-
-  const observer = new MutationObserver(() => {
-    if (!_configSorting) scheduleConfigSort();
-  });
-  observer.observe(tbody, { childList: true, subtree: true, characterData: true });
 }
 
 function getValue(id) {
@@ -1621,7 +1623,11 @@ function getTableData(tableId, hasStockName = false) {
   const data = [];
 
   rows.forEach(row => {
-    const cells = getPersistedRowCells(row);
+    // D-023 (D): stored values are read independently of how the cell is
+    // rendered; a row being edited keeps its originalCells.
+    const cells = row.dataset.editing === "true"
+      ? getPersistedRowCells(row)
+      : Array.from(row.cells).slice(0, -1).map(readStoredCellText);
 
     const item = {
       cells
@@ -1630,7 +1636,7 @@ function getTableData(tableId, hasStockName = false) {
     if (hasStockName) {
       item.mainStockName = row.dataset.editing === "true"
         ? row.dataset.originalMainStockName ?? cells[3] ?? ""
-        : row.cells[3]?.dataset.stockName ?? row.cells[3]?.innerText.trim() ?? "";
+        : row.cells[3]?.dataset.stockName ?? (row.cells[3] ? readStoredCellText(row.cells[3]) : "");
     }
 
     if (tableId === "beybladeTable") {
@@ -1651,6 +1657,7 @@ function getTableData(tableId, hasStockName = false) {
 
 function collectCurrentData() {
   sortBeybladeTable();
+  sortConfigTable();
 
   return {
     beybladeTable: getTableData("beybladeTable", true),
@@ -1669,18 +1676,32 @@ function getHistoryData() {
 
   rows.forEach(row => {
     data.push({
-      model: row.cells[0]?.innerText.trim() || "",
-      combo: row.cells[1]?.innerText.trim() || "",
-      fix: row.cells[2]?.innerText.trim() || "",
-      axis: row.cells[3]?.innerText.trim() || "",
-      result: row.cells[4]?.innerText.trim() || "",
-      note: row.cells[5]?.innerText.trim() || "",
-      date: row.cells[6]?.innerText.trim() || "",
+      model: readStoredCellText(row.cells[0]),
+      combo: readStoredCellText(row.cells[1]),
+      fix: readStoredCellText(row.cells[2]),
+      axis: readStoredCellText(row.cells[3]),
+      result: readStoredCellText(row.cells[4]),
+      note: readStoredCellText(row.cells[5]),
+      date: readStoredCellText(row.cells[6]),
       comboKey: row.dataset.comboKey || ""
     });
   });
 
   return data;
+}
+
+// D-023 (D): the stored text of a data cell. Data cells are only ever filled
+// through the innerText setter, which keeps spaces, TAB, ideographic spaces,
+// NBSP and markup characters as text and turns line breaks into <br>. This
+// reads that back exactly (no trim, no whitespace collapsing), so the value
+// does not depend on whether the cell is visible, clipped or display:none.
+// textContent alone would drop the <br> line breaks. A cell holding anything
+// else keeps the previous read.
+function readStoredCellText(cell) {
+  if (!cell) return "";
+  const nodes = Array.from(cell.childNodes);
+  if (nodes.some(node => node.nodeType !== 3 && node.nodeName !== "BR")) return cell.innerText.trim();
+  return nodes.map(node => (node.nodeType === 3 ? node.nodeValue : "\n")).join("");
 }
 
 /* ===== D-018 collection saves: begin ===== */
@@ -2504,9 +2525,11 @@ function applyDataToTables(data) {
       });
     }
 
-    // Remote data normalization is display-only. Never write from a snapshot.
-    normalizeAllModelCells();
+    // Never write from a snapshot. Cells keep the stored values as they are
+    // (D-023: no model normalization on load); both sorted tables are put in
+    // order here, before the D-018 screen base is taken.
     sortBeybladeTable();
+    sortConfigTable();
     refreshSelectors();
   } finally {
     isApplyingRemoteData = false;
@@ -5307,7 +5330,6 @@ document.addEventListener("DOMContentLoaded", function () {
   installCollectionView();
   installUiSummaryObservers();
   setSyncStatus("請先使用 Google 登入", "muted");
-  installConfigSort();
 
   onAuthStateChanged(auth, handleAuthStateChange);
 });

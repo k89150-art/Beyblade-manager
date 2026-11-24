@@ -311,3 +311,14 @@
 - Tr／Op 搭配 CX 四件戰刃只顯示非阻擋提示，不新增違規規則。
 - 「歷史測試紀錄」改名「拆解紀錄」只改顯示文字，`historyTable` 不變。
 - D-018 連續空白問題、配置排序問題（儲存前同步排序無法解決未排序資料載入，7-3a 已撤回該部分）皆獨立待修。
+- 2026-11-24：上述兩項由 D-023（Phase 7-DC）處理。
+
+## D-023：資料一致性（Phase 7-DC）
+
+> 狀態：**已實作、本機 commit，未部署**（2026-11-24，ChatGPT 核准；預計 v1.14.2）。規格：`design/phase7/12-data-consistency-spec.md`；驗收：`design/phase7/verification/phase7-dc/README.md`。
+
+- 原始表格仍是儲存來源；修正的是「顯示用的處理不得改變權威資料或 D-018 基準」。D-018 的判定（逐表指紋、順序差異即變更、交易內衝突）不變，不忽略差異、不重設基準、不放寬衝突。
+- 排序（A／B）：配置表比照收藏表，在 `applyDataToTables`（D-018 取基準前）與 `collectCurrentData` 內同步排序；移除載入後 80 ms 的延遲重排（`installConfigSort`）。排序規則 `compareSortText` 不依賴語系（不分大小寫、連續數字以數值比較、其餘依碼位），相等時保持原順序；以 2026-11-24 備份驗證與舊規則排出的順序相同。賽事頁配置選單沿用儲存順序，不變。
+- 型號（C）：`normalizeModel` 保留多段型號的所有數字組（`UX-21-01 CUSTOM`）；載入時不再把正規化結果寫入儲存格。**不做隱性資料修復**：已損壞的 `UX-21 -01 CUSTOM` 在載入、顯示、查詢、不相關儲存與修改該配置時都維持原值；正式資料中的 1 筆列為待修復，修復需另行授權。
+- 讀值（D）：`getTableData`／`getHistoryData` 以 `readStoredCellText`（文字節點原文＋`<br>` 轉回換行，不 trim）讀儲存值，與儲存格可見、clip、`display:none`、卡片或清單無關；不全域取代 `innerText`（庫存計算、顯示層、確認文字仍用原讀法），編輯中的列仍用 `originalCells`。
+- A-09 只有兩段因此變更（`getTableData` 段落 `383aeb872526af0b → 02f67bb21e597b3e`、`applyDataToTables` 段落 `0d4c7a0a11b52e65 → 08c1de72b2266fec`），其餘受保護段落、`collection-sync.js`、`data-session-guard.js`、F-04、D-015、D-019、Rules、Schema 不變。

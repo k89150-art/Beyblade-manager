@@ -579,7 +579,7 @@ test("script.js: saves go through the transaction module; no whole-document setD
 
 test("index.html: script cache version, version line and the sync notice controls", () => {
   const html = fs.readFileSync("index.html", "utf8");
-  assert.match(html, /src="script\.js\?v=20261124-phase73a"/);
+  assert.match(html, /src="script\.js\?v=20261124-phase7dc"/);
   for (const id of ["collectionClientVersion", "collectionSyncNotice", "collectionSyncMessage", "collectionRetryBtn", "collectionLoadCloudBtn", "collectionKeepLocalBtn", "collectionDraftNotice", "collectionDraftMessage", "collectionDraftDownloadBtn", "collectionDraftDismissBtn"]) {
     assert.match(html, new RegExp(`id="${id}"`), id);
   }

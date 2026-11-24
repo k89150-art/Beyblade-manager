@@ -25,9 +25,24 @@ function escapeAttr(text) {
   return String(text).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
+// The child nodes a browser creates for `cell.innerText = text`: each line
+// break (CRLF, CR or LF) becomes a <br>, everything else stays text.
+export function innerTextNodes(text) {
+  const nodes = [];
+  String(text).split(/\r\n|\r|\n/).forEach((part, index) => {
+    if (index) nodes.push({ nodeType: 1, nodeName: "BR" });
+    if (part) nodes.push({ nodeType: 3, nodeName: "#text", nodeValue: part });
+  });
+  return nodes;
+}
+
 // ---------- in-memory DOM ----------
 
 function createDom() {
+  // How innerText reads data cells: "raw" like a display:none cell (the text
+  // as stored), "rendered" like a visible cell (whitespace runs collapsed,
+  // trimmed). Real pages switch between the two when card styles apply (D-023).
+  const textView = { mode: "raw" };
   const observers = [];
   const pendingTargets = new Set();
   let flushQueued = false;
@@ -167,13 +182,15 @@ function createDom() {
       let html = "";
       const cell = { tag: "td", dataset: {}, parentElement: row };
       Object.defineProperty(cell, "innerText", {
-        get() { return text; },
+        get() { return textView.mode === "rendered" ? text.replace(/[ \t\r\n]+/g, " ").trim() : text; },
         set(value) { text = String(value); html = escapeAttr(text); if (row.parentElement === tbody) notify(tbody); }
       });
       Object.defineProperty(cell, "textContent", {
         get() { return text; },
         set(value) { cell.innerText = value; }
       });
+      // Like the innerText setter: line breaks become <br>, everything else text.
+      Object.defineProperty(cell, "childNodes", { get() { return innerTextNodes(text); } });
       Object.defineProperty(cell, "innerHTML", {
         get() { return html; },
         set(value) { html = String(value); text = stripTags(html).trim(); if (row.parentElement === tbody) notify(tbody); }
@@ -272,7 +289,7 @@ function createDom() {
       return [];
     }
   };
-  return { document, tables, elements, MutationObserver };
+  return { document, tables, elements, MutationObserver, textView };
 }
 
 // ---------- page ----------
@@ -368,9 +385,8 @@ globalThis.__page = {
 };`, context);
   const page = context.__page;
 
-  // What DOMContentLoaded does for the tables and the config sort.
+  // What DOMContentLoaded does for the tables (D-023: no delayed config sort).
   context.clearAllTables();
-  context.installConfigSort();
 
   function rowCells(row) { return row.cells.slice(0, 9).map(cell => cell.innerText); }
 
@@ -437,6 +453,8 @@ globalThis.__page = {
     },
     save() { return context.window.addConfig(); },
     restoreHistory(row) { return context.window.restoreHistoryRow({ parentElement: { parentElement: row } }); },
+    // D-023: switch how innerText reads cells (see createDom).
+    setInnerTextView(mode) { dom.textView.mode = mode; },
     rowCells
   };
   return api;

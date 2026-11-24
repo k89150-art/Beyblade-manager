@@ -16,7 +16,7 @@ const between = (start, end) => {
   return script.slice(a, b);
 };
 const code = [
-  between("const partTypes = [", "function normalizeAllModelCells("),
+  between("const partTypes = [", "const RANDOM_BOOSTER_MODELS"),
   between("const RANDOM_BOOSTER_MODELS", "// Phase 7-R: the ratchet rules"),
   between("function getSeriesFromModel(", "function getConfigStructureModeFromRow("),
   between("function addStock(", "function escapeHtml("),

@@ -6,6 +6,7 @@ import { createDataSessionGuard, createSessionSnapshotGate, DATA_SESSION_STATES 
 import { attachCatalogNames, getOfficialStockCode } from "../stock-catalog-names.js";
 import * as collectionSyncModule from "../collection-sync.js";
 import * as assemblyRulesModule from "../assembly-rules.js";
+import { innerTextNodes } from "./helpers/config-page-harness.mjs";
 
 // H-1 / D-015: run the real script.js collection code against the real
 // catalog files, with an in-memory DOM and Firestore mocks. Nothing here reads
@@ -24,7 +25,7 @@ function sourceBetween(source, startMarker, endMarker) {
 }
 
 const SLICES = [
-  ["function normalizeModel(", "function normalizeAllModelCells("],
+  ["function normalizeModel(", "const RANDOM_BOOSTER_MODELS"],
   ["const RANDOM_BOOSTER_MODELS", "function getConfigStructureModeFromRow("],
   ["function getValue(", "function preventInvalidPartCountInput("],
   ["function getStockNameFromCell(", "function escapeHtml("],
@@ -81,7 +82,14 @@ function createDom() {
           dataset: {},
           cells: [],
           insertCell(index) {
-            const cell = { innerText: "", innerHTML: "", dataset: {} };
+            let text = "";
+            const cell = {
+              innerHTML: "",
+              dataset: {},
+              get innerText() { return text; },
+              set innerText(value) { text = String(value); },
+              get childNodes() { return innerTextNodes(text); }
+            };
             row.cells.splice(index, 0, cell);
             return cell;
           }
@@ -132,7 +140,7 @@ function createHarness({ source = managerSource, loadCatalog = true } = {}) {
     requireLogin: () => Boolean(guard.captureWriteSession()),
     getOperationButtons: () => "",
     createHistoryRow() {},
-    normalizeAllModelCells() {},
+    sortConfigTable() {},
     sortBeybladeTable() {},
     refreshSelectors() {},
     clearFirstAreaInputs() {},

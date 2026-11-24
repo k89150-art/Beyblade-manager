@@ -31,6 +31,7 @@ import {
 import vm from "node:vm";
 import { createMockFirestore, userDocPath } from "./helpers/mock-firestore.mjs";
 import { createManagerDevice, partRow } from "./helpers/manager-page-harness.mjs";
+import { innerTextNodes } from "./helpers/config-page-harness.mjs";
 
 const read = file => fs.readFileSync(file, "utf8").replace(/\r\n/g, "\n");
 const html = read("index.html");
@@ -156,7 +157,7 @@ test("Q1: add forms stay where they were, wrapped in collapsible panels with the
 
 test("cache versions for the changed files", () => {
   assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261124-phase72d" \/>/);
-  assert.match(html, /<script type="module" src="script\.js\?v=20261124-phase73a"><\/script>/);
+  assert.match(html, /<script type="module" src="script\.js\?v=20261124-phase7dc"><\/script>/);
   assert.match(script, /from "\.\/collection-view\.js\?v=20261124-phase72d";/);
   // v1.14.1 only changes SITE_VERSION in site-menu.js; the D-020 navigation itself is unchanged.
   assert.match(html, /<script src="site-menu\.js\?v=20261124-v1141"><\/script>/);
@@ -219,8 +220,14 @@ test("A-09: D-018, D-015, F-04 capture and table reads are byte-for-byte unchang
   // Hashes of the same ranges in 50169d7 (Phase 7-1, before 7-2a).
   const expected = [
     ["/* ===== D-018 collection saves: begin", "/* ===== D-018 collection saves: end", "1027d4a2debc9138"],
-    ["function getTableData(", "/* ===== D-018 collection saves: begin", "383aeb872526af0b"],
-    ["function applyDataToTables(", "function startCloudListener(", "0d4c7a0a11b52e65"],
+    // Phase 7-DC (D-023, approved exception): getTableData / getHistoryData read
+    // through readStoredCellText (new, in this range) and collectCurrentData
+    // sorts the config table; applyDataToTables no longer normalizes model
+    // cells and sorts the config table before the D-018 base. Previous hashes
+    // (50169d7..21a9318): 383aeb872526af0b, 0d4c7a0a11b52e65. Covered by
+    // tests/data-consistency.test.mjs.
+    ["function getTableData(", "/* ===== D-018 collection saves: begin", "02f67bb21e597b3e"],
+    ["function applyDataToTables(", "function startCloudListener(", "08c1de72b2266fec"],
     ["function getStoredItemExtras(", "function clearAllTables(", "70d4d345da4b1036"],
     ["function chooseStockProductForStoredItem(", "function createStockSetInstanceId(", "410384c3e2c96a4c"],
     ["function getStockNameFromCell(", "function escapeHtml(", "bf558aecdc0ad038"],
@@ -375,14 +382,15 @@ const STOCK_FIXTURE = [
   stockItem("h", "BX-1", "惡魔")
 ];
 
-// Runs the real sortTable() on a fake tbody whose rows only expose cells[0].innerText.
+// Runs the real sortTable() on a fake tbody whose rows only expose cells[0]
+// (its text, as the innerText setter stores it).
 function realSortTableOrder(models) {
   const pieces = [
     between(script, "function getSeriesFromModel(", "function getConfigStructureModeFromRow("),
-    between(script, "const TABLE_SORT_ORDER", "let _configSortTimer"),
-    between(script, "function sortTable(", "function sortBeybladeTable(")
+    between(script, "const TABLE_SORT_ORDER", "function sortBeybladeTable("),
+    between(script, "function readStoredCellText(", "/* ===== D-018 collection saves: begin")
   ].join("\n");
-  const rows = models.map((model, index) => ({ index, dataset: {}, cells: [{ innerText: model }] }));
+  const rows = models.map((model, index) => ({ index, dataset: {}, cells: [{ innerText: model, childNodes: innerTextNodes(model) }] }));
   const tbody = {
     rows,
     querySelector: () => null,

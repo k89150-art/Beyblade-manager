@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：無（v1.14.1 已部署；接著進行資料一致性唯讀盤點，結果交 ChatGPT 審查，未授權修正）
+- 目前執行者：無（Phase 7-DC 已本機 commit，待 ChatGPT 審查 v1.14.2 發布）
 - 寫入範圍：目前沒有進行中的寫入任務
-- 正式版本：`f4d2546`（v1.14.1，`origin/main`，GitHub Pages deployment `8024719101` success）。本機另有部署紀錄結案 commit，未 push。
+- 正式版本：`f4d2546`（v1.14.1，`origin/main`，GitHub Pages deployment `8024719101` success）。本機另有 v1.14.1 結案 commit `21a9318` 與 Phase 7-DC 修正 commit，皆未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -33,6 +33,18 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（Phase 7-DC：資料一致性修正，D-023）
+
+- 任務：ChatGPT 審查 v1.14.1 後的資料一致性盤點，新增 Phase 7-DC（7-3b 前置），授權規格、實作、測試與本機 commit（不升版、不 push、不部署、不寫入或修復正式資料）。規格 `design/phase7/12-data-consistency-spec.md`，驗收 `design/phase7/verification/phase7-dc/README.md`，決策 D-023。
+- A／B 排序與重複寫入：配置表在 `applyDataToTables`（D-018 取基準前）與 `collectCurrentData` 同步排序，移除 `installConfigSort` 的 80 ms 延遲重排；排序規則改為不依賴語系的 `compareSortText`（2026-11-24 備份上與舊規則順序完全相同）。`addConfig`／`restoreHistoryRow` 各 1 次寫入；未排序雲端資料載入不再變成未儲存，不相關儲存不寫 `configTable`。
+- C 型號：`normalizeModel` 保留多段型號（`UX-21-01 CUSTOM`）；載入時不再改寫型號（移除 `normalizeAllModelCells`）；已損壞的 `UX-21 -01 CUSTOM` 不做隱性修復（正式資料 1 筆，待另行授權）。
+- D 讀值：`getTableData`／`getHistoryData` 改用 `readStoredCellText`（文字節點＋`<br>`→換行，不 trim），與顯示狀態無關；`textContent` 會遺失換行所以不單用；未全域取代 `innerText`。
+- 受保護段落：A-09 兩段變更（`getTableData` 段 `383aeb872526af0b → 02f67bb21e597b3e`、`applyDataToTables` 段 `0d4c7a0a11b52e65 → 08c1de72b2266fec`），其餘 8 段與 `addConfig` 儲存格寫入、`checkStock` 不變；`collection-sync.js`、`data-session-guard.js`、`assembly-rules.js`、`collection-view.js`、`style.css`、`tournament.js`、Rules 未改。`index.html` 的 `script.js` 快取改 `20261124-phase7dc`；`SITE_VERSION` 仍 v1.14.1。
+- 測試：Node 17 檔 407/407（新增 `tests/data-consistency.test.mjs` 24 項，含 7 項突變）；Emulator 真實頁面（`exports/emulator-ui-7dc/`，commit 以 `documents:commit` 請求計數並以網路紀錄核對）：8 組寬度×主題載入與顯示 0 次 commit、新增零件 1 次且只寫 `partTable`、空白與型號原樣；`addConfig`、`restoreHistoryRow` 各 1 次；未排序資料 0 次、雲端順序不變；兩裝置同時修改配置表 → 一方 200、一方 400 進入衝突且不覆蓋；登出／換帳號 0 次、tester-b 無文件；換回修正前程式時同一操作會把型號與空白改寫（反向檢查）。Phase 7-2 回歸 505/505；M01～M16 PASS（`exports/firebase-emulator-7dc/`）；validate PASS；build PASS（35 files）；`git diff --check` PASS；`saveData()` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0。
+- 測試環境調整（未改斷言）：切片結尾改為 `const RANDOM_BOOSTER_MODELS`（`normalizeAllModelCells` 已移除）；H-1 環境補 `sortConfigTable` 空函式與 `childNodes`；7-3a 固定已知排序問題的測試改為驗證新行為；`phase7-2-regression`／`phase7-2d` 的 frame 切片同步調整。
+- 剩餘風險：`editRow`（受保護）仍以 `innerText.trim()` 取 `originalCells`；庫存比對與顯示仍用原讀法；收藏顯示層預設排序仍用 `localeCompare`（只影響畫面）；`\r\n` 讀回 `\n`；正式資料 1 筆損壞型號待修復；Safari／iOS 未驗證。
+- 另：7-3a 留下的 Emulator（`demo-beyblade-73a-ui`，8185／9199）在本輪開始時仍在執行，已停止；本輪的 Emulator 與伺服器都已關閉。
 
 ### 2026-11-24 — Claude Code（v1.14.1 正式部署與唯讀驗收）
 
