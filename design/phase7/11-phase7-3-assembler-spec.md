@@ -1,6 +1,6 @@
 # 11｜Phase 7-3：組裝器與配置管理（實作規格）
 
-狀態：**7-3a 已隨 v1.14.1 部署**（功能 commit `fca352e`、release `f4d2546`，GitHub Pages deployment `8024719101`，2026-11-24；排序修改已撤回）；**7-3b 已隨 v1.15.0 部署**（2026-11-25；功能 commit `cef1218`、release `aa1493a`，GitHub Pages deployment `8036157930`；驗收 `verification/phase7-3b/README.md`）；7-3c 授權本機實作；7-3d 未授權。
+狀態：**7-3a 已隨 v1.14.1 部署**（功能 commit `fca352e`、release `f4d2546`，GitHub Pages deployment `8024719101`，2026-11-24；排序修改已撤回）；**7-3b 已隨 v1.15.0 部署**（2026-11-25；功能 commit `cef1218`、release `aa1493a`，GitHub Pages deployment `8036157930`；驗收 `verification/phase7-3b/README.md`）；**7-3c ChatGPT 有條件 PASS，補測通過後 commit、隨 v1.16.0 發布**（2026-11-25；驗收 `verification/phase7-3c/README.md`）；7-3d 授權本機實作（v1.16.0 部署後）。
 
 基準：`main` = `fa4e419`（origin/main = `17ac204`，正式網站 v1.14.0）。前置審查與 ChatGPT 有條件 PASS：2026-11-24。
 
@@ -90,13 +90,21 @@
 - 清單上的「⋯」選單移除（操作在面板）。配置排序待修問題不受影響（顯示層自行排序）。
 - 新純函式放在新檔 `config-view.js`；`collection-view.js` 不改。
 
-## 5. 7-3c：組裝器（規格，未授權）
+## 5. 7-3c：組裝器（2026-11-25 實作，ChatGPT 有條件 PASS，補測後 commit）
 
 - 保留 Quick Editor 的元素 id（`configQuickEditor`、`confModel`、`sel上蓋`…`sel軸心`、`saveConfigEditorBtn`），讓 `addConfig` 讀取方式不變；寫入只經 `addConfig`。
 - 頂部選結構：標準三件式（BX／UX）、CX 三件戰刃、CX 四件戰刃；CX 三件只顯示「主要戰刃」，四件只顯示「超越＋金屬」（對應 `addConfig` 既有的二選一檢查）。固鎖一體上蓋與 Tr／Op 自動「無固鎖」（既有 `updateNoRatchetConfigOption`），固鎖槽顯示為「無固鎖」。
 - 選項顯示剩餘數量（既有 `refreshSelectors`）。
 - 即時檢查區（只讀、不阻擋；阻擋仍由 `addConfig` 決定）：庫存（可用數、超用時列出占用的配置）、規則（`evaluateAssembly` 帶上蓋名稱；修改時以 §3.2 的身分比較區分「原有」與「新產生」）、拆解紀錄重複（`findHistoryByComboKey`）、Tr／Op＋CX 四件戰刃提示（A4）。
 - 桌面為對話框，手機為底部全螢幕 sheet；焦點限制與 Esc 關閉沿用 7-2d。
+
+### 5.1 7-3c 測試清單（實作時補入）
+
+- C-01～C-04（純函式）：結構與 `configEditorMode` 對應、四件判定、切換時清空的戰刃；與 `addConfig` 相同的組成（cells 1–6）與 `checkStock` 零件清單；必選欄位（「-」視為已選固鎖、抽包只要固鎖與軸心）；檢查文字與等級（原有違規為警告、新違規為阻擋、時鐘幻象未選固鎖只算未選擇、列已變更只顯示一則）。
+- C-05～C-13（真實頁面 harness，真實 `addConfig`）：三種結構儲存的 9 格與 `mainStockName` 不變、每次 1 次寫入；切換結構與選零件、取消 0 次寫入；一體式上蓋與 Tr／Op 顯示「無獨立固鎖」、Tr／Op＋CX 四件只提示；修改時扣除自身（含開著時重新整理選單）；庫存不足列出占用配置且 `checkStock` 仍阻擋；修改超用配置提示原本使用的零件；特殊空白名稱精準；原有違規警告、新違規阻擋、D-019 確認取消 0 次寫入；拆解紀錄同組合提示、列已變更提示。
+- C-14：組裝器區塊沒有寫入呼叫；`checkStock` 雜湊與 `addConfig` 的 D-019 呼叫不變。
+- 複審補測 C-15～C-19：連續重新整理選單不重複扣除或釋放；超用配置欄位空白時儲存被拒、資料不變；CX 三↔四切換不存入隱藏戰刃、切換後取消原配置不變；即時阻擋與 `addConfig`／`checkStock`／D-019 結果一致；模式切換不影響組裝器以外元素。
+- Emulator 真實頁面：§8 共同項目，加上兩裝置、登出／換帳號、焦點限制、375／820／821／1440 × 深色／米色。
 
 ## 6. 7-3d：複製配置、從收藏陀螺建立配置（規格，未授權）
 

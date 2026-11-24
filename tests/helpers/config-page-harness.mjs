@@ -445,6 +445,8 @@ globalThis.__page = {
   get saving() { return isSavingCloudData; },
   get pending() { return hasPendingCloudSave; },
   get editorRow() { return configEditorRow; },
+  get editorMode() { return configEditorMode; },
+  get assemblyStructure() { return configAssemblyStructure; },
   get configView() { return configViewState; },
   get writable() { return Boolean(dataSessionGuard.captureWriteSession()); }
 };`, context);

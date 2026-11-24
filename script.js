@@ -53,11 +53,20 @@ import {
   CONFIG_STRUCTURE_LABELS,
   CONFIG_VIEW_MODE_STORAGE_KEY,
   CONFIG_VIEW_TABS,
+  assemblyHiddenBladeTypes,
+  assemblyMissingSlots,
+  assemblyModeOf,
+  assemblyRatchetFixedText,
+  assemblyRecordValues,
+  assemblySelectedParts,
+  assemblyStructureFromValues,
+  buildAssemblyChecks,
   buildConfigItems,
   buildHistoryItems,
   configCountText,
   configListNotice,
   configTabFromHash,
+  configTitle,
   defaultConfigControls,
   filterConfigByControls,
   filterConfigItems,
@@ -66,8 +75,9 @@ import {
   normalizeConfigViewMode,
   otherConfigTab,
   seriesOfModel,
+  normalizeAssemblyStructure,
   sortConfigItems
-} from "./config-view.js?v=20261125-phase73b";
+} from "./config-view.js?v=20261125-phase73c";
 
 import {
   getAuth,
@@ -159,6 +169,10 @@ let configEditorRow = null;
 let configEditorSessionToken = null;
 let configEditorRowSignature = null;
 let configEditorMode = "bxux";
+// Phase 7-3c: the assembler structure (std / cx3 / cx4) and what opened the editor.
+let configAssemblyStructure = "std";
+let configEditorReturnFocus = null;
+let configEditorStructureAtOpen = "std";
 let inventoryFilterType = "all";
 
 function isAdmin() {
@@ -4872,7 +4886,15 @@ function writeConfigDetail(kind, html, { open }) {
   if (!detail) return;
   const sheet = isSheetLayout();
   const body = detail.querySelector("[data-detail-body]");
+  // Phase 7-3c: a re-render (e.g. after saving from the editor) replaces the
+  // panel buttons; focus that was on one moves to the same new button.
+  const active = document.activeElement;
+  const focusedAction = active && typeof body?.contains === "function" && body.contains(active) ? active.dataset?.configAction || "" : null;
   if (body) body.innerHTML = html;
+  if (body && focusedAction !== null) {
+    const again = focusedAction ? body.querySelector?.(`[data-config-action="${focusedAction}"]`) : null;
+    (again && !again.disabled ? again : detail).focus?.({ preventScroll: true });
+  }
   detail.classList.toggle("is-open", open);
   detail.classList.toggle("is-sheet", sheet);
   detail.setAttribute("role", sheet ? "dialog" : "region");
@@ -5253,6 +5275,202 @@ function installConfigView() {
 }
 /* ===== Phase 7-3b config view: end ===== */
 
+/* ===== Phase 7-3c assembler: start =====
+   Display layer on the existing quick editor (spec 11 §5). It keeps the
+   select ids, never writes, and never decides a save: addConfig, checkStock
+   and checkConfigAssemblyRules (D-019) still check everything on 儲存. */
+const ASSEMBLY_CHECK_ICONS = { ok: "✓", info: "・", warn: "！", block: "✕" };
+
+function readConfigAssemblerValues() {
+  const values = {};
+  partTypes.forEach(type => {
+    values[type] = document.getElementById(selectorMap[type])?.value || "";
+  });
+  return values;
+}
+
+function syncConfigAssemblyStructureUi() {
+  const structure = normalizeAssemblyStructure(configAssemblyStructure);
+  document.querySelectorAll("#configQuickEditor [data-config-structure]").forEach(button => {
+    const active = button.dataset.configStructure === structure;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  document.querySelectorAll("#configQuickEditor [data-assembly-structure]").forEach(field => {
+    field.hidden = field.dataset.assemblyStructure !== structure;
+  });
+}
+
+// The structure buttons. Switching between BX/UX and CX clears the other
+// side's fields (existing setConfigEditorMode); switching CX 3 ↔ 4 clears
+// the blade fields the new structure does not show, so addConfig's either/or
+// check sees only what is on screen.
+function setConfigAssemblyStructure(structure) {
+  const next = normalizeAssemblyStructure(structure);
+  if (next === configAssemblyStructure) return;
+  configAssemblyStructure = next;
+  assemblyHiddenBladeTypes(next).forEach(type => {
+    const field = document.getElementById(selectorMap[type]);
+    if (field) field.value = "";
+  });
+  const mode = assemblyModeOf(next);
+  if (mode !== configEditorMode) {
+    setConfigEditorMode(mode, true);
+    return;
+  }
+  syncConfigAssemblyStructureUi();
+  updateNoRatchetConfigOption();
+  renderConfigAssembler();
+}
+
+// Same before/after identity comparison as checkConfigAssemblyRules (§3.2),
+// without alerts: kept = the edited config already broke this rule.
+function liveConfigAssemblyViolations(model, layer, fix, axis) {
+  const afterInput = { model, layer, fix, axis };
+  const after = evaluateAssembly(afterInput);
+  if (!after.violations.length) return [];
+  let added = after.violations;
+  if (configEditorRow) {
+    const cells = configEditorRow.cells;
+    const beforeInput = {
+      model: cells[0]?.innerText.trim() || "",
+      layer: cells[1]?.innerText.trim() || "",
+      fix: cells[7]?.innerText.trim() || "",
+      axis: cells[8]?.innerText.trim() || ""
+    };
+    added = newConfigAssemblyViolations(beforeInput, evaluateAssembly(beforeInput), afterInput, after);
+  }
+  return after.violations.map(item => ({ id: item.id, message: item.message, kept: !added.includes(item) }));
+}
+
+// Same stock formula as addConfig / checkStock (exact stored names, D-023);
+// for a shortage, the other configs that use the part.
+// dropped: a part the edited config uses that refreshSelectors could not offer
+// (no stock left), so its field opened empty.
+function liveConfigAssemblyShortages(parts) {
+  const total = getTotalParts();
+  const used = configEditorRow ? getUsedPartsExceptRow(configEditorRow) : getUsedParts();
+  const rows = Array.from(document.querySelectorAll("#configTable tbody tr")).filter(row => row !== configEditorRow);
+  const dropped = [];
+  if (configEditorRow && configEditorStructureAtOpen === configAssemblyStructure) {
+    // Only the slots of the row's own structure (a CX row keeps its combined
+    // name in the 上蓋 column, which is not a part it uses).
+    const stored = {};
+    partTypes.forEach(type => { stored[type] = getPersistedStockName(configEditorRow, configCellMap[type]); });
+    const booster = isRandomBooster(configEditorRow.cells[0]?.innerText.trim() || "");
+    assemblySelectedParts(configAssemblyStructure, stored, { booster }).forEach(({ type, name }) => {
+      const select = document.getElementById(selectorMap[type]);
+      if (!select || select.value === name) return;
+      if (Array.from(select.options || []).some(option => option.value === name)) return;
+      dropped.push({ type, name, dropped: true });
+    });
+  }
+  return [...dropped, ...parts]
+    .filter(({ type, name }) => (total[type]?.[name] || 0) - (used[type]?.[name] || 0) <= 0)
+    .map(({ type, name, dropped: isDropped = false }) => ({
+      label: `${type}「${formatPartNameForMenu(name)}」`,
+      total: total[type]?.[name] || 0,
+      dropped: isDropped,
+      users: rows
+        .filter(row => getPersistedStockName(row, configCellMap[type]) === name)
+        .map(row => configTitle(getPersistedRowCells(row)))
+    }));
+}
+
+function renderConfigAssembler() {
+  const editor = document.getElementById("configQuickEditor");
+  const list = document.getElementById("configAssemblyChecks");
+  if (!editor || editor.hidden || !list) return;
+  try {
+    syncConfigAssemblyStructureUi();
+    const structure = normalizeAssemblyStructure(configAssemblyStructure);
+    const values = readConfigAssemblerValues();
+    const existingModel = configEditorRow?.cells[0]?.innerText.trim() || "";
+    const model = buildInternalConfigModel(configEditorMode, values["上蓋"], existingModel);
+    const booster = Boolean(configEditorRow && isRandomBooster(model));
+    const fix = getNoRatchetFixValue(model, values["軸心"], values["固鎖"], values["上蓋"]);
+    const effective = { ...values, "固鎖": fix };
+    const integratedBlade = isIntegratedRatchetBlade(values["上蓋"], model);
+    const integratedBit = isIntegratedRatchetBit(values["軸心"]);
+
+    // The ratchet slot reads 無獨立固鎖 while an integrated part fills it.
+    const fixSelect = document.getElementById(selectorMap["固鎖"]);
+    const fixed = document.getElementById("configRatchetFixed");
+    const showFixed = (integratedBlade || integratedBit) && fixSelect?.value === "-";
+    if (fixSelect) fixSelect.hidden = showFixed;
+    if (fixed) {
+      fixed.hidden = !showFixed;
+      fixed.textContent = showFixed
+        ? assemblyRatchetFixedText({ integratedBlade, integratedBit, axisLabel: formatPartNameForMenu(values["軸心"]) })
+        : "";
+    }
+
+    const stale = Boolean(configEditorRow) && !isConfigEditorRowCurrent();
+    const missing = assemblyMissingSlots(structure, effective, { booster });
+    const record = assemblyRecordValues(structure, effective, { booster });
+    const history = !stale && !configEditorRow && !missing.length
+      ? findHistoryByComboKey(buildHistoryRecordFromConfigValues({ model, ...record, fix, axis: values["軸心"] }).comboKey)
+      : null;
+    const checks = buildAssemblyChecks({
+      structure,
+      booster,
+      stale,
+      missing,
+      violations: stale ? [] : liveConfigAssemblyViolations(model, values["上蓋"], fix, values["軸心"]),
+      fixEmpty: !fix,
+      integratedBit,
+      shortages: stale ? [] : liveConfigAssemblyShortages(assemblySelectedParts(structure, effective, { booster })),
+      history
+    });
+    const html = checks
+      .map(item => `<p class="assembly-check is-${item.level}"><span aria-hidden="true">${ASSEMBLY_CHECK_ICONS[item.level]}</span> ${escapeHtml(item.text)}</p>`)
+      .join("");
+    if (list.innerHTML !== html) list.innerHTML = html;
+  } catch (error) {
+    console.warn("[config assembler] live check unavailable", error);
+    list.innerHTML = "";
+  }
+}
+
+// Tab stays inside the open editor (as the 7-2d sheets).
+function trapConfigEditorFocus(event) {
+  if (event.key !== "Tab") return;
+  const editor = document.getElementById("configQuickEditor");
+  if (!editor || editor.hidden) return;
+  const panel = editor.querySelector(".quick-editor-panel");
+  if (!panel) return;
+  const focusables = Array.from(panel.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"))
+    .filter(element => !element.disabled && element.getClientRects().length > 0);
+  if (!focusables.length) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  const active = document.activeElement;
+  if (!panel.contains(active)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus({ preventScroll: true });
+  } else if (event.shiftKey && active === first) {
+    event.preventDefault();
+    last.focus({ preventScroll: true });
+  } else if (!event.shiftKey && active === last) {
+    event.preventDefault();
+    first.focus({ preventScroll: true });
+  }
+}
+
+function installConfigAssembler() {
+  document.querySelectorAll("#configQuickEditor [data-config-structure]").forEach(button => {
+    button.addEventListener("click", () => setConfigAssemblyStructure(button.dataset.configStructure));
+  });
+  // After the existing listeners (上蓋 → model, 軸心 → 無固鎖), so the checks
+  // see the updated values.
+  partTypes.forEach(type => {
+    document.getElementById(selectorMap[type])?.addEventListener("change", renderConfigAssembler);
+  });
+  document.addEventListener("keydown", trapConfigEditorFocus);
+  syncConfigAssemblyStructureUi();
+}
+/* ===== Phase 7-3c assembler: end ===== */
+
 function updateNoRatchetConfigOption() {
   const modelInput = document.getElementById("confModel");
   const fixSelect = document.getElementById(selectorMap["固鎖"]);
@@ -5286,12 +5504,13 @@ function updateNoRatchetConfigOption() {
 function setConfigEditorMode(mode, clearOpposite = false) {
   const normalizedMode = mode === "cx" ? "cx" : "bxux";
   configEditorMode = normalizedMode;
-
-  document.querySelectorAll("[data-config-mode]").forEach(button => {
-    const active = button.dataset.configMode === normalizedMode;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
-  });
+  // Phase 7-3c: the structure follows the mode (CX keeps 3- or 4-piece).
+  if (typeof syncConfigAssemblyStructureUi === "function") {
+    if (assemblyModeOf(configAssemblyStructure) !== normalizedMode) {
+      configAssemblyStructure = normalizedMode === "cx" ? "cx3" : "std";
+    }
+    syncConfigAssemblyStructureUi();
+  }
 
   document.querySelectorAll("[data-config-field]").forEach(field => {
     field.hidden = field.dataset.configField !== normalizedMode;
@@ -5314,6 +5533,7 @@ function setConfigEditorMode(mode, clearOpposite = false) {
   }
 
   updateNoRatchetConfigOption();
+  if (typeof renderConfigAssembler === "function") renderConfigAssembler();
 }
 
 function syncConfigEditorModeFromModel() {
@@ -5331,6 +5551,7 @@ function syncConfigModelFromSelection() {
   const layer = document.getElementById("sel上蓋")?.value || "";
   if (modelInput) modelInput.value = buildInternalConfigModel(configEditorMode, layer);
   updateNoRatchetConfigOption();
+  if (typeof renderConfigAssembler === "function") renderConfigAssembler();
 }
 
 function clearConfigEditorFields() {
@@ -5372,10 +5593,16 @@ function openConfigQuickEditor(editingRow = null) {
   configEditorRow = editingRow;
   configEditorRowSignature = editingRow ? getConfigEditorRowSignature(editingRow) : null;
   configEditorSessionToken = operationSession;
+  configEditorReturnFocus = document.activeElement || null;
   clearConfigEditorFields();
   refreshSelectors(editingRow);
 
   const mode = editingRow ? getConfigStructureModeFromRow(editingRow) : "bxux";
+  // Phase 7-3c: an existing CX config opens as 4-piece when it uses 超越／金屬.
+  configAssemblyStructure = editingRow
+    ? assemblyStructureFromValues(mode, { "超越戰刃": readStoredCellText(editingRow.cells[4]), "金屬戰刃": readStoredCellText(editingRow.cells[5]) })
+    : "std";
+  configEditorStructureAtOpen = configAssemblyStructure;
   const modelInput = document.getElementById("confModel");
   if (modelInput) {
     modelInput.value = editingRow
@@ -5394,6 +5621,7 @@ function openConfigQuickEditor(editingRow = null) {
 
   editor.hidden = false;
   document.body.classList.add("config-editor-open");
+  if (typeof renderConfigAssembler === "function") renderConfigAssembler();
 
   requestAnimationFrame(() => {
     const firstFieldId = mode === "cx" ? "sel紋章鎖" : "sel上蓋";
@@ -5407,12 +5635,24 @@ function closeConfigQuickEditor({ restoreFocus = true } = {}) {
   const editor = document.getElementById("configQuickEditor");
   if (!editor) return;
 
+  const focusInside = typeof editor.contains === "function" && editor.contains(document.activeElement);
   editor.hidden = true;
   document.body.classList.remove("config-editor-open");
   configEditorRow = null;
   configEditorRowSignature = null;
   configEditorSessionToken = null;
-  if (restoreFocus) document.getElementById("openConfigEditorBtn")?.focus();
+  const opener = configEditorReturnFocus;
+  configEditorReturnFocus = null;
+  // Phase 7-3c: focus goes back to what opened the editor when it is still
+  // shown and usable; otherwise to a visible control, never the page body.
+  // Without restoreFocus (sign-out, remote rebuild), only focus that was
+  // inside the editor is moved.
+  if (!restoreFocus && !focusInside) return;
+  const usable = element => Boolean(element && element !== document.body && element !== document.documentElement
+    && element.isConnected && !element.disabled && element.getClientRects?.().length);
+  const target = [restoreFocus ? opener : null, document.getElementById("openConfigEditorBtn"), document.querySelector('[data-config-tab][aria-selected="true"]')]
+    .find(usable);
+  target?.focus();
 }
 
 // Phase 7-3a: the row being edited must still be the same stored config row
@@ -5442,6 +5682,9 @@ function formatPartNameForMenu(name) {
 }
 
 window.refreshSelectors = function (editingRow = null) {
+  // Phase 7-3c: a refresh while a config is being edited (e.g. after checkStock
+  // refuses) keeps deducting that config's own use, as when it was opened.
+  if (!editingRow && configEditorRow && isConfigEditorRowCurrent()) editingRow = configEditorRow;
   const total = getTotalParts();
   const used = editingRow ? getUsedPartsExceptRow(editingRow) : getUsedParts();
   const selectorPlaceholders = {
@@ -5487,6 +5730,7 @@ window.refreshSelectors = function (editingRow = null) {
   });
 
   updateNoRatchetConfigOption();
+  if (typeof renderConfigAssembler === "function") renderConfigAssembler();
 };
 
 function checkStock(type, name, total, used) {
@@ -5922,9 +6166,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (button) button.addEventListener("click", closeConfigQuickEditor);
   });
 
-  document.querySelectorAll("[data-config-mode]").forEach(button => {
-    button.addEventListener("click", () => setConfigEditorMode(button.dataset.configMode, true));
-  });
+  installConfigAssembler();
 
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && !document.getElementById("stockChoiceDialog")?.hidden) {

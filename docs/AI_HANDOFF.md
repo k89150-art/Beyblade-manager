@@ -4,8 +4,8 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（Phase 7-3c 組裝器介面本機實作，不 commit；完成後交 ChatGPT 複審）
-- 寫入範圍：Phase 7-3c 組裝器顯示與即時檢查（Quick Editor 介面、`config-view.js` 或新純函式、`style.css`、`index.html`、測試）
+- 目前執行者：Claude Code（Phase 7-3c commit 與 v1.16.0 發布；之後 Phase 7-3d 本機實作，不 commit）
+- 寫入範圍：v1.16.0 發布（版本、快取、更新紀錄、使用教學、測試）；Phase 7-3d 快速建立配置（組裝器預填入口、詳細面板按鈕、測試）
 - 正式版本：`aa1493a`（v1.15.0，`origin/main`，GitHub Pages deployment `8036157930` success）。本機另有 v1.15.0 部署結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
@@ -33,6 +33,18 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-25 — Claude Code（Phase 7-3c：組裝器介面，ChatGPT 有條件 PASS → 補測後 commit）
+
+- 任務：v1.15.0 部署後依規格 11 §5 與 integrated-ac 原型實作 7-3c（只允許本機實作與測試，不 commit、不升版、不 push、不部署），完成後交 ChatGPT 複審。驗收紀錄 `design/phase7/verification/phase7-3c/README.md`。
+- 主要內容：Quick Editor 頂部改為三種結構（標準三件式／CX 三件戰刃／CX 四件戰刃），依結構顯示零件槽，CX 三↔四切換清空不顯示的戰刃；一體式上蓋與 Tr／Op 時固鎖欄顯示「無獨立固鎖」；只讀即時檢查（未選欄位、規則原有／新產生、庫存不足與占用配置、修改時原本使用但已無庫存的零件、拆解紀錄同組合、Tr／Op＋CX 四件提示、抽包提示、列已變更）；桌面置中對話框、手機全螢幕 sheet、焦點限制與焦點回復。純函式在 `config-view.js`；`script.js` 新區塊「Phase 7-3c assembler」在 7-3b 區塊之後。寫入只經既有 `addConfig`；`addConfig`、`checkStock`、`checkConfigAssemblyRules`、`updateNoRatchetConfigOption` 未修改。附帶修正：`setConfigEditorMode` 不再改到 7-3b 清單的 class／`aria-pressed`；開著修改時 `refreshSelectors()` 繼續扣除自身零件；7-3b 詳細面板重繪時保留按鈕焦點。快取 `script.js`／`style.css`／`config-view.js` 為 `20261125-phase73c`。未實作 7-3d。
+- 修改檔案：`config-view.js`、`script.js`、`index.html`、`style.css`、`guide.html`、`tests/config-assembler.test.mjs`（新）、`tests/helpers/config-page-harness.mjs`、`tests/assembly-rules.test.mjs`、`tests/collection-sync.test.mjs`、`tests/collection-view.test.mjs`、`README.md`、`AGENTS.md`、規格 11、本文件、`design/phase7/verification/phase7-3c/README.md`（新）。
+- 測試：Node 19 檔 453/453（新增 14 項）；Phase 7-2 回歸 505/505；M01～M16 PASS 16／FAIL 0；validate、build（36 files）、`git diff --check` PASS；核准雜湊（含 `addConfig` 寫入 `da046a3d56a07519`、`checkStock` `0bed51c10a056c87`）不變；`saveData(` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0；`assembly-rules.js`、`collection-sync.js`、`data-session-guard.js`、`collection-view.js` 未修改。Emulator 真實頁面：標準／CX 三件／CX 四件／一體式上蓋／Tr 各 1 次寫入；特殊空白名稱精準；修改不變更 0 次寫入、合法修改 1 次；原有違規警告、新違規阻擋、確認取消 0 次；庫存不足與超用阻擋 0 次；兩裝置、登出／換帳號不寫入；375／820／821／1440 × 深色／米色無水平溢出。
+- 複審補測（ChatGPT 有條件 PASS 的條件）：新增 C-15～C-19（連續重新整理選單、超用配置欄位空白時儲存被拒、CX 三↔四不存入隱藏戰刃與切換後取消、即時與最終判定一致、模式按鈕不影響清單）；Emulator：清單屬性與篩選／檢視模式不受影響、焦點（儲存、取消、原目標消失、遠端更新關閉）、手機 sheet 與組裝器不殘留遮罩或焦點限制、背景被遮罩覆蓋。新增修正：焦點在組裝器內而組裝器被登出或遠端更新關閉時，移到「＋ 建立配置」或目前分頁（`cancelSessionInteractions` 未修改）。回歸：Node 458/458、505/505、M01～M16 PASS、validate／build／diff-check PASS、雜湊與寫入路徑不變。
+- Git：功能 commit `feat(config): implement phase 7-3c assembler interface`（見 `git log`）。
+- 已知：開著時零件被用完只能在頁面上模擬（遠端變更會先關閉組裝器）；修改超用配置時欄位開啟為空屬既有 `refreshSelectors` 行為；確認文字「歷史測試紀錄」未改；Safari／iOS 未驗證。
+- 資料庫／部署風險：無正式 Firestore 讀寫；Rules、Schema 未修改。
+- Commit / Deploy：已 commit，隨 v1.16.0 發布。
 
 ### 2026-11-25 — Claude Code（v1.15.0 正式部署與唯讀驗收）
 

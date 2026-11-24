@@ -14,7 +14,7 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20261125-phase73b" />
+  <link rel="stylesheet" href="style.css?v=20261125-phase73c" />
   <link rel="stylesheet" href="site-menu.css?v=20261124-v1100" />
   <style>
 
@@ -655,10 +655,12 @@
         <button id="closeConfigEditorBtn" type="button" class="quick-editor-close" aria-label="關閉建立配置面板">×</button>
       </header>
 
-      <div class="config-mode-switch" role="group" aria-label="選擇配置系列">
-        <button type="button" class="config-mode-btn active" data-config-mode="bxux" aria-pressed="true">BX / UX</button>
-        <button type="button" class="config-mode-btn" data-config-mode="cx" aria-pressed="false">CX</button>
+      <div class="config-mode-switch config-structure-switch" role="group" aria-label="組裝結構">
+        <button type="button" class="config-mode-btn active" data-config-structure="std" aria-pressed="true"><span>標準三件式</span><small>BX／UX：上蓋＋固鎖＋軸心</small></button>
+        <button type="button" class="config-mode-btn" data-config-structure="cx3" aria-pressed="false"><span>CX 三件戰刃</span><small>紋章鎖＋主要戰刃＋輔助戰刃</small></button>
+        <button type="button" class="config-mode-btn" data-config-structure="cx4" aria-pressed="false"><span>CX 四件戰刃</span><small>紋章鎖＋超越＋金屬＋輔助</small></button>
       </div>
+      <p class="config-structure-note">固鎖一體型上蓋（彈丸獅鷲、榮耀戰神、惡魔冥界）與固鎖一體型軸心（Tr、Op）會自動取消固鎖欄位，不需另選結構。</p>
 
       <div id="config-selector" class="quick-editor-form">
         <input type="hidden" id="confModel" value="BX-CUSTOM">
@@ -677,23 +679,23 @@
               <option value="">選擇紋章鎖</option>
             </select>
           </label>
-          <label class="quick-editor-field">
+          <label class="quick-editor-field" data-assembly-structure="cx3">
             <span>主要戰刃</span>
             <select id="sel主要戰刃">
               <option value="">選擇主要戰刃</option>
             </select>
           </label>
-          <div class="quick-editor-split-row">
-            <label class="quick-editor-field">
-              <span>金屬戰刃</span>
-              <select id="sel金屬戰刃">
-                <option value="">選擇金屬戰刃</option>
-              </select>
-            </label>
+          <div class="quick-editor-split-row" data-assembly-structure="cx4" hidden>
             <label class="quick-editor-field">
               <span>超越戰刃</span>
               <select id="sel超越戰刃">
                 <option value="">選擇超越戰刃</option>
+              </select>
+            </label>
+            <label class="quick-editor-field">
+              <span>金屬戰刃</span>
+              <select id="sel金屬戰刃">
+                <option value="">選擇金屬戰刃</option>
               </select>
             </label>
           </div>
@@ -710,6 +712,7 @@
           <select id="sel固鎖">
             <option value="">選擇固鎖</option>
           </select>
+          <span id="configRatchetFixed" class="quick-editor-fixed" hidden></span>
         </label>
 
         <label class="quick-editor-field">
@@ -719,7 +722,8 @@
           </select>
         </label>
 
-        <div class="quick-editor-note">只需選擇實際使用的零件。庫存耗盡、Tr、UX-19／UX-20、UX-16 與 CX 二選一防呆仍會自動檢查。</div>
+        <div id="configAssemblyChecks" class="quick-editor-checks" role="status" aria-live="polite" aria-label="即時檢查"></div>
+        <div class="quick-editor-note">即時檢查只做提示；按「儲存」時仍會再次檢查庫存與官方組裝規則。</div>
       </div>
 
       <footer class="quick-editor-actions">
@@ -885,7 +889,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20261125-phase73b"></script>
+  <script type="module" src="script.js?v=20261125-phase73c"></script>
   <script src="site-menu.js?v=20261125-v1150"></script>
 </body>
 </html>
