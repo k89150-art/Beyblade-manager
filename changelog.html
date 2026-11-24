@@ -35,6 +35,19 @@
     <nav class="site-nav help-page-nav" data-help-nav aria-label="說明頁面捷徑"></nav>
 
     <div class="info-card">
+      <div class="version-title">v1.14.1｜組裝規則修正</div>
+      <div class="version-meta">2026-11-24</div>
+      <ul class="update-list">
+        <li><span class="change-tag">修正</span>修正組裝規則未完整套用到配置儲存流程的問題：建立或修改配置時，現在會依上蓋名稱與型號完整檢查一體式固鎖上蓋、Tr／Op 等一體式軸心與時鐘幻象的規則。</li>
+        <li><span class="change-tag">配置</span>新建不符合組裝規則的配置會被阻擋，不會儲存。</li>
+        <li><span class="change-tag">配置</span>修改原本就不符合規則的配置時，若這次修改沒有產生新的違規，會先提醒並在確認後儲存；若會產生新的違規則會被阻擋。按「取消」不會變更任何資料。</li>
+      </ul>
+    </div>
+
+    <details class="version-archive">
+      <summary>歷史版本（v1.2.0～v1.14.0）</summary>
+
+    <div class="info-card">
       <div class="version-title">v1.14.0｜收藏詳細資訊</div>
       <div class="version-meta">2026-11-24</div>
       <ul class="update-list">
@@ -45,9 +58,6 @@
         <li><span class="change-tag">手機</span>詳細資訊視窗開啟時，背景清單暫時無法操作；關閉後會回到原本點選的項目。</li>
       </ul>
     </div>
-
-    <details class="version-archive">
-      <summary>歷史版本（v1.2.0～v1.13.0）</summary>
 
     <div class="info-card">
       <div class="version-title">v1.13.0｜收藏清單篩選與排序</div>
@@ -332,6 +342,6 @@
     </div>
     </details>
   </div>
-<script src="site-menu.js?v=20261124-v1140"></script>
+<script src="site-menu.js?v=20261124-v1141"></script>
 </body>
 </html>

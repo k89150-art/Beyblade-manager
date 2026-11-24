@@ -4,8 +4,8 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Phase 7-3a 已本機 commit，待 ChatGPT 審查 v1.14.1 發布）
-- 寫入範圍：目前沒有進行中的寫入任務
+- 目前執行者：Claude Code（v1.14.1 發布流程：release commit → 正式備份 → push → 唯讀驗收；之後資料一致性唯讀盤點）
+- 寫入範圍：版本／說明頁／版本測試／交接與部署紀錄；不改功能程式
 - 正式版本：`17ac204`（v1.14.0，`origin/main`，GitHub Pages deployment `8014738489` success）。本機另有 v1.14.0 部署紀錄 commit `fa4e419` 與 7-3a 功能 commit，皆未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
@@ -33,6 +33,13 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（v1.14.1 發布準備：組裝規則修正）
+
+- 任務：ChatGPT 複審 Phase 7-3a PASS，核准 v1.14.1 正式發布（只含已驗收的 D-019 接線修正；配置排序撤回的決定維持）。
+- 主要內容：`SITE_VERSION` v1.14.1（`site-menu.js` 只改常數），11 頁 `site-menu.js` 快取改 `20261124-v1141`；更新紀錄新增 v1.14.1（組裝規則未完整套用到配置儲存流程的修正、新建違規阻擋、修改既有違規在未產生新違規時確認後可儲存），v1.14.0 移入歷史版本；使用教學「建立自由配置」改寫規則檢查說明並加入修改既有違規配置的行為。未宣稱配置排序、重複寫入或型號空白問題已修正。功能程式（`script.js` 等）未修改。
+- 修改檔案：`site-menu.js`、11 個頁面（快取字串）、`changelog.html`、`guide.html`、`tests/collection-view.test.mjs`／`tests/help-pages.test.mjs`／`tests/manager-ui-refresh.test.mjs`（版本、快取、更新紀錄順序）、`README.md`（測試檔數 15→16 的文字更正）、本文件。
+- 測試：見下方部署紀錄。
 
 ### 2026-11-24 — Claude Code（Phase 7-3a：D-019 接線修正；配置排序修正撤回）
 

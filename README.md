@@ -27,6 +27,6 @@ node scripts/build-site.mjs
 git diff --check
 ```
 
-上列 15 個測試檔是目前全部的 Node 測試。主頁與賽事頁的 Firestore 交易另以 Firebase Emulator 驗證，工具與結果放在被 Git 忽略的 `exports/firebase-emulator-*/`，只連本機 `demo-` 專案。
+上列 16 個測試檔是目前全部的 Node 測試。主頁與賽事頁的 Firestore 交易另以 Firebase Emulator 驗證，工具與結果放在被 Git 忽略的 `exports/firebase-emulator-*/`，只連本機 `demo-` 專案。
 
 `scripts/build-site.mjs` 會將檢查後的靜態檔案輸出到被 Git 忽略的 `.site-build/`；該資料夾不是部署來源，也不得提交。
