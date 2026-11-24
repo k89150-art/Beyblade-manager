@@ -41,7 +41,7 @@ import {
   roundPanelSelectionError,
   buildConfigPartIndex,
   checkDeckDuplicates
-} from "./tournament-panel.js?v=20261126-phase74";
+} from "./tournament-panel.js?v=20261125-v1180";
 
 const firebaseConfig = {
   apiKey: "AIzaSyABQadKr-Am-55GgFJmhZ0tkRY-joARNAQ",

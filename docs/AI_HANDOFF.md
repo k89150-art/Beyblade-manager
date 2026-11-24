@@ -4,8 +4,8 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（Phase 7-4 本機實作完成，等待 ChatGPT 統一審查 v1.18.0 發布）
-- 寫入範圍：賽事頁顯示層（`tournament.html`、`tournament.js` 渲染與面板區塊、`tournament-panel.js`、測試）；7-4c 另含核准的 T16 `editMatch` 例外
+- 目前執行者：Claude Code（v1.18.0 發布與 Phase 7-FINAL 最終驗收；最終驗收只做驗收、隔離環境測試、文件與問題分類）
+- 寫入範圍：v1.18.0 發布（版本、快取、更新紀錄、使用教學、版本測試、交接）；Phase 7-FINAL 只寫 `design/phase7/14-final-acceptance-report.md` 與交接文件
 - 正式版本：`049b0e6`（v1.17.0，`origin/main`，GitHub Pages deployment `8038191756` success）。本機另有 v1.17.0 部署結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
@@ -33,6 +33,12 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-25 — Claude Code（v1.18.0 發布準備：新版賽事記錄面板）
+
+- 任務：ChatGPT Phase 7-4 複審 PASS（7-4a／7-4b／7-4c 與 T16 有限例外核准；3on3 函式提前放在 7-4a commit 接受；修改對局未改動仍寫入一次接受既有行為）後，準備 v1.18.0。
+- 主要內容：`SITE_VERSION` v1.18.0；11 頁 `site-menu.js?v=20261125-v1180`；賽事頁 `tournament.js?v=20261125-v1180`、`tournament-panel.js?v=20261125-v1180`（只改快取字串；`tournament-sync.js` import 不變）；更新紀錄新增 v1.18.0（比分板、記錄回合大按鈕、多對局切換、4 分後停用快速記錄、新增／修改對局面板、3on3 重複零件提示（註明依官方大賽規則 B4 第 12 版、只提示不阻擋、實際比賽依主辦方規則）、交易保護不變），v1.17.0 移入歷史版本；使用教學第六節改寫。不宣稱即時同步、強制 3on3、手機全螢幕比分板；「賽事儲存版本：4B-1（交易保護）」不變。功能程式未修改。
+- 測試：見部署紀錄。
 
 ### 2026-11-25 — Claude Code（Phase 7-4 完整回歸與文件，交 ChatGPT 統一審查 v1.18.0）
 

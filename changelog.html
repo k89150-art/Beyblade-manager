@@ -35,6 +35,23 @@
     <nav class="site-nav help-page-nav" data-help-nav aria-label="說明頁面捷徑"></nav>
 
     <div class="info-card">
+      <div class="version-title">v1.18.0｜新版賽事記錄面板</div>
+      <div class="version-meta">2026-11-25</div>
+      <ul class="update-list">
+        <li><span class="change-tag">賽事</span>比賽詳細最上方新增比分板：顯示目前對局、對手、我方與對手比分及「先到 4 分」。</li>
+        <li><span class="change-tag">賽事</span>新增記錄回合大按鈕：依序點選本回合陀螺、得分方（我方得分／我方失分）與勝利方式（極限 3 分、擊飛 2 分、爆裂 2 分、迴轉 1 分），按「記錄回合」前會預覽記錄後的比分。只有一顆陀螺可選時會自動選好，其他選項不預選。</li>
+        <li><span class="change-tag">賽事</span>有多場尚未分出勝負的對局時，可切換要記錄的對局；切換前選好但還沒送出的內容會留在原本那一局。</li>
+        <li><span class="change-tag">賽事</span>任一方達到 4 分後，該局停用快速記錄；刪除回合使比分低於 4 分時會恢復。</li>
+        <li><span class="change-tag">賽事</span>新增對局與修改對局改為面板操作，取代原本連續跳出的輸入框；取消不會變更資料，沒有修改的欄位保留原本內容。「輪空／種子」與「對手未到」仍可直接晉級。</li>
+        <li><span class="change-tag">賽事</span>新增對局時會提示三顆陀螺之間的重複零件（依官方大賽規則 B4 レギュレーション第 12 版：紋章鎖只有戰神、帝王各限一個）。這只是提示、不會阻擋儲存，實際比賽請依主辦方規則；自填或無法辨識的陀螺會標示「未檢查重複零件」。</li>
+        <li><span class="change-tag">資料</span>所有賽事操作仍使用原本的交易保護與衝突檢查（賽事儲存版本 4B-1）；其他分頁或裝置的變更不會被覆蓋。</li>
+      </ul>
+    </div>
+
+    <details class="version-archive">
+      <summary>歷史版本（v1.2.0～v1.17.0）</summary>
+
+    <div class="info-card">
       <div class="version-title">v1.17.0｜快速建立配置</div>
       <div class="version-meta">2026-11-25</div>
       <ul class="update-list">
@@ -45,9 +62,6 @@
         <li><span class="change-tag">配置</span>這些入口只預先選好零件，不會自動儲存；按「儲存」時仍會完整檢查庫存與官方組裝規則，複製的配置視為新配置。</li>
       </ul>
     </div>
-
-    <details class="version-archive">
-      <summary>歷史版本（v1.2.0～v1.16.0）</summary>
 
     <div class="info-card">
       <div class="version-title">v1.16.0｜新版組裝器</div>
@@ -391,6 +405,6 @@
     </div>
     </details>
   </div>
-<script src="site-menu.js?v=20261125-v1170"></script>
+<script src="site-menu.js?v=20261125-v1180"></script>
 </body>
 </html>

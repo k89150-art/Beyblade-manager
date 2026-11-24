@@ -39,7 +39,7 @@ test("六個說明頁只保留共用捷徑掛載點", () => {
     assert.equal((html.match(/data-help-nav/g) || []).length, 1, `${page} 掛載點數量錯誤`);
     assert.match(html, /class="site-nav help-page-nav" data-help-nav/);
     assert.doesNotMatch(html, /<div class="site-nav">/);
-    assert.match(html, /site-menu\.js\?v=20261125-v1170/);
+    assert.match(html, /site-menu\.js\?v=20261125-v1180/);
     assert.match(html, /site-menu\.css\?v=20261124-v1100/);
   });
 });
@@ -56,6 +56,9 @@ test("使用教學符合目前正式操作", () => {
   // v1.15.0 (Phase 7-3b): config actions moved into the detail panel.
   // v1.16.0 (Phase 7-3c): assembler structures and live checks.
   // v1.17.0 (Phase 7-3d): quick create entries.
+  // v1.18.0 (Phase 7-4): tournament record panel.
+  assert.match(guide, /比賽詳細最上方是比分板與記錄回合面板/);
+  assert.match(guide, /按對局卡的「修改對局」；取消不會變更資料/);
   assert.match(guide, /在配置的詳細面板按「複製配置」，或在原裝收藏的詳細面板按「建立配置」/);
   assert.match(guide, /先在上方選擇組裝結構：標準三件式（BX／UX）、CX 三件戰刃或 CX 四件戰刃/);
   assert.match(guide, /即時檢查只是提示，按「儲存」時仍會再次檢查/);
@@ -72,14 +75,15 @@ test("使用教學符合目前正式操作", () => {
 
 test("更新紀錄只直接顯示最新版本，其餘版本集中於歷史版本", () => {
   const html = readFileSync("changelog.html", "utf8");
-  const latestVersionIndex = html.indexOf("v1.17.0｜快速建立配置");
+  const latestVersionIndex = html.indexOf("v1.18.0｜新版賽事記錄面板");
   const historyIndex = html.indexOf('<details class="version-archive">');
-  const previousVersionIndex = html.indexOf("v1.16.0｜新版組裝器");
+  const previousVersionIndex = html.indexOf("v1.17.0｜快速建立配置");
 
   assert.equal((html.match(/2026-09-02/g) || []).length, 1);
   assert.equal((html.match(/class="version-archive"/g) || []).length, 1);
   assert.ok(latestVersionIndex >= 0 && latestVersionIndex < historyIndex);
   assert.ok(previousVersionIndex > historyIndex);
+  assert.ok(html.indexOf("v1.16.0｜新版組裝器") > historyIndex);
   assert.ok(html.indexOf("v1.15.0｜配置管理") > historyIndex);
   assert.ok(html.indexOf("v1.14.2｜資料一致性修正") > historyIndex);
   assert.ok(html.indexOf("v1.14.1｜組裝規則修正") > historyIndex);
@@ -90,8 +94,11 @@ test("更新紀錄只直接顯示最新版本，其餘版本集中於歷史版�
   assert.ok(html.indexOf("v1.10.0｜導覽調整與組裝規則更新") > historyIndex);
   assert.ok(html.indexOf("v1.9.2｜收藏與文字閱讀體驗改善") > historyIndex);
   assert.ok(html.indexOf("v1.9.0｜主題、導覽與管理介面更新") > historyIndex);
-  assert.match(html, /<summary>歷史版本（v1\.2\.0～v1\.16\.0）<\/summary>/);
-  assert.equal((html.match(/2026-11-25/g) || []).length, 3, "v1.17.0, v1.16.0 and v1.15.0");
+  assert.match(html, /<summary>歷史版本（v1\.2\.0～v1\.17\.0）<\/summary>/);
+  assert.equal((html.match(/2026-11-25/g) || []).length, 4, "v1.18.0, v1.17.0, v1.16.0 and v1.15.0");
+  // v1.18.0 (Phase 7-4): no claim of live sync, enforced 3on3 or a full-screen phone scoreboard.
+  assert.match(html, /這只是提示、不會阻擋儲存/);
+  assert.doesNotMatch(html, /即時同步|全螢幕比分板|強制.{0,4}3on3/);
   // v1.17.0 (Phase 7-3d): quick create; saving still checks everything.
   assert.match(html, /新增「複製配置」/);
   assert.match(html, /按「儲存」時仍會完整檢查庫存與官方組裝規則/);
