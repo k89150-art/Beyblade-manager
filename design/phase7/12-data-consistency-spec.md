@@ -58,19 +58,35 @@
 - 新增 `readStoredCellText(cell)`：文字節點取原文、`<br>` 取 `"\n"`（`innerText` setter 的反向），**不 trim**；若儲存格出現文字與 `<br>` 以外的節點，退回原本的 `innerText.trim()`。
 - `getTableData`：非編輯中的列改用 `readStoredCellText` 讀 9 欄與沒有 `data-stock-name` 時的 `mainStockName`；編輯中的列維持 `getPersistedRowCells`（`originalCells`）。
 - `getHistoryData`：7 個欄位改用 `readStoredCellText`。
-- 不全域取代 `innerText`：`getPersistedRowCells`、`getStockNameFromCell`、庫存計算、顯示層、確認文字等仍用原讀法（只影響畫面與數量比對，不進入儲存或 D-018 基準）。
+- 不全域取代 `innerText`：顯示層與確認文字仍用原讀法。（`getPersistedRowCells`、`getStockNameFromCell` 原本也留用舊讀法，後由 §3.4 追加修正改為 `readStoredCellText`。）
 - 排序鍵（`sortTable`）也改用 `readStoredCellText(...).trim()`，排序不受顯示狀態影響。
 
 已知限制：`\r\n` 與 `\r` 經 `innerText` setter 都變成 `<br>`，讀回為 `"\n"`（正式資料沒有換行）。原本被讀成 `"-"` 的空白歷史欄位（`createHistoryRow` 以 `|| "-"` 顯示）行為不變。
 
+### 3.4 追加修正（2026-11-24，ChatGPT 核准）：編輯流程與庫存名稱身分
+
+補測（真實頁面＋Emulator）發現兩個資料安全問題：
+1. **編輯流程**：`editRow`（受保護）以 `innerText.trim()` 取原值與預填值；零件列是渲染中的列，連續空白、TAB 被摺疊、前後空白被刪除。取消會以這些值重建該列、之後不相關的儲存一併寫回；不修改直接儲存、只改數量也會把名稱存成摺疊後的值。
+2. **庫存名稱**：`getTotalParts`／`getUsedParts`（受保護）以 `getPersistedRowCells`／`getStockNameFromCell` 的 `innerText` 讀名稱，比對鍵依各表的顯示狀態而不同（零件列摺疊、配置與收藏列為 `display:none` 的原文）；選單值取自這些鍵，新配置存成摺疊名稱，而存原始名稱的配置對不上零件（引用 0、可用 1、可再選＝可能超用）。
+
+修正：
+- **編輯流程**（`window.editRow`→`rebuildRow` 段落）：`editRow` 以 `readStoredCellText` 取原值（不 trim）、輸入框預填原值，並另存編輯器開啟後各控制項的初始值（`editInitialValues`；輸入框無法保存換行等，故不假設 `defaultValue` 等於原值）；`saveEditRow` 對控制項仍為初始值的欄位保留原值，只有改過的欄位才套用既有規則（trim、空白存 `-`、數量轉數字、型號正規化）；取消以原值重建。D1 確認、session、stale-row、同步防護不變。
+- **庫存名稱身分**：零件身分為「類別＋原始名稱」精確比對。`getPersistedRowCells`、`getStockNameFromCell` 改用 `readStoredCellText`，所以 `getTotalParts`、`getUsedParts`、`getUsedPartsExceptRow`、7-2b 零件模型、D1 影響提示（函式本體都未修改）在任何顯示狀態下用同一個鍵；不同空白的名稱獨立計算，庫存公式與 CX、抽包、一體式、空值、`-` 等規則不變。
+- **選單**：`refreshSelectors` 的選項值是原始名稱，顯示文字另以 `formatPartNameForMenu` 標出會被隱藏的空白（␣ 連續或前後空白、⇥ TAB、⍽ NBSP、↵ 換行）；`populateConfigEditorFromRow` 以原值選取，`addConfig` 存入使用者選的原始名稱（`addConfig` 儲存格寫入段落、`checkStock` 未修改）。
+- **拆解／還原**：`buildHistoryRecordFromConfigRow`、`getConfigComboKeyFromRow` 以 `readStoredCellText` 讀配置；`normalizeComboValue` 保留原值（空白或 `-` 仍為 `-`），還原時引用同一個零件。
+- 不自動修復舊配置：舊選單存成摺疊名稱的配置，若沒有完全相符的零件，顯示為「無對應的配置引用」，不扣其他零件的庫存。
+- CRLF／LF 維持既有限制（見 §7）。
+
 ## 4. 受保護區段
 
-A-09 原有 10 段中只有兩段因本規格改變，其餘 8 段與 `addConfig` 儲存格寫入、`checkStock` 雜湊不變。
+A-09 原有 10 段中有四段因本規格（含 §3.4 追加修正）改變，其餘 6 段與 `addConfig` 儲存格寫入（`da046a3d56a07519`）、`checkStock`（`0bed51c10a056c87`）雜湊不變。
 
 | 段落 | 原雜湊 | 新雜湊 | 變更 | 理由 |
 |---|---|---|---|---|
 | `function getTableData(` → `D-018 collection saves: begin`（含 `collectCurrentData`、`getHistoryData`，新增的 `readStoredCellText` 也在此段） | `383aeb872526af0b` | `02f67bb21e597b3e` | `getTableData`／`getHistoryData` 改用 `readStoredCellText`；`collectCurrentData` 加 `sortConfigTable()` | D、A／B |
 | `function applyDataToTables(` → `function startCloudListener(` | `0d4c7a0a11b52e65` | `08c1de72b2266fec` | 移除 `normalizeAllModelCells()`，加 `sortConfigTable()` | C、B |
+| `window.editRow = function` → `function rebuildRow(`（`editRow`、`saveEditRow`、`cancelEditRow`） | `8be3b0baca010150` | `3ec54b27ec414e19` | 原值以 `readStoredCellText` 取得、另存控制項初始值；未修改欄位保留原值；清除 `editInitialValues` | §3.4 編輯流程 |
+| `function getStockNameFromCell(` → `function escapeHtml(`（含 `getPersistedRowCells`） | `bf558aecdc0ad038` | `c1230e4d43e39ba2` | 兩處讀值改為 `readStoredCellText` | §3.4 庫存名稱身分 |
 
 `index.html` 的 `script.js` 快取參數改為 `20261124-phase7dc`；`SITE_VERSION` 不變（v1.14.1）。
 
@@ -91,12 +107,14 @@ A-09 原有 10 段中只有兩段因本規格改變，其餘 8 段與 `addConfig
 
 ## 6. 驗收紀錄
 
-見 `design/phase7/verification/phase7-dc/README.md`。摘要：Node 407/407（新增 24 項，含 7 項突變）；Emulator 真實頁面 8 組寬度×主題載入與顯示 0 次 commit、不相關操作只寫 `partTable`，`addConfig`／`restoreHistoryRow` 各 1 次 commit，兩裝置同時修改配置表時衝突且不覆蓋，登出／換帳號不寫入；換回修正前程式時同一操作會改寫型號與空白（反向檢查）；Phase 7-2 回歸 505/505；M01～M16 PASS。
+見 `design/phase7/verification/phase7-dc/README.md`。第一階段摘要：Node 407/407（新增 24 項，含 7 項突變）；Emulator 真實頁面 8 組寬度×主題載入與顯示 0 次 commit、不相關操作只寫 `partTable`，`addConfig`／`restoreHistoryRow` 各 1 次 commit，兩裝置同時修改配置表時衝突且不覆蓋，登出／換帳號不寫入；換回修正前程式時同一操作會改寫型號與空白（反向檢查）；Phase 7-2 回歸 505/505；M01～M16 PASS。
+
+追加修正摘要：Node 425/425（新增 18 項，含 6 項突變）；Emulator 真實頁面編輯取消／未修改儲存 0 次寫入、只改數量名稱原樣；選單分開列出相似名稱、配置存入原始名稱、庫存耗盡後直接送出仍阻擋、修改／拆解／還原各 1 次寫入且名稱原樣、D1 提示依精確名稱；正式備份修改前後離線比對：庫存、引用、零件模型、選單完全相同，0 次寫入；Phase 7-2 回歸、M01～M16 見驗收紀錄。
 
 ## 7. 剩餘風險
 
-- `editRow`（受保護、未授權修改）仍以 `innerText.trim()` 取 `originalCells`：零件或收藏在列內編輯期間，若名稱含連續空白或 TAB，編輯中的列以摺疊後的值參與儲存與比較。正式資料目前沒有這類值。
-- 顯示與數量比對仍用原讀法（`getPersistedRowCells`、`getStockNameFromCell`、`checkStock` 等）：含連續空白的名稱，在不同顯示狀態下的庫存比對可能不同（只影響畫面與防呆，不進入儲存）。
+- 收藏顯示層（Phase 7-2）與 `deleteRow` 確認標題的名稱顯示會摺疊空白：兩個只差空白的零件在零件清單中看起來同名（各自獨立計數，選單以 ␣ 等標記區分）。
+- CRLF／LF（已知限制）：同一資料表因其他列變更而重新儲存時，原 CRLF 會轉為 LF；不新增 Schema、dataset 原值保存或全域換行轉換。
 - 收藏顯示層（Phase 7-2，`collection-view.js`）的預設排序仍用 `localeCompare`（只影響畫面）；與新規則在正式資料與測試樣本上相同。
 - `createHistoryRow` 以 `|| "-"` 顯示空白欄位，讀回為 `"-"`：既有行為，未變更。
 - `\r\n`、`\r` 經 `innerText` setter 後讀回為 `\n`。

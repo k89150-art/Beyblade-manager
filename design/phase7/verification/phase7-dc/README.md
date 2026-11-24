@@ -70,3 +70,58 @@
 | `function applyDataToTables(` → `function startCloudListener(` | `0d4c7a0a11b52e65` | `08c1de72b2266fec` | 移除 `normalizeAllModelCells()`，加 `sortConfigTable()`，註解 | C；B | C 載入、B 載入、突變 B、C |
 
 A-09 其餘 8 段（D-018 儲存、D-015 三段、`getStockNameFromCell`…`escapeHtml`、`deleteRow`、`editRow`、F-04 草稿、`getTotalParts`）與 7-3a 的兩段雜湊不變。另修改但不在 A-09 的程式：`normalizeModel`、`compareSortText`（新增）、`sortTable`、`sortConfigTable`，以及移除 `normalizeAllModelCells`、`scheduleConfigSort`、`installConfigSort` 與其呼叫。
+
+## 6. 追加修正（編輯流程、庫存名稱身分；2026-11-24）
+
+補測先在真實頁面發現：原始列編輯器取消、未修改儲存、只改數量都會把 `雙  空白`、`定位\t字元`、`  前後空白  ` 改寫成摺疊或 trim 後的值（NBSP 不受影響）；選單從畫面讀名稱，存原始名稱的配置對不上零件（引用 0、可用 1）。依 ChatGPT 核准的範圍修正（規格 §3.4）。
+
+### Node（`tests/data-consistency.test.mjs` 新增 18 項，全檔 42 項）
+
+| 項目 | 結果 |
+|---|---|
+| 編輯：取消（6 種特殊名稱） | 0 次 commit、無未儲存表、原值不變；之後新增配置只寫 `configTable` |
+| 編輯：未修改儲存 | 0 次 commit，原值不變 |
+| 編輯：只改數量／只改類別 | 名稱原樣（數量、類別依輸入） |
+| 編輯：主動改名、改數量 `05` | 沿用既有 trim 與數量規則、D1 確認文字 |
+| 編輯中儲存其他表 | 編輯列以原值參與，不寫 `partTable` |
+| 身分：選單 | `雙 空白`／`雙  空白`（`雙␣␣空白`）、`定位⇥字元`、`␣␣前後空白␣␣`、`不斷行⍽空白`、全形原樣，各自獨立；原裝 `雙  空白` 與額外 `雙 空白` 也分開 |
+| 身分：建立配置 | 存入選取的原始名稱；只扣該零件；用盡後不再列出；強制送出仍由 `checkStock` 阻擋；相似名稱可正常使用 |
+| 身分：舊配置（摺疊名稱） | 不修復；列為無對應引用；不扣 `雙  空白`；0 次交易 |
+| 身分：修改／拆解／還原 | 編輯器選取原值；歷史紀錄與組合鍵保留原值；還原用同一零件（含前後空白） |
+| D1 | 刪除被引用的 `雙  空白` 列出配置；刪除未使用的 `雙 空白` 無影響 |
+| 突變（6 項） | 換回 `editRow` 的 `innerText.trim()`、未修改欄位走輸入規則、庫存讀名稱用 `innerText`、選單不標空白、編輯器以畫面值選取、組合鍵 trim：對應測試全部失敗 |
+
+### 正式備份離線比對（2026-11-24 備份，唯讀，只輸出布林與筆數）
+
+兩份文件分別以修改前（`776efa0`）與修改後的 `script.js` 載入（「原文」與「渲染」兩種讀法）：`getTotalParts`、`getUsedParts`、7-2b 零件模型、8 個選單的選項值**完全相同**；載入後無未儲存表、0 次交易。正式資料不受影響。
+
+### Emulator 真實頁面（`exports/emulator-ui-7dc/`）
+
+| 情境 | 結果（commit 以 `documents:commit` 請求計數，讀回 Emulator 核對） |
+|---|---|
+| 編輯取消（4 種名稱）→ 不相關還原 | 取消 0 次；還原 1 次只寫 `configTable`；`partTable` 原樣（含 CRLF 列） |
+| 未修改儲存（4 種） | 0 次 |
+| 只改數量（4 種） | 各 1 次，名稱原樣 |
+| 選單 | 軸心：`雙␣␣空白`、`定位⇥字元`、`不斷行⍽空白`、`␣␣前後空白␣␣`、`雙 空白` 各自列出；上蓋：原裝 `雙  空白` 已被配置使用而不列、額外 `雙 空白` 列出 |
+| 選 `雙  空白` 建立配置 | 1 次（`configTable`），雲端存 `雙  空白`；之後不再列出 |
+| 強制送出已用盡的 `雙  空白` | 0 次，「軸心「雙  空白」已經沒有庫存，不能再使用」 |
+| 選 `雙 空白` 建立配置 | 1 次，雲端存 `雙 空白`；零件清單兩個項目各引用 1、可用 0 |
+| 修改配置（上蓋 `雙  空白`，軸心改 `定位\t字元`） | 1 次，上蓋原樣、軸心原值 |
+| 拆解（原因視窗） | 1 次（`configTable`＋`historyTable`），歷史 `combo`、`axis`、`comboKey` 原值 |
+| 還原 | 1 次（`configTable`），名稱原值 |
+| D1 刪除提示（取消） | 依精確名稱列出引用的配置；未使用的 `  前後空白  ` 無影響；0 次 |
+
+測試環境：這個環境中背景程序約 30 秒後會被暫停，Emulator 與伺服器改由前景以 `Start-Process` 啟動；App 視窗不可見時 `requestAnimationFrame` 不執行，測試複本的 `index.html` 加 16 ms 計時器代替（只在 Git 忽略的複本，正式程式未改）。登入改用頁面自己的 Firebase App 以 Emulator 專用憑證 `signInWithCredential`。
+
+### 回歸
+
+Node 425/425；M01～M16 PASS 16／FAIL 0；Phase 7-2 回歸見下；validate、build、`git diff --check` 見 AI_HANDOFF。
+
+### 受保護雜湊（追加）
+
+| 段落 | 原 | 新 |
+|---|---|---|
+| `window.editRow` → `rebuildRow` | `8be3b0baca010150` | `3ec54b27ec414e19` |
+| `getStockNameFromCell` → `escapeHtml` | `bf558aecdc0ad038` | `c1230e4d43e39ba2` |
+
+`getTableData` 段 `02f67bb21e597b3e`、`applyDataToTables` 段 `08c1de72b2266fec`、其餘 6 段、`addConfig` 儲存格寫入 `da046a3d56a07519`、`checkStock` `0bed51c10a056c87` 不變。

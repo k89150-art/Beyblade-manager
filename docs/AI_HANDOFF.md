@@ -4,7 +4,7 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Phase 7-DC 已本機 commit，待 ChatGPT 審查 v1.14.2 發布）
+- 目前執行者：Claude Code（Phase 7-DC 追加修正已本機 commit；接著 v1.14.2 發布，之後 Phase 7-3b 本機實作）
 - 寫入範圍：目前沒有進行中的寫入任務
 - 正式版本：`f4d2546`（v1.14.1，`origin/main`，GitHub Pages deployment `8024719101` success）。本機另有 v1.14.1 結案 commit `21a9318` 與 Phase 7-DC 修正 commit，皆未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
@@ -33,6 +33,15 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（Phase 7-DC 追加修正：編輯流程與庫存名稱身分）
+
+- 任務：v1.14.2 發布前補測（真實頁面＋Emulator）發現兩個資料安全問題，依指示停止發布；ChatGPT 核准追加修正（編輯流程、配置選單名稱一致性，零件身分改為「類別＋原始名稱」精確比對；CRLF／LF 維持既有限制）。規格 12 §3.4、D-023、驗收紀錄 `design/phase7/verification/phase7-dc/README.md` §6。
+- 問題 1（編輯流程）：受保護的 `editRow` 以 `innerText.trim()` 取原值與預填值（零件列為渲染中的列）→ 取消、未修改儲存、只改數量都會把 `雙  空白`、`定位	字元`、`  前後空白  ` 改寫；取消後不相關的儲存也會寫回零件表。修正：`editRow` 以 `readStoredCellText` 取原值並另存控制項初始值（`editInitialValues`）；`saveEditRow` 對未修改欄位保留原值，只有改過的欄位套用既有規則；取消以原值重建。
+- 問題 2（庫存名稱）：`getTotalParts`／`getUsedParts`（受保護）讀名稱依顯示狀態而不同（零件列摺疊、配置與收藏列為原文），選單值取自這些鍵，新配置存成摺疊名稱；存原始名稱的配置對不上零件（引用 0、可用 1，可能超用）。修正：`getPersistedRowCells`、`getStockNameFromCell` 改用 `readStoredCellText`（庫存函式本體未改）；選單值＝原始名稱、顯示文字以 `formatPartNameForMenu` 標出空白；`populateConfigEditorFromRow` 以原值選取；拆解／還原的 `buildHistoryRecordFromConfigRow`、`getConfigComboKeyFromRow` 以原值讀取，`normalizeComboValue` 保留原值。舊配置不修復，無完全相符零件時列為無對應引用。
+- 受保護段落：`editRow`→`rebuildRow` `8be3b0baca010150 → 3ec54b27ec414e19`；`getStockNameFromCell`→`escapeHtml` `bf558aecdc0ad038 → c1230e4d43e39ba2`；`getTableData` 段 `02f67bb21e597b3e`、`applyDataToTables` 段 `08c1de72b2266fec`、其餘 6 段、`addConfig` 儲存格寫入 `da046a3d56a07519`、`checkStock` `0bed51c10a056c87` 不變。`getTotalParts`、`getUsedParts`、`checkStock`、7-2b 零件模型、交易協定、F-04、D-015、D-019、Rules、Schema 未改。
+- 測試：Node 17 檔 425/425（新增 18 項，含 6 項突變）；正式備份離線比對（修改前後庫存、引用、零件模型、選單完全相同，0 次交易）；Emulator 真實頁面（編輯取消／未修改儲存 0 次、只改數量名稱原樣；選單分開列出相似名稱；配置存原始名稱；用盡後強制送出仍阻擋；修改、拆解、還原各 1 次且名稱原樣；D1 依精確名稱）；M01～M16 PASS；Phase 7-2 回歸與 validate／build／diff-check 見 commit 前檢查。測試環境調整：`tests/collection-parts.test.mjs` 的假儲存格加 `childNodes`、切片加 `readStoredCellText`（斷言未改）；`tests/helpers/config-page-harness.mjs` 的假儲存格支援 `<input>`／`<select>` 與 `deleteCell`。
+- 剩餘：收藏顯示層與 `deleteRow` 確認標題的名稱顯示會摺疊空白（只差空白的兩個零件看起來同名，計數各自獨立）；CRLF／LF 限制；Safari／iOS 未驗證。
 
 ### 2026-11-24 — Claude Code（Phase 7-DC：資料一致性修正，D-023）
 

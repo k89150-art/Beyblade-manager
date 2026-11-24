@@ -465,3 +465,332 @@ test("tournament menu: addConfig keeps the stored order sorted, so the menu orde
   assert.deepEqual(after.filter(text => before.includes(text)), before, "existing entries keep their relative order");
   assert.deepEqual(after.map(text => text.split("｜")[0]), ["UX-01 CUSTOM", "UX-21-01 CUSTOM", "BX-01 CUSTOM"]);
 });
+
+/* ---------- original row editor (editRow / saveEditRow / cancelEditRow) ---------- */
+
+// Part rows are rendered in the real page (their innerText collapses spaces
+// and trims), so these run with the "rendered" innerText view.
+const EDIT_PARTS = [
+  { cells: ["軸心", "雙  空白", "1"] },
+  { cells: ["軸心", "定位\t字元", "1"] },
+  { cells: ["軸心", "不斷行 空白", "2"] },
+  { cells: ["軸心", "  前後空白  ", "1"] },
+  { cells: ["上蓋", "全形　空白", "1"] },
+  { cells: ["上蓋", "換\n行", "1"] },
+  { cells: ["固鎖", "3-60", "2"] },
+  { cells: ["軸心", "Z", "1"] }
+];
+const EDIT_NAMES = EDIT_PARTS.slice(0, 6).map(item => item.cells[1]);
+
+function partRowByName(page, name) {
+  const read = cell => cell.childNodes.map(node => (node.nodeType === 3 ? node.nodeValue : "\n")).join("");
+  return [...page.context.document.querySelector("#partTable tbody").rows].find(row => read(row.cells[1]) === name);
+}
+const openEdit = (page, row) => page.context.window.editRow({ closest: () => row }, "part");
+const saveEdit = (page, row) => page.context.window.saveEditRow({ parentElement: { parentElement: row } }, "part");
+const cancelEdit = (page, row) => page.context.window.cancelEditRow({ parentElement: { parentElement: row } }, "part");
+
+async function openEditPage(source = SOURCE) {
+  return openPage(seed({ partTable: EDIT_PARTS }), { source, view: "rendered" });
+}
+
+async function assertCancelKeepsEverything(source) {
+  const { mock, page } = await openEditPage(source);
+  for (const name of EDIT_NAMES) {
+    const row = partRowByName(page, name);
+    openEdit(page, row);
+    assert.equal(row.dataset.editing, "true");
+    cancelEdit(page, row);
+  }
+  await page.settle();
+  assert.equal(mock.stats.commits, 0, "cancelling writes nothing");
+  assert.deepEqual(page.dirtyTables(), [], "nothing is left unsaved");
+  assert.deepEqual(page.tables().partTable, EDIT_PARTS);
+  // A later save of another table writes only that table.
+  page.openEditor();
+  page.build({ 上蓋: "惡魔冥界", 軸心: "Z" });
+  page.save();
+  await page.settle();
+  assert.equal(mock.stats.commits, 1);
+  assert.ok(!lastCommitFields(mock).includes("partTable"), "partTable not rewritten");
+  assert.deepEqual(mock.read(PATH).partTable, EDIT_PARTS);
+}
+
+test("edit: open then cancel keeps every stored name; a later unrelated save does not write partTable", async () => {
+  await assertCancelKeepsEverything(SOURCE);
+});
+
+test("edit: saving without changes keeps every stored value and writes nothing", async () => {
+  const { mock, page } = await openEditPage();
+  for (const name of EDIT_NAMES) {
+    const row = partRowByName(page, name);
+    openEdit(page, row);
+    saveEdit(page, row);
+    await page.settle();
+  }
+  assert.equal(mock.stats.commits, 0);
+  assert.deepEqual(page.dirtyTables(), []);
+  assert.deepEqual(mock.read(PATH).partTable, EDIT_PARTS);
+});
+
+test("edit: changing only the count keeps the name exactly; changing the type keeps name and count", async () => {
+  const { mock, page } = await openEditPage();
+  for (const name of EDIT_NAMES) {
+    const row = partRowByName(page, name);
+    openEdit(page, row);
+    row.cells[2].querySelector("input").value = "5";
+    saveEdit(page, row);
+    await page.settle();
+  }
+  const stored = mock.read(PATH).partTable;
+  for (const name of EDIT_NAMES) assert.deepEqual(stored.find(item => item.cells[1] === name)?.cells.slice(1), [name, "5"], JSON.stringify(name));
+  const row = partRowByName(page, "雙  空白");
+  openEdit(page, row);
+  row.cells[0].querySelector("select").value = "上蓋";
+  saveEdit(page, row);
+  await page.settle();
+  assert.deepEqual(mock.read(PATH).partTable.find(item => item.cells[1] === "雙  空白").cells, ["上蓋", "雙  空白", "5"]);
+});
+
+test("edit: a name the user changes follows the existing input rules and D1 confirm", async () => {
+  const { mock, page } = await openEditPage();
+  const row = partRowByName(page, "雙  空白");
+  openEdit(page, row);
+  row.cells[1].querySelector("input").value = "  新  名稱  ";
+  saveEdit(page, row);
+  await page.settle();
+  assert.deepEqual(mock.read(PATH).partTable.find(item => item.cells[2] === "1" && item.cells[1].startsWith("新")).cells, ["軸心", "新  名稱", "1"], "trimmed like before, inner spaces as typed");
+  assert.match(page.effects.confirms.at(-1), /^確定要保存這次修改嗎？/);
+  // A count the user changes is normalised as before ("05" -> "5").
+  const other = partRowByName(page, "定位\t字元");
+  openEdit(page, other);
+  other.cells[2].querySelector("input").value = "05";
+  saveEdit(page, other);
+  await page.settle();
+  assert.deepEqual(mock.read(PATH).partTable.find(item => item.cells[1] === "定位\t字元").cells, ["軸心", "定位\t字元", "5"]);
+});
+
+test("edit: while a row is being edited, saves of other tables use its stored values", async () => {
+  const { mock, page } = await openEditPage();
+  const row = partRowByName(page, "  前後空白  ");
+  openEdit(page, row);
+  assert.deepEqual(page.tables().partTable, EDIT_PARTS, "the editing row reads as stored");
+  page.openEditor();
+  page.build({ 上蓋: "惡魔冥界", 軸心: "Z" });
+  page.save();
+  await page.settle();
+  assert.ok(!lastCommitFields(mock).includes("partTable"));
+  cancelEdit(page, row);
+  assert.deepEqual(page.tables().partTable, EDIT_PARTS);
+});
+
+test("mutation edit: the old innerText capture in editRow is detected", async () => {
+  const source = mutate(SOURCE, "    .map(cell => readStoredCellText(cell));\n\n  const originalMainStockName =", "    .map(cell => cell.innerText.trim());\n\n  const originalMainStockName =");
+  assert.ok(await fails(() => assertCancelKeepsEverything(source)));
+});
+
+test("mutation edit: saving untouched fields through the input rules again is detected", async () => {
+  const source = mutate(SOURCE, "    if (control && canKeepOriginal && control.value === initialValues[i]) {", "    if (false) {");
+  assert.ok(await fails(async () => {
+    const { mock, page } = await openEditPage(source);
+    const row = partRowByName(page, "  前後空白  ");
+    openEdit(page, row);
+    saveEdit(page, row);
+    await page.settle();
+    assert.deepEqual(mock.read(PATH).partTable, EDIT_PARTS);
+  }));
+});
+
+/* ---------- inventory identity: category + exact stored name ---------- */
+
+// Run with the "rendered" innerText view: before D-023 the stock keys came
+// from rendered text, which merged names that differ only in whitespace.
+const IDENTITY_STOCK = [
+  stockItem("UX-03", "雙  空白", "-", "Z"),
+  stockItem("BX-01", "蒼龍神劍", "3-60", "F"),
+  stockItem("BX-02", "地獄鐮刀", "4-60", "T")
+];
+const IDENTITY_PARTS = [
+  { cells: ["軸心", "雙 空白", "1"] },
+  { cells: ["軸心", "雙  空白", "1"] },
+  { cells: ["軸心", "定位\t字元", "1"] },
+  { cells: ["軸心", "  前後空白  ", "1"] },
+  { cells: ["軸心", "不斷行 空白", "1"] },
+  { cells: ["軸心", "全形　空白", "1"] },
+  { cells: ["上蓋", "雙 空白", "1"] },
+  { cells: ["固鎖", "3-60", "9"] }
+];
+
+async function openIdentityPage({ configTable = [], historyTable = [], partTable = IDENTITY_PARTS, source = SOURCE } = {}) {
+  return openPage(seed({ beybladeTable: IDENTITY_STOCK, partTable, configTable, historyTable }), { source, view: "rendered" });
+}
+const unescapeText = text => String(text).replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&quot;", '"').replaceAll("&amp;", "&");
+const menu = (page, type) => page.context.document.getElementById(`sel${type}`).options
+  .filter(option => option.value)
+  .map(option => [option.value, unescapeText(option.textContent).replace(/[ \t\r\n]+/g, " ").trim()]);
+const offered = (page, type) => menu(page, type).map(([value]) => value);
+const usedOf = (page, type, name) => page.context.getUsedParts()[type][name] || 0;
+const totalOf = (page, type, name) => page.context.getTotalParts()[type][name] || 0;
+const partRowNamed = (page, name) => [...page.context.document.querySelector("#partTable tbody").rows]
+  .find(row => row.cells[1].childNodes.map(node => (node.nodeType === 3 ? node.nodeValue : "\n")).join("") === name);
+
+test("identity: names that differ only in whitespace are separate parts with their own menu entries", async () => {
+  const { page } = await openIdentityPage();
+  page.openEditor();
+  const axis = Object.fromEntries(menu(page, "軸心"));
+  assert.equal(axis["雙 空白"], "雙 空白，剩餘 1");
+  assert.equal(axis["雙  空白"], "雙␣␣空白，剩餘 1", "the menu shows the double space");
+  assert.equal(axis["定位\t字元"], "定位⇥字元，剩餘 1");
+  assert.equal(axis["  前後空白  "], "␣␣前後空白␣␣，剩餘 1");
+  assert.equal(axis["不斷行 空白"], "不斷行⍽空白，剩餘 1");
+  assert.equal(axis["全形　空白"], "全形　空白，剩餘 1");
+  assert.equal(totalOf(page, "軸心", "雙 空白"), 1);
+  assert.equal(totalOf(page, "軸心", "雙  空白"), 1);
+  // Original (collection) and extra parts with similar names stay apart too.
+  const layer = Object.fromEntries(menu(page, "上蓋"));
+  assert.equal(layer["雙  空白"], "雙␣␣空白，剩餘 1");
+  assert.equal(layer["雙 空白"], "雙 空白，剩餘 1");
+});
+
+test("identity: a config stores the exact name picked, uses only that part, and an exhausted part is blocked even when submitted directly", async () => {
+  const { mock, page } = await openIdentityPage();
+  page.openEditor();
+  page.build({ 上蓋: "蒼龍神劍", 固鎖: "3-60", 軸心: "雙  空白" });
+  page.save();
+  await page.settle();
+  assert.equal(mock.stats.commits, 1);
+  assert.equal(mock.read(PATH).configTable[0].cells[8], "雙  空白");
+  assert.equal(usedOf(page, "軸心", "雙  空白"), 1);
+  assert.equal(usedOf(page, "軸心", "雙 空白"), 0, "the similar name is not used");
+  page.openEditor();
+  assert.ok(!offered(page, "軸心").includes("雙  空白"), "used up");
+  assert.ok(offered(page, "軸心").includes("雙 空白"), "the other part is still available");
+  // Forcing the used-up name into the form is still blocked by checkStock.
+  page.build({ 上蓋: "地獄鐮刀", 固鎖: "3-60" });
+  const select = page.context.document.getElementById("sel軸心");
+  select.innerHTML += '<option value="雙  空白">forced</option>';
+  select.value = "雙  空白";
+  assert.equal(select.value, "雙  空白");
+  page.save();
+  await page.settle();
+  assert.equal(mock.stats.commits, 1, "nothing written");
+  assert.match(page.effects.alerts.at(-1), /軸心「雙  空白」已經沒有庫存/);
+  // The similar name is a legal, separate part.
+  page.build({ 上蓋: "地獄鐮刀", 固鎖: "3-60", 軸心: "雙 空白" });
+  page.save();
+  await page.settle();
+  assert.equal(mock.stats.commits, 2);
+  assert.equal(mock.read(PATH).configTable.find(item => item.cells[1] === "地獄鐮刀").cells[8], "雙 空白");
+});
+
+test("identity: every special name round-trips through a new config exactly", async () => {
+  const picks = [["蒼龍神劍", "定位\t字元"], ["地獄鐮刀", "  前後空白  "], ["雙  空白", "不斷行 空白"], ["雙 空白", "全形　空白"]];
+  const { mock, page } = await openIdentityPage();
+  for (const [layer, axis] of picks) {
+    page.openEditor();
+    page.build({ 上蓋: layer, 固鎖: "3-60", 軸心: axis });
+    page.save();
+    await page.settle();
+  }
+  assert.deepEqual(page.effects.alerts, []);
+  const stored = mock.read(PATH).configTable.map(item => [item.cells[1], item.cells[8]]);
+  for (const pick of picks) assert.ok(stored.some(item => item[0] === pick[0] && item[1] === pick[1]), JSON.stringify(pick));
+  for (const [layer, axis] of picks) {
+    assert.equal(usedOf(page, "軸心", axis), 1, JSON.stringify(axis));
+    assert.equal(usedOf(page, "上蓋", layer), 1, JSON.stringify(layer));
+  }
+});
+
+test("identity: an existing config that stored a merged name is not repaired and shows as an unmatched reference", async () => {
+  const legacy = cfg("BX-CUSTOM", "蒼龍神劍", "3-60", "雙 空白");
+  const parts = IDENTITY_PARTS.filter(item => !(item.cells[0] === "軸心" && item.cells[1] === "雙 空白"));
+  const { mock, page } = await openIdentityPage({ partTable: parts, configTable: [legacy] });
+  const model = page.context.computeCollectionPartsModel();
+  assert.ok(JSON.stringify(model.orphans || model).includes("雙 空白"), "listed as an unmatched reference");
+  assert.equal(usedOf(page, "軸心", "雙  空白"), 0, "it does not use the double-space part");
+  page.openEditor();
+  assert.ok(offered(page, "軸心").includes("雙  空白"));
+  await page.wait(250);
+  assert.equal(mock.stats.transactions, 0);
+  assert.deepEqual(mock.read(PATH).configTable, [legacy], "not repaired");
+});
+
+test("identity: editing a config keeps its exact names; dismantling and restoring keeps them and counts stock correctly", async () => {
+  const { mock, page } = await openIdentityPage({ configTable: [cfg("BX-01 CUSTOM", "蒼龍神劍", "3-60", "定位\t字元")] });
+  page.openEditor(page.configRows()[0]);
+  assert.equal(page.context.document.getElementById("sel軸心").value, "定位\t字元", "the editor selects the stored name");
+  page.build({ 固鎖: "3-60" });
+  page.save();
+  await page.settle();
+  assert.equal(mock.read(PATH).configTable[0].cells[8], "定位\t字元");
+  // Dismantle: the history record and its combo key keep the exact names.
+  const row = page.configRows()[0];
+  const record = page.context.buildHistoryRecordFromConfigRow(row, "測試", "");
+  assert.equal(record.axis, "定位\t字元");
+  assert.equal(record.comboKey.split("|")[7], "定位\t字元");
+  row.remove();
+  page.context.createHistoryRow(record);
+  page.context.saveData();
+  await page.settle();
+  assert.equal(usedOf(page, "軸心", "定位\t字元"), 0);
+  // Restore: same parts, stock checked by exact name.
+  page.restoreHistory(page.historyRows()[0]);
+  await page.settle();
+  assert.deepEqual(page.effects.alerts, []);
+  assert.equal(mock.read(PATH).configTable[0].cells[8], "定位\t字元");
+  assert.equal(usedOf(page, "軸心", "定位\t字元"), 1);
+});
+
+test("identity: restoring a config whose part has leading/trailing spaces uses that part", async () => {
+  const history = { model: "BX-01 CUSTOM", combo: "蒼龍神劍", fix: "3-60", axis: "  前後空白  ", result: "", note: "", date: "", comboKey: "蒼龍神劍|-|-|-|-|-|3-60|  前後空白  " };
+  const { mock, page } = await openIdentityPage({ historyTable: [history] });
+  page.restoreHistory(page.historyRows()[0]);
+  await page.settle();
+  assert.deepEqual(page.effects.alerts, []);
+  assert.equal(mock.read(PATH).configTable[0].cells[8], "  前後空白  ");
+  assert.equal(usedOf(page, "軸心", "  前後空白  "), 1);
+});
+
+test("identity: D1 impact text follows the exact names", async () => {
+  const { page } = await openIdentityPage({ configTable: [cfg("BX-01 CUSTOM", "蒼龍神劍", "3-60", "雙  空白")] });
+  assert.match(page.context.getPartDeleteImpactText(partRowNamed(page, "雙  空白")), /雙  空白/, "deleting the used part is reported");
+  assert.equal(page.context.getPartDeleteImpactText(partRowNamed(page, "雙 空白")), "", "deleting the similar, unused part has no impact");
+});
+
+test("mutation identity: reading stock names from rendered text again merges similar names", async () => {
+  let source = mutate(SOURCE, "    .map(cell => readStoredCellText(cell));\n}\n\nfunction getPersistedStockName(", "    .map(cell => cell.innerText.trim());\n}\n\nfunction getPersistedStockName(");
+  source = mutate(source, "  return readStoredCellText(cell);\n}\n\nfunction getPersistedRowCells(", "  return cell.innerText.trim();\n}\n\nfunction getPersistedRowCells(");
+  assert.ok(await fails(async () => {
+    const { page } = await openIdentityPage({ source });
+    assert.equal(totalOf(page, "軸心", "雙  空白"), 1);
+    assert.equal(totalOf(page, "軸心", "雙 空白"), 1);
+  }));
+});
+
+test("mutation identity: menu text without whitespace marks is detected", async () => {
+  const source = mutate(SOURCE, "${escapeHtml(formatPartNameForMenu(name))}，剩餘", "${escapeHtml(name)}，剩餘");
+  assert.ok(await fails(async () => {
+    const { page } = await openIdentityPage({ source });
+    page.openEditor();
+    assert.equal(Object.fromEntries(menu(page, "軸心"))["雙  空白"], "雙␣␣空白，剩餘 1");
+  }));
+});
+
+test("mutation identity: filling the editor from rendered text is detected", async () => {
+  const source = mutate(SOURCE, "  const values = Array.from(row.cells).slice(0, 9).map(cell => readStoredCellText(cell));", "  const values = Array.from(row.cells).slice(0, 9).map(cell => cell.innerText.trim());");
+  assert.ok(await fails(async () => {
+    const { page } = await openIdentityPage({ source, configTable: [cfg("BX-01 CUSTOM", "蒼龍神劍", "3-60", "定位\t字元")] });
+    page.openEditor(page.configRows()[0]);
+    assert.equal(page.context.document.getElementById("sel軸心").value, "定位\t字元");
+  }));
+});
+
+test("mutation identity: trimming combo values again breaks restoring an edge-space part", async () => {
+  const source = mutate(SOURCE, "  const text = String(value || \"\");\n  const trimmed = text.trim();\n  return trimmed && trimmed !== \"-\" ? text : \"-\";", "  const text = String(value || \"\").trim();\n  return text && text !== \"-\" ? text : \"-\";");
+  assert.ok(await fails(async () => {
+    // Dismantling builds the combo key that restoring later uses.
+    const { page } = await openIdentityPage({ source, configTable: [cfg("BX-01 CUSTOM", "蒼龍神劍", "3-60", "  前後空白  ")] });
+    const record = page.context.buildHistoryRecordFromConfigRow(page.configRows()[0], "", "");
+    assert.equal(record.comboKey.split("|")[7], "  前後空白  ");
+  }));
+});

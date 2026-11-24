@@ -230,12 +230,23 @@ test("A-09: D-018, D-015, F-04 capture and table reads are byte-for-byte unchang
     ["function applyDataToTables(", "function startCloudListener(", "08c1de72b2266fec"],
     ["function getStoredItemExtras(", "function clearAllTables(", "70d4d345da4b1036"],
     ["function chooseStockProductForStoredItem(", "function createStockSetInstanceId(", "410384c3e2c96a4c"],
-    ["function getStockNameFromCell(", "function escapeHtml(", "bf558aecdc0ad038"],
+    // Phase 7-DC follow-up (D-023, approved exception): getStockNameFromCell and
+    // getPersistedRowCells read stored values (readStoredCellText) so part
+    // identity is category + exact stored name in every table and display
+    // state. Previous hash (50169d7..776efa0): bf558aecdc0ad038. Covered by the
+    // "identity:" tests in tests/data-consistency.test.mjs.
+    ["function getStockNameFromCell(", "function escapeHtml(", "c1230e4d43e39ba2"],
     // Phase 7-2b (D1, approved): only the confirm() strings gained a read-only hint
     // (3 lines in deleteRow, 1 line in saveEditRow); see tests/collection-parts.test.mjs.
     // Previous hashes (50169d7..6f3f2b5): b2d3025d2f9d948b, e3d6abe8c11d47eb.
     ["window.deleteRow = async function", "/* ====== 表格內修改功能", "0bc3c60c31499a7c"],
-    ["window.editRow = function", "function rebuildRow(", "8be3b0baca010150"],
+    // Phase 7-DC follow-up (D-023, approved exception): editRow records the
+    // stored values (readStoredCellText, no trim) and the editor's initial
+    // control values; saveEditRow keeps untouched fields as stored and applies
+    // the input rules only to changed ones; both clear editInitialValues.
+    // Previous hash (6f3f2b5..776efa0): 8be3b0baca010150. Covered by the
+    // "edit:" tests in tests/data-consistency.test.mjs.
+    ["window.editRow = function", "function rebuildRow(", "3ec54b27ec414e19"],
     ["function captureOrphanedCollectionDraft(", "// Phase 7-2a (Q1)", "b6c58c122f6809ff"],
     ["function getTotalParts(", "function setUiSummaryValue(", "813fc6a101343c44"]
   ];

@@ -666,7 +666,9 @@ function getStockNameFromCell(cell) {
     return cell.dataset.stockName;
   }
 
-  return cell.innerText.trim();
+  // D-023: part identity is the category plus the exact stored name, read
+  // independently of how the cell is rendered.
+  return readStoredCellText(cell);
 }
 
 function getPersistedRowCells(row) {
@@ -683,7 +685,7 @@ function getPersistedRowCells(row) {
 
   return Array.from(row?.cells || [])
     .slice(0, -1)
-    .map(cell => cell.innerText.trim());
+    .map(cell => readStoredCellText(cell));
 }
 
 function getPersistedStockName(row, cellIndex) {
@@ -801,9 +803,12 @@ function getEditingButtons(tableType) {
     <button onclick="cancelEditRow(this, '${tableType}')">取消</button>
   `;
 }
+// D-023: combo keys carry exact part names (category + exact name identity),
+// so a restored config refers to the same parts; blank means "-".
 function normalizeComboValue(value) {
-  const text = String(value || "").trim();
-  return text && text !== "-" ? text : "-";
+  const text = String(value || "");
+  const trimmed = text.trim();
+  return trimmed && trimmed !== "-" ? text : "-";
 }
 
 function getConfigComboKeyFromValues(values) {
@@ -816,10 +821,11 @@ function getConfigComboKeyFromRow(row) {
   for (let i = 1; i <= 8; i++) {
     const cell = row.cells[i];
 
+    // D-023: stored values, not the rendered text.
     if (i === 3) {
-      values.push(getStockNameFromCell(cell) || cell?.innerText.trim() || "-");
+      values.push(getStockNameFromCell(cell) || "-");
     } else {
-      values.push(cell?.innerText.trim() || "-");
+      values.push((cell ? readStoredCellText(cell) : "") || "-");
     }
   }
 
@@ -827,15 +833,17 @@ function getConfigComboKeyFromRow(row) {
 }
 
 function buildHistoryRecordFromConfigRow(row, result, note) {
-  const model = normalizeModel(row.cells[0]?.innerText.trim() || "");
-  const layer = row.cells[1]?.innerText.trim() || "-";
-  const lock = row.cells[2]?.innerText.trim() || "-";
-  const main = row.cells[3]?.innerText.trim() || "-";
-  const transcend = row.cells[4]?.innerText.trim() || "-";
-  const metal = row.cells[5]?.innerText.trim() || "-";
-  const aux = row.cells[6]?.innerText.trim() || "-";
-  const fix = row.cells[7]?.innerText.trim() || "-";
-  const axis = row.cells[8]?.innerText.trim() || "-";
+  // D-023: the history record keeps the config's stored values.
+  const stored = index => (row.cells[index] ? readStoredCellText(row.cells[index]) : "") || "-";
+  const model = normalizeModel(row.cells[0] ? readStoredCellText(row.cells[0]) : "");
+  const layer = stored(1);
+  const lock = stored(2);
+  const main = stored(3);
+  const transcend = stored(4);
+  const metal = stored(5);
+  const aux = stored(6);
+  const fix = stored(7);
+  const axis = stored(8);
 
   const comboParts = [layer, lock, main, transcend, metal, aux]
     .filter(item => item && item !== "-")
@@ -1169,14 +1177,15 @@ window.editRow = function (button, tableType) {
   row.dataset.editing = "true";
   row.classList.add("editing-row");
 
+  // D-023: the stored values exactly as saved (not the rendered, trimmed
+  // text), so cancelling or saving an untouched field changes nothing.
   const originalCells = Array.from(row.cells)
     .slice(0, -1)
-    .map(cell => cell.innerText.trim());
+    .map(cell => readStoredCellText(cell));
 
   const originalMainStockName =
     row.cells[3]?.dataset.stockName ??
-    row.cells[3]?.innerText.trim() ??
-    "";
+    (row.cells[3] ? readStoredCellText(row.cells[3]) : "");
 
   row.dataset.originalCells = JSON.stringify(originalCells);
   row.dataset.originalMainStockName = originalMainStockName;
@@ -1185,7 +1194,7 @@ window.editRow = function (button, tableType) {
 
   for (let i = 0; i < lastIndex; i++) {
     if (tableType === "part" && i === 0) {
-      const currentType = row.cells[i].innerText.trim();
+      const currentType = originalCells[i];
 
       row.cells[i].innerHTML = `
         <select>
@@ -1204,7 +1213,7 @@ window.editRow = function (button, tableType) {
     }
 
     else if (tableType === "part" && i === 2) {
-      const currentText = row.cells[i].innerText.trim();
+      const currentText = originalCells[i];
 
       row.cells[i].innerHTML = `
         <input type="number" min="1" step="1" value="${escapeHtml(currentText)}">
@@ -1229,13 +1238,23 @@ window.editRow = function (button, tableType) {
     }
 
     else {
-      const currentText = row.cells[i].innerText.trim();
+      const currentText = originalCells[i];
 
       row.cells[i].innerHTML = `
         <input type="text" value="${escapeHtml(currentText)}">
       `;
     }
   }
+
+  // D-023: what each editor control holds right after opening (an input can
+  // differ from the stored value, e.g. it cannot hold a line break). A field
+  // whose control still holds this value counts as untouched.
+  row.dataset.editInitialValues = JSON.stringify(Array.from(row.cells)
+    .slice(0, lastIndex)
+    .map(cell => {
+      const control = cell.querySelector("input, select");
+      return control ? control.value : null;
+    }));
 
   row.cells[lastIndex].innerHTML = getEditingButtons(tableType);
 };
@@ -1255,18 +1274,40 @@ window.saveEditRow = function (button, tableType) {
   const row = button.parentElement.parentElement;
   const lastIndex = row.cells.length - 1;
 
+  // D-023: a field the user did not change keeps its stored value exactly;
+  // only changed fields go through the input rules (trim, "-", count, model).
+  let originalCells = null;
+  let initialValues = null;
+  try {
+    originalCells = JSON.parse(row.dataset.originalCells || "null");
+    initialValues = JSON.parse(row.dataset.editInitialValues || "null");
+  } catch (error) {
+    originalCells = null;
+    initialValues = null;
+  }
+  const canKeepOriginal = Array.isArray(originalCells) && originalCells.length === lastIndex &&
+    Array.isArray(initialValues) && initialValues.length === lastIndex;
+
   const newValues = [];
+  const changed = [];
 
   for (let i = 0; i < lastIndex; i++) {
     const input = row.cells[i].querySelector("input");
     const select = row.cells[i].querySelector("select");
+    const control = input || select;
 
-    if (input) {
+    if (control && canKeepOriginal && control.value === initialValues[i]) {
+      newValues.push(originalCells[i]);
+      changed.push(false);
+    } else if (input) {
       newValues.push(input.value.trim() || "-");
+      changed.push(true);
     } else if (select) {
       newValues.push(select.value);
+      changed.push(true);
     } else {
-      newValues.push(row.cells[i].innerText.trim() || "-");
+      newValues.push(canKeepOriginal ? originalCells[i] : row.cells[i].innerText.trim() || "-");
+      changed.push(!canKeepOriginal);
     }
   }
 
@@ -1284,10 +1325,10 @@ window.saveEditRow = function (button, tableType) {
       return;
     }
 
-    newValues[2] = String(partCount);
+    if (changed[2]) newValues[2] = String(partCount);
   }
-  
-  if (tableType === "beyblade") {
+
+  if (tableType === "beyblade" && changed[0]) {
   newValues[0] = normalizeModel(newValues[0]);
   }
 
@@ -1304,6 +1345,7 @@ window.saveEditRow = function (button, tableType) {
 
   delete row.dataset.originalCells;
   delete row.dataset.originalMainStockName;
+  delete row.dataset.editInitialValues;
   delete row.dataset.editing;
   row.classList.remove("editing-row");
 
@@ -1324,6 +1366,7 @@ window.cancelEditRow = function (button, tableType) {
 
   delete row.dataset.originalCells;
   delete row.dataset.originalMainStockName;
+  delete row.dataset.editInitialValues;
   delete row.dataset.editing;
   row.classList.remove("editing-row");
 
@@ -4717,7 +4760,9 @@ function clearConfigEditorFields() {
 }
 
 function populateConfigEditorFromRow(row) {
-  const values = Array.from(row.cells).slice(0, 9).map(cell => cell.innerText.trim());
+  // D-023: the selects hold exact stored names, so the row's own values are
+  // read as stored (not as rendered).
+  const values = Array.from(row.cells).slice(0, 9).map(cell => readStoredCellText(cell));
   const mainValue = values[3] || "";
   const hasSplitMain = Boolean((values[4] && values[4] !== "-") || (values[5] && values[5] !== "-"));
   const fieldValues = {
@@ -4801,6 +4846,20 @@ function isConfigEditorRowCurrent() {
     && configEditorRowSignature === getConfigEditorRowSignature(row));
 }
 
+// D-023: menu text for a part name. Names that differ only in whitespace are
+// different parts, so whitespace a menu would collapse is shown with marks:
+// ␣ for a run of spaces or a leading/trailing space, ⇥ TAB, ⍽ NBSP, ↵ line
+// break. Plain names are shown as they are. Display only, never stored.
+function formatPartNameForMenu(name) {
+  const text = String(name ?? "");
+  if (!/[\t\r\n ]| {2,}|^ | $/.test(text)) return text;
+  return text
+    .replace(/\r\n|\r|\n/g, "↵")
+    .replace(/\t/g, "⇥")
+    .replace(/ /g, "⍽")
+    .replace(/ {2,}|^ +| +$/g, spaces => "␣".repeat(spaces.length));
+}
+
 window.refreshSelectors = function (editingRow = null) {
   const total = getTotalParts();
   const used = editingRow ? getUsedPartsExceptRow(editingRow) : getUsedParts();
@@ -4831,9 +4890,11 @@ window.refreshSelectors = function (editingRow = null) {
       const remainCount = totalCount - usedCount;
 
       if (remainCount > 0 || name === currentValue) {
+        // D-023: the value is the exact stored name; the text only marks
+        // whitespace a menu would otherwise hide.
         sel.innerHTML += `
           <option value="${escapeHtml(name)}">
-            ${escapeHtml(name)}，剩餘 ${remainCount}
+            ${escapeHtml(formatPartNameForMenu(name))}，剩餘 ${remainCount}
           </option>
         `;
       }

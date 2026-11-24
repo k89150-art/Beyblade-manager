@@ -191,12 +191,48 @@ function createDom() {
       });
       // Like the innerText setter: line breaks become <br>, everything else text.
       Object.defineProperty(cell, "childNodes", { get() { return innerTextNodes(text); } });
+      // Form controls written through innerHTML (the original row editor):
+      // <input> keeps its value attribute the way a browser sanitizes it (a
+      // text input drops line breaks; a number input keeps only a valid
+      // number); <select> only takes values it has an option for.
+      let controls = [];
       Object.defineProperty(cell, "innerHTML", {
         get() { return html; },
-        set(value) { html = String(value); text = stripTags(html).trim(); if (row.parentElement === tbody) notify(tbody); }
+        set(value) {
+          html = String(value);
+          text = stripTags(html).trim();
+          controls = parseControls(html);
+          if (row.parentElement === tbody) notify(tbody);
+        }
       });
-      cell.querySelector = selector => (String(selector).split(",").some(part => html.includes(`<${part.trim()}`)) ? {} : null);
+      cell.querySelector = selector => {
+        const tags = String(selector).split(",").map(part => part.trim());
+        const control = controls.find(item => tags.includes(item.tag));
+        if (control) return control;
+        return tags.some(tag => html.includes(`<${tag}`)) ? {} : null;
+      };
       return cell;
+    }
+
+    function parseControls(source) {
+      const found = [];
+      for (const match of source.matchAll(/<input\b([^>]*)>/g)) {
+        const type = (/\btype="([^"]*)"/.exec(match[1]) || [])[1] || "text";
+        const raw = unescapeHtml((/\bvalue="([^"]*)"/.exec(match[1]) || [])[1] || "");
+        const value = type === "number" ? (/^\s*-?\d+(\.\d+)?\s*$/.test(raw) ? raw.trim() : "") : raw.replace(/[\r\n]/g, "");
+        found.push({ tag: "input", type, value, defaultValue: value });
+      }
+      for (const match of source.matchAll(/<select\b[^>]*>([\s\S]*?)<\/select>/g)) {
+        const options = [...match[1].matchAll(/<option value="([^"]*)"/g)].map(option => unescapeHtml(option[1]));
+        let selected = options[0] ?? "";
+        found.push({
+          tag: "select",
+          options,
+          get value() { return selected; },
+          set value(next) { if (options.includes(String(next))) selected = String(next); }
+        });
+      }
+      return found;
     }
 
     function createRow() {
@@ -206,6 +242,10 @@ function createDom() {
         if (index < 0 || index >= row.cells.length) row.cells.push(cell); else row.cells.splice(index, 0, cell);
         if (row.parentElement === tbody) notify(tbody);
         return cell;
+      };
+      row.deleteCell = index => {
+        row.cells.splice(index, 1);
+        if (row.parentElement === tbody) notify(tbody);
       };
       row.closest = selector => (selector === "table" && row.parentElement === tbody ? table : null);
       row.remove = () => {

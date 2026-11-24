@@ -8,6 +8,7 @@ import fs from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 import * as view from "../collection-view.js";
+import { innerTextNodes } from "./helpers/config-page-harness.mjs";
 
 const script = fs.readFileSync("script.js", "utf8").replace(/\r\n/g, "\n");
 const between = (start, end) => {
@@ -22,10 +23,13 @@ const code = [
   between("function addStock(", "function escapeHtml("),
   between("function getTotalParts(", "function setUiSummaryValue("),
   between("function isExplicitStockAutoFilled(", "function getStoredItemExtras("),
-  between("/* ===== Phase 7-2b parts model", "/* ===== Phase 7-2b parts model (P2 / U2 / D1, read-only): end")
+  between("/* ===== Phase 7-2b parts model", "/* ===== Phase 7-2b parts model (P2 / U2 / D1, read-only): end"),
+  // D-023: stored cell values are read through readStoredCellText.
+  between("function readStoredCellText(", "/* ===== D-018 collection saves: begin")
 ].join("\n");
 
-const cell = (text, stockName) => ({ innerText: text, dataset: stockName === undefined ? {} : { stockName } });
+// Cells as the innerText setter leaves them (D-023 reads their child nodes).
+const cell = (text, stockName) => ({ innerText: text, childNodes: innerTextNodes(text), dataset: stockName === undefined ? {} : { stockName } });
 const makeRow = (cells, { stockName, dataset = {}, key } = {}) => ({
   cells: [...cells.map((text, index) => cell(text, index === 3 ? stockName : undefined)), cell("")],
   dataset: { ...dataset },
