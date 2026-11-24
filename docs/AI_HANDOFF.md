@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（v1.14.1 發布流程：release commit → 正式備份 → push → 唯讀驗收；之後資料一致性唯讀盤點）
-- 寫入範圍：版本／說明頁／版本測試／交接與部署紀錄；不改功能程式
-- 正式版本：`17ac204`（v1.14.0，`origin/main`，GitHub Pages deployment `8014738489` success）。本機另有 v1.14.0 部署紀錄 commit `fa4e419` 與 7-3a 功能 commit，皆未 push。
+- 目前執行者：無（v1.14.1 已部署；接著進行資料一致性唯讀盤點，結果交 ChatGPT 審查，未授權修正）
+- 寫入範圍：目前沒有進行中的寫入任務
+- 正式版本：`f4d2546`（v1.14.1，`origin/main`，GitHub Pages deployment `8024719101` success）。本機另有部署紀錄結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -34,12 +34,22 @@
 
 ## 最新紀錄
 
+### 2026-11-24 — Claude Code（v1.14.1 正式部署與唯讀驗收）
+
+- 發布前驗收（release commit 前）：Node 16 檔 383/383；Phase 7-2 整合回歸 505/505（a 4×32、b 4×31、c 4×38、d 2×24＋2×23、fail 7；same 273、entry 108、design 12、added 112）；validate PASS；build PASS（35 files）；`git diff --check` PASS；A-09 十段雜湊不變（測試內固定）；`addConfig` 儲存格寫入 `da046a3d56a07519`、`checkStock` `0bed51c10a056c87`；`saveData()` 17、`script.js` 的 `runTransaction(` 1；`setDoc`／`updateDoc`／`deleteDoc` 0；`script.js`、`assembly-rules.js`、`collection-sync.js`、`data-session-guard.js`、`collection-view.js`、`style.css`、`firestore.rules` 相對 `fca352e` 未改。
+- 正式備份（部署前，使用者以管理員帳號操作既有工具 `exports/firestore-backup-tool/`，只讀取）：`C:\BeybladeBackups\beyblade-appData-backup-20261124-181035.json`，40,317 bytes，建立時間 2026-11-24T10:10:35.464Z，來源 `k89150-web-login`，2 份文件（summary 2），檔案 SHA-256 `e40576279653a45af28cc670d6f7f24bc85495a4276600f37ece02113ac071bb`，文件整體 SHA-256 `4a602c7d98721c05e93d99d760dcf9c7ae67ddcb0750bdddca9576bd765524b8`（與 11-23、11-24 早上備份相同，期間正式資料未變）；`verify-backup.mjs` PASS。未還原、未匯入、未寫入；備份工具伺服器已關閉。
+- 部署前：使用者確認所有裝置的舊版分頁與 PWA 已關閉並同意正式部署；`origin/main` 仍為 `17ac204`，可 fast-forward。Push `17ac204..f4d2546`（含 `fa4e419`、`fca352e`、`f4d2546`），無 force push。Pages workflow run `45372312042` success，deployment `8024719101`（github-pages）success。
+- 正式網站唯讀驗收（未登入）：11 頁皆載入 `site-menu.js?v=20261124-v1141`，`index.html` 載入 `script.js?v=20261124-phase73a`；`site-menu.js`、`script.js`、`assembly-rules.js`、`collection-sync.js`、`changelog.html`、`guide.html`、`index.html` 與 `f4d2546` 內容一致；頁面版本 v1.14.1；更新紀錄最新為「v1.14.1｜組裝規則修正」、歷史版本 v1.2.0～v1.14.0；使用教學含新的規則說明；桌面 1280 與手機 375 無水平溢出；index、guide、tournament 等頁 Console Error 0。
+- 尚未驗證：登入後的實際配置操作（新建阻擋、修改既有違規確認）未在正式網站操作（未建立正式測試資料）；已於 Emulator 真實頁面驗證。正式 `signInWithPopup` 與 Safari／iOS 仍未驗證。
+- 正式 Firestore：備份只讀取；部署與驗收沒有任何寫入；Rules、Schema 未修改。
+- 已知問題（沿用、未修正）：配置排序造成 `configTable` 順序後續改寫（含 `addConfig` 後第二次寫入）；`UX-21-01 CUSTOM` 顯示為 `UX-21 -01 CUSTOM` 並在後續寫入存回；D-018 基準遇連續空白；三顆一組套組仍顯示「雙陀螺套組」；後備版面順序。
+
 ### 2026-11-24 — Claude Code（v1.14.1 發布準備：組裝規則修正）
 
 - 任務：ChatGPT 複審 Phase 7-3a PASS，核准 v1.14.1 正式發布（只含已驗收的 D-019 接線修正；配置排序撤回的決定維持）。
 - 主要內容：`SITE_VERSION` v1.14.1（`site-menu.js` 只改常數），11 頁 `site-menu.js` 快取改 `20261124-v1141`；更新紀錄新增 v1.14.1（組裝規則未完整套用到配置儲存流程的修正、新建違規阻擋、修改既有違規在未產生新違規時確認後可儲存），v1.14.0 移入歷史版本；使用教學「建立自由配置」改寫規則檢查說明並加入修改既有違規配置的行為。未宣稱配置排序、重複寫入或型號空白問題已修正。功能程式（`script.js` 等）未修改。
 - 修改檔案：`site-menu.js`、11 個頁面（快取字串）、`changelog.html`、`guide.html`、`tests/collection-view.test.mjs`／`tests/help-pages.test.mjs`／`tests/manager-ui-refresh.test.mjs`（版本、快取、更新紀錄順序）、`README.md`（測試檔數 15→16 的文字更正）、本文件。
-- 測試：見下方部署紀錄。
+- 測試：見上方部署紀錄。Release commit `f4d2546`。
 
 ### 2026-11-24 — Claude Code（Phase 7-3a：D-019 接線修正；配置排序修正撤回）
 

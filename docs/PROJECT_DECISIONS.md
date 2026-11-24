@@ -267,7 +267,7 @@
 - 暫不啟用：輔助戰刃 G × 主戰刃エクリプス（型錄中的 G 是否為官方グラビティ未確認）；Tr／Op 裝在 CX 四件戰刃下（官方未說明）。
 - 套用範圍：新建配置與收藏手動輸入阻擋違規；修改既有配置時只有「新產生」的違規會阻擋，原本就有的違規以 confirm 警告後可儲存；歷史測試還原不檢查。既有資料不會被自動修改或刪除。
 - 新增規則或官方名單必須附官方來源並更新 `tests/assembly-rules.test.mjs`；測試會核對型錄中所有官方產品都符合規則。
-- **接線缺口與補正（Phase 7-3a，2026-11-24，本機 commit，尚未部署）**：`f1df0bc` 把 `checkConfigAssemblyRules` 接到已無入口的舊行內編輯 `saveConfigEditRow`；實際使用的 `window.addConfig`（建立配置與「⋯ → 修改」）仍呼叫 `validateRatchetRules(model, axisSel, fixSel)`，沒有傳入上蓋名稱，正式網站自 D-019 部署起（至 v1.14.0）因此只有型號備援生效：惡魔冥界＋固鎖、惡魔冥界＋Tr／Op、非 UX-16 型號的時鐘幻象＋非簡易固鎖可以儲存，修改原本違規的配置會直接被擋、沒有確認。7-3a 改為 `getNoRatchetFixValue(model, axisSel, fixSel, layerSel)` 與 `checkConfigAssemblyRules(model, layerSel, fixSel, axisSel)`；新舊違規以身分比較（規則＋上蓋／軸心，時鐘幻象另含原因），只換固鎖數值仍視為原有違規；比較基準是配置自己的原始資料列，儲存前確認該列仍在配置表且儲存值未變。`assembly-rules.js` 不變。測試：`tests/config-assembly-wiring.test.mjs`（真實 `addConfig` 路徑）。規格：`design/phase7/11-phase7-3-assembler-spec.md` §3。
+- **接線缺口與補正（Phase 7-3a，2026-11-24，`fca352e`，隨 v1.14.1 部署：release `f4d2546`、deployment `8024719101`）**：`f1df0bc` 把 `checkConfigAssemblyRules` 接到已無入口的舊行內編輯 `saveConfigEditRow`；實際使用的 `window.addConfig`（建立配置與「⋯ → 修改」）仍呼叫 `validateRatchetRules(model, axisSel, fixSel)`，沒有傳入上蓋名稱，正式網站自 D-019 部署起（至 v1.14.0）因此只有型號備援生效：惡魔冥界＋固鎖、惡魔冥界＋Tr／Op、非 UX-16 型號的時鐘幻象＋非簡易固鎖可以儲存，修改原本違規的配置會直接被擋、沒有確認。7-3a 改為 `getNoRatchetFixValue(model, axisSel, fixSel, layerSel)` 與 `checkConfigAssemblyRules(model, layerSel, fixSel, axisSel)`；新舊違規以身分比較（規則＋上蓋／軸心，時鐘幻象另含原因），只換固鎖數值仍視為原有違規；比較基準是配置自己的原始資料列，儲存前確認該列仍在配置表且儲存值未變。`assembly-rules.js` 不變。測試：`tests/config-assembly-wiring.test.mjs`（真實 `addConfig` 路徑）。規格：`design/phase7/11-phase7-3-assembler-spec.md` §3。
 
 ## D-020：全站導覽改為「收藏／配置／＋新增／賽事／更多」
 
@@ -303,7 +303,7 @@
 
 ## D-022：Phase 7-3 組裝器與配置管理
 
-> 狀態：**規格已定**（2026-11-24，使用者／ChatGPT）；7-3a 已在本機實作並 commit，7-3b～7-3d 未授權。規格：`design/phase7/11-phase7-3-assembler-spec.md`。
+> 狀態：**規格已定**（2026-11-24，使用者／ChatGPT）；7-3a 已隨 v1.14.1 部署（2026-11-24），7-3b～7-3d 未授權。規格：`design/phase7/11-phase7-3-assembler-spec.md`。
 
 - 沿用已核准的 A 零件槽設計與 `design/phase7/prototypes/integrated-ac/` 原型；不採用疊層組裝器。
 - 分四步：7-3a D-019 接線與配置排序；7-3b 配置顯示層（clip 隱藏原始表格、搜尋篩選排序、詳細面板與手機 sheet）；7-3c 組裝器介面；7-3d 複製配置、從收藏陀螺建立配置。
