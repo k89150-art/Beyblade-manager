@@ -5,9 +5,9 @@
 ## 協調狀態
 
 - 目前執行者：Claude Code（v1.14.0 正式發布進行中；ChatGPT 已核准 7-2d 功能 commit 與發布流程）
-- 寫入範圍：目前沒有進行中的寫入任務
+- 寫入範圍：v1.14.0 release commit（版本、更新紀錄、使用說明、相關測試、本文件）
 - 正式版本：`c22d712`（v1.13.0，`origin/main`，GitHub Pages deployment `8013363988` success）。本筆部署紀錄 commit 只在本機，未 push。
-- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2d 本機實作中（未 commit）。
+- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2d 已本機 commit `5a56db2`，v1.14.0 發布中。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -34,7 +34,15 @@
 
 ## 最新紀錄
 
-### 2026-11-24 — Claude Code（Phase 7-2d 複審補強：整合回歸驗證，本機，未 commit）
+### 2026-11-24 — Claude Code（v1.14.0 發布準備，release commit）
+
+- 任務：ChatGPT 最終複審核准 7-2d 功能 commit 與 v1.14.0 發布流程。7-2d 功能 commit：`5a56db2`（`feat(collection): implement phase 7-2d detail panels and regression coverage`，17 個檔案，逐一加入；歷史 7-2a／7-2b／7-2c 驗證頁未修改；新增驗證檔案不含正式資料、個資或金鑰）。
+- 主要內容：`SITE_VERSION` v1.13.0 → v1.14.0（只改常數）；11 頁 `site-menu.js` 快取 `20261124-v1130` → `20261124-v1140`，其他資源快取不變（`style.css`／`script.js` 為 `phase72d`，`site-menu.css` 為 `v1100`）。changelog 新增「v1.14.0｜收藏詳細資訊」五點（桌面詳細面板與手機詳細資訊視窗、詳細內容〔零件、來源、套組成員、配置引用〕、修改與刪除移到面板且同名額外零件逐筆操作、原裝內含不可修改、資料更新／登出／換帳號時自動關閉、手機視窗開啟時背景不可操作），v1.13.0 移入歷史版本（v1.2.0～v1.13.0）。guide 第二節以「點選查看詳細資訊」與「刪除這顆／刪除整組」取代「按卡片的刪除」；第三節以詳細面板取代卡片內的修改／刪除說明，並說明原裝內含不能直接修改、手機修改時先關閉視窗。
+- 修改檔案：`site-menu.js`、11 個頁面（快取參數）、`changelog.html`、`guide.html`、`tests/collection-view.test.mjs`、`tests/help-pages.test.mjs`、`tests/manager-ui-refresh.test.mjs`、本文件。功能程式未修改。
+- 測試：Node 367/367；測試只更新版本字串、快取參數與更新紀錄順序／日期次數（2026-11-24 由 4 次改為 5 次），未放寬功能斷言。
+- Commit / Deploy：release commit `chore(release): prepare v1.14.0 collection detail release`；部署見上方紀錄。
+
+### 2026-11-24 — Claude Code（Phase 7-2d 複審補強：整合回歸驗證，已併入 `5a56db2`）
 
 - 任務：ChatGPT 複審 7-2d 後要求以目前介面建立整合回歸驗證、逐項對照舊版驗證，並補強詳細面板／手機 sheet 情境；只允許 7-2d 顯示層最小修正；不得 commit、push、部署或更新 SITE_VERSION。
 - 整合回歸：新增 `design/phase7/verification/phase7-2-regression/`（17 組：a／b／c／d 各 390、820、821、1440，加 A-08 回退）。舊版每一項檢查保留原 id 並分類：same（直接通過）、entry（經面板／sheet）、design（核准設計取代，改驗新行為：7-2a「零件一列一項」「零件分頁數量」改為 P2 種類、7-2b 卡片上不再有按鈕）、added（補充）。結果 505/505（same 273、entry 108、design 12、added 112，各寬度相加）。沒有「不再適用且無替代斷言」的項目；歷史 7-2a／7-2b／7-2c 驗證頁與紀錄未修改。
@@ -46,7 +54,7 @@
 - Git status：上列檔案未 commit；新增 `design/phase7/verification/phase7-2-regression/`、`design/phase7/verification/phase7-2d/`。SITE_VERSION 仍為 v1.13.0。
 - Commit / Deploy：未 commit、未部署。
 
-### 2026-11-24 — Claude Code（Phase 7-2d，本機實作，未 commit）
+### 2026-11-24 — Claude Code（Phase 7-2d，本機實作，已 commit `5a56db2`）
 
 - 任務：使用者授權先唯讀確認 7-2d 規格，完整且不需改受保護流程時在本機實作並驗證；不得 commit、push、deploy 或寫入正式 Firestore。規格（B.2／B.3、C.4、§F、H.4、P-2、P-3）與定案原型確認完整，未改受保護流程，故直接實作。
 - 主要內容：桌面詳細面板（≥ 821px，清單右側 sticky）、手機底部 sheet（dialog＋遮罩，焦點移入，Escape／關閉／遮罩關閉並把焦點還給清單項目）。清單項目只選取（role=button，Enter／Space），刪除／修改按鈕只在面板／sheet，一律經 `runCollectionViewAction`（新增 P-2 檢查 3：套組各列須與顯示時相同）。原裝陀螺面板：中英名、零件、來源說明、套組成員、使用該上蓋／主要戰刃的配置、刪除這顆／整組；零件面板：四個數字、超用、引用配置、原裝內含不可修改、每筆額外列的修改／刪除。選取：原裝陀螺保存原始 `<tr>`，重建即關閉並提示「資料已更新，請重新選擇。」；零件以類別＋名稱。換帳號、切換分頁清除選取。細節見規格 10 第四部分「7-2d 實作細節」。
