@@ -328,3 +328,16 @@
   - 選單值為原始名稱、顯示文字以 ␣⇥⍽↵ 標出空白；配置存入選取的原始名稱；拆解／還原的組合鍵保留原值。舊配置不自動修復，無完全相符零件時顯示無對應引用。
   - CRLF／LF 為已知限制：同一資料表因其他列變更而重新儲存時，CRLF 會轉為 LF。
 - A-09 有四段因此變更：`getTableData` 段 `383aeb872526af0b → 02f67bb21e597b3e`、`applyDataToTables` 段 `0d4c7a0a11b52e65 → 08c1de72b2266fec`、`editRow`→`rebuildRow` 段 `8be3b0baca010150 → 3ec54b27ec414e19`、`getStockNameFromCell`→`escapeHtml` 段 `bf558aecdc0ad038 → c1230e4d43e39ba2`。其餘受保護段落、`addConfig` 儲存格寫入、`checkStock`、`collection-sync.js`、`data-session-guard.js`、F-04、D-015、D-019、Rules、Schema 不變。
+
+## D-024：Phase 7-4 賽事記錄面板
+
+> 狀態：**本機實作，未發布**（2026-11-25；規格 `design/phase7/13-phase7-4-tournament-panel-spec.md`，ChatGPT 前置審查、Q1～Q8 定案；7-4a `3267d10`、7-4b `696269d`、7-4c `3e00ac2`）。待 ChatGPT 統一審查 v1.18.0 發布。
+
+- 沿用核准的 C 大按鈕面板與 integrated-ac 原型，只用於回合記錄；比分板與記錄回合面板固定在比賽詳細最上方，對局清單在下方。不採用整頁儀表板、手機全螢幕比分板、首頁近期賽事工作台（Q6 延後）與即時同步。
+- 顯示層只操作既有入口：記錄回合填入既有 `data-round-*` 欄位並呼叫 `addRound`；新增對局用既有欄位屬性呼叫 `addMatch`／`addDirectAdvance`；修改對局由 `editMatch` 呼叫 `openMatchEditPanel` 取得輸入。所有寫入仍經 `submitTournamentOperation`（D-017），不新增交易入口或 `onSnapshot`；`tournament-sync.js` 逐位元組不變。
+- 計分、比賽完成判定、名次、資料欄位不變；比分與勝負只呼叫既有 `calculateMatchScore`／`getMatchOutcome`。
+- Q1 面板可切換到較早未完成的對局；切換只改顯示，回合草稿依比賽＋對局保留。Q2 達 4 分停用面板快速記錄，比分低於 4 分恢復，`addRound` 不加限制。Q3 只有一個有效陀螺時預選，勝負與方式不預選、不沿用。
+- Q4 T16 `editMatch` 有限例外：四次 `prompt()` 改為單一面板；只有輸入取得段落改變（前段草稿合併與衝突選擇、後段確認與 EDIT_MATCH 操作雜湊不變），未改欄位保留原值。T16 `73137bfdbaaf7c12 → 0b152288040815c0`。
+- Q7 3on3 重複零件只提示：類別＋原始名稱、CX／抽包／一體式結構、紋章鎖只限戰神與帝王；自填、未選、多義顯示「未檢查」，不顯示通過；不回寫賽事紀錄。
+- 賽事端受保護基準：`tests/tournament-protection.test.mjs`（S1～S6、T1～T17、寫入計數 `runTransaction(` 1、`submitTournamentOperation(` 11、`createTournamentOperation(` 10、`setDoc`／`updateDoc`／`deleteDoc`／`onSnapshot` 0、「4B-1」文字）。
+- 發布時 `tournament.js?v=` 已改（`20261126-phase74c`），需依 D-017 H2 程序要求關閉所有舊分頁與 PWA。

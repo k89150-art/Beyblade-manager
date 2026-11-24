@@ -4,7 +4,7 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（Phase 7-4a／7-4b／7-4c 本機實作與個別 commit；不升版、不 push、不部署）
+- 目前執行者：Claude Code（Phase 7-4 本機實作完成，等待 ChatGPT 統一審查 v1.18.0 發布）
 - 寫入範圍：賽事頁顯示層（`tournament.html`、`tournament.js` 渲染與面板區塊、`tournament-panel.js`、測試）；7-4c 另含核准的 T16 `editMatch` 例外
 - 正式版本：`049b0e6`（v1.17.0，`origin/main`，GitHub Pages deployment `8038191756` success）。本機另有 v1.17.0 部署結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
@@ -33,6 +33,15 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-25 — Claude Code（Phase 7-4 完整回歸與文件，交 ChatGPT 統一審查 v1.18.0）
+
+- 完整回歸（HEAD `3e00ac2`）：Node 22 檔 492/492（含 `tournament-sync`／`tournament-page-sync`／`tournament-sync-regression`、7-3b／7-3c／7-3d、7-DC、D-019、H-1／D-015）；Phase 7-2 整合回歸 505/505；M01～M16 PASS 16／FAIL 0；H2 Emulator E01～E16（真實 SDK 驅動 `tournament.js`：並行新增／修改／刪除、同場衝突、離線、提交中斷結果不明、逾時後提交、換帳號、只寫 `tournamentRecords`／`updatedAt`）PASS 16／FAIL 0；validate、build（37 files）、`git diff --check` PASS。
+- 受保護：`tournament-sync.js` 逐位元組不變；S1～S6、T1～T5、T7～T13、T15、T17 不變；T16 核准例外 `73137bfdbaaf7c12 → 0b152288040815c0`（前段與後段雜湊不變）；賽事端 `runTransaction(` 1、`submitTournamentOperation(` 11、`createTournamentOperation(` 10、`setDoc`／`updateDoc`／`deleteDoc`／`onSnapshot` 0；收藏端六段核准雜湊與 `saveData(` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0 不變；Rules、Schema、型錄、競賽統計、備份還原未修改。
+- 真實頁面 Emulator（賽事頁）：兩裝置同場賽事記錄回合 → 後者既有衝突訊息、0 次寫入、採用最新資料並保留選擇，重送 1 次；不同賽事各自成功；修改對局雙方衝突 → 欄位選擇後保留另一裝置的值；離線不送出、保留輸入；登出與換帳號不殘留；收藏與配置資料前後相同；回合 ID 不重複。
+- 文件：規格 13、`PROJECT_DECISIONS`（D-024）、`PROJECT_ARCHITECTURE`、各子階段驗收紀錄。
+- 已知／未驗證：修改對局未改動直接儲存仍寫入一次（與原本 `prompt()` 流程相同，受保護後段未改）；Safari／iOS 與正式網站未驗證；測試用賽事頁 Emulator 複本以 `exports/emulator-ui-7dc/patch-tournament.cjs` 指向 Emulator（Git 忽略）。
+- Git：7-4a `3267d10`、7-4b `696269d`、7-4c `3e00ac2`、文件 commit；未升版、未 push、未部署、未寫入正式 Firestore。
 
 ### 2026-11-25 — Claude Code（Phase 7-4c：修改對局面板，T16 核准例外，本機 commit）
 

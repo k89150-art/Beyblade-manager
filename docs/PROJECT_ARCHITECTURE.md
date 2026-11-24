@@ -51,6 +51,9 @@ Firebase Web SDK 目前由 `https://www.gstatic.com/firebasejs/11.2.0/` 載入�
 
 由 `tournament.js` 管理比賽基本資料、輪次、對戰、輪空／不戰晉級與最終成績。它會讀取同一位使用者的 `configTable`，並依 D-017 以 Firestore transaction 寫入：每次操作在交易內讀取最新文件，經 `tournament-sync.js` 只套用到目標賽事，再以 `transaction.update` 只寫 `tournamentRecords` 與 `updatedAt`，避免覆蓋主頁其他欄位或其他分頁／裝置的賽事變更。
 
+
+Phase 7-4（D-024）在賽事頁加入顯示層，不新增寫入路徑：比賽詳細最上方的記錄回合面板（比分板、對局切換、陀螺／得分方／勝利方式大按鈕）只填入既有 `data-round-*` 欄位後呼叫 `addRound`；新增對局對話框（比賽卡內，沿用 `data-match-opponent`／`data-deck-*`）呼叫 `addMatch`／`addDirectAdvance`；修改對局面板由 `editMatch` 呼叫 `openMatchEditPanel` 取得輸入。純函式在 `tournament-panel.js`（面板對象、可選陀螺、3on3 重複零件判斷）；計分與勝負一律使用 `tournament.js` 既有函式。顯示狀態（面板對象、對話框開啟）只在記憶體並綁定登入帳號。受保護區段與寫入計數由 `tests/tournament-protection.test.mjs` 固定。
+
 ### 管理員與使用者檢視
 
 - `admin.html`、`admin.js`：指定管理員使用 `collectionGroup("appData")` 讀取使用者摘要；UI 為唯讀。
