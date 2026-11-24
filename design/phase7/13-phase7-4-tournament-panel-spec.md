@@ -1,6 +1,6 @@
 # Phase 7-4 賽事記錄面板：前置盤點與實作規格（草案）
 
-狀態：**7-4a、7-4b、7-4c 本機實作完成並個別 commit**（2026-11-25；`3267d10`、`696269d`、`3e00ac2`；驗收 `verification/phase7-4a`～`phase7-4c`）。未升版、未 push、未部署；待 ChatGPT 統一審查 v1.18.0 發布。基準：正式版本 `049b0e6`（v1.17.0），本機 HEAD `c7fef06`。
+狀態：**已隨 v1.18.0 部署，Phase 7-4 結案**（2026-11-25；7-4a `3267d10`、7-4b `696269d`、7-4c `3e00ac2`、release `f86490c`，GitHub Pages deployment `8039918758`；部署前備份 PASS；驗收 `verification/phase7-4a`～`phase7-4c`）。基準：正式版本 `049b0e6`（v1.17.0），本機 HEAD `c7fef06`。
 
 沿用已核准設計，不重新製作原型：
 - 賽事回合記錄採 **C 的大按鈕面板**，只用於回合記錄（`design/phase7/README.md:8`、`04:3`）。

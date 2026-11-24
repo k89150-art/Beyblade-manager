@@ -6,7 +6,7 @@
 
 - 目前執行者：Claude Code（v1.18.0 發布與 Phase 7-FINAL 最終驗收；最終驗收只做驗收、隔離環境測試、文件與問題分類）
 - 寫入範圍：v1.18.0 發布（版本、快取、更新紀錄、使用教學、版本測試、交接）；Phase 7-FINAL 只寫 `design/phase7/14-final-acceptance-report.md` 與交接文件
-- 正式版本：`049b0e6`（v1.17.0，`origin/main`，GitHub Pages deployment `8038191756` success）。本機另有 v1.17.0 部署結案 commit，未 push。
+- 正式版本：`f86490c`（v1.18.0，`origin/main`，GitHub Pages deployment `8039918758` success）。本機另有 v1.18.0 部署結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -33,6 +33,16 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-25 — Claude Code（v1.18.0 正式部署與唯讀驗收，Phase 7-4 結案）
+
+- 發布前驗收（release 樹）：Node 22 檔 492/492；Phase 7-2 整合回歸 505/505；M01～M16 PASS 16／FAIL 0；H2 E01～E16 PASS 16／FAIL 0；validate PASS；build PASS（37 files）；`git diff --check` PASS。`tournament-sync.js` 逐位元組不變；T16 `0b152288040815c0`（前段 `7cbde7b9cc28e9e2`、後段 `7a5b363512fea2f9`）；賽事端 `runTransaction(` 1、`submitTournamentOperation(` 11、`setDoc`／`updateDoc`／`deleteDoc`／`onSnapshot` 0；收藏端六段核准雜湊與 `saveData(` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0 不變；變更內容不含金鑰、UID、Email 或 Token。
+- **備份 PASS**：`C:BeybladeBackupseyblade-appData-backup-20261125-042907.json`（建立 2026-11-24T20:29:07Z，2 份文件；各文件皆含 `beybladeTable`、`partTable`、`configTable`、`historyTable`、`tournamentRecords`；`verify-backup.mjs` PASS；檔案 SHA-256 `5008011ccf3867a0b54bd31f15f6a618588bca796f1efcfcb1ef5cb536a5d2d2`；`integrity.documentsSha256` `4a602c7d98721c05e93d99d760dcf9c7ae67ddcb0750bdddca9576bd765524b8`）。使用者以管理員帳號執行唯讀備份工具；未還原、匯入或寫入。
+- 部署前：使用者確認所有裝置舊收藏頁、配置頁、賽事頁與 PWA 已關閉並授權部署；`origin/main` 仍為 `049b0e6`、工作樹乾淨、可 fast-forward。Push `049b0e6..f86490c`（`c7fef06`、`3267d10`、`696269d`、`3e00ac2`、`cad4c15`、`f86490c`），無 force push。Pages workflow run `45481409196` success，deployment `8039918758` success。
+- 正式網站唯讀驗收（未登入）：16 個檔案（含 `tournament.js`、`tournament-panel.js`、`tournament-sync.js`）與 `f86490c` 一致；7 頁在 1280 與 375 寬度版本 v1.18.0、`site-menu.js?v=20261125-v1180`、無水平溢出；賽事頁載入 `tournament.js?v=20261125-v1180` 與 `tournament-panel.js?v=20261125-v1180`，「賽事儲存版本：4B-1（交易保護）」；主頁「收藏儲存版本：5B（交易保護）」；未登入時賽事頁 1 個、主頁 6 個寫入控制項全部停用；更新紀錄最新「v1.18.0｜新版賽事記錄面板」、歷史版本 v1.2.0～v1.17.0、無即時同步／全螢幕比分板字樣；使用教學含新面板說明；Console Error 0。
+- 未驗證（正式網站）：登入後的賽事面板操作（不建立正式測試資料；已於 Emulator 真實頁面驗證）；Safari／iOS。
+- 正式 Firestore：只有使用者執行的唯讀備份；沒有寫入；Rules、Schema 未修改。
+- **Phase 7-4 結案。** 下一步：Phase 7-FINAL 全站最終驗收（只驗收、不修改功能）。
 
 ### 2026-11-25 — Claude Code（v1.18.0 發布準備：新版賽事記錄面板）
 

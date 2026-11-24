@@ -331,7 +331,7 @@
 
 ## D-024：Phase 7-4 賽事記錄面板
 
-> 狀態：**本機實作，未發布**（2026-11-25；規格 `design/phase7/13-phase7-4-tournament-panel-spec.md`，ChatGPT 前置審查、Q1～Q8 定案；7-4a `3267d10`、7-4b `696269d`、7-4c `3e00ac2`）。待 ChatGPT 統一審查 v1.18.0 發布。
+> 狀態：**已隨 v1.18.0 部署**（2026-11-25；規格 `design/phase7/13-phase7-4-tournament-panel-spec.md`，ChatGPT 前置審查 Q1～Q8 定案、複審 PASS；7-4a `3267d10`、7-4b `696269d`、7-4c `3e00ac2`、release `f86490c`、deployment `8039918758`）。Phase 7-4 結案。
 
 - 沿用核准的 C 大按鈕面板與 integrated-ac 原型，只用於回合記錄；比分板與記錄回合面板固定在比賽詳細最上方，對局清單在下方。不採用整頁儀表板、手機全螢幕比分板、首頁近期賽事工作台（Q6 延後）與即時同步。
 - 顯示層只操作既有入口：記錄回合填入既有 `data-round-*` 欄位並呼叫 `addRound`；新增對局用既有欄位屬性呼叫 `addMatch`／`addDirectAdvance`；修改對局由 `editMatch` 呼叫 `openMatchEditPanel` 取得輸入。所有寫入仍經 `submitTournamentOperation`（D-017），不新增交易入口或 `onSnapshot`；`tournament-sync.js` 逐位元組不變。
