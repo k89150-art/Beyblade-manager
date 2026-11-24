@@ -4,10 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（v1.14.0 正式發布進行中；ChatGPT 已核准 7-2d 功能 commit 與發布流程）
-- 寫入範圍：v1.14.0 release commit（版本、更新紀錄、使用說明、相關測試、本文件）
-- 正式版本：`c22d712`（v1.13.0，`origin/main`，GitHub Pages deployment `8013363988` success）。本筆部署紀錄 commit 只在本機，未 push。
-- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2d 已本機 commit `5a56db2`，v1.14.0 發布中。
+- 目前執行者：無（v1.14.0 已正式部署；Phase 7-2 結案）
+- 寫入範圍：目前沒有進行中的寫入任務
+- 正式版本：`17ac204`（v1.14.0，`origin/main`，GitHub Pages deployment `8014738489` success）。本筆部署紀錄 commit 只在本機，未 push。
+- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -33,6 +33,19 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（v1.14.0／Phase 7-2d，正式部署；Phase 7-2 結案）
+
+- 任務：ChatGPT 最終複審核准 7-2d 功能 commit 與 v1.14.0 發布；使用者授權部署。
+- 正式 commit：功能 `5a56db2`、release `17ac204`（`chore(release): prepare v1.14.0 collection detail release`），連同 `5a3edf5`（v1.13.0 部署紀錄）以 fast-forward 推送 `c22d712..17ac204`，未 force push。
+- 備份：**依使用者指示略過**（使用者回覆「不須備份」）。此與本次授權流程「應建立新的正式備份、不沿用 v1.13.0 略過的決定」的要求不同，已在部署前告知。最近一份已驗證的正式備份仍為 `C:BeybladeBackupseyblade-appData-backup-20261124-060036.json`（v1.12.0 部署前，2 份文件，PASS，檔案 SHA-256 `10b7c2896e5b3a0b00091dad2e0fd45eab5959b3089bf7449e445f30809df414`）。本版只改顯示層，未改資料格式、未新增寫入路徑。
+- Push 前：Node 367/367；整合回歸 505/505；7-2d 瀏覽器 198/198；validate PASS；build PASS（35 files）；`git diff --check` 通過；A-09 十段雜湊不變；寫入路徑 `saveData()` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0；工作樹乾淨、遠端無新 commit、可 fast-forward；使用者確認舊分頁與 PWA 已關閉並授權部署。
+- 部署：GitHub Pages build `built`；deployment `8014738489`（`github-pages`）success；workflow run `45296028120` success。
+- 部署後唯讀驗收（未登入，內建瀏覽器）：18 個正式檔案與 commit 逐位元組相同；版本 v1.14.0；首頁載入 `script.js?v=20261124-phase72d`、`style.css?v=20261124-phase72d`、`site-menu.js?v=20261124-v1140`；1024 與 821：兩個詳細面板容器在清單右側（sticky、region）顯示「選擇一筆資料查看詳細資訊。」，遮罩隱藏，清單／卡片切換顯示；375 與 820：面板不顯示、切換不顯示，手機 sheet 樣式（`(max-width: 820px) .cv-detail.is-sheet.is-open`）已載入；搜尋、系列 chip、來源、排序、零件狀態與排序控制項存在；清單沒有內嵌操作按鈕；更新紀錄最新 v1.14.0、歷史版本 v1.2.0～v1.13.0；使用說明含點選查看詳細資訊、「刪除這顆」、操作在詳細面板，已無「按卡片的刪除」與「卡片內列出額外第 1 筆」；375／820／821／1024 無水平捲動；資源無 4xx／5xx；Console Error 0。
+- 未驗證（正式環境）：登入後以正式資料開啟詳細面板／sheet、刪除與修改、篩選排序結果（只在 harness 與 Emulator 驗證）；正式 `signInWithPopup`；Safari／iOS（含 K-2 `inert`、sheet 焦點與安全區域實機）。
+- 既有待修問題（未處理）：D-018 基準遇連續空白；配置排序造成 configTable 順序後續改寫；三顆一組套組仍顯示「雙陀螺套組」；後備版面順序。
+- 資料庫／部署風險：未部署 Rules、未寫入正式 Firestore、未建立測試資料。
+- Commit / Deploy：已部署 `17ac204`；本筆紀錄為本機 commit，未 push。Phase 7-2（7-2a～7-2d）結案。
 
 ### 2026-11-24 — Claude Code（v1.14.0 發布準備，release commit）
 

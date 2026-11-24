@@ -915,3 +915,5 @@ Firestore 快照 → applyDataToTables（建立 <tr>，D-015 升級只在記憶�
 7-2d 複審補強（2026-11-24，本機，未 commit）：
 - 整合回歸：`verification/phase7-2-regression/` 在 7-2d 介面上重跑 7-2a、7-2b、7-2c 的每一個瀏覽器檢查並分類（same／entry／design／added），另加 7-2d 複審情境；歷史驗證頁不修改。結果 505/505，對照表見該資料夾 README。沒有「不再適用且無替代斷言」的項目。
 - 補強（只在 7-2d 顯示層）：手機 sheet 的 Tab／Shift+Tab 焦點限制（`trapSheetFocus`）；關閉或資料重建後焦點的安全替代（項目不存在時改到分頁按鈕，不留在已關閉／隱藏的面板內）；跨越 820／821 調整寬度時 sheet 與遮罩不殘留（媒體查詢物件保存在狀態上、渲染時非手機寬度不保留 sheet）。
+
+Phase 7-2 結案（2026-11-24）：7-2a（v1.11.0）、7-2b（v1.12.0）、7-2c（v1.13.0）、7-2d（v1.14.0，正式 commit `17ac204`，GitHub Pages deployment `8014738489`）全部部署。正式網站未登入唯讀驗收通過；登入後以正式資料操作詳細面板／sheet、正式 `signInWithPopup`、Safari／iOS（含 K-2 `inert` 實機）仍未驗證。
