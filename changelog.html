@@ -35,6 +35,21 @@
     <nav class="site-nav help-page-nav" data-help-nav aria-label="說明頁面捷徑"></nav>
 
     <div class="info-card">
+      <div class="version-title">v1.14.2｜資料一致性修正</div>
+      <div class="version-meta">2026-11-24</div>
+      <ul class="update-list">
+        <li><span class="change-tag">修正</span>修正新增或還原配置時會多儲存一次的問題，現在只會儲存一次。</li>
+        <li><span class="change-tag">修正</span>修正配置排序造成不相關的資料被連帶儲存：新增零件或收藏時，不會再改寫配置紀錄的順序。</li>
+        <li><span class="change-tag">資料</span>保留多段型號（例如 UX-21-01 CUSTOM）與自訂型號的原始內容，載入或儲存其他資料時不會改寫。先前已被改成「UX-21 -01」格式的型號不會自動修復。</li>
+        <li><span class="change-tag">資料</span>改善名稱中含連續空白、TAB、全形空白、不斷行空白或前後空白時的資料一致性：畫面顯示方式改變時不會被當成修改；修改零件時，未修改的名稱會原樣保留，按「取消」不會變更資料。</li>
+        <li><span class="change-tag">零件</span>零件依「類別＋完整名稱」計算庫存，只差空白的名稱視為不同零件；建立配置的選單會以 ␣、⇥ 等符號標出這類空白，並保存所選零件的原始名稱。</li>
+      </ul>
+    </div>
+
+    <details class="version-archive">
+      <summary>歷史版本（v1.2.0～v1.14.1）</summary>
+
+    <div class="info-card">
       <div class="version-title">v1.14.1｜組裝規則修正</div>
       <div class="version-meta">2026-11-24</div>
       <ul class="update-list">
@@ -43,9 +58,6 @@
         <li><span class="change-tag">配置</span>修改原本就不符合規則的配置時，若這次修改沒有產生新的違規，會先提醒並在確認後儲存；若會產生新的違規則會被阻擋。按「取消」不會變更任何資料。</li>
       </ul>
     </div>
-
-    <details class="version-archive">
-      <summary>歷史版本（v1.2.0～v1.14.0）</summary>
 
     <div class="info-card">
       <div class="version-title">v1.14.0｜收藏詳細資訊</div>
@@ -342,6 +354,6 @@
     </div>
     </details>
   </div>
-<script src="site-menu.js?v=20261124-v1141"></script>
+<script src="site-menu.js?v=20261124-v1142"></script>
 </body>
 </html>
