@@ -344,7 +344,7 @@
 
 ## D-025：Phase 7-FINAL 最後修正（v1.18.1）
 
-> 狀態：**本機修正完成**（2026-11-25；ChatGPT 核准範圍；驗收 `design/phase7/verification/phase7-final/README.md`）。發布 v1.18.1 後 Phase 7 技術結案，進入日常維護（`docs/MAINTENANCE_BACKLOG.md`）。
+> 狀態：**已隨 v1.18.1 正式部署**（2026-11-25；`97ced93`，Pages deployment `8040915692` success；ChatGPT 核准範圍；驗收 `design/phase7/verification/phase7-final/README.md`）。Phase 7 技術結案，進入日常維護（`docs/MAINTENANCE_BACKLOG.md`）；使用者實機驗收待完成。v1.18.1 發布前備份由使用者明確略過（單次例外）。
 
 - 只修顯示、導覽與確認文字：P2-1 只差空白的名稱以 ␣⇥⍽↵ 標示（零件清單卡、詳細、無對應引用、刪除確認、D1 提示）；P2-2 跨頁快捷入口在資料與寫入 Session 就緒後經既有入口執行一次（不用計時器，登出／換帳號／載入失敗／雜湊改變時丟棄）；P3-1「N 顆陀螺套組」；P3-2 使用者可見名稱統一為「拆解紀錄」；P3-3 回退時原始表格回到所屬區塊；P3-4 手機工具列標籤不換行；P3-5 sheet 與視窗開啟時導覽 inert、刪除原因視窗 Tab 限制；P3-7 3on3 提示註明 B4 第 12 版與比對範圍。
 - 受保護區段有限例外：`deleteRow` 確認文字（A-09 `0bc3c60c31499a7c → 5260d10ffd5ebdf3`）；`collection-sync.js` 顯示用表名（整檔 `d427877d1f126014 → 0cda868c6585949c`）。刪除目標、D1 計算、交易、衝突、Session 不變。其餘核准雜湊、賽事端 S1～S6／T1～T17、`tournament-sync.js` 不變。

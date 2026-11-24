@@ -179,3 +179,5 @@ hash 導覽實測（已登入，頁面載入後）：
 | P3-5 遮罩與全站選單 | 已修正（開啟 sheet／視窗時導覽 inert；刪除原因視窗 Tab 限制） |
 | P3-7 3on3 提示文案 | 已修正（註明 B4 第 12 版、比對範圍與限制） |
 | P2-3、P3-6 與 Deferred 各項 | 未處理，列入 `docs/MAINTENANCE_BACKLOG.md` |
+
+部署狀態：以上修正已隨 v1.18.1 正式部署（2026-11-25，`97ced93`，Pages deployment `8040915692` success；正式網站唯讀驗收 PASS，紀錄見 `docs/AI_HANDOFF.md`）。Phase 7 技術結案。§6 的實機項目仍為**使用者實機驗收待完成**。

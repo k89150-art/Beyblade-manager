@@ -28,3 +28,6 @@
 
 ## 回歸
 見 `docs/AI_HANDOFF.md` 本次紀錄（Node、505、M01～M16、H2 E01～E16、108 組版面矩陣、validate、build、diff-check）。
+
+## 部署
+已隨 v1.18.1 正式部署（2026-11-25，`97ced93`，Pages deployment `8040915692` success）；正式網站唯讀驗收見 `docs/AI_HANDOFF.md`。

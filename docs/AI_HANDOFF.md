@@ -4,9 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（v1.18.0 發布與 Phase 7-FINAL 最終驗收；最終驗收只做驗收、隔離環境測試、文件與問題分類）
-- 寫入範圍：P2-1、P2-2、P3-1～P3-5、P3-7 顯示／導覽／確認文字修正；v1.18.1 發布；結案文件
-- 正式版本：`f86490c`（v1.18.0，`origin/main`，GitHub Pages deployment `8039918758` success）。本機另有 v1.18.0 部署結案 commit，未 push。
+- 目前執行者：無（Phase 7 技術結案；日常維護模式，每項維護需另行授權）
+- 寫入範圍：無
+- 正式版本：`97ced93`（v1.18.1，`origin/main`，GitHub Pages deployment `8040915692` success）。本機另有 v1.18.1 部署與 Phase 7 結案文件 commit，未 push。
+- 維護清單與安全基線：`docs/MAINTENANCE_BACKLOG.md`。使用者實機驗收待完成。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -33,6 +34,16 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-25 — Claude Code（v1.18.1 正式部署與唯讀驗收，Phase 7 技術結案）
+
+- 發布前驗收（release 樹 `97ced93`）：Node 23 檔 499/499；Phase 7-2 整合回歸 505/505；M01～M16 PASS 16／FAIL 0；H2 E01～E16 PASS 16／FAIL 0；validate PASS；build PASS（37 files）；`git diff --check` PASS。`tournament-sync.js` 逐位元組不變；T16 `0b152288040815c0`；寫入路徑收藏端 17／1／0、賽事端 1／11／0。
+- **備份：使用者明確選擇本次略過（v1.18.1 單次例外）。** 理由與範圍：本版只涉及顯示、導覽與確認文字，未修改資料寫入邏輯或交易核心；最近一次有效備份為 v1.18.0 前的 `beyblade-appData-backup-20261125-042907.json`（verify PASS）。此例外不延伸到之後的版本。
+- 部署前：使用者確認所有裝置舊分頁與 PWA 已關閉並授權部署；`origin/main` 仍為 `f86490c`、工作樹乾淨、可 fast-forward。Push `f86490c..97ced93`（`ae189eb`、`ac91b63`、`892f125`、`97ced93`），無 force push。Pages workflow run `45488945207` success，deployment `8040915692` success。
+- 正式網站唯讀驗收（未登入）：21 個檔案（含 `script.js`、`style.css`、`collection-sync.js`、`collection-view.js`、`config-view.js`、`tournament.js`、`tournament-panel.js`、`tournament-sync.js` 與 13 頁）與 `97ced93` 逐位元組一致；7 頁在 1280 與 375 寬度版本 v1.18.1、無水平溢出；主頁快取字串 `20261125-v1181` ×3，賽事頁載入 `tournament.js?v=20261125-v1181`；「收藏儲存版本：5B（交易保護）」「賽事儲存版本：4B-1（交易保護）」；未登入時主頁與賽事頁的寫入控制項全部停用（啟用的只有側欄「新增」與底部導覽「＋新增」選單開關，不寫入）；主頁未出現「歷史測試紀錄」；更新紀錄最新「v1.18.1｜介面細節修正」、歷史版本 v1.2.0～v1.18.0；Console Error 0。
+- 未驗證（正式網站）：登入後操作（不建立正式測試資料；已於 Emulator 真實頁面驗證）；Safari／iOS／PWA 實機。
+- 正式 Firestore：本輪沒有讀寫正式資料；Rules、Schema 未修改。
+- **Phase 7 技術結案。** 未開始 Phase 8。目前版本、安全基線與維護清單見 `docs/MAINTENANCE_BACKLOG.md`；**使用者實機驗收待完成**（報告 §6），不代表所有項目已通過。
 
 ### 2026-11-25 — Claude Code（v1.18.1 發布準備：介面細節修正）
 
