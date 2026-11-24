@@ -73,8 +73,19 @@ test("P-03 the write handlers other than editMatch are unchanged", () => {
   for (const [name, start, end, hash] of HANDLERS_WITHOUT_T16) assert.equal(sha(between(page, start, end)), hash, name);
 });
 
-test("P-05 T16 editMatch: unchanged before 7-4c", () => {
-  assert.equal(sha(between(page, "window.editMatch = async function", "window.deleteMatch = async function")), T16_BEFORE);
+// 7-4c (approved T16 exception, spec 13 Q4): 73137bfdbaaf7c12 → 0b152288040815c0.
+// Only the input segment changed (four prompt() calls → openMatchEditPanel,
+// untouched fields keep their stored values): the draft merge before it and
+// the final confirmation, draft and operation after it are byte-identical to
+// the original (prefix 7cbde7b9cc28e9e2, suffix 7a5b363512fea2f9).
+const T16_AFTER = "0b152288040815c0";
+test("P-05 T16 editMatch: only the approved input segment changed", () => {
+  const t16 = between(page, "window.editMatch = async function", "window.deleteMatch = async function");
+  assert.notEqual(sha(t16), T16_BEFORE);
+  assert.equal(sha(t16), T16_AFTER);
+  assert.equal(sha(t16.slice(0, t16.indexOf("  // Phase 7-4c (approved T16 exception)"))), "7cbde7b9cc28e9e2", "draft merge and collision choice unchanged");
+  assert.equal(sha(t16.slice(t16.indexOf("  const finalValues = { opponentName: patch.opponentName };"))), "7a5b363512fea2f9", "final confirmation, draft and EDIT_MATCH operation unchanged");
+  assert.doesNotMatch(page, /\bprompt\(\s*["`]/, "no prompt() left");
 });
 
 test("P-04 tournament write paths stay at the D-017 baseline (not the collection side's 17/1/0)", () => {

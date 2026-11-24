@@ -1514,28 +1514,32 @@ window.editMatch = async function (tournamentId, matchId) {
     }
   }
 
-  const opponentName = prompt("對手名稱", defaults.opponentName);
-  if (opponentName === null) return;
-
-  const newDeck = [];
-
-  for (let i = 0; i < 3; i++) {
-    const value = prompt(`陀螺 ${i + 1}`, defaults[`deck${i + 1}`]);
-    if (value === null) return;
-
-    if (!value.trim()) {
-      alert("3 顆陀螺不可空白。");
-      return;
-    }
-
-    newDeck.push({
-      source: configOptions.some(option => option.text === value.trim()) ? "config" : "custom",
-      configText: value.trim()
-    });
+  // Phase 7-4c (approved T16 exception): one panel instead of four prompt()
+  // calls. A field left as it was keeps the stored value exactly; only a
+  // changed field is trimmed and (a bey) classified again.
+  const input = await openMatchEditPanel(match, defaults, operationSession);
+  if (!input) return;
+  const opponentName = String(input.opponentName ?? "");
+  const deckInputs = (input.decks || []).map(value => String(value ?? ""));
+  if (deckInputs.length !== 3 || deckInputs.some(value => !value.trim())) {
+    alert("3 顆陀螺不可空白。");
+    return;
   }
 
+  const newDeck = deckInputs.map((value, i) => {
+    const stored = match.deck?.[i];
+    if (stored && value === latestValues[`deck${i + 1}`]) return { ...stored };
+    return {
+      source: configOptions.some(option => option.text === value.trim()) ? "config" : "custom",
+      configText: value.trim()
+    };
+  });
+
   if (!dataSessionGuard.isWriteSessionCurrent(operationSession)) return;
-  const patch = { opponentName: opponentName.trim(), deck: newDeck };
+  const patch = {
+    opponentName: opponentName === latestValues.opponentName ? String(match.opponentName || "") : opponentName.trim(),
+    deck: newDeck
+  };
   const finalValues = { opponentName: patch.opponentName };
   newDeck.forEach((item, index) => { finalValues[`deck${index + 1}`] = item.configText; });
 
@@ -1684,6 +1688,24 @@ window.deleteRound = async function (tournamentId, matchId, roundId) {
 // the signed-in account: another account never inherits it.
 const roundPanelState = { uid: "", targets: new Map() };
 let roundPanelSubmitting = false;
+
+// A save re-renders the list (and disables the write controls while it runs),
+// which drops the focus. Once the page settles, focus goes to the control
+// find() returns, unless the user has focused something else meanwhile.
+function restoreFocusAfterSave(find, { timeoutMs = 6000 } = {}) {
+  const started = Date.now();
+  const attempt = () => {
+    const active = document.activeElement;
+    if (active && active !== document.body && active.isConnected) return;
+    const target = find();
+    if (target && !target.disabled && target.getClientRects?.().length) {
+      target.focus();
+      return;
+    }
+    if (Date.now() - started < timeoutMs) setTimeout(attempt, 100);
+  };
+  setTimeout(attempt, 0);
+}
 
 function roundPanelTargets() {
   const uid = currentUser?.uid || "";
@@ -1870,6 +1892,10 @@ window.recordRoundFromPanel = async function (tournamentId, matchId) {
   } finally {
     roundPanelSubmitting = false;
   }
+  restoreFocusAfterSave(() => {
+    const current = findRoundPanel(tournamentId);
+    return current?.querySelector?.("[data-panel-pick], [data-panel-target], [data-panel-record]") || null;
+  });
 };
 
 function handleRoundPanelClick(event) {
@@ -2082,6 +2108,123 @@ document.addEventListener("input", handleMatchDialogInput);
 document.addEventListener("change", handleMatchDialogInput);
 document.addEventListener("click", handleMatchDialogClick);
 document.addEventListener("keydown", handleMatchDialogKeydown);
+
+/* ----- 7-4c: edit-match panel (replaces the four prompt() calls) ----- */
+
+// Called by editMatch (T16, approved exception) after its draft merge. It only
+// collects the input: resolves { opponentName, decks: [3 raw strings] } or
+// null (cancel, Escape, backdrop, sign-out, account switch). A bey left as
+// shown is returned exactly as stored so editMatch keeps the stored entry.
+// Kept as a reassignable function declaration (tests replace it).
+function openMatchEditPanel(match, defaults, session) {
+  return new Promise(resolve => {
+    const opener = document.activeElement;
+    const optionTexts = new Set(configOptions.map(option => option.text));
+    const shell = document.createElement("div");
+    shell.className = "tp-dialog-shell";
+    shell.setAttribute("data-match-edit-panel", "");
+    const rows = [1, 2, 3].map(slot => {
+      const value = String(defaults[`deck${slot}`] ?? "");
+      const fromConfig = optionTexts.has(value);
+      return `
+        <div class="tp-deck-row">
+          <label class="tp-field"><span>使用陀螺 ${slot}（從配置選）</span>${buildConfigSelectHtml(`data-edit-deck-select="${slot}" aria-label="使用陀螺 ${slot}（從配置選）"`, fromConfig ? value : "")}</label>
+          <label class="tp-field"><span>或自填（優先）</span><input type="text" data-edit-deck-custom="${slot}" placeholder="或手動輸入陀螺 ${slot}" value="${fromConfig ? "" : escapeHtml(value)}"></label>
+        </div>`;
+    }).join("");
+    shell.innerHTML = `
+      <div class="tp-dialog-backdrop" data-edit-close></div>
+      <section class="tp-dialog" role="dialog" aria-modal="true" aria-labelledby="matchEditTitle">
+        <header class="tp-dialog-head"><h3 id="matchEditTitle">修改對局</h3><button type="button" class="tp-dialog-x" data-edit-close aria-label="關閉修改對局">×</button></header>
+        <label class="tp-field"><span>對手名稱</span><input type="text" data-edit-opponent value="${escapeHtml(String(defaults.opponentName ?? ""))}"></label>
+        ${rows}
+        <p class="tp-hint-note">只會修改對手名稱與 3 顆使用陀螺，回合紀錄不受影響。未改動的欄位保留原本的內容；修改中的草稿與其他裝置的衝突，沿用既有規則處理。</p>
+        <p class="tp-message" data-edit-message role="alert"></p>
+        <footer class="tp-dialog-actions">
+          <button type="button" data-edit-close>取消</button>
+          <button type="button" class="primary-btn" data-edit-save>儲存修改</button>
+        </footer>
+      </section>`;
+    document.body.appendChild(shell);
+    const dialog = shell.querySelector(".tp-dialog");
+    let done = false;
+    let unregister = () => {};
+
+    const close = value => {
+      if (done) return;
+      done = true;
+      unregister();
+      document.removeEventListener("keydown", onKeydown, true);
+      shell.remove();
+      const editButton = () => Array.from(document.querySelectorAll(`.match-card[data-match-id="${match.id}"] .match-actions button`))
+        .find(button => button.textContent.includes("修改對局")) || null;
+      if (value === null) {
+        if (opener?.isConnected && !opener.disabled && opener.getClientRects?.().length) opener.focus();
+        else editButton()?.focus?.();
+      } else {
+        // The save re-renders the list: return to this match's edit button then.
+        document.activeElement?.blur?.();
+        restoreFocusAfterSave(editButton);
+      }
+      resolve(value);
+    };
+
+    const readValues = () => {
+      const decks = [1, 2, 3].map(slot => {
+        const custom = shell.querySelector(`[data-edit-deck-custom="${slot}"]`)?.value ?? "";
+        const select = shell.querySelector(`[data-edit-deck-select="${slot}"]`)?.value ?? "";
+        return custom.trim() ? custom : select;
+      });
+      return { opponentName: shell.querySelector("[data-edit-opponent]")?.value ?? "", decks };
+    };
+
+    const save = () => {
+      if (!dataSessionGuard.isWriteSessionCurrent(session)) {
+        close(null);
+        return;
+      }
+      const values = readValues();
+      if (values.decks.some(value => !value.trim())) {
+        shell.querySelector("[data-edit-message]").textContent = "3 顆陀螺不可空白。";
+        return;
+      }
+      close(values);
+    };
+
+    function onKeydown(event) {
+      if (done) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        close(null);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusables = Array.from(dialog.querySelectorAll("button, input, select")).filter(element => !element.disabled && element.getClientRects().length > 0);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (!dialog.contains(document.activeElement)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    shell.addEventListener("click", event => {
+      if (event.target.closest("[data-edit-close]")) close(null);
+      else if (event.target.closest("[data-edit-save]")) save();
+    });
+    document.addEventListener("keydown", onKeydown, true);
+    unregister = pendingTournamentInteractions.register(() => close(null));
+    shell.querySelector("[data-edit-opponent]")?.focus();
+  });
+}
 /* ===== Phase 7-4 tournament record panel: end ===== */
 
 document.addEventListener("DOMContentLoaded", function () {

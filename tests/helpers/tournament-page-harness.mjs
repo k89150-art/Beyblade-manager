@@ -36,7 +36,8 @@ globalThis.__test = {
   get formDrafts() { return tournamentFormDrafts; },
   get opened() { return openedTournamentIds; },
   get pendingAdd() { return pendingAddTournamentDraft; },
-  setEditDialog(fn) { openTournamentEditDialog = fn; }
+  setEditDialog(fn) { openTournamentEditDialog = fn; },
+  setMatchEditPanel(fn) { openMatchEditPanel = fn; }
 };
 `;
 
@@ -176,6 +177,21 @@ export async function createTournamentPage({
   vm.runInContext(transformed, context, { filename: "tournament.js" });
   // Deterministic ids that still go through generateId() exactly once per call.
   vm.runInContext(`generateId = function (prefix = "id") { return globalThis.__nextId(prefix); };`, context);
+  // Phase 7-4c: the edit-match panel (DOM) is replaced by the same four
+  // prompt() answers the tests queue, asked in the original order: a cancel
+  // stops, and a blank bey stops (editMatch then shows its alert).
+  vm.runInContext(`openMatchEditPanel = async function (match, defaults) {
+    const opponentName = prompt("對手名稱", defaults.opponentName);
+    if (opponentName === null) return null;
+    const decks = [];
+    for (let i = 0; i < 3; i++) {
+      const value = prompt("陀螺 " + (i + 1), defaults["deck" + (i + 1)]);
+      if (value === null) return null;
+      decks.push(value);
+      if (!String(value).trim()) break;
+    }
+    return { opponentName, decks };
+  };`, context);
   context.__nextId = prefix => {
     idCounter += 1;
     const id = `${prefix}_${idTag}${idCounter}`;
@@ -201,6 +217,7 @@ export async function createTournamentPage({
     setConfirm(value) { confirmAnswer = value; },
     queueConfirms(...answers) { confirmAnswers.push(...answers); },
     queuePrompts(...answers) { promptAnswers.push(...answers); },
+    setMatchEditPanel(fn) { api.setMatchEditPanel(fn); },
     setCard(selector, element) { cards.set(selector, element); },
     // Phase 7-4a: a record panel for (tournamentId, matchId) holding the round
     // fields; it is also the first [data-match-id] element, as on the page.

@@ -34,6 +34,12 @@
 
 ## 最新紀錄
 
+### 2026-11-25 — Claude Code（Phase 7-4c：修改對局面板，T16 核准例外，本機 commit）
+
+- 主要內容：`editMatch` 的四次 `prompt()` 改為單一 `openMatchEditPanel`；未改動欄位保留原值；取消、Esc、登出、換帳號不寫入；儲存後焦點回復。T16 `73137bfdbaaf7c12` → `0b152288040815c0`，前段（草稿合併與衝突選擇）與後段（重新儲存確認、草稿、EDIT_MATCH 操作）雜湊與原版相同。驗收 `design/phase7/verification/phase7-4c/README.md`。
+- 測試：Node 492/492（含 E-01～E-03 突變測試、既有 M1／L2 草稿測試經替身驅動面板）；Emulator 真實頁面（Esc、空白、改名、登出、兩裝置衝突與欄位選擇、版面）。
+- Commit：`feat(tournament): implement phase 7-4c match editing panel`；未 push、未部署。
+
 ### 2026-11-25 — Claude Code（Phase 7-4b：新增對局對話框與 3on3 提示，本機 commit）
 
 - 主要內容：對局區標題列（輪空／種子、對手未到、＋ 新增對局）；新增對局對話框在比賽卡內、沿用既有欄位屬性並呼叫既有 `addMatch`，成功存入才關閉；3on3 重複零件提示（類別＋原始名稱、紋章鎖只限戰神與帝王、自填／未選擇／多義顯示未檢查、只提示不阻擋）。驗收 `design/phase7/verification/phase7-4b/README.md`。

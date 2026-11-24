@@ -261,3 +261,58 @@ test("D-05 the dialog does nothing for another tournament or a finished one; dir
   const advance = server(mock)[0].matches[0];
   assert.deepEqual({ ...advance, id: "x" }, { id: "x", advancementType: "walkover", opponentName: "對手未到", deck: [], rounds: [] });
 });
+
+/* ---------- 7-4c: edit-match panel (T16 approved exception) ---------- */
+
+test("E-01 untouched fields keep the stored values exactly; a changed field is trimmed and classified", async () => {
+  const stored = { id: "m1", opponentName: " 阿明 ", deck: [{ source: "config", configText: "A " }, { source: "custom", configText: "B" }, { source: "custom", configText: "C" }], rounds: [round("r1", "win", "spin")] };
+  const { mock, page } = await openPage([tournament("t1", [stored])]);
+  page.setMatchEditPanel(async (match, defaults) => ({ opponentName: defaults.opponentName, decks: [defaults.deck1, "  新陀螺  ", defaults.deck3] }));
+  await page.window.editMatch("t1", "m1");
+  const saved = server(mock)[0].matches[0];
+  assert.equal(saved.opponentName, " 阿明 ", "untouched opponent name kept as stored");
+  assert.deepEqual(saved.deck, [{ source: "config", configText: "A " }, { source: "custom", configText: "新陀螺" }, { source: "custom", configText: "C" }]);
+  assert.deepEqual(saved.rounds.map(item => item.id), ["r1"], "rounds untouched");
+  assert.equal(mock.stats.transactions, 1);
+});
+
+test("E-02 cancelling or a blank bey writes nothing and leaves no draft", async () => {
+  const { mock, page } = await openPage([tournament("t1", [match("m1")])]);
+  page.setMatchEditPanel(async () => null);
+  await page.window.editMatch("t1", "m1");
+  page.setMatchEditPanel(async (m, defaults) => ({ opponentName: "x", decks: [defaults.deck1, "   ", defaults.deck3] }));
+  await page.window.editMatch("t1", "m1");
+  assert.match(page.alerts.at(-1), /3 顆陀螺不可空白/);
+  assert.equal(mock.stats.transactions, 0);
+  assert.equal(page.api.matchEditDrafts.size, 0);
+  assert.equal(server(mock)[0].matches[0].opponentName, "對手m1");
+});
+
+test("E-03 mutation: without the field-level collision check another device's change is overwritten (M1 tests catch it)", async () => {
+  const collisionLine = "      if (otherChanged && latestValues[field] !== draft.values[field]) collisions.push(field);";
+  const run = async (source, confirms) => {
+    const mock = createMockFirestore();
+    seed(mock, [tournament("t1", [match("m1")])]);
+    const page = await createTournamentPage({ mock, source, saveTimeoutMs: 60, verifyTimeoutMs: 60, slowNoticeMs: 20 });
+    await page.signIn("account-a");
+    page.queuePrompts("我的對手", "A", "B", "C");
+    mock.setOnline(false);
+    await page.window.editMatch("t1", "m1");
+    mock.setOnline(true);
+    const records = mock.read(A).tournamentRecords;
+    records[0].matches[0].opponentName = "雲端對手";
+    mock.externalMerge(A, { tournamentRecords: records });
+    await page.signIn("account-a");
+    page.queueConfirms(...confirms);
+    page.queuePrompts(value => value, value => value, value => value, value => value);
+    await page.window.editMatch("t1", "m1");
+    return { name: mock.read(A).tournamentRecords[0].matches[0].opponentName, asked: page.confirms.some(text => text.includes("你和其他裝置都修改了")) };
+  };
+  const source = loadTournamentSource().replace(/\r\n/g, "\n");
+  assert.ok(source.includes(collisionLine));
+  // Real code: the collision is shown ("use the cloud value"), then the final confirmation.
+  assert.deepEqual(await run(source, [false, true]), { name: "雲端對手", asked: true }, "the real code asks and keeps the cloud value");
+  // Mutant: no collision is shown; the user only confirms the save.
+  const mutant = await run(source.replace(collisionLine, ""), [true]);
+  assert.deepEqual(mutant, { name: "我的對手", asked: false }, "the mutant silently overwrites the other device's change");
+});
