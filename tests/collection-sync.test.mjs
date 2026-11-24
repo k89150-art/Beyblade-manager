@@ -567,7 +567,7 @@ test("a cache snapshot never writes, even when it would upgrade", async () => {
 test("script.js: saves go through the transaction module; no whole-document setDoc remains", () => {
   const source = loadManagerSource();
   assert.doesNotMatch(source, /\bsetDoc\b/);
-  assert.match(source, /from "\.\/collection-sync\.js\?v=20261030-phase5b"/);
+  assert.match(source, /from "\.\/collection-sync\.js\?v=20261125-v1181"/);
   assert.match(source, /startCollectionTransaction\(\{/);
   assert.match(source, /\}\), \{ maxAttempts: 1 \}\);/);
   assert.doesNotMatch(source.slice(source.indexOf("/* ===== D-018 collection saves: begin")), /tournamentRecords[\s\S]{0,40}transaction\./);
@@ -579,7 +579,7 @@ test("script.js: saves go through the transaction module; no whole-document setD
 
 test("index.html: script cache version, version line and the sync notice controls", () => {
   const html = fs.readFileSync("index.html", "utf8");
-  assert.match(html, /src="script\.js\?v=20261125-phase73d"/);
+  assert.match(html, /src="script\.js\?v=20261125-v1181"/);
   for (const id of ["collectionClientVersion", "collectionSyncNotice", "collectionSyncMessage", "collectionRetryBtn", "collectionLoadCloudBtn", "collectionKeepLocalBtn", "collectionDraftNotice", "collectionDraftMessage", "collectionDraftDownloadBtn", "collectionDraftDismissBtn"]) {
     assert.match(html, new RegExp(`id="${id}"`), id);
   }

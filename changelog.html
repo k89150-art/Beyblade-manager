@@ -35,6 +35,23 @@
     <nav class="site-nav help-page-nav" data-help-nav aria-label="說明頁面捷徑"></nav>
 
     <div class="info-card">
+      <div class="version-title">v1.18.1｜介面細節修正</div>
+      <div class="version-meta">2026-11-25</div>
+      <ul class="update-list">
+        <li><span class="change-tag">顯示</span>名稱只差空白（連續空白、TAB、前後空白等）的零件，在零件清單、詳細資訊、無對應引用、刪除確認與配置影響提示中會以 ␣、⇥ 等符號標出，方便分辨；名稱與庫存計算不變。</li>
+        <li><span class="change-tag">修正</span>從其他頁面使用「新增收藏」「新增零件」「建立配置」快捷入口時，會在資料載入完成後自動切到對應位置或開啟建立配置面板。</li>
+        <li><span class="change-tag">修正</span>刪除套組的確認視窗會顯示實際顆數（例如「3 顆陀螺套組」）。</li>
+        <li><span class="change-tag">文字</span>確認視窗、同步衝突提示、管理員檢視與說明頁統一使用「拆解紀錄」名稱；資料不變。</li>
+        <li><span class="change-tag">顯示</span>修正顯示層無法使用時，原始表格出現在錯誤區塊的問題；修正手機工具列兩字標籤換行。</li>
+        <li><span class="change-tag">操作</span>手機詳細資訊視窗或刪除原因視窗開啟時，左上角選單與底部導覽暫時不可操作，避免誤觸；關閉後恢復。</li>
+        <li><span class="change-tag">賽事</span>3on3 重複零件提示註明參考 B4 レギュレーション第 12 版，以及只依可辨識的零件名稱比對的限制。</li>
+      </ul>
+    </div>
+
+    <details class="version-archive">
+      <summary>歷史版本（v1.2.0～v1.18.0）</summary>
+
+    <div class="info-card">
       <div class="version-title">v1.18.0｜新版賽事記錄面板</div>
       <div class="version-meta">2026-11-25</div>
       <ul class="update-list">
@@ -47,9 +64,6 @@
         <li><span class="change-tag">資料</span>所有賽事操作仍使用原本的交易保護與衝突檢查（賽事儲存版本 4B-1）；其他分頁或裝置的變更不會被覆蓋。</li>
       </ul>
     </div>
-
-    <details class="version-archive">
-      <summary>歷史版本（v1.2.0～v1.17.0）</summary>
 
     <div class="info-card">
       <div class="version-title">v1.17.0｜快速建立配置</div>
@@ -405,6 +419,6 @@
     </div>
     </details>
   </div>
-<script src="site-menu.js?v=20261125-v1180"></script>
+<script src="site-menu.js?v=20261125-v1181"></script>
 </body>
 </html>

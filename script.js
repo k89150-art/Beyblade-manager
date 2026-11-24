@@ -18,7 +18,7 @@ import {
   pickCollectionTables,
   startCollectionTransaction,
   waitForCollectionTransaction
-} from "./collection-sync.js?v=20261030-phase5b";
+} from "./collection-sync.js?v=20261125-v1181";
 import {
   bitCode,
   evaluateAssembly,
@@ -48,7 +48,7 @@ import {
   normalizeViewMode,
   sortPartItems,
   sortStockItems
-} from "./collection-view.js?v=20261124-phase72d";
+} from "./collection-view.js?v=20261125-v1181";
 import {
   CONFIG_STRUCTURE_LABELS,
   CONFIG_VIEW_MODE_STORAGE_KEY,

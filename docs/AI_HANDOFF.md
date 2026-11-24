@@ -34,6 +34,11 @@
 
 ## 最新紀錄
 
+### 2026-11-25 — Claude Code（v1.18.1 發布準備：介面細節修正）
+
+- 主要內容：`SITE_VERSION` v1.18.1；11 頁 `site-menu.js?v=20261125-v1181`；主頁 `style.css`／`script.js?v=20261125-v1181`；`script.js` 內 `collection-sync.js`、`collection-view.js` import `?v=20261125-v1181`；賽事頁 `tournament.js?v=20261125-v1181`（`tournament-panel.js` 內容未變，維持 `20261125-v1180`）。更新紀錄新增 v1.18.1（只描述實際完成的八項修正），v1.18.0 移入歷史版本（v1.2.0～v1.18.0）；版本測試同步。功能程式未再修改。
+- 本版只涉及顯示、導覽與確認文字；未修改資料寫入邏輯或交易核心。
+
 ### 2026-11-25 — Claude Code（Phase 7-FINAL 最後修正，本機 commit）
 
 - 任務：ChatGPT 核准的有限修正 P2-1、P2-2、P3-1、P3-2、P3-3、P3-4、P3-5、P3-7（顯示、導覽、確認文字）。驗收 `design/phase7/verification/phase7-final/README.md`；報告 §9；維護清單 `docs/MAINTENANCE_BACKLOG.md`；決策 D-025。

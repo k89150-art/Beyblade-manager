@@ -157,11 +157,11 @@ test("Q1: add forms stay where they were, wrapped in collapsible panels with the
 });
 
 test("cache versions for the changed files", () => {
-  assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261125-phase73c" \/>/);
-  assert.match(html, /<script type="module" src="script\.js\?v=20261125-phase73d"><\/script>/);
-  assert.match(script, /from "\.\/collection-view\.js\?v=20261124-phase72d";/);
-  // v1.18.0 only changes SITE_VERSION in site-menu.js; the D-020 navigation itself is unchanged.
-  assert.match(html, /<script src="site-menu\.js\?v=20261125-v1180"><\/script>/);
+  assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261125-v1181" \/>/);
+  assert.match(html, /<script type="module" src="script\.js\?v=20261125-v1181"><\/script>/);
+  assert.match(script, /from "\.\/collection-view\.js\?v=20261125-v1181";/);
+  // v1.18.1 only changes SITE_VERSION in site-menu.js; the D-020 navigation itself is unchanged.
+  assert.match(html, /<script src="site-menu\.js\?v=20261125-v1181"><\/script>/);
   assert.match(html, /<link rel="stylesheet" href="site-menu\.css\?v=20261124-v1100" \/>/);
 });
 
