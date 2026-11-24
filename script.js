@@ -20,8 +20,8 @@ import {
   waitForCollectionTransaction
 } from "./collection-sync.js?v=20261030-phase5b";
 import {
+  bitCode,
   evaluateAssembly,
-  newAssemblyViolations,
   isIntegratedRatchetBlade,
   isIntegratedRatchetBit,
   isSimpleRatchet as isOfficialSimpleRatchet
@@ -138,6 +138,7 @@ let stockChoiceResolve = null;
 let stockChoiceProducts = [];
 let configEditorRow = null;
 let configEditorSessionToken = null;
+let configEditorRowSignature = null;
 let configEditorMode = "bxux";
 let inventoryFilterType = "all";
 
@@ -448,23 +449,50 @@ function validateRatchetRules(model, axis, ratchet, layer = "") {
   return true;
 }
 
+// Phase 7-3a: a violation counts as "already there" only when the same rule is
+// broken by the same part: the same blade (by name; by model code for the old
+// UX-19／UX-20／UX-16 configs without a usable name) and/or the same bit, and
+// for 時鐘幻象 the same cause (an integrated bit, or a non-simple ratchet).
+// Changing only the ratchet value of an already broken rule keeps it (D-019).
+function assemblyViolationKey(violation, { model, layer, fix, axis }) {
+  const name = String(layer ?? "").replace(/\s+/g, "");
+  const blade = name && name !== "-" ? `blade:${name}` : `model:${getBaseModelCode(model)}`;
+  const bit = `bit:${bitCode(axis)}`;
+  switch (violation.id) {
+    case "integrated-blade-integrated-bit": return [violation.id, blade, bit].join("|");
+    case "integrated-blade-ratchet": return [violation.id, blade].join("|");
+    case "integrated-bit-ratchet": return [violation.id, bit].join("|");
+    case "simple-ratchet-only": return [violation.id, blade, isIntegratedRatchetBit(axis) ? bit : "ratchet"].join("|");
+    default: return [violation.id, blade, bit, String(fix ?? "").trim()].join("|");
+  }
+}
+
+function newConfigAssemblyViolations(beforeInput, before, afterInput, after) {
+  const existing = new Set(before.violations.map(item => assemblyViolationKey(item, beforeInput)));
+  return after.violations.filter(item => !existing.has(assemblyViolationKey(item, afterInput)));
+}
+
 // New configs follow the official rules. An edited config is blocked only by a
 // violation it did not already have; existing data stays editable after a warning.
+// The baseline is the config's own row as stored (addConfig checks that the row
+// is still the one the editor opened before calling this).
 function checkConfigAssemblyRules(model, layer, fix, axis) {
-  const after = evaluateAssembly({ model, layer, fix, axis });
+  const afterInput = { model, layer, fix, axis };
+  const after = evaluateAssembly(afterInput);
   if (!after.violations.length) return true;
   if (!configEditorRow) {
     alert(after.violations[0].message);
     return false;
   }
   const cells = configEditorRow.cells;
-  const before = evaluateAssembly({
+  const beforeInput = {
     model: cells[0]?.innerText.trim() || "",
     layer: cells[1]?.innerText.trim() || "",
     fix: cells[7]?.innerText.trim() || "",
     axis: cells[8]?.innerText.trim() || ""
-  });
-  const added = newAssemblyViolations(before, after);
+  };
+  const before = evaluateAssembly(beforeInput);
+  const added = newConfigAssemblyViolations(beforeInput, before, afterInput, after);
   if (added.length) {
     alert(added[0].message);
     return false;
@@ -4693,6 +4721,7 @@ function openConfigQuickEditor(editingRow = null) {
   if (!operationSession) return;
 
   configEditorRow = editingRow;
+  configEditorRowSignature = editingRow ? getConfigEditorRowSignature(editingRow) : null;
   configEditorSessionToken = operationSession;
   clearConfigEditorFields();
   refreshSelectors(editingRow);
@@ -4732,8 +4761,21 @@ function closeConfigQuickEditor({ restoreFocus = true } = {}) {
   editor.hidden = true;
   document.body.classList.remove("config-editor-open");
   configEditorRow = null;
+  configEditorRowSignature = null;
   configEditorSessionToken = null;
   if (restoreFocus) document.getElementById("openConfigEditorBtn")?.focus();
+}
+
+// Phase 7-3a: the row being edited must still be the same stored config row
+// (in the config table, same stored cells and main-blade name) when saving.
+function getConfigEditorRowSignature(row) {
+  return JSON.stringify([getPersistedRowCells(row), row.cells[3]?.dataset.stockName ?? null]);
+}
+
+function isConfigEditorRowCurrent() {
+  const row = configEditorRow;
+  return Boolean(row && row.isConnected && row.closest("table")?.id === "configTable"
+    && configEditorRowSignature === getConfigEditorRowSignature(row));
 }
 
 window.refreshSelectors = function (editingRow = null) {
@@ -4805,6 +4847,11 @@ window.addConfig = function () {
     closeConfigQuickEditor({ restoreFocus: false });
     return;
   }
+  if (configEditorRow && !isConfigEditorRowCurrent()) {
+    alert("這筆配置已經變更或不存在，請重新開啟後再修改。");
+    closeConfigQuickEditor({ restoreFocus: false });
+    return;
+  }
 
   const modelInput = document.getElementById("confModel");
   const layerSel = document.getElementById("sel上蓋").value;
@@ -4819,9 +4866,11 @@ window.addConfig = function () {
   const model = buildInternalConfigModel(configEditorMode, layerSel, existingModel);
   const series = configEditorMode === "cx" ? "CX" : "BX";
   if (modelInput) modelInput.value = model;
-  fixSel = getNoRatchetFixValue(model, axisSel, fixSel);
+  // D-019 (Phase 7-3a): the rules are decided by blade name and bit, so the
+  // blade is passed here too; edits are compared with the stored row.
+  fixSel = getNoRatchetFixValue(model, axisSel, fixSel, layerSel);
 
-  if (!validateRatchetRules(model, axisSel, fixSel)) return;
+  if (!checkConfigAssemblyRules(model, layerSel, fixSel, axisSel)) return;
 
   let layer = "-";
   let lockPart = "-";

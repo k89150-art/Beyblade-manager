@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：無（v1.14.0 已正式部署；Phase 7-2 結案）
+- 目前執行者：無（Phase 7-3a 已本機 commit，待 ChatGPT 審查 v1.14.1 發布）
 - 寫入範圍：目前沒有進行中的寫入任務
-- 正式版本：`17ac204`（v1.14.0，`origin/main`，GitHub Pages deployment `8014738489` success）。本筆部署紀錄 commit 只在本機，未 push。
+- 正式版本：`17ac204`（v1.14.0，`origin/main`，GitHub Pages deployment `8014738489` success）。本機另有 v1.14.0 部署紀錄 commit `fa4e419` 與 7-3a 功能 commit，皆未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -33,6 +33,20 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（Phase 7-3a：D-019 接線修正；配置排序修正撤回）
+
+- 任務：ChatGPT 前置審查有條件 PASS，授權 7-3a（D-019 接線與配置排序）。先建立規格 `design/phase7/11-phase7-3-assembler-spec.md`（決策 A1～A7、7-3a～7-3d 規格），再實作 7-3a。
+- D-019 原有接線缺口：`f1df0bc` 把 `checkConfigAssemblyRules` 接到已無入口的舊行內編輯 `saveConfigEditRow`；實際使用的 `window.addConfig` 仍呼叫 `validateRatchetRules(model, axisSel, fixSel)`（未傳上蓋名稱），`getNoRatchetFixValue` 也未傳。正式網站因此只有 UX-19／UX-20／UX-16 型號備援生效；惡魔冥界＋固鎖、惡魔冥界＋Tr、非 UX-16 型號的時鐘幻象＋9-60 可以儲存；修改原本違規的配置直接被擋、沒有 D-019 的確認。
+- 修正（只在 `script.js`）：`addConfig` 改傳完整型號、上蓋名稱、固鎖、軸心給 `getNoRatchetFixValue` 與 `checkConfigAssemblyRules`；新舊違規以身分比較（`assemblyViolationKey`：規則＋上蓋／軸心，時鐘幻象另含原因；只換固鎖數值仍是原有違規）；比較基準為配置自己的原始資料列；儲存前確認編輯中的列仍在配置表且儲存值與 `mainStockName` 未變（`configEditorRowSignature`），否則提示、關閉、不寫入。import 改為 `bitCode`（移除未使用的 `newAssemblyViolations`）。`index.html` 的 `script.js` 快取改 `20261124-phase73a`。`assembly-rules.js`、`collection-sync.js`、`data-session-guard.js`、D-018／D-015／F-04、Schema、Rules 未改；`SITE_VERSION` 仍為 v1.14.0。
+- 配置排序：以真實程式重現四種情境（`design/phase7/verification/phase7-3a/sort-repro.mjs`）。「儲存前同步排序」可修正 `addConfig`／`restoreHistoryRow`，但**未排序資料載入**後 80 ms 的畫面重排仍晚於 D-018 基準，不相關的儲存會連帶改寫 `configTable` 順序 → 依指示**撤回**排序修改，列為獨立待修（完整解決需在受保護的 `applyDataToTables` 內排序或停止載入後重排，都超出核准方案）。Emulator 另確認：一次 `addConfig` 產生 2 次 commit（第二次為排序後順序，由回音快照後的 `scheduleCollectionSaveIfDirty` 寫入）；未排序雲端資料閒置時不自動寫入，但下一次不相關儲存會改寫順序。
+- 修改檔案：`script.js`、`index.html`、`tests/config-assembly-wiring.test.mjs`（新，16 項）、`tests/helpers/config-page-harness.mjs`（新）、`tests/assembly-rules.test.mjs`／`tests/collection-sync.test.mjs`／`tests/collection-view.test.mjs`（只改 `script.js` 快取字串）、`README.md`／`AGENTS.md`（測試指令加入新檔）、`design/phase7/11-phase7-3-assembler-spec.md`（新）、`design/phase7/README.md`、`design/phase7/verification/phase7-3a/`（新）、`docs/PROJECT_DECISIONS.md`（D-019 補正、D-022）、本文件。
+- 測試：Node 16 檔 383/383（新增 16 項；以 `fa4e419` 的 `script.js` 執行時 9 項 D-019 測試失敗，身分比較改成只比 id 時 1 項失敗）；Emulator（`exports/emulator-ui-73a/`，`demo-beyblade-73a-ui`，真實頁面）：新建違規 4 種阻擋、既有違規修改的兩種取消與兩種新違規阻擋，`updateTime` 全程不變；保留違規只換固鎖、完全修正、合法新建各自寫入且 `cells` 正確；修改中登出再以 tester-b 登入，編輯器關閉、A 文件不變、B 無文件；Console Error 0。Phase 7-2 整合回歸 505/505；validate PASS；build PASS（35 files）；`git diff --check` PASS；A-09 十段雜湊不變；新增雜湊 `addConfig` 儲存格寫入 `da046a3d56a07519`、`checkStock` `0bed51c10a056c87`（與 `fa4e419` 相同）；寫入路徑 `saveData()` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0。
+- 已知問題（新發現，既有，未修）：載入時 `normalizeAllModelCells` 把 `UX-21-01 CUSTOM` 這類「型號-編號-編號 CUSTOM」顯示為 `UX-21 -01 CUSTOM`，配置表下次寫入時以此值存回（Emulator 已觀察到）。
+- 已知問題（沿用）：配置排序造成 `configTable` 順序後續改寫（含 `addConfig` 後第二次寫入）；D-018 基準遇連續空白；三顆一組套組仍顯示「雙陀螺套組」；後備版面順序；正式 `signInWithPopup` 與 Safari／iOS 未驗證。
+- 下一位注意：v1.14.1 發布需另行授權（升版、changelog、部署）；行為變更：新建配置對惡魔冥界、名稱判斷的時鐘幻象更嚴格，修改原本違規的配置改為確認後可儲存。7-3b～7-3d 未授權。配置排序的完整修正方案需使用者／ChatGPT 決定。
+- 資料庫／部署風險：未寫入正式 Firestore、未部署 Rules、未 push、未部署。
+- Commit / Deploy：本機 commit `feat(config): wire D-019 rules into the config editor save path (phase 7-3a)`；未 push、未部署。
 
 ### 2026-11-24 — Claude Code（v1.14.0／Phase 7-2d，正式部署；Phase 7-2 結案）
 

@@ -1,0 +1,451 @@
+// Phase 7-3a: runs the REAL main-page script (script.js from its first page
+// variable to the end) inside an isolated VM over a small in-memory DOM, so the
+// actual config flows (window.addConfig, window.restoreHistoryRow, the config
+// sort, collectCurrentData, the D-018 load baseline and saveData) run exactly
+// as written. Firebase calls go to the mock Firestore; data-session-guard.js,
+// collection-sync.js, assembly-rules.js and collection-view.js are the real
+// modules. Nothing here touches Firebase, the network or the working tree.
+import fs from "node:fs";
+import vm from "node:vm";
+import * as guardModule from "../../data-session-guard.js";
+import * as collectionModule from "../../collection-sync.js";
+import * as assemblyModule from "../../assembly-rules.js";
+import * as viewModule from "../../collection-view.js";
+import * as catalogNamesModule from "../../stock-catalog-names.js";
+
+const SOURCE_URL = new URL("../../script.js", import.meta.url);
+const TABLE_IDS = ["beybladeTable", "partTable", "configTable", "historyTable"];
+
+function unescapeHtml(text) {
+  return String(text)
+    .replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&quot;", '"').replaceAll("&amp;", "&");
+}
+
+function escapeAttr(text) {
+  return String(text).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+// ---------- in-memory DOM ----------
+
+function createDom() {
+  const observers = [];
+  const pendingTargets = new Set();
+  let flushQueued = false;
+
+  function notify(target) {
+    if (!observers.some(item => item.target === target)) return;
+    pendingTargets.add(target);
+    if (flushQueued) return;
+    flushQueued = true;
+    queueMicrotask(() => {
+      flushQueued = false;
+      const targets = [...pendingTargets];
+      pendingTargets.clear();
+      observers.filter(item => targets.includes(item.target) && item.active).forEach(item => item.callback([{ type: "childList" }], item.observer));
+    });
+  }
+
+  class MutationObserver {
+    constructor(callback) { this.callback = callback; this.entries = []; }
+    observe(target) {
+      const entry = { target, callback: this.callback, observer: this, active: true };
+      this.entries.push(entry);
+      observers.push(entry);
+    }
+    disconnect() { this.entries.forEach(entry => { entry.active = false; }); }
+    takeRecords() { return []; }
+  }
+
+  function classList() {
+    const set = new Set();
+    return {
+      add: (...names) => names.forEach(name => set.add(name)),
+      remove: (...names) => names.forEach(name => set.delete(name)),
+      toggle: (name, force) => {
+        const on = force === undefined ? !set.has(name) : Boolean(force);
+        if (on) set.add(name); else set.delete(name);
+        return on;
+      },
+      contains: name => set.has(name)
+    };
+  }
+
+  function genericElement(id = "") {
+    const listeners = {};
+    return {
+      id,
+      hidden: false,
+      disabled: false,
+      value: "",
+      textContent: "",
+      innerHTML: "",
+      dataset: {},
+      style: {},
+      attributes: {},
+      classList: classList(),
+      setAttribute(name, value) { this.attributes[name] = String(value); },
+      getAttribute(name) { return this.attributes[name] ?? null; },
+      removeAttribute(name) { delete this.attributes[name]; },
+      addEventListener(type, handler) { (listeners[type] ||= []).push(handler); },
+      removeEventListener(type, handler) { listeners[type] = (listeners[type] || []).filter(item => item !== handler); },
+      dispatch(type, event = {}) { (listeners[type] || []).forEach(handler => handler(event)); },
+      focus() { document.activeElement = this; },
+      blur() {},
+      contains: () => false,
+      closest: () => null,
+      querySelector: () => null,
+      querySelectorAll: () => [],
+      appendChild(child) { return child; },
+      insertBefore(child) { return child; },
+      remove() {},
+      scrollIntoView() {}
+    };
+  }
+
+  function createOption(value = "", text = "") {
+    const option = { tag: "option", value: String(value), textContent: String(text), owner: null };
+    option.remove = () => {
+      if (!option.owner) return;
+      option.owner.options = option.owner.options.filter(item => item !== option);
+      if (option.owner.selected === option) option.owner.selected = null;
+      option.owner = null;
+    };
+    return option;
+  }
+
+  // A <select>: the value can only be one of its options (as in a browser).
+  function createSelect(id) {
+    const select = genericElement(id);
+    select.tag = "select";
+    select.options = [];
+    select.selected = null;
+    Object.defineProperty(select, "children", { get() { return select.options; } });
+    Object.defineProperty(select, "innerHTML", {
+      get() { return select.options.map(option => `<option value="${escapeAttr(option.value)}">${option.textContent}</option>`).join(""); },
+      set(html) {
+        select.options = [];
+        select.selected = null;
+        for (const match of String(html).matchAll(/<option value="([^"]*)">([\s\S]*?)<\/option>/g)) {
+          const option = createOption(unescapeHtml(match[1]), match[2].trim());
+          option.owner = select;
+          select.options.push(option);
+        }
+      }
+    });
+    Object.defineProperty(select, "value", {
+      get() { return (select.selected || select.options[0])?.value ?? ""; },
+      set(value) {
+        const found = select.options.find(option => option.value === String(value));
+        select.selected = found || null;
+        if (!found) select.selected = { value: "" };
+      }
+    });
+    select.querySelector = selector => {
+      const match = String(selector).match(/^option\[value="([^"]*)"\]$/);
+      return match ? select.options.find(option => option.value === match[1]) || null : null;
+    };
+    select.insertBefore = (option, reference) => {
+      option.owner = select;
+      const index = reference ? select.options.indexOf(reference) : -1;
+      if (index >= 0) select.options.splice(index, 0, option); else select.options.push(option);
+      return option;
+    };
+    return select;
+  }
+
+  function stripTags(html) {
+    return unescapeHtml(String(html).replace(/<[^>]*>/g, ""));
+  }
+
+  function createTable(id) {
+    const table = { id, tag: "table" };
+    const tbody = { tag: "tbody", table, rows: [] };
+    table.tbody = tbody;
+
+    function createCell(row) {
+      let text = "";
+      let html = "";
+      const cell = { tag: "td", dataset: {}, parentElement: row };
+      Object.defineProperty(cell, "innerText", {
+        get() { return text; },
+        set(value) { text = String(value); html = escapeAttr(text); if (row.parentElement === tbody) notify(tbody); }
+      });
+      Object.defineProperty(cell, "textContent", {
+        get() { return text; },
+        set(value) { cell.innerText = value; }
+      });
+      Object.defineProperty(cell, "innerHTML", {
+        get() { return html; },
+        set(value) { html = String(value); text = stripTags(html).trim(); if (row.parentElement === tbody) notify(tbody); }
+      });
+      cell.querySelector = selector => (String(selector).split(",").some(part => html.includes(`<${part.trim()}`)) ? {} : null);
+      return cell;
+    }
+
+    function createRow() {
+      const row = { tag: "tr", cells: [], dataset: {}, parentElement: null, classList: classList() };
+      row.insertCell = (index = -1) => {
+        const cell = createCell(row);
+        if (index < 0 || index >= row.cells.length) row.cells.push(cell); else row.cells.splice(index, 0, cell);
+        if (row.parentElement === tbody) notify(tbody);
+        return cell;
+      };
+      row.closest = selector => (selector === "table" && row.parentElement === tbody ? table : null);
+      row.remove = () => {
+        if (row.parentElement !== tbody) return;
+        tbody.rows.splice(tbody.rows.indexOf(row), 1);
+        row.parentElement = null;
+        notify(tbody);
+      };
+      row.querySelector = () => null;
+      row.querySelectorAll = () => [];
+      Object.defineProperty(row, "isConnected", { get() { return row.parentElement === tbody; } });
+      return row;
+    }
+
+    tbody.insertRow = () => {
+      const row = createRow();
+      row.parentElement = tbody;
+      tbody.rows.push(row);
+      notify(tbody);
+      return row;
+    };
+    tbody.appendChild = row => {
+      const index = tbody.rows.indexOf(row);
+      if (index >= 0) tbody.rows.splice(index, 1);
+      row.parentElement = tbody;
+      tbody.rows.push(row);
+      notify(tbody);
+      return row;
+    };
+    tbody.querySelectorAll = selector => (selector === "tr" ? [...tbody.rows] : []);
+    tbody.querySelector = selector => {
+      const parts = String(selector).split(",").map(part => part.trim());
+      return tbody.rows.some(row => row.cells.some(cell => parts.some(part => cell.innerHTML.includes(`<${part}`)))) ? {} : null;
+    };
+    Object.defineProperty(tbody, "innerHTML", {
+      get() { return ""; },
+      set(value) {
+        if (String(value) !== "") throw new Error("harness: only clearing a tbody is supported");
+        tbody.rows.forEach(row => { row.parentElement = null; });
+        tbody.rows = [];
+        notify(tbody);
+      }
+    });
+    return table;
+  }
+
+  const tables = Object.fromEntries(TABLE_IDS.map(id => [id, createTable(id)]));
+  const elements = new Map();
+  const selectIds = ["sel上蓋", "sel紋章鎖", "sel主要戰刃", "sel超越戰刃", "sel金屬戰刃", "sel輔助戰刃", "sel固鎖", "sel軸心"];
+  selectIds.forEach(id => elements.set(id, createSelect(id)));
+  const editor = genericElement("configQuickEditor");
+  editor.hidden = true;
+  elements.set("configQuickEditor", editor);
+  const stockChoiceDialog = genericElement("stockChoiceDialog");
+  stockChoiceDialog.hidden = true;
+  elements.set("stockChoiceDialog", stockChoiceDialog);
+  const confModel = genericElement("confModel");
+  confModel.value = "BX-CUSTOM";
+  elements.set("confModel", confModel);
+
+  const body = genericElement("body");
+  const document = {
+    body,
+    activeElement: null,
+    readyState: "complete",
+    addEventListener() {},
+    removeEventListener() {},
+    createElement: tag => (tag === "option" ? createOption() : genericElement()),
+    getElementById(id) {
+      if (!elements.has(id)) elements.set(id, genericElement(id));
+      return elements.get(id);
+    },
+    querySelector(selector) {
+      const match = String(selector).match(/^#(\w+) tbody$/);
+      if (match && tables[match[1]]) return tables[match[1]].tbody;
+      return null;
+    },
+    querySelectorAll(selector) {
+      const match = String(selector).match(/^#(\w+) tbody tr$/);
+      if (match && tables[match[1]]) return [...tables[match[1]].tbody.rows];
+      return [];
+    }
+  };
+  return { document, tables, elements, MutationObserver };
+}
+
+// ---------- page ----------
+
+function clone(value) {
+  return value === undefined || value === null ? value : JSON.parse(JSON.stringify(value));
+}
+
+export function loadPageSource() {
+  return fs.readFileSync(SOURCE_URL, "utf8");
+}
+
+export function createConfigPage({ mock, uid = "user-a", email = "a@example.test", source = loadPageSource() } = {}) {
+  const dom = createDom();
+  const effects = { alerts: [], confirms: [], confirmAnswers: [], defaultConfirm: true, listeners: [] };
+  const start = source.indexOf("let currentUser = null;");
+  if (start < 0) throw new Error("harness: page start not found");
+  const code = source.slice(start);
+
+  const windowObject = { addEventListener() {}, removeEventListener() {}, matchMedia: () => ({ matches: false, addEventListener() {} }) };
+  const context = {
+    ...guardModule,
+    ...collectionModule,
+    ...catalogNamesModule,
+    ...viewModule,
+    evaluateAssembly: assemblyModule.evaluateAssembly,
+    newAssemblyViolations: assemblyModule.newAssemblyViolations,
+    isIntegratedRatchetBlade: assemblyModule.isIntegratedRatchetBlade,
+    isIntegratedRatchetBit: assemblyModule.isIntegratedRatchetBit,
+    isOfficialSimpleRatchet: assemblyModule.isSimpleRatchet,
+    bitCode: assemblyModule.bitCode,
+    auth: {},
+    provider: {},
+    db: {},
+    doc: (db, ...segments) => ({ path: segments.join("/") }),
+    getDocFromServer: ref => mock.getDocFromServer(ref),
+    runTransaction: (db, updateFunction, options) => mock.runTransaction(db, updateFunction, options),
+    onSnapshot: (ref, options, next, error) => {
+      const listener = { ref, options, next, error, active: true };
+      effects.listeners.push(listener);
+      return () => { listener.active = false; };
+    },
+    onAuthStateChanged() {},
+    signInWithPopup: async () => {},
+    signOut: async () => {},
+    fetch: async () => { throw new Error("harness: no network"); },
+    document: dom.document,
+    window: windowObject,
+    localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+    matchMedia: windowObject.matchMedia,
+    MutationObserver: dom.MutationObserver,
+    requestAnimationFrame: callback => setTimeout(callback, 0),
+    cancelAnimationFrame: id => clearTimeout(id),
+    alert: message => effects.alerts.push(String(message)),
+    confirm: message => {
+      effects.confirms.push(String(message));
+      return effects.confirmAnswers.length ? effects.confirmAnswers.shift() : effects.defaultConfirm;
+    },
+    console: { warn() {}, error() {}, log() {}, info() {} },
+    location: { hash: "", hostname: "127.0.0.1", href: "http://127.0.0.1/" },
+    history: { replaceState() {} },
+    navigator: { onLine: true },
+    setTimeout,
+    clearTimeout,
+    setInterval,
+    clearInterval,
+    queueMicrotask,
+    structuredClone,
+    Date,
+    Math,
+    JSON,
+    Promise,
+    Map,
+    Set,
+    WeakMap,
+    Intl,
+    Blob: class { constructor(parts) { this.text = parts.join(""); } },
+    URL: { createObjectURL: () => "blob:test", revokeObjectURL() {} }
+  };
+  // In a browser `window` is the global object (window.addConfig is callable as addConfig).
+  context.window = context;
+  context.addEventListener = windowObject.addEventListener;
+  context.removeEventListener = windowObject.removeEventListener;
+  vm.createContext(context);
+  vm.runInContext(`${code}
+globalThis.__page = {
+  setUser(user) { currentUser = user; },
+  get sync() { return collectionSync; },
+  get guard() { return dataSessionGuard; },
+  get saving() { return isSavingCloudData; },
+  get pending() { return hasPendingCloudSave; },
+  get editorRow() { return configEditorRow; }
+};`, context);
+  const page = context.__page;
+
+  // What DOMContentLoaded does for the tables and the config sort.
+  context.clearAllTables();
+  context.installConfigSort();
+
+  function rowCells(row) { return row.cells.slice(0, 9).map(cell => cell.innerText); }
+
+  const api = {
+    context,
+    dom,
+    effects,
+    page,
+    get window() { return context.window; },
+    select(type, value) {
+      const select = dom.elements.get(`sel${type}`);
+      select.value = value;
+      return select.value;
+    },
+    selectOptions(type) { return dom.elements.get(`sel${type}`).options.map(option => option.value); },
+    configRows() { return [...dom.tables.configTable.tbody.rows]; },
+    configCells() { return api.configRows().map(rowCells); },
+    configStockNames() { return api.configRows().map(row => row.cells[3]?.dataset.stockName); },
+    historyRows() { return [...dom.tables.historyTable.tbody.rows]; },
+    stored() { return clone(mock.read(`users/${uid}/appData/main`)); },
+    tables() { return context.collectCollectionTables(); },
+    dirtyTables() { return page.sync.getDirtyTables(context.collectCollectionTables()); },
+    signIn() {
+      page.setUser({ uid, email });
+      const token = context.beginDataSession(uid, false);
+      context.startCloudListener(token);
+      return token;
+    },
+    deliver({ fromCache = false } = {}) {
+      const listener = effects.listeners.filter(item => item.active).at(-1);
+      if (!listener) throw new Error("harness: no active listener");
+      const raw = mock.read(listener.ref.path);
+      listener.next({
+        metadata: { fromCache, hasPendingWrites: false },
+        exists: () => raw !== null && raw !== undefined,
+        data: () => clone(raw)
+      });
+    },
+    async wait(ms) { await new Promise(resolve => setTimeout(resolve, ms)); },
+    async settle({ timeoutMs = 3000 } = {}) {
+      const started = Date.now();
+      for (;;) {
+        await new Promise(resolve => setTimeout(resolve, 0));
+        if (!page.saving && !page.pending) {
+          await new Promise(resolve => setTimeout(resolve, 0));
+          if (!page.saving && !page.pending) return;
+        }
+        if (Date.now() - started > timeoutMs) throw new Error("harness: save did not settle");
+      }
+    },
+    // Opens the real quick editor (new config, or editing an existing <tr>).
+    openEditor(row = null) { context.openConfigQuickEditor(row); },
+    editorOpen() { return !dom.elements.get("configQuickEditor").hidden; },
+    setMode(mode) { context.setConfigEditorMode(mode, true); },
+    // Picks parts in the editor like a user, then presses the save button.
+    build({ mode, ...parts } = {}) {
+      if (mode) api.setMode(mode);
+      for (const [type, value] of Object.entries(parts)) {
+        const set = api.select(type, value);
+        if (set !== value) throw new Error(`harness: ${type} option "${value}" is not offered`);
+        if (type === "上蓋") context.syncConfigModelFromSelection();
+        if (type === "軸心") context.updateNoRatchetConfigOption();
+      }
+    },
+    save() { return context.window.addConfig(); },
+    restoreHistory(row) { return context.window.restoreHistoryRow({ parentElement: { parentElement: row } }); },
+    rowCells
+  };
+  return api;
+}
+
+export function stockItem(model, layer, fix, axis, extra = {}) {
+  return { cells: [model, layer, "-", "-", "-", "-", "-", fix, axis], mainStockName: "-", ...extra };
+}
+
+export function configItem(cells, mainStockName = cells[3]) {
+  return { cells, mainStockName };
+}
