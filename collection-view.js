@@ -234,18 +234,19 @@ export function computeImpact(model, { remove = [], add = [], mode = "delete" } 
 
 const listConfigs = configs => `${configs.slice(0, 3).join("、")}${configs.length > 3 ? ` 等 ${configs.length} 個` : ""}`;
 
-export function formatImpactText(impact, { verb = "刪除後", oldName = "" } = {}) {
+export function formatImpactText(impact, { verb = "刪除後", oldName = "", formatName = name => name } = {}) {
   const lines = [];
+  const shown = name => formatName(String(name ?? ""));
   if (impact.shortages.length) {
     lines.push(`${verb}，下列零件會不夠配置使用：`);
-    impact.shortages.slice(0, 5).forEach(entry => lines.push(`・${entry.type} ${entry.name}：持有 ${entry.held}，配置引用 ${entry.ref}（${listConfigs(entry.configs)}）`));
+    impact.shortages.slice(0, 5).forEach(entry => lines.push(`・${entry.type} ${shown(entry.name)}：持有 ${entry.held}，配置引用 ${entry.ref}（${listConfigs(entry.configs)}）`));
     if (impact.shortages.length > 5) lines.push(`…等 ${impact.shortages.length} 個零件`);
   }
   if (impact.unmatched.length) {
-    lines.push(`改名後，下列配置仍使用舊名稱「${oldName}」，將找不到對應零件：`);
-    impact.unmatched.slice(0, 5).forEach(entry => lines.push(`・${entry.type} ${entry.name}：${listConfigs(entry.configs)}`));
+    lines.push(`改名後，下列配置仍使用舊名稱「${shown(oldName)}」，將找不到對應零件：`);
+    impact.unmatched.slice(0, 5).forEach(entry => lines.push(`・${entry.type} ${shown(entry.name)}：${listConfigs(entry.configs)}`));
   }
-  impact.alreadyShort.slice(0, 5).forEach(entry => lines.push(`${entry.type} ${entry.name} 原本就不夠配置使用（持有 ${entry.held}，配置引用 ${entry.ref}），變更後會更不足。`));
+  impact.alreadyShort.slice(0, 5).forEach(entry => lines.push(`${entry.type} ${shown(entry.name)} 原本就不夠配置使用（持有 ${entry.held}，配置引用 ${entry.ref}），變更後會更不足。`));
   if (!lines.length) return "";
   lines.push(impact.unmatched.length ? "配置不會自動改名。" : "配置不會被修改。");
   return `\n${lines.join("\n")}`;

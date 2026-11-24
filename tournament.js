@@ -2040,7 +2040,7 @@ function renderDeckHint(result) {
   } else if (!result.duplicates.length && result.slots.filter(slot => slot.status === "checked").length >= 2) {
     lines.push(`<p class="tp-hint-muted">已檢查的陀螺之間沒有重複零件；其他陀螺未檢查，不代表通過。</p>`);
   }
-  lines.push(`<p class="tp-hint-note">官方規則：三顆之間零件不可重複（紋章鎖只有戰神、帝王各限一個）。只提示，不阻擋儲存；依目前配置的零件判斷。</p>`);
+  lines.push(`<p class="tp-hint-note">參考官方大賽規則 B4 レギュレーション第 12 版（2026-03-13 施行）：三顆之間不可使用相同零件，紋章鎖只有戰神、帝王各限一個。本站只依目前配置中可辨識的零件與原始名稱比對（名稱不同的同一零件或顏色版本不會被判定為重複），不代表已確認所有官方賽制限制；實際比賽請依主辦方規則。只提示，不阻擋儲存。</p>`);
   return lines.join("");
 }
 

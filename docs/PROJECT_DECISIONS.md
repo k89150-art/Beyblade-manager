@@ -341,3 +341,11 @@
 - Q7 3on3 重複零件只提示：類別＋原始名稱、CX／抽包／一體式結構、紋章鎖只限戰神與帝王；自填、未選、多義顯示「未檢查」，不顯示通過；不回寫賽事紀錄。
 - 賽事端受保護基準：`tests/tournament-protection.test.mjs`（S1～S6、T1～T17、寫入計數 `runTransaction(` 1、`submitTournamentOperation(` 11、`createTournamentOperation(` 10、`setDoc`／`updateDoc`／`deleteDoc`／`onSnapshot` 0、「4B-1」文字）。
 - 發布時 `tournament.js?v=` 已改（`20261126-phase74c`），需依 D-017 H2 程序要求關閉所有舊分頁與 PWA。
+
+## D-025：Phase 7-FINAL 最後修正（v1.18.1）
+
+> 狀態：**本機修正完成**（2026-11-25；ChatGPT 核准範圍；驗收 `design/phase7/verification/phase7-final/README.md`）。發布 v1.18.1 後 Phase 7 技術結案，進入日常維護（`docs/MAINTENANCE_BACKLOG.md`）。
+
+- 只修顯示、導覽與確認文字：P2-1 只差空白的名稱以 ␣⇥⍽↵ 標示（零件清單卡、詳細、無對應引用、刪除確認、D1 提示）；P2-2 跨頁快捷入口在資料與寫入 Session 就緒後經既有入口執行一次（不用計時器，登出／換帳號／載入失敗／雜湊改變時丟棄）；P3-1「N 顆陀螺套組」；P3-2 使用者可見名稱統一為「拆解紀錄」；P3-3 回退時原始表格回到所屬區塊；P3-4 手機工具列標籤不換行；P3-5 sheet 與視窗開啟時導覽 inert、刪除原因視窗 Tab 限制；P3-7 3on3 提示註明 B4 第 12 版與比對範圍。
+- 受保護區段有限例外：`deleteRow` 確認文字（A-09 `0bc3c60c31499a7c → 5260d10ffd5ebdf3`）；`collection-sync.js` 顯示用表名（整檔 `d427877d1f126014 → 0cda868c6585949c`）。刪除目標、D1 計算、交易、衝突、Session 不變。其餘核准雜湊、賽事端 S1～S6／T1～T17、`tournament-sync.js` 不變。
+- 不處理：Rules 內容驗證、賽事文件 owner 欄位、CRLF、損壞型號、F-06、匯入器、F-05／F-08、修改對局未改動仍寫入、管理員 UID 重複（列入維護清單）。

@@ -278,7 +278,7 @@ try {
     const setRows = rowsOf("beybladeTable").filter(r => r.dataset.stockSetInstanceId === "BX-00-01-aaaa");
     await open(stockItem("BX-00", 1));
     panelButtons("stock", "delete")[0].click(); await settle();
-    check("K4-06 set delete removes both set rows via the existing confirm", "entry", setRows.every(r => !r.isConnected) && /雙陀螺套組/.test(lastConfirm()) && /歐比王肯諾比、葛里維斯將軍/.test(lastConfirm()) && counters.saveData === 2, lastConfirm());
+    check("K4-06 set delete removes both set rows via the existing confirm", "entry", setRows.every(r => !r.isConnected) && new RegExp(`是 ${setRows.length} 顆陀螺套組`).test(lastConfirm()) && setRows.length === 2 && /歐比王肯諾比、葛里維斯將軍/.test(lastConfirm()) && counters.saveData === 2, lastConfirm());
     api.refreshUi(); await settle();
     const ux01Row = rowsOf("beybladeTable").find(r => r.cells[0].innerText === "UX-01");
     await open(stockItem("UX-01"));
@@ -352,7 +352,7 @@ try {
     check("D1 cancel: data unchanged, no save", "entry", unchanged() && counters.confirms.length === 1);
     await open(stockItem("BX-00"));
     panelButtons("stock", "delete")[0].click(); await settle();
-    check("D1-2 set: no configuration uses the set parts, so the confirmation is unchanged", "entry", lastConfirm() === "「BX-00」是雙陀螺套組。確定要一起刪除「歐比王肯諾比、葛里維斯將軍」嗎？", lastConfirm());
+    check("D1-2 set: no configuration uses the set parts, so the confirmation is unchanged", "entry", lastConfirm() === "「BX-00」是 2 顆陀螺套組。確定要一起刪除「歐比王肯諾比、葛里維斯將軍」嗎？", lastConfirm());
     check("D1-2 cancel: unchanged, no save", "entry", unchanged());
     api.setCollectionTab("parts"); await settle();
     await open(partItem("軸心", "R"));

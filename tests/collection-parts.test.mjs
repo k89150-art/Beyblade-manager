@@ -305,7 +305,8 @@ test("D1: a failure while computing the hint returns no text instead of breaking
 
 test("D1 wiring: only the confirm() strings changed; the cancel path returns before any change", () => {
   const del = between("window.deleteRow = async function", "/* ====== 表格內修改功能");
-  assert.match(del, /const ok = confirm\(`「\$\{setCode\}」是雙陀螺套組。確定要一起刪除「\$\{names\}」嗎？` \+ \(typeof getStockDeleteImpactText === "function" \? getStockDeleteImpactText\(setRows, "整組刪除後"\) : ""\)\);\n      if \(!ok\) return;\n\n      setRows\.forEach\(candidate => candidate\.remove\(\)\);/);
+  // Phase 7-FINAL (P3-1): the set confirm says how many beys the set has.
+  assert.match(del, /const ok = confirm\(`「\$\{setCode\}」是 \$\{setRows\.length\} 顆陀螺套組。確定要一起刪除「\$\{names\}」嗎？` \+ \(typeof getStockDeleteImpactText === "function" \? getStockDeleteImpactText\(setRows, "整組刪除後"\) : ""\)\);\n      if \(!ok\) return;\n\n      setRows\.forEach\(candidate => candidate\.remove\(\)\);/);
   assert.match(del, /const ok = confirm\(`確定要刪除「\$\{deleteName\}」嗎？` \+ \(typeof getStockDeleteImpactText === "function" \? getStockDeleteImpactText\(\[row\]\) : ""\)\);\n    if \(!ok\) return;/);
   assert.match(del, /const ok = confirm\(`確定要刪除「\$\{deleteName\}」嗎？` \+ \(typeof getPartDeleteImpactText === "function" \? getPartDeleteImpactText\(row\) : ""\)\);\n    if \(!ok\) return;/);
   assert.match(del, /if \(!dataSessionGuard\.isWriteSessionCurrent\(operationSession\) \|\| !row\.isConnected\) return;\n  row\.remove\(\);/);

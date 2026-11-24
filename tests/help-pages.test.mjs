@@ -65,7 +65,7 @@ test("使用教學符合目前正式操作", () => {
   assert.match(guide, /先點選配置，再按詳細面板中的「修改」（開啟建立配置面板）或「拆解」/);
   assert.match(guide, /「我的配置」與「拆解紀錄」兩個分頁/);
   assert.doesNotMatch(guide, /按卡片右側「⋯」才會顯示「修改」與「刪除」/);
-  assert.match(guide, /原裝收藏、額外零件庫存、自訂配置、歷史測試與參賽紀錄會儲存在自己的帳號/);
+  assert.match(guide, /原裝收藏、額外零件庫存、自訂配置、拆解紀錄與參賽紀錄會儲存在自己的帳號/);
   assert.match(guide, /手機底部導覽為「收藏／配置／＋新增／賽事／更多」/);
   assert.match(guide, /競賽統計、說明頁與主題設定在「更多」/);
   assert.match(guide, /深色與米色主題，可在左側選單底部切換；選擇後會在同一瀏覽器保存/);

@@ -215,6 +215,8 @@ function updateDataAccessUi() {
 
   const retryButton = document.getElementById("retryDataLoadBtn");
   if (retryButton) retryButton.hidden = session.state !== DATA_SESSION_STATES.ERROR || !currentUser;
+  // Phase 7-FINAL (P2-2): a quick entry from another page runs once the data is ready.
+  if (typeof runPendingQuickEntry === "function") runPendingQuickEntry();
   renderCollectionSyncNotice();
   if (typeof scheduleCollectionViewRender === "function") scheduleCollectionViewRender();
 }
@@ -1045,14 +1047,14 @@ window.restoreHistoryRow = function (button) {
   const comboKey = historyRow.dataset.comboKey || "";
 
   if (!comboKey) {
-    alert("這筆歷史紀錄缺少組合資料，無法還原。");
+    alert("這筆拆解紀錄缺少組合資料，無法還原。");
     return;
   }
 
   const parts = comboKey.split("|");
 
   if (parts.length < 8) {
-    alert("這筆歷史紀錄格式不完整，無法還原。");
+    alert("這筆拆解紀錄格式不完整，無法還原。");
     return;
   }
 
@@ -1067,12 +1069,12 @@ window.restoreHistoryRow = function (button) {
   const axis = parts[7] || "-";
 
   if (!model) {
-    alert("這筆歷史紀錄缺少型號，無法還原。");
+    alert("這筆拆解紀錄缺少型號，無法還原。");
     return;
   }
 
   const ok = confirm(
-    "確定要把這筆歷史紀錄還原到配置紀錄區嗎？\n\n" +
+    "確定要把這筆拆解紀錄還原到我的配置嗎？\n\n" +
     "型號：" + model + "\n" +
     "組合：" + (historyRow.cells[1]?.innerText.trim() || "-") + "\n" +
     "固鎖：" + fix + "\n" +
@@ -1128,7 +1130,7 @@ window.restoreHistoryRow = function (button) {
 window.deleteHistoryRow = function (button) {
   if (!requireLogin()) return;
 
-  const ok = confirm("確定要刪除這筆歷史測試紀錄嗎？");
+  const ok = confirm("確定要刪除這筆拆解紀錄嗎？");
 
   if (!ok) return;
 
@@ -1149,20 +1151,22 @@ window.deleteRow = async function (button) {
   const tableId = table ? table.id : "";
 
   let deleteName = "這筆資料";
+  // Phase 7-FINAL: names in the confirm texts mark whitespace (display only).
+  const shownName = cell => (typeof displayStoredName === "function" ? displayStoredName(cell) : cell?.innerText.trim() || "");
 
   if (tableId === "beybladeTable") {
     const model = row.cells[0]?.innerText.trim() || "";
-    const layer = row.cells[1]?.innerText.trim() || "";
+    const layer = shownName(row.cells[1]);
 
     if (row.dataset.stockSetInstanceId) {
       const setRows = Array.from(document.querySelectorAll("#beybladeTable tbody tr"))
         .filter(candidate => candidate.dataset.stockSetInstanceId === row.dataset.stockSetInstanceId);
       const setCode = row.dataset.stockProductCode || row.dataset.stockSetId || model;
       const names = setRows
-        .map(candidate => candidate.cells[1]?.innerText.trim() || candidate.cells[0]?.innerText.trim() || "")
+        .map(candidate => shownName(candidate.cells[1]) || candidate.cells[0]?.innerText.trim() || "")
         .filter(Boolean)
         .join("、");
-      const ok = confirm(`「${setCode}」是雙陀螺套組。確定要一起刪除「${names}」嗎？` + (typeof getStockDeleteImpactText === "function" ? getStockDeleteImpactText(setRows, "整組刪除後") : ""));
+      const ok = confirm(`「${setCode}」是 ${setRows.length} 顆陀螺套組。確定要一起刪除「${names}」嗎？` + (typeof getStockDeleteImpactText === "function" ? getStockDeleteImpactText(setRows, "整組刪除後") : ""));
       if (!ok) return;
 
       setRows.forEach(candidate => candidate.remove());
@@ -1179,7 +1183,7 @@ window.deleteRow = async function (button) {
 
   else if (tableId === "partTable") {
     const type = row.cells[0]?.innerText.trim() || "";
-    const name = row.cells[1]?.innerText.trim() || "";
+    const name = shownName(row.cells[1]);
     const count = row.cells[2]?.innerText.trim() || "";
     if (type || name) deleteName = `${type}：${name}，數量 ${count}`;
     const ok = confirm(`確定要刪除「${deleteName}」嗎？` + (typeof getPartDeleteImpactText === "function" ? getPartDeleteImpactText(row) : ""));
@@ -3829,6 +3833,11 @@ function installUiSummaryObservers() {
 }
 
 /* ===== Phase 7-2a collection view (R2): begin ===== */
+// Phase 7-FINAL (P2-1): part names shown with whitespace marks (display only;
+// the stored name, stock key and search text stay exact).
+function displayPartName(name) {
+  return typeof formatPartNameForMenu === "function" ? formatPartNameForMenu(name) : String(name ?? "");
+}
 // The original #beybladeTable / #partTable rows stay the only stored data
 // source: getTableData(), collectCurrentData() and the D-018 saves are not
 // changed. This layer only reads those rows and draws its own lists outside
@@ -4015,7 +4024,7 @@ function renderPartViewItem(item, selected = false) {
   const editing = item.extraRows.some(row => row.editing);
   const extraCount = item.extraRows.length > 1 ? `<span class="cv-tag">額外 ${item.extraRows.length} 筆</span>` : "";
   return `<article class="cv-item cv-part-item${editing ? " is-editing" : ""}${over ? " is-over" : ""}${selected ? " is-selected" : ""}" data-inventory-tone="${escapeHtml(getInventoryTypeTone(item.type))}" ${selectableItemAttributes("parts", item.key, selected, `${item.type} ${item.name}`.trim())}>
-    <div class="cv-head"><span class="cv-type">${escapeHtml(item.type)}</span><strong class="cv-title">${escapeHtml(item.name)}</strong>${extraCount}</div>
+    <div class="cv-head"><span class="cv-type">${escapeHtml(item.type)}</span><strong class="cv-title">${escapeHtml(displayPartName(item.name))}</strong>${extraCount}</div>
     ${renderPartNumbers(item)}
   </article>`;
 }
@@ -4061,7 +4070,7 @@ function renderPartDetail(item) {
   const extras = item.extraRows.length
     ? `<section class="cv-detail-box"><h4>額外持有（${item.extraRows.length} 筆資料）</h4><ul class="cv-extra-rows">${item.extraRows.map((row, index) => renderExtraRowLine(row, index, item.extraRows.length, escapeHtml(label))).join("")}</ul></section>`
     : '<p class="cv-detail-hint">沒有額外持有可修改或刪除。</p>';
-  return `<div class="cv-detail-head"><span class="cv-type">${escapeHtml(item.type)}</span><h3 class="cv-detail-title">${escapeHtml(item.name)}</h3></div>
+  return `<div class="cv-detail-head"><span class="cv-type">${escapeHtml(item.type)}</span><h3 class="cv-detail-title">${escapeHtml(displayPartName(item.name))}</h3></div>
     ${renderPartNumbers(item)}
     ${over}
     <section class="cv-detail-box"><h4>引用這個零件的配置（${item.configs.length}）</h4>${listConfigNames(item.configs)}</section>
@@ -4155,7 +4164,7 @@ function writeCollectionDetail(kind, html, { open }) {
 
 function renderUnmatchedReferences(orphans) {
   if (!orphans.length) return "";
-  const lines = orphans.map(entry => `<li>${escapeHtml(entry.type)}「${escapeHtml(entry.name)}」：被 ${entry.ref} 個配置引用（${escapeHtml(entry.configs.slice(0, 3).join("、"))}${entry.configs.length > 3 ? ` 等 ${entry.configs.length} 個` : ""}），但目前沒有持有這個名稱。</li>`).join("");
+  const lines = orphans.map(entry => `<li>${escapeHtml(entry.type)}「${escapeHtml(displayPartName(entry.name))}」：被 ${entry.ref} 個配置引用（${escapeHtml(entry.configs.slice(0, 3).join("、"))}${entry.configs.length > 3 ? ` 等 ${entry.configs.length} 個` : ""}），但目前沒有持有這個名稱。</li>`).join("");
   return `<section class="cv-unmatched" aria-label="無對應的配置引用"><h3>無對應的配置引用（${orphans.length}）</h3><ul>${lines}</ul><p>可能是零件改名或刪除造成；只提示，配置不會被修改。</p></section>`;
 }
 
@@ -4458,6 +4467,8 @@ function failCollectionView(error) {
   try {
     document.body.classList.add("collection-view-failed");
     ["beybladeSourceBox", "partSourceBox"].forEach(id => setSourceBoxHidden(document.getElementById(id), false));
+    // Phase 7-FINAL (P3-3): each original table goes back under its own section.
+    if (typeof placeFallbackSourceTables === "function") placeFallbackSourceTables([["beybladeSourceBox", "collectionSection"], ["partSourceBox", "inventorySection"]]);
     ["collectionSection", "inventorySection", "collectionAddBody", "inventoryAddBody"].forEach(id => {
       const element = document.getElementById(id);
       if (element) element.hidden = false;
@@ -4694,14 +4705,14 @@ function impactTextOrEmpty(build) {
 function getStockDeleteImpactText(rows, verb = "刪除後") {
   return impactTextOrEmpty(() => formatImpactText(
     computeImpact(computeCollectionPartsModel(), { remove: rows.map(collectionRowPartCounts), mode: "delete" }),
-    { verb }
+    { verb, formatName: typeof displayPartName === "function" ? displayPartName : undefined }
   ));
 }
 
 function getPartDeleteImpactText(row) {
   return impactTextOrEmpty(() => formatImpactText(
     computeImpact(computeCollectionPartsModel(), { remove: [extraPartCountsFromCells(getPersistedRowCells(row))], mode: "delete" }),
-    { verb: "刪除後" }
+    { verb: "刪除後", formatName: typeof displayPartName === "function" ? displayPartName : undefined }
   ));
 }
 
@@ -4717,7 +4728,7 @@ function getPartEditImpactText(button) {
     const remove = [extraPartCountsFromCells(oldCells)];
     const add = [extraPartCountsFromCells([type, name, String(count)])];
     if (type !== oldCells[0] || name !== oldCells[1]) {
-      return formatImpactText(computeImpact(computeCollectionPartsModel(), { remove, add, mode: "rename" }), { verb: "變更後", oldName: oldCells[1] });
+      return formatImpactText(computeImpact(computeCollectionPartsModel(), { remove, add, mode: "rename" }), { verb: "變更後", oldName: oldCells[1], formatName: typeof displayPartName === "function" ? displayPartName : undefined });
     }
     if (count < Number(oldCells[2] || 0)) {
       return formatImpactText(computeImpact(computeCollectionPartsModel(), { remove, add, mode: "reduce" }), { verb: "數量減少後" });
@@ -5172,6 +5183,8 @@ function failConfigView(error) {
   try {
     document.body.classList.add("config-view-failed");
     CONFIG_SOURCE_BOX_IDS.forEach(id => setSourceBoxHidden(document.getElementById(id), false));
+    // Phase 7-FINAL (P3-3): each original table goes back under its own section.
+    if (typeof placeFallbackSourceTables === "function") placeFallbackSourceTables([["configSourceBox", "configSection"], ["historySourceBox", "historySection"]]);
     Object.values(CONFIG_VIEW_TABS).forEach(config => {
       const section = document.getElementById(config.section);
       if (section) section.hidden = false;
@@ -5585,6 +5598,146 @@ function createConfigFromStockRow(row, key = "") {
   return opened;
 }
 /* ===== Phase 7-3d quick create: end ===== */
+
+/* ===== Phase 7-FINAL usability fixes: start =====
+   Display and navigation only: nothing here writes, reads stored data for
+   saving, or changes a save, identity or session rule. */
+
+// P2-1: a stored cell value shown with whitespace marks (confirm texts).
+function displayStoredName(cell) {
+  if (!cell) return "";
+  const raw = readStoredCellText(cell);
+  if (!raw.trim()) return "";
+  return formatPartNameForMenu(raw);
+}
+
+// P3-3: when a display layer falls back, each original table box (the same
+// node, with its rows untouched) moves under its own section. Layout only.
+function placeFallbackSourceTables(pairs) {
+  pairs.forEach(([boxId, sectionId]) => {
+    const box = document.getElementById(boxId);
+    const section = document.getElementById(sectionId);
+    if (box && section && box.parentElement !== section) section.appendChild(box);
+  });
+}
+
+// P2-2: quick entries reached from another page (#add-collection, #add-part,
+// #configQuickEditor) run once this account's data is loaded and writable,
+// through the existing entry points (applyCollectionHash /
+// openConfigQuickEditor). A pending entry belongs to the account it was
+// opened for: a sign-out, an account switch or a failed load drops it, so it
+// never carries over. No timers: it runs from updateDataAccessUi.
+// The state lives on the function (no top-level const), so a call during
+// module evaluation can never hit an uninitialized binding.
+function quickEntryState() {
+  if (!quickEntryState.state) quickEntryState.state = { hash: "", uid: undefined, authSeen: false };
+  return quickEntryState.state;
+}
+const QUICK_ENTRY_HASHES = Object.freeze(["#add-collection", "#add-part", "#configQuickEditor"]);
+
+function rememberQuickEntry(hash) {
+  if (!QUICK_ENTRY_HASHES.includes(hash)) {
+    quickEntryState().hash = "";
+    return;
+  }
+  quickEntryState().hash = hash;
+  quickEntryState().uid = quickEntryState().authSeen ? currentUser?.uid || null : undefined;
+  runPendingQuickEntry();
+}
+
+function runPendingQuickEntry() {
+  const pending = quickEntryState();
+  const hash = pending.hash;
+  if (!hash) return;
+  if (location.hash !== hash) {
+    quickEntryState().hash = "";
+    return;
+  }
+  const session = dataSessionGuard.snapshot();
+  if (session.state === DATA_SESSION_STATES.ERROR) {
+    quickEntryState().hash = "";
+    return;
+  }
+  if (!currentUser || (quickEntryState().uid !== undefined && quickEntryState().uid !== currentUser.uid)) return;
+  if (!dataSessionGuard.captureWriteSession()) return;
+  quickEntryState().hash = "";
+  if (hash === "#configQuickEditor") {
+    if (document.getElementById("configQuickEditor")?.hidden) openConfigQuickEditor();
+  } else if (typeof applyCollectionHash === "function") {
+    applyCollectionHash(hash, { scroll: false });
+  }
+}
+
+function installQuickEntries() {
+  onAuthStateChanged(auth, user => {
+    // First answer: an entry opened while signed out is dropped (it does not
+    // wait for a later sign-in); a later change (sign-out, switch) drops it too.
+    if (!quickEntryState().authSeen) {
+      quickEntryState().authSeen = true;
+      if (!user) quickEntryState().hash = "";
+      else if (quickEntryState().uid === undefined) quickEntryState().uid = user.uid;
+      return;
+    }
+    quickEntryState().hash = "";
+  });
+  window.addEventListener("hashchange", () => rememberQuickEntry(location.hash));
+  rememberQuickEntry(location.hash);
+}
+
+// P3-5: while a phone detail sheet, the delete-reason dialog, the quick
+// editor or the stock choice dialog is open, the site menu, the bottom
+// navigation and the quick-add menu are inert (no pointer or keyboard).
+// Recomputed from what is actually open on every change, so nothing stays
+// blocked. The page content itself is never made inert (focus returns there
+// when a dialog closes); the delete-reason dialog keeps Tab inside itself.
+function isShown(element) {
+  return Boolean(element) && !element.hidden && element.style.display !== "none" && element.getClientRects().length > 0;
+}
+
+function syncBackgroundInert() {
+  const sheetOpen = Boolean(document.querySelector(".cv-detail.is-sheet.is-open"));
+  const dialogOpen = isShown(document.getElementById("deleteConfigModal"))
+    || isShown(document.getElementById("configQuickEditor"))
+    || isShown(document.getElementById("stockChoiceDialog"));
+  const navInert = sheetOpen || dialogOpen;
+  document.querySelectorAll(".side-menu-button, .side-menu, .side-menu-backdrop, .bottom-nav, .quick-add-menu, .quick-add-backdrop").forEach(element => {
+    element.toggleAttribute("inert", navInert);
+  });
+  document.body.classList.toggle("ui-modal-open", navInert);
+}
+
+function trapDeleteReasonFocus(event) {
+  if (event.key !== "Tab") return;
+  const modal = document.getElementById("deleteConfigModal");
+  if (!isShown(modal)) return;
+  const box = document.getElementById("deleteConfigModalBox") || modal;
+  const focusables = Array.from(box.querySelectorAll("button, input, select, textarea")).filter(element => !element.disabled && element.getClientRects().length > 0);
+  if (!focusables.length) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (!box.contains(document.activeElement)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  } else if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function installBackgroundInert() {
+  document.addEventListener("keydown", trapDeleteReasonFocus);
+  const observer = new MutationObserver(() => syncBackgroundInert());
+  ["deleteConfigModal", "configQuickEditor", "stockChoiceDialog"].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) observer.observe(element, { attributes: true, attributeFilter: ["hidden", "style"] });
+  });
+  document.querySelectorAll(".cv-detail").forEach(element => observer.observe(element, { attributes: true, attributeFilter: ["class", "hidden"] }));
+  syncBackgroundInert();
+}
+/* ===== Phase 7-FINAL usability fixes: end ===== */
 
 function updateNoRatchetConfigOption() {
   const modelInput = document.getElementById("confModel");
@@ -6278,9 +6431,9 @@ document.addEventListener("DOMContentLoaded", function () {
     openConfigEditorBtn.addEventListener("click", () => openConfigQuickEditor());
   }
 
-  if (location.hash === "#configQuickEditor") {
-    openConfigQuickEditor();
-  }
+  // Phase 7-FINAL (P2-2): #configQuickEditor (and #add-collection / #add-part)
+  // from another page wait for this account's data (installQuickEntries).
+  installQuickEntries();
 
   [closeConfigEditorBtn, cancelConfigEditorBtn, configEditorBackdrop].forEach(button => {
     if (button) button.addEventListener("click", closeConfigQuickEditor);
@@ -6333,6 +6486,7 @@ document.addEventListener("DOMContentLoaded", function () {
   refreshSelectors();
   installCollectionView();
   installConfigView();
+  installBackgroundInert();
   installUiSummaryObservers();
   setSyncStatus("請先使用 Google 登入", "muted");
 

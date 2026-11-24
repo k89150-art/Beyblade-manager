@@ -19,7 +19,7 @@ export const COLLECTION_TABLE_LABELS = Object.freeze({
   beybladeTable: "我的陀螺收藏",
   partTable: "額外零件庫存",
   configTable: "配置紀錄",
-  historyTable: "歷史測試紀錄"
+  historyTable: "拆解紀錄"
 });
 
 export const COLLECTION_SYNC_STATES = Object.freeze({

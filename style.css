@@ -4564,3 +4564,16 @@ html[data-theme="beige"] .cv-detail-warn {
     display: none;
   }
 }
+
+/* ===== Phase 7-FINAL: toolbar labels (P3-4) and modal background (P3-5) ===== */
+/* The label keeps its width; the select takes the rest (no wrapping, no overflow). */
+.cv-select > span {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* While a sheet or dialog is open the navigation is inert; show it as unavailable. */
+body.ui-modal-open .side-menu-button,
+body.ui-modal-open .bottom-nav {
+  pointer-events: none;
+}

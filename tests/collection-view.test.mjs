@@ -240,7 +240,13 @@ test("A-09: D-018, D-015, F-04 capture and table reads are byte-for-byte unchang
     // Phase 7-2b (D1, approved): only the confirm() strings gained a read-only hint
     // (3 lines in deleteRow, 1 line in saveEditRow); see tests/collection-parts.test.mjs.
     // Previous hashes (50169d7..6f3f2b5): b2d3025d2f9d948b, e3d6abe8c11d47eb.
-    ["window.deleteRow = async function", "/* ====== 表格內修改功能", "0bc3c60c31499a7c"],
+    // Phase 7-FINAL (approved text exception, P2-1 / P3-1): only the confirm
+    // texts changed — names are shown with whitespace marks (shownName →
+    // displayStoredName) and a set says how many beys it has
+    // (setRows.length) instead of 「雙陀螺套組」. Targets (setRows, row), the D1
+    // calls and the delete flow are unchanged. Previous hash (6f3f2b5..ae189eb):
+    // 0bc3c60c31499a7c. Covered by tests/final-fixes.test.mjs.
+    ["window.deleteRow = async function", "/* ====== 表格內修改功能", "5260d10ffd5ebdf3"],
     // Phase 7-DC follow-up (D-023, approved exception): editRow records the
     // stored values (readStoredCellText, no trim) and the editor's initial
     // control values; saveEditRow keeps untouched fields as stored and applies

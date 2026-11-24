@@ -5,7 +5,7 @@
 ## 協調狀態
 
 - 目前執行者：Claude Code（v1.18.0 發布與 Phase 7-FINAL 最終驗收；最終驗收只做驗收、隔離環境測試、文件與問題分類）
-- 寫入範圍：v1.18.0 發布（版本、快取、更新紀錄、使用教學、版本測試、交接）；Phase 7-FINAL 只寫 `design/phase7/14-final-acceptance-report.md` 與交接文件
+- 寫入範圍：P2-1、P2-2、P3-1～P3-5、P3-7 顯示／導覽／確認文字修正；v1.18.1 發布；結案文件
 - 正式版本：`f86490c`（v1.18.0，`origin/main`，GitHub Pages deployment `8039918758` success）。本機另有 v1.18.0 部署結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
@@ -33,6 +33,16 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-25 — Claude Code（Phase 7-FINAL 最後修正，本機 commit）
+
+- 任務：ChatGPT 核准的有限修正 P2-1、P2-2、P3-1、P3-2、P3-3、P3-4、P3-5、P3-7（顯示、導覽、確認文字）。驗收 `design/phase7/verification/phase7-final/README.md`；報告 §9；維護清單 `docs/MAINTENANCE_BACKLOG.md`；決策 D-025。
+- 受保護例外：`deleteRow` 確認文字 `0bc3c60c31499a7c → 5260d10ffd5ebdf3`；`collection-sync.js` 顯示表名（整檔 `d427877d1f126014 → 0cda868c6585949c`）。Phase 7-2 回歸 `frame.html` 兩項檢查的預期文字由「雙陀螺套組」改為「N 顆陀螺套組」（K4-06 另檢查 N 等於實際刪除的 2 列）。
+- 測試：
+  - Node 23 檔 499/499（新增 `tests/final-fixes.test.mjs` F-01～F-07）；Phase 7-2 回歸 505/505；M01～M16 16/16；H2 E01～E16 16/16；108 組版面矩陣溢出 0；validate、build、`git diff --check` PASS。
+  - 收藏端 `saveData(` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0；賽事端 `runTransaction(` 1、`submitTournamentOperation(` 11、其餘 0；T16 `0b152288040815c0`；`tournament-sync.js` 不變；Rules、型錄、競賽統計不變。
+  - Emulator 真實頁面：快捷入口（跨頁、未登入、載入前改雜湊、同頁重複點擊、不重複開啟、0 次寫入）；相似名稱刪除目標正確；三顆套組；取消 0 次寫入；☰ 實際點擊在 sheet 與刪除原因視窗開啟時無效；Tab 限制；回退順序與操作；登出／換帳號恢復。
+- Commit：`fix(ui): resolve phase 7 final usability issues`；未升版、未 push。
 
 ### 2026-11-25 — Claude Code（Phase 7-FINAL 全站最終驗收，未 commit）
 
