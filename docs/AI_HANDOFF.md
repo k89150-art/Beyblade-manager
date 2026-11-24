@@ -34,6 +34,21 @@
 
 ## 最新紀錄
 
+### 2026-11-25 — Claude Code（Phase 7-FINAL 全站最終驗收，未 commit）
+
+- 產出：`design/phase7/14-final-acceptance-report.md`。只做驗收、Emulator 隔離測試、文件與問題分類；未修改功能程式、Rules、Schema、正式資料、型錄、競賽統計。
+- 新增驗證：
+  - Emulator 大量資料：收藏 300、零件 200、配置 300、紀錄 100、賽事 40×6×5；主頁登入到顯示約 0.9 秒，互動 60～270 ms，記錄回合約 0.8 秒；
+  - 9 頁／分頁 × 375／390／820／821／1024／1440 × 深色／米色共 108 組無溢出；
+  - hash 導覽 7 項；
+  - 權限與備份工具稽核：Rules 只允許本人寫入、管理員只讀、無直接還原路徑、寫入點與預期一致、`backup-tool.test.mjs` 9/9、無機密。
+- 結果：P0、P1 無。
+  - P2：只差空白名稱的顯示、跨頁快捷入口在主頁載入時不聚焦或不開組裝器、Rules 不驗證內容；
+  - P3：「雙陀螺套組」、「歷史測試紀錄」、回退順序、手機工具列換行、☰ 在 sheet 與刪除原因視窗之上、賽事頁首次建立無 owner 欄位、3on3 提示範圍；
+  - Deferred：CRLF、損壞型號、F-06、匯入器固定值、F-05／F-08、修改對局未改動仍寫入、管理員 UID 重複。
+- 需使用者實機：正式 Google 登入、iPhone Safari、iOS PWA（清單見報告 §6）。
+- Git：報告與本筆紀錄未 commit（本輪未授權 commit）；HEAD `ae189eb` 領先 origin 1，未 push。交 ChatGPT 決定最後收尾修正與 Phase 7 結案。
+
 ### 2026-11-25 — Claude Code（v1.18.0 正式部署與唯讀驗收，Phase 7-4 結案）
 
 - 發布前驗收（release 樹）：Node 22 檔 492/492；Phase 7-2 整合回歸 505/505；M01～M16 PASS 16／FAIL 0；H2 E01～E16 PASS 16／FAIL 0；validate PASS；build PASS（37 files）；`git diff --check` PASS。`tournament-sync.js` 逐位元組不變；T16 `0b152288040815c0`（前段 `7cbde7b9cc28e9e2`、後段 `7a5b363512fea2f9`）；賽事端 `runTransaction(` 1、`submitTournamentOperation(` 11、`setDoc`／`updateDoc`／`deleteDoc`／`onSnapshot` 0；收藏端六段核准雜湊與 `saveData(` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0 不變；變更內容不含金鑰、UID、Email 或 Token。
