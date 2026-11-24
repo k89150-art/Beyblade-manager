@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（Phase 7-DC 追加修正已本機 commit；接著 v1.14.2 發布，之後 Phase 7-3b 本機實作）
-- 寫入範圍：目前沒有進行中的寫入任務
-- 正式版本：`f4d2546`（v1.14.1，`origin/main`，GitHub Pages deployment `8024719101` success）。本機另有 v1.14.1 結案 commit `21a9318` 與 Phase 7-DC 修正 commit，皆未 push。
+- 目前執行者：Claude Code（Phase 7-3b 本機實作，不 commit；完成後交 ChatGPT 複審）
+- 寫入範圍：Phase 7-3b 配置顯示層（`config-view.js`、`script.js` 顯示層區塊、`index.html`、`style.css`、測試）
+- 正式版本：`4b791da`（v1.14.2，`origin/main`，GitHub Pages deployment `8033980752` success）。本機另有 v1.14.2 部署結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -34,11 +34,20 @@
 
 ## 最新紀錄
 
+### 2026-11-25 — Claude Code（v1.14.2 正式部署與唯讀驗收）
+
+- 發布前驗收：Node 17 檔 425/425；Phase 7-2 整合回歸 505/505（release 樹再跑一次）；M01～M16 PASS 16／FAIL 0；validate PASS；build PASS（35 files）；`git diff --check` PASS；A-09 雜湊：`getTableData` 段 `02f67bb21e597b3e`、`applyDataToTables` 段 `08c1de72b2266fec`、`editRow`→`rebuildRow` `3ec54b27ec414e19`、`getStockNameFromCell`→`escapeHtml` `c1230e4d43e39ba2`（皆為核准的新雜湊），其餘 6 段不變；`addConfig` 儲存格寫入 `da046a3d56a07519`、`checkStock` `0bed51c10a056c87`；`saveData()` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0。
+- 正式備份（部署前，使用者以管理員帳號操作既有工具，只讀取）：`C:BeybladeBackupseyblade-appData-backup-20261125-002614.json`，40,317 bytes，建立時間 2026-11-24T16:26:14.896Z，來源 `k89150-web-login`，2 份文件（summary 2），檔案 SHA-256 `bec5122c2c29c2260dc4577787e0402833c9e555476a87142594e55de14e38c5`，文件整體 SHA-256 `4a602c7d98721c05e93d99d760dcf9c7ae67ddcb0750bdddca9576bd765524b8`（與前幾份相同，正式資料未變）；`verify-backup.mjs` PASS。未還原、未匯入、未寫入；工具伺服器已關閉。（使用者第一次回覆「不須備份」，因核准條件規定不得略過而再次確認，使用者隨即提供上述新備份。）
+- 部署前：使用者確認所有裝置舊分頁與 PWA 已關閉並授權部署；`origin/main` 仍為 `f4d2546`、可 fast-forward。Push `f4d2546..4b791da`（`21a9318`、`776efa0`、`0e43f0a`、`4b791da`），無 force push。Pages workflow run `45437243154` success，deployment `8033980752` success。
+- 正式網站唯讀驗收（未登入）：11 頁 `site-menu.js?v=20261124-v1142`、`index.html` 載入 `script.js?v=20261124-phase7dc`；`site-menu.js`、`script.js`、`collection-sync.js`、`assembly-rules.js`、`collection-view.js`、`changelog.html`、`guide.html`、`index.html` 與 `4b791da` 一致；7 頁在 1280 與 375 寬度版本 v1.14.2、無水平溢出；更新紀錄最新「v1.14.2｜資料一致性修正」、歷史版本 v1.2.0～v1.14.1；index、changelog、tournament Console Error 0。
+- 尚未驗證（正式網站）：登入後的配置、零件編輯、選單等實際操作（不建立正式測試資料；已於 Emulator 真實頁面驗證）；Safari／iOS、正式 `signInWithPopup`。
+- 正式 Firestore：只有備份讀取；部署與驗收沒有任何寫入；Rules、Schema 未修改；未修復正式資料中已損壞的 1 筆型號。
+
 ### 2026-11-24 — Claude Code（v1.14.2 發布準備：資料一致性修正）
 
 - 任務：Phase 7-DC（`776efa0`）與追加修正（`0e43f0a`）全部驗收通過後，依核准流程準備 v1.14.2。
 - 主要內容：`SITE_VERSION` v1.14.2（`site-menu.js` 只改常數），11 頁 `site-menu.js` 快取 `20261124-v1142`（`script.js` 快取 `20261124-phase7dc` 未曾部署，沿用）；更新紀錄新增 v1.14.2（新增／還原配置只儲存一次、排序不再連帶儲存不相關資料、保留多段與自訂型號原始內容且不自動修復已損壞型號、特殊空白與顯示狀態的資料一致性、零件依類別＋完整名稱計算並在選單標出空白），v1.14.1 移入歷史版本；使用教學加入零件名稱比對與選單空白標記說明。版本測試同步。功能程式未修改。
-- 測試：見下方部署紀錄。
+- 測試：見上方部署紀錄。Release commit `4b791da`。
 
 ### 2026-11-24 — Claude Code（Phase 7-DC 追加修正：編輯流程與庫存名稱身分）
 

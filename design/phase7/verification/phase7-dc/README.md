@@ -115,7 +115,7 @@ A-09 其餘 8 段（D-018 儲存、D-015 三段、`getStockNameFromCell`…`esca
 
 ### 回歸
 
-Node 425/425；M01～M16 PASS 16／FAIL 0；Phase 7-2 回歸見下；validate、build、`git diff --check` 見 AI_HANDOFF。
+Node 425/425；M01～M16 PASS 16／FAIL 0；Phase 7-2 整合回歸 505/505（修正後與 release 後各跑一次）；validate PASS；build PASS（35 files）；`git diff --check` PASS；`saveData()` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0。
 
 ### 受保護雜湊（追加）
 

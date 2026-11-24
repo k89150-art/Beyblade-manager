@@ -1,6 +1,6 @@
 # 12｜Phase 7-DC：資料一致性修正（實作規格）
 
-狀態：**已實作並驗收，本機 commit，未部署**（2026-11-24，ChatGPT 核准建立規格後直接實作；預計 v1.14.2，發布另行授權）。Phase 7-3b 的前置階段。決策紀錄：`docs/PROJECT_DECISIONS.md` D-023。
+狀態：**已隨 v1.14.2 部署**（2026-11-25；修正 commit `776efa0`、追加修正 `0e43f0a`、release `4b791da`，GitHub Pages deployment `8033980752`）。Phase 7-3b 的前置階段。決策紀錄：`docs/PROJECT_DECISIONS.md` D-023。
 
 ## 1. 範圍與原則
 

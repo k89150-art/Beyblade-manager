@@ -315,7 +315,7 @@
 
 ## D-023：資料一致性（Phase 7-DC）
 
-> 狀態：**已實作、本機 commit，未部署**（2026-11-24，ChatGPT 核准；預計 v1.14.2）。規格：`design/phase7/12-data-consistency-spec.md`；驗收：`design/phase7/verification/phase7-dc/README.md`。
+> 狀態：**已隨 v1.14.2 部署**（2026-11-25；`776efa0`、`0e43f0a`，release `4b791da`，deployment `8033980752`）。規格：`design/phase7/12-data-consistency-spec.md`；驗收：`design/phase7/verification/phase7-dc/README.md`。
 
 - 原始表格仍是儲存來源；修正的是「顯示用的處理不得改變權威資料或 D-018 基準」。D-018 的判定（逐表指紋、順序差異即變更、交易內衝突）不變，不忽略差異、不重設基準、不放寬衝突。
 - 排序（A／B）：配置表比照收藏表，在 `applyDataToTables`（D-018 取基準前）與 `collectCurrentData` 內同步排序；移除載入後 80 ms 的延遲重排（`installConfigSort`）。排序規則 `compareSortText` 不依賴語系（不分大小寫、連續數字以數值比較、其餘依碼位），相等時保持原順序；以 2026-11-24 備份驗證與舊規則排出的順序相同。賽事頁配置選單沿用儲存順序，不變。
