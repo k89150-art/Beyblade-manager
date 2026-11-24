@@ -4,8 +4,8 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（Phase 7-3d 快速建立配置本機實作，不 commit；完成後交 ChatGPT 複審）
-- 寫入範圍：Phase 7-3d 快速建立配置（組裝器預填入口、配置與收藏詳細面板按鈕、測試）
+- 目前執行者：Claude Code（Phase 7-3d commit 與 v1.17.0 發布；之後 Phase 7-4 唯讀盤點與規格整理，不實作）
+- 寫入範圍：v1.17.0 發布（版本、快取、更新紀錄、使用教學、測試）；Phase 7-4 只寫規格文件
 - 正式版本：`2cb2f2e`（v1.16.0，`origin/main`，GitHub Pages deployment `8037272446` success）。本機另有 v1.16.0 部署結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
@@ -33,6 +33,18 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-25 — Claude Code（Phase 7-3d：快速建立配置，ChatGPT 有條件 PASS → 補測後 commit）
+
+- 任務：v1.16.0 部署後依規格 11 §6 實作 7-3d（只允許本機實作與測試，不 commit、不升版、不 push、不部署），完成後交 ChatGPT 複審。驗收紀錄 `design/phase7/verification/phase7-3d/README.md`。
+- 主要內容：配置詳細面板「複製配置」、收藏詳細面板「建立配置」，兩者經既有新鮮度檢查後以新增模式開啟組裝器並預填來源的原始零件名稱（主要戰刃依 `mainStockName`）；正確判定標準／CX 三件／CX 四件／抽包／一體式；只選 `refreshSelectors` 提供的選項，無庫存或缺少的零件不選入、不猜測並提示；複製視為新建，不繼承原配置的違規確認；不自動儲存。純函式在 `config-view.js`，`script.js` 新區塊「Phase 7-3d quick create」；7-3b `renderConfigDetail`／`runConfigViewAction` 與 7-2 `renderStockDetail`／`runCollectionViewAction` 各加入口按鈕與分支。`script.js`／`config-view.js` 快取 `20261125-phase73d`。未修改 `addConfig`、`checkStock`、D-019、`refreshSelectors`、資料格式、Rules、Schema、型錄、競賽統計與交易協定；未開始 Phase 7-4。
+- 修改檔案：`config-view.js`、`script.js`、`index.html`、`guide.html`、`tests/config-quick-create.test.mjs`（新）、`tests/assembly-rules.test.mjs`、`tests/collection-sync.test.mjs`、`tests/collection-view.test.mjs`、`README.md`、`AGENTS.md`、規格 11、`docs/PROJECT_DECISIONS.md`、本文件、`design/phase7/verification/phase7-3d/README.md`（新）。
+- 測試：Node 20 檔 468/468（新增 10 項）；Phase 7-2 回歸 505/505；M01～M16 PASS；validate、build（36 files）、`git diff --check` PASS；核准雜湊與寫入路徑不變。Emulator 真實頁面：複製開啟／取消 0 次寫入、庫存足夠 1 次、無庫存與違規配置被阻擋 0 次；從收藏預填標準（特殊空白名稱）、CX 三件、CX 四件、一體式、抽包、缺件，收藏不變；過期按鈕、登出／換帳號、手機 sheet、375／820／821／1440 × 深色／米色。
+- 複審補測：預填中（複製、從收藏）另一裝置更新 → 既有保護關閉組裝器、舊儲存按鈕 0 次寫入、不覆蓋另一裝置、重開無預填殘留；焦點新增最小修正（開啟按鈕 → 來源清單項目 → 「＋ 建立配置」）；資料保護全部重跑通過。回歸：Node 469/469、505/505、M01～M16 PASS、validate／build／diff-check PASS、雜湊與寫入路徑不變。
+- Git：功能 commit `feat(config): implement phase 7-3d quick configuration creation`（見 `git log`）。
+- 已知：Safari／iOS 未驗證。
+- 資料庫／部署風險：無正式 Firestore 讀寫；Rules、Schema 未修改。
+- Commit / Deploy：已 commit，隨 v1.17.0 發布。
 
 ### 2026-11-25 — Claude Code（v1.16.0 正式部署與唯讀驗收，Phase 7-3c 結案）
 

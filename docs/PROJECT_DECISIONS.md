@@ -303,7 +303,7 @@
 
 ## D-022：Phase 7-3 組裝器與配置管理
 
-> 狀態：**規格已定**（2026-11-24，使用者／ChatGPT）；7-3a 已隨 v1.14.1 部署（2026-11-24）；7-3b 已隨 v1.15.0 部署（2026-11-25，`cef1218`、release `aa1493a`、deployment `8036157930`）：原始表格 clip 隱藏、顯示層只讀、面板操作經既有入口與新鮮度檢查、純函式在 `config-view.js`；7-3c 經 ChatGPT 有條件 PASS、補測後 commit（`afb7472`，隨 v1.16.0 部署：release `2cb2f2e`、deployment `8037272446`）：Quick Editor 保留元素 id 與 `addConfig`，加上三種結構、零件槽、一體式固鎖顯示與只讀即時檢查（不取代 `addConfig`／`checkStock`／D-019），三項附帶修正（模式按鈕只限組裝器、修改中重新整理選單扣除自身、焦點回復與安全替代焦點）核准保留；7-3d 授權本機實作（v1.16.0 部署後）。既有確認視窗與 `collection-sync.js` 衝突提示中的「歷史測試紀錄」字樣列為待修（不修改受保護函式）。規格：`design/phase7/11-phase7-3-assembler-spec.md`。
+> 狀態：**規格已定**（2026-11-24，使用者／ChatGPT）；7-3a 已隨 v1.14.1 部署（2026-11-24）；7-3b 已隨 v1.15.0 部署（2026-11-25，`cef1218`、release `aa1493a`、deployment `8036157930`）：原始表格 clip 隱藏、顯示層只讀、面板操作經既有入口與新鮮度檢查、純函式在 `config-view.js`；7-3c 經 ChatGPT 有條件 PASS、補測後 commit（`afb7472`，隨 v1.16.0 部署：release `2cb2f2e`、deployment `8037272446`）：Quick Editor 保留元素 id 與 `addConfig`，加上三種結構、零件槽、一體式固鎖顯示與只讀即時檢查（不取代 `addConfig`／`checkStock`／D-019），三項附帶修正（模式按鈕只限組裝器、修改中重新整理選單扣除自身、焦點回復與安全替代焦點）核准保留；7-3d 經 ChatGPT 有條件 PASS、補測後 commit（隨 v1.17.0 發布）：配置面板「複製配置」與收藏面板「建立配置」只預填新增模式的組裝器，經既有新鮮度檢查，值在按下時從目前的列讀取，不猜測缺少或不明確的零件。既有確認視窗與 `collection-sync.js` 衝突提示中的「歷史測試紀錄」字樣列為待修（不修改受保護函式）。規格：`design/phase7/11-phase7-3-assembler-spec.md`。
 
 - 沿用已核准的 A 零件槽設計與 `design/phase7/prototypes/integrated-ac/` 原型；不採用疊層組裝器。
 - 分四步：7-3a D-019 接線與配置排序；7-3b 配置顯示層（clip 隱藏原始表格、搜尋篩選排序、詳細面板與手機 sheet）；7-3c 組裝器介面；7-3d 複製配置、從收藏陀螺建立配置。

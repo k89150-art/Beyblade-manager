@@ -76,8 +76,10 @@ import {
   otherConfigTab,
   seriesOfModel,
   normalizeAssemblyStructure,
+  prefillFromConfig,
+  prefillFromStock,
   sortConfigItems
-} from "./config-view.js?v=20261125-phase73c";
+} from "./config-view.js?v=20261125-phase73d";
 
 import {
   getAuth,
@@ -173,6 +175,10 @@ let configEditorMode = "bxux";
 let configAssemblyStructure = "std";
 let configEditorReturnFocus = null;
 let configEditorStructureAtOpen = "std";
+// Phase 7-3d: notes on what a quick-create prefill could not fill in.
+let configAssemblyPrefillNotes = [];
+// Phase 7-3d: the list item to return focus to when the opening button is gone.
+let configEditorFocusFallback = null;
 let inventoryFilterType = "all";
 
 function isAdmin() {
@@ -4035,8 +4041,9 @@ function renderStockDetail(item, { setMembers, bladeConfigs, blade }) {
   const refs = blade
     ? `<section class="cv-detail-box"><h4>使用這個${escapeHtml(blade.type)}的配置（${bladeConfigs.length}）</h4>${listConfigNames(bladeConfigs)}</section>`
     : "";
+  // Phase 7-3d: 建立配置 opens the assembler prefilled with this item's parts.
   const action = item.canDelete
-    ? `<div class="cv-detail-actions"><button type="button" class="cv-action cv-action-danger" data-write-action data-view-action="delete" data-view-key="${item.key}"${item.deleteDisabled ? " disabled" : ""} aria-label="刪除 ${escapeHtml(label)}">${setMembers.length > 1 ? "刪除整組" : "刪除這顆"}</button></div>`
+    ? `<div class="cv-detail-actions"><button type="button" class="cv-action" data-write-action data-view-action="config" data-view-key="${item.key}"${item.deleteDisabled ? " disabled" : ""} aria-label="用 ${escapeHtml(label)} 建立配置">建立配置</button><button type="button" class="cv-action cv-action-danger" data-write-action data-view-action="delete" data-view-key="${item.key}"${item.deleteDisabled ? " disabled" : ""} aria-label="刪除 ${escapeHtml(label)}">${setMembers.length > 1 ? "刪除整組" : "刪除這顆"}</button></div>`
     : "";
   return `<div class="cv-detail-head"><span class="cv-code">${escapeHtml(item.model)}</span><h3 class="cv-detail-title">${escapeHtml(item.title)}</h3>${item.englishName ? `<span class="cv-detail-sub">${escapeHtml(item.englishName)}</span>` : ""}</div>
     ${parts ? `<dl class="cv-detail-kv">${parts}</dl>` : ""}
@@ -4335,6 +4342,16 @@ function runCollectionViewAction(button) {
   if (button.dataset.viewAction === "edit" && isSheetLayout()) {
     // The original row editor opens below the list; the sheet would cover it.
     collectionViewState.sheetOpen = false;
+  }
+  if (button.dataset.viewAction === "config") {
+    // Phase 7-3d: the assembler opens above the page; the sheet closes first.
+    if (entry.tableId !== "beybladeTable") return;
+    if (collectionViewState.sheetOpen) {
+      collectionViewState.sheetOpen = false;
+      scheduleCollectionViewRender();
+    }
+    if (typeof createConfigFromStockRow === "function") createConfigFromStockRow(row, button.dataset.viewKey);
+    return;
   }
   if (button.dataset.viewAction === "delete") {
     const source = getSourceRowButton(row, "deleteRow");
@@ -4862,9 +4879,10 @@ function renderConfigDetail(item, { partsModel, history, disabled }) {
     <section class="cv-detail-box"><h4>拆解紀錄中的相同組合（${history.length}）</h4>${records}</section>
     <div class="cv-detail-actions">
       <button type="button" class="cv-action" data-write-action data-config-action="edit" data-config-key="${escapeHtml(item.key)}"${disabled.edit ? " disabled" : ""} aria-label="修改 ${escapeHtml(item.title)}">修改</button>
+      <button type="button" class="cv-action" data-write-action data-config-action="copy" data-config-key="${escapeHtml(item.key)}"${disabled.copy ? " disabled" : ""} aria-label="複製 ${escapeHtml(item.title)}">複製配置</button>
       <button type="button" class="cv-action cv-action-danger" data-write-action data-config-action="delete" data-config-key="${escapeHtml(item.key)}"${disabled.delete ? " disabled" : ""} aria-label="拆解 ${escapeHtml(item.title)}">拆解</button>
     </div>
-    <p class="cv-detail-hint">修改會開啟建立配置面板；拆解前會詢問原因，並可保留到拆解紀錄。</p>`;
+    <p class="cv-detail-hint">修改會開啟建立配置面板；「複製配置」以這個配置的零件開啟新的配置，不會改動原配置；拆解前會詢問原因，並可保留到拆解紀錄。</p>`;
 }
 
 function renderHistoryDetail(item, { disabled }) {
@@ -4979,7 +4997,7 @@ function renderConfigView() {
     configDetail = renderConfigDetail(selectedConfig, {
       partsModel: computeCollectionPartsModel(),
       history,
-      disabled: { edit: !edit || edit.disabled, delete: !remove || remove.disabled }
+      disabled: { edit: !edit || edit.disabled, copy: !edit || edit.disabled, delete: !remove || remove.disabled }
     });
   }
   let historyDetail = emptyDetail;
@@ -5062,6 +5080,17 @@ function runConfigViewAction(button) {
     return;
   }
   const action = button.dataset.configAction;
+  // Phase 7-3d: a copy opens the assembler for a new config; it uses no
+  // source button and never changes the copied row.
+  if (action === "copy") {
+    if (entry.tableId !== "configTable") return;
+    if (configViewState.sheetOpen) {
+      configViewState.sheetOpen = false;
+      renderConfigView();
+    }
+    if (typeof copyConfigFromRow === "function") copyConfigFromRow(row, button.dataset.configKey);
+    return;
+  }
   const source = getConfigSourceButton(row, action);
   if (!source || source.disabled) return;
   // The quick editor, the reason dialog and confirms open above the page; the
@@ -5420,7 +5449,8 @@ function renderConfigAssembler() {
       fixEmpty: !fix,
       integratedBit,
       shortages: stale ? [] : liveConfigAssemblyShortages(assemblySelectedParts(structure, effective, { booster })),
-      history
+      history,
+      prefill: configAssemblyPrefillNotes.filter(note => !note.type || !values[note.type])
     });
     const html = checks
       .map(item => `<p class="assembly-check is-${item.level}"><span aria-hidden="true">${ASSEMBLY_CHECK_ICONS[item.level]}</span> ${escapeHtml(item.text)}</p>`)
@@ -5470,6 +5500,91 @@ function installConfigAssembler() {
   syncConfigAssemblyStructureUi();
 }
 /* ===== Phase 7-3c assembler: end ===== */
+
+/* ===== Phase 7-3d quick create: start =====
+   Prefill entries only (spec 11 §6): 「複製配置」 in the config detail panel and
+   「建立配置」 in the collection detail panel open the assembler as a NEW
+   config (configEditorRow stays null) with the source's exact part names.
+   Nothing is saved here: addConfig, checkStock and D-019 decide on 儲存, and a
+   copy gets no exemption for a violation its source already had. The source
+   row is read when the (freshness-checked) button is pressed, never cached. */
+
+function readConfigPrefillSource(row) {
+  const values = {};
+  partTypes.forEach(type => {
+    values[type] = getPersistedStockName(row, configCellMap[type]);
+  });
+  return { ...prefillFromConfig(getConfigStructureModeFromRow(row), values), title: "複製配置" };
+}
+
+function readStockPrefillSource(row) {
+  const values = {};
+  partTypes.forEach(type => {
+    values[type] = getPersistedStockName(row, beybladeCellMap[type]);
+  });
+  const model = getPersistedRowCells(row)[0] || "";
+  const source = prefillFromStock({
+    model,
+    values,
+    cxAssembly: String(row.dataset.stockAssemblySystem || "").startsWith("CX_"),
+    booster: isRandomBooster(model)
+  });
+  return { ...source, title: "從收藏建立配置" };
+}
+
+// Opens the assembler for a new config and selects each source part the
+// menus offer (refreshSelectors: stock still available). A part with no stock
+// left is not selected; the live checks say so.
+function openConfigAssemblerPrefilled({ structure, values, notes = [], title }) {
+  openConfigQuickEditor();
+  const editor = document.getElementById("configQuickEditor");
+  if (!editor || editor.hidden || configEditorRow) return false;
+  setConfigAssemblyStructure(structure);
+  const missed = [...notes];
+  const order = ["上蓋", "紋章鎖", "主要戰刃", "超越戰刃", "金屬戰刃", "輔助戰刃", "軸心", "固鎖"];
+  order.forEach(type => {
+    const name = values[type];
+    if (!name) return;
+    const select = document.getElementById(selectorMap[type]);
+    if (!select) return;
+    if (Array.from(select.options || []).some(option => option.value === name)) {
+      select.value = name;
+      if (type === "上蓋") syncConfigModelFromSelection();
+      if (type === "軸心") updateNoRatchetConfigOption();
+    } else {
+      missed.push({ type, text: `${type}「${formatPartNameForMenu(name)}」沒有可用庫存，未自動選入，請改選其他零件。` });
+    }
+  });
+  configAssemblyPrefillNotes = missed;
+  const heading = document.getElementById("configEditorTitle");
+  if (heading) heading.textContent = title;
+  updateNoRatchetConfigOption();
+  renderConfigAssembler();
+  return true;
+}
+
+// The list item (by its select key) that focus returns to when the panel
+// button that opened the assembler is no longer shown.
+function listItemFocusFallback(attribute, kind, key) {
+  if (!key) return null;
+  const selectKey = attribute === "data-view-select" ? encodeURIComponent(key) : key;
+  return () => Array.from(document.querySelectorAll(`[${attribute}="${kind}"]`)).find(item => item.dataset.selectKey === selectKey) || null;
+}
+
+function copyConfigFromRow(row, key = "") {
+  if (!row?.isConnected || row.closest("table")?.id !== "configTable") return false;
+  const opened = openConfigAssemblerPrefilled(readConfigPrefillSource(row));
+  if (opened) configEditorFocusFallback = listItemFocusFallback("data-config-select", "configs", key);
+  return opened;
+}
+
+function createConfigFromStockRow(row, key = "") {
+  if (!row?.isConnected || row.closest("table")?.id !== "beybladeTable") return false;
+  const opened = openConfigAssemblerPrefilled(readStockPrefillSource(row));
+  if (opened) configEditorFocusFallback = listItemFocusFallback("data-view-select", "stock", key);
+  return opened;
+}
+/* ===== Phase 7-3d quick create: end ===== */
 
 function updateNoRatchetConfigOption() {
   const modelInput = document.getElementById("confModel");
@@ -5590,6 +5705,8 @@ function openConfigQuickEditor(editingRow = null) {
   const operationSession = dataSessionGuard.captureWriteSession();
   if (!operationSession) return;
 
+  configAssemblyPrefillNotes = [];
+  configEditorFocusFallback = null;
   configEditorRow = editingRow;
   configEditorRowSignature = editingRow ? getConfigEditorRowSignature(editingRow) : null;
   configEditorSessionToken = operationSession;
@@ -5641,8 +5758,11 @@ function closeConfigQuickEditor({ restoreFocus = true } = {}) {
   configEditorRow = null;
   configEditorRowSignature = null;
   configEditorSessionToken = null;
+  configAssemblyPrefillNotes = [];
   const opener = configEditorReturnFocus;
+  const fallback = configEditorFocusFallback;
   configEditorReturnFocus = null;
+  configEditorFocusFallback = null;
   // Phase 7-3c: focus goes back to what opened the editor when it is still
   // shown and usable; otherwise to a visible control, never the page body.
   // Without restoreFocus (sign-out, remote rebuild), only focus that was
@@ -5650,7 +5770,7 @@ function closeConfigQuickEditor({ restoreFocus = true } = {}) {
   if (!restoreFocus && !focusInside) return;
   const usable = element => Boolean(element && element !== document.body && element !== document.documentElement
     && element.isConnected && !element.disabled && element.getClientRects?.().length);
-  const target = [restoreFocus ? opener : null, document.getElementById("openConfigEditorBtn"), document.querySelector('[data-config-tab][aria-selected="true"]')]
+  const target = [restoreFocus ? opener : null, restoreFocus && typeof fallback === "function" ? fallback() : null, document.getElementById("openConfigEditorBtn"), document.querySelector('[data-config-tab][aria-selected="true"]')]
     .find(usable);
   target?.focus();
 }

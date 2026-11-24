@@ -286,13 +286,16 @@ export function buildAssemblyChecks({
   fixEmpty = false,
   integratedBit = false,
   shortages = [],
-  history = null
+  history = null,
+  prefill = []
 } = {}) {
   const out = [];
   if (stale) {
     out.push({ level: "block", text: "這筆配置已經變更或不存在，請關閉後重新開啟。" });
     return out;
   }
+  // Phase 7-3d: what a quick-create prefill could not fill in.
+  prefill.forEach(item => out.push({ level: "warn", text: item.text }));
   if (booster) out.push({ level: "info", text: "抽包配置：固鎖與軸心必選，其他零件選填。" });
   if (missing.length) out.push({ level: "info", text: `尚未選擇：${missing.join("、")}` });
   // An empty ratchet on 時鐘幻象 is "not chosen yet", not a rule error.
@@ -314,5 +317,47 @@ export function buildAssemblyChecks({
     out.push({ level: "warn", text: `這個組合以前拆解過${result}，可在「拆解紀錄」查看；儲存時會再詢問。` });
   }
   if (!missing.length && !shown.length && !shortages.length) out.push({ level: "ok", text: "符合官方組裝規則，庫存足夠。" });
+  return out;
+}
+
+/* ===== Phase 7-3d quick create (spec 11 §6): prefill only =====
+   Both entries open the assembler as a NEW config and never save. Values are
+   exact stored names (D-023); a slot is filled only when the source names a
+   part for it, never guessed. */
+const CX_BLADE_TYPES = ["紋章鎖", "主要戰刃", "超越戰刃", "金屬戰刃", "輔助戰刃"];
+
+// Copy of a stored config: the editor mode the config opens in ("bxux"/"cx")
+// plus its stored part names (主要戰刃 = mainStockName, "" for a split blade).
+export function prefillFromConfig(mode, values = {}) {
+  const structure = assemblyStructureFromValues(mode, values);
+  return { structure, values: pickSlots(structure, values), notes: [] };
+}
+
+// A collection item: its model, stored part names and whether the catalog
+// marks it as a CX assembly. A random booster is CX only when it lists CX parts.
+export function prefillFromStock({ model = "", values = {}, cxAssembly = false, booster = false } = {}) {
+  const series = String(model).trim().toUpperCase().startsWith("CX") ? "CX" : "";
+  const hasCxParts = CX_BLADE_TYPES.some(type => picked(values[type]));
+  const isCx = cxAssembly || (series === "CX" && (!booster || hasCxParts));
+  if (!isCx) return { structure: "std", values: pickSlots("std", values), notes: [] };
+  const split = picked(values["超越戰刃"]) || picked(values["金屬戰刃"]);
+  if (split && picked(values["主要戰刃"])) {
+    const cleared = { ...values, "主要戰刃": "", "超越戰刃": "", "金屬戰刃": "" };
+    return {
+      structure: "cx3",
+      values: pickSlots("cx3", cleared),
+      notes: [{ type: "", text: "收藏資料的戰刃結構不明確（同時有主要戰刃與超越／金屬戰刃），未自動選入戰刃，請自行選擇。" }]
+    };
+  }
+  const structure = split ? "cx4" : "cx3";
+  return { structure, values: pickSlots(structure, values), notes: [] };
+}
+
+// Only the structure's own slots, only real part names ("-" and "" dropped).
+function pickSlots(structure, values) {
+  const out = {};
+  ASSEMBLY_STRUCTURES[normalizeAssemblyStructure(structure)].slots.forEach(type => {
+    if (picked(values[type])) out[type] = values[type];
+  });
   return out;
 }
