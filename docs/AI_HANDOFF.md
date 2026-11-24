@@ -4,10 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：無（v1.13.0 已正式部署）
+- 目前執行者：Claude Code（v1.14.0 正式發布進行中；ChatGPT 已核准 7-2d 功能 commit 與發布流程）
 - 寫入範圍：目前沒有進行中的寫入任務
 - 正式版本：`c22d712`（v1.13.0，`origin/main`，GitHub Pages deployment `8013363988` success）。本筆部署紀錄 commit 只在本機，未 push。
-- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2d 尚未授權。
+- Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2d 本機實作中（未 commit）。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
 > 「目前執行者」僅供協調，不是可靠的檔案鎖。開始寫入前仍必須檢查 `git status`，並確認沒有其他 AI 或使用者正在修改同一工作樹。
@@ -33,6 +33,34 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-24 — Claude Code（Phase 7-2d 複審補強：整合回歸驗證，本機，未 commit）
+
+- 任務：ChatGPT 複審 7-2d 後要求以目前介面建立整合回歸驗證、逐項對照舊版驗證，並補強詳細面板／手機 sheet 情境；只允許 7-2d 顯示層最小修正；不得 commit、push、部署或更新 SITE_VERSION。
+- 整合回歸：新增 `design/phase7/verification/phase7-2-regression/`（17 組：a／b／c／d 各 390、820、821、1440，加 A-08 回退）。舊版每一項檢查保留原 id 並分類：same（直接通過）、entry（經面板／sheet）、design（核准設計取代，改驗新行為：7-2a「零件一列一項」「零件分頁數量」改為 P2 種類、7-2b 卡片上不再有按鈕）、added（補充）。結果 505/505（same 273、entry 108、design 12、added 112，各寬度相加）。沒有「不再適用且無替代斷言」的項目；歷史 7-2a／7-2b／7-2c 驗證頁與紀錄未修改。
+- 發現並修正（只在 `script.js` 的 Phase 7-2a 顯示層區塊）：(1) 手機 sheet 沒有 Tab 焦點限制 → `trapSheetFocus`；(2) 關閉時原項目已不存在，焦點落到頁面 → `focusSelectableItem` 改到分頁按鈕，渲染後焦點若在已關閉／隱藏的面板內或 sheet 剛關閉落在 body，改回項目或分頁；(3) 手機寬度開著 sheet 時拉寬視窗，sheet 與遮罩殘留 → 媒體查詢物件存在 `collectionViewState.sheetQuery`，渲染時非手機寬度不保留 sheet。
+- 測試：Node 367/367（7-2d 回報後新增 2 項：sheet 焦點限制與安全替代焦點、寬度變化與媒體查詢監聽）；7-2d harness 198/198；整合回歸 505/505；validate PASS；build PASS（35 files）；`git diff --check` 通過。
+- Emulator（`exports/emulator-ui-72d/`，重新複製最新程式，demo 專案、測試帳號）：375px sheet 的 Tab／Shift+Tab 循環、焦點拉回、遮罩接住點擊；sheet 開啟中把視窗從 375 調整到 1024，瀏覽器的媒體查詢事件關閉 sheet 與遮罩、桌面面板顯示同一選取；全程 0 寫入（`updateTime` 等於種子資料時間）。前一輪已驗證 K4-E1、確定刪除與登出關閉 sheet。
+- 受保護程式碼：A-09 十段雜湊不變；`getTotalParts`／`getUsedParts`、`sortTable`、`applyInventoryFilters`、表格讀取三函式、`hasUnsavedDomInteraction`、`deleteRow`／`editRow`／`saveEditRow`／`cancelEditRow`、7-2b 零件模型區塊逐位元組相同；`collection-view.js`、`collection-sync.js`、`site-menu.js` 無差異；寫入路徑 `saveData()` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0。
+- 限制：隱藏窗格不觸發 iframe 的媒體查詢事件，harness 在該情況改送事件給頁面自己的 MediaQueryList（真實事件路徑以 Emulator 可見頁面確認）；寫入閘門在 harness 以替身模擬，D-018 衝突由 Node 測試涵蓋；Safari／iOS 與 K-2（inert）實機未測。
+- Git status：上列檔案未 commit；新增 `design/phase7/verification/phase7-2-regression/`、`design/phase7/verification/phase7-2d/`。SITE_VERSION 仍為 v1.13.0。
+- Commit / Deploy：未 commit、未部署。
+
+### 2026-11-24 — Claude Code（Phase 7-2d，本機實作，未 commit）
+
+- 任務：使用者授權先唯讀確認 7-2d 規格，完整且不需改受保護流程時在本機實作並驗證；不得 commit、push、deploy 或寫入正式 Firestore。規格（B.2／B.3、C.4、§F、H.4、P-2、P-3）與定案原型確認完整，未改受保護流程，故直接實作。
+- 主要內容：桌面詳細面板（≥ 821px，清單右側 sticky）、手機底部 sheet（dialog＋遮罩，焦點移入，Escape／關閉／遮罩關閉並把焦點還給清單項目）。清單項目只選取（role=button，Enter／Space），刪除／修改按鈕只在面板／sheet，一律經 `runCollectionViewAction`（新增 P-2 檢查 3：套組各列須與顯示時相同）。原裝陀螺面板：中英名、零件、來源說明、套組成員、使用該上蓋／主要戰刃的配置、刪除這顆／整組；零件面板：四個數字、超用、引用配置、原裝內含不可修改、每筆額外列的修改／刪除。選取：原裝陀螺保存原始 `<tr>`，重建即關閉並提示「資料已更新，請重新選擇。」；零件以類別＋名稱。換帳號、切換分頁清除選取。細節見規格 10 第四部分「7-2d 實作細節」。
+- 修改檔案：`index.html`（兩個面板容器與遮罩；快取 `style.css`／`script.js` 改 `20261124-phase72d`）、`script.js`（import 版本＋Phase 7-2a 顯示層區塊內）、`style.css`（新增 7-2d 區塊）、`tests/collection-view.test.mjs`、`tests/assembly-rules.test.mjs`、`tests/collection-sync.test.mjs`（快取版本）；新增 `design/phase7/verification/phase7-2d/`；文件。`collection-view.js` 未修改（只更新 import 版本參數）。
+- 受保護程式碼：A-09 十段雜湊不變；`getTotalParts`／`getUsedParts`、`sortTable`、`applyInventoryFilters`、`getTableData`／`collectCurrentData`／`applyDataToTables`、`hasUnsavedDomInteraction`、`deleteRow`／`editRow`／`saveEditRow`／`cancelEditRow`、7-2b 零件模型區塊逐位元組相同；D-018、D-015、F-04、`collection-sync.js` 未改。寫入路徑 `saveData()` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0 不變。
+- 測試：Node 365/365（原 359＋新增 6 項：面板容器結構、清單無內嵌操作且操作只經 `runCollectionViewAction`、P-2 檢查含套組、選取生命週期〔重建關閉、不以簽章找回、換帳號／分頁清除、`hasUnsavedDomInteraction` 未變〕、鍵盤與 Escape、CSS 面板／sheet 只在各自寬度）。既有斷言修改：快取版本 `phase72c`→`phase72d`（3 檔）；7-2c 的重設與失敗回退斷言維持原文（程式另起一行處理面板）。validate PASS；build PASS（35 files）；`git diff --check` 通過。
+- 瀏覽器：`phase7-2d/` 198/198（390／768／1440 × 深色／米色）。`phase7-2b`、`phase7-2c` harness 依「清單內嵌按鈕」撰寫：執行到第一次點擊內嵌按鈕前全部通過（7-2b 的「卡片上同名兩筆各有按鈕」一項依設計不再成立），之後中止；這些操作檢查已由 7-2d harness 經面板涵蓋（D1 五種文字逐字相同）。
+- Emulator（`exports/emulator-ui-72d/`，Git 忽略的測試複本，demo 專案、Emulator 測試帳號）：桌面面板、名稱排序＋BX 篩選後選第二顆 BX-01、清單／卡片切換保留選取、取消刪除（D1 文字正確、0 寫入）；K4-E1：同帳號第二分頁刪除第一顆 BX-01 → 本分頁原始列重建、面板關閉並提示、不改選；再從本分頁刪除剩下的 BX-01（一次寫入、只少該列）；375px sheet（dialog、遮罩、焦點、44px 按鈕、Escape 關閉焦點回清單、無水平捲動）；sheet 開啟時登出 → sheet 關閉、選取清除。Console 只有先前 Emulator／本機伺服器重啟留下的網路錯誤（400／連線拒絕），無程式錯誤。
+- 行為改變（依規格與定案原型）：清單／卡片上不再有刪除、修改按鈕，需先點選項目再於面板／sheet 操作；使用說明與更新紀錄待發布準備時更新。
+- Branch / HEAD：`main` / `5a3edf5`（領先 `origin/main` `c22d712` 1 筆部署紀錄）。
+- Git status：上列檔案未 commit；新增 `design/phase7/verification/phase7-2d/`。
+- 未完成事項：等待 ChatGPT 複審；未 commit、未部署；版本、更新紀錄、使用說明未更新。
+- 已知問題（未處理，沿用）：D-018 基準遇連續空白；配置排序造成 configTable 順序後續改寫；三顆一組套組仍顯示「雙陀螺套組」；後備版面順序；正式 `signInWithPopup` 與 Safari／iOS 未驗證（含 K-2 `inert` 實機）。
+- Commit / Deploy：未 commit、未部署。
 
 ### 2026-11-24 — Claude Code（v1.13.0／Phase 7-2c，正式部署）
 

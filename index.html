@@ -14,7 +14,7 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20261124-phase72c" />
+  <link rel="stylesheet" href="style.css?v=20261124-phase72d" />
   <link rel="stylesheet" href="site-menu.css?v=20261124-v1100" />
   <style>
 
@@ -362,7 +362,15 @@
       </div>
     </div>
 
+    <div class="cv-layout" data-detail-layout>
     <div id="stockViewList" class="collection-view-list" aria-label="原裝陀螺清單" hidden></div>
+    <div class="cv-detail-scrim" data-detail-close hidden></div>
+    <aside id="stockDetail" class="cv-detail" aria-label="原裝陀螺詳細資訊" tabindex="-1" hidden>
+      <div class="cv-detail-grab" aria-hidden="true"></div>
+      <div class="cv-detail-body" data-detail-body></div>
+      <button type="button" class="cv-detail-close" data-detail-close>關閉</button>
+    </aside>
+    </div>
 
     </section>
 
@@ -439,7 +447,15 @@
     </div>
     </div>
 
+    <div class="cv-layout" data-detail-layout>
     <div id="partViewList" class="collection-view-list" aria-label="額外零件清單" hidden></div>
+    <div class="cv-detail-scrim" data-detail-close hidden></div>
+    <aside id="partDetail" class="cv-detail" aria-label="零件詳細資訊" tabindex="-1" hidden>
+      <div class="cv-detail-grab" aria-hidden="true"></div>
+      <div class="cv-detail-body" data-detail-body></div>
+      <button type="button" class="cv-detail-close" data-detail-close>關閉</button>
+    </aside>
+    </div>
 
     </section>
 
@@ -788,7 +804,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20261124-phase72c"></script>
+  <script type="module" src="script.js?v=20261124-phase72d"></script>
   <script src="site-menu.js?v=20261124-v1130"></script>
 </body>
 </html>

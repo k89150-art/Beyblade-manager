@@ -155,9 +155,9 @@ test("Q1: add forms stay where they were, wrapped in collapsible panels with the
 });
 
 test("cache versions for the changed files", () => {
-  assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261124-phase72c" \/>/);
-  assert.match(html, /<script type="module" src="script\.js\?v=20261124-phase72c"><\/script>/);
-  assert.match(script, /from "\.\/collection-view\.js\?v=20261124-phase72c";/);
+  assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261124-phase72d" \/>/);
+  assert.match(html, /<script type="module" src="script\.js\?v=20261124-phase72d"><\/script>/);
+  assert.match(script, /from "\.\/collection-view\.js\?v=20261124-phase72d";/);
   // v1.13.0 only changes SITE_VERSION in site-menu.js; the D-020 navigation itself is unchanged.
   assert.match(html, /<script src="site-menu\.js\?v=20261124-v1130"><\/script>/);
   assert.match(html, /<link rel="stylesheet" href="site-menu\.css\?v=20261124-v1100" \/>/);
@@ -513,4 +513,120 @@ test("7-2c V3 CSS: list mode only on desktop; phones always show cards and no to
   assert.match(desktop, /\.collection-view-list\[data-view-mode="list"\] \{/);
   assert.equal((block.match(/data-view-mode="list"/g) || []).length, (desktop.match(/data-view-mode="list"/g) || []).length, "every list-mode rule is inside the desktop query");
   assert.doesNotMatch(block, /display:\s*none[^;]*;[^}]*source|\.source-table-box|#beybladeTable|#partTable/);
+});
+
+/* ---------- Phase 7-2d: detail panel (desktop) and sheet (phones) ---------- */
+
+test("7-2d markup: one detail container per tab, next to its list, outside the original tables", () => {
+  const collection = between(html, '<section id="collectionSection"', "</section>");
+  const inventory = between(html, '<section id="inventorySection"', "</section>");
+  [[collection, "stockViewList", "stockDetail"], [inventory, "partViewList", "partDetail"]].forEach(([section, list, detail]) => {
+    const layout = between(section, '<div class="cv-layout" data-detail-layout>', "    </aside>");
+    assert.match(layout, new RegExp(`<div id="${list}" class="collection-view-list"`));
+    assert.match(layout, /<div class="cv-detail-scrim" data-detail-close hidden><\/div>/);
+    assert.match(layout, new RegExp(`<aside id="${detail}" class="cv-detail" aria-label="[^"]+詳細資訊" tabindex="-1" hidden>`));
+    assert.match(layout, /<div class="cv-detail-body" data-detail-body><\/div>/);
+    assert.match(layout, /<button type="button" class="cv-detail-close" data-detail-close>關閉<\/button>/);
+  });
+  const sources = html.slice(html.indexOf('id="collectionSourceTables"'), html.indexOf('id="collectionSourceTables"') + 4000);
+  assert.ok(html.indexOf('id="collectionSourceTables"') > 0);
+  assert.doesNotMatch(sources.slice(0, sources.indexOf("</table>", sources.indexOf('id="partTable"'))), /cv-detail|data-detail/);
+});
+
+test("7-2d: list items only select; 刪除／修改 exist only in the panel / sheet and go through runCollectionViewAction", () => {
+  const stockItem = between(viewBlock, "function renderStockViewItem(", "// P2: one card per part");
+  const partItem = between(viewBlock, "function renderPartViewItem(", "function listConfigNames(");
+  [stockItem, partItem].forEach(source => {
+    assert.match(source, /selectableItemAttributes\(/);
+    assert.doesNotMatch(source, /data-view-action|<button/);
+  });
+  assert.match(between(viewBlock, "function selectableItemAttributes(", "function renderStockViewItem("),
+    /role="button" tabindex="0" data-view-select="\$\{kind\}" data-select-key="\$\{encodeURIComponent\(key\)\}"/);
+  const stockDetail = between(viewBlock, "function renderStockDetail(", "function renderPartDetail(");
+  assert.match(stockDetail, /data-write-action data-view-action="delete" data-view-key="\$\{item\.key\}"\$\{item\.deleteDisabled \? " disabled" : ""\}/);
+  assert.match(stockDetail, /item\.canDelete/, "no button when the original row has none (read-only view)");
+  assert.doesNotMatch(stockDetail, /data-view-action="edit"/, "collection items still cannot be edited (D-09)");
+  const partDetail = between(viewBlock, "function renderPartDetail(", "function isSheetLayout(");
+  assert.match(partDetail, /item\.extraRows\.map\(\(row, index\) => renderExtraRowLine\(row, index, item\.extraRows\.length/);
+  assert.match(partDetail, /原裝內含 \$\{item\.orig\} 個會隨原裝陀螺變動，不能在這裡修改。/);
+  const install = viewBlock.slice(viewBlock.indexOf("function installCollectionView("));
+  assert.match(install, /const button = event\.target\.closest\("\.cv-detail \[data-view-action\]"\);\n        if \(button && !button\.disabled\) runCollectionViewAction\(button\);/);
+  assert.equal((viewBlock.match(/(?<!function )runCollectionViewAction\(button\)/g) || []).length, 1, "one entry point for actions");
+  assert.doesNotMatch(viewCode, /saveEditRow\(|window\.cancelEditRow\(button/, "no new save path");
+});
+
+test("7-2d P-2: before any action the row is connected, unchanged, and a set is exactly what was shown", () => {
+  const action = between(viewBlock, "function runCollectionViewAction(", "// Q1 / F-04:");
+  assert.match(action, /row && row\.isConnected && row\.closest\("table"\)\?\.id === entry\.tableId/);
+  assert.match(action, /\.filter\(snapshot => snapshot\.meta\.stockSetInstanceId === setId\)\n      \.map\(rowSignature\)/);
+  assert.match(action, /JSON\.stringify\(setNow\) !== JSON\.stringify\(entry\.setSignatures \|\| \[\]\)/);
+  assert.match(action, /if \(!current \|\| rowSignature\(current\) !== entry\.signature \|\| setChanged\) \{\n    alert\("資料已更新，請確認清單後再操作。"\);\n    scheduleCollectionViewRender\(\);\n    return;\n  \}/);
+  assert.ok(action.indexOf("setChanged) {") < action.indexOf("window.deleteRow(source)"), "checks run before deleteRow");
+  const render = between(viewBlock, "function renderCollectionView(", "function scheduleCollectionViewRender(");
+  assert.match(render, /refs\.get\(snapshot\.key\)\.setSignatures = stockSnapshots\n      \.filter\(other => other\.meta\.stockSetInstanceId === setId\)\n      \.map\(other => refs\.get\(other\.key\)\.signature\);/);
+});
+
+test("7-2d selection: a stock selection is the <tr> itself and closes once it is rebuilt; never found again by content", () => {
+  const select = between(viewBlock, "function selectCollectionItem(", "// Escape, 關閉 or the scrim");
+  assert.match(select, /\{ kind, row: entry\.row \}/);
+  assert.match(select, /\{ kind, partKey: key \}/);
+  assert.match(select, /const key = decodeURIComponent\(encodedKey\);/);
+  const render = between(viewBlock, "function renderCollectionView(", "function scheduleCollectionViewRender(");
+  assert.match(render, /const index = selection\.row\.isConnected \? stockRows\.indexOf\(selection\.row\) : -1;\n    if \(index >= 0\) selectedStock = stockItems\[index\];\n    else clearCollectionSelection\("資料已更新，請重新選擇。"\);/);
+  assert.match(render, /selectedPart = partsModel\.items\.find\(entry => entry\.key === selection\.partKey\) \|\| null;\n    if \(!selectedPart\) clearCollectionSelection\("資料已更新，請重新選擇。"\);/);
+  assert.doesNotMatch(render, /selection[^\n]*signature|signature[^\n]*selection/, "no signature-based lookup (P-2)");
+  const reset = between(viewBlock, "function resetCollectionViewState(", "// Phase 7-2c: show the filter");
+  assert.match(reset, /clearCollectionSelection\(\);\n  collectionViewState\.trigger = null;/);
+  assert.match(between(viewBlock, "function setCollectionTab(", "// D-020:"), /if \(next !== collectionViewState\.tab && collectionViewState\.selection\) \{\n    clearCollectionSelection\(\);\n    scheduleCollectionViewRender\(\);\n  \}/);
+  // Viewing is not editing (spec F): hasUnsavedDomInteraction is unchanged.
+  const unsaved = between(script, "function hasUnsavedDomInteraction()", "function beginDataSession(");
+  assert.doesNotMatch(unsaved, /cv-detail|selection|sheet/i);
+});
+
+test("7-2d keyboard and Escape: Enter / Space select; Escape closes the sheet or panel first, then cancels an edit", () => {
+  const install = viewBlock.slice(viewBlock.indexOf("function installCollectionView("));
+  assert.match(install, /if \(!item \|\| \(event\.key !== "Enter" && event\.key !== " "\)\) return;/);
+  const escape = install.slice(install.indexOf('if (event.key !== "Escape") return;'));
+  assert.match(escape, /if \(!collectionViewState\.editingPartRow && \(collectionViewState\.sheetOpen \|\| \(inDetail && collectionViewState\.selection\)\)\) \{\n        event\.preventDefault\(\);\n        closeCollectionDetail\(\);\n        return;\n      \}/);
+  assert.ok(escape.indexOf("closeCollectionDetail()") < escape.indexOf('window.cancelEditRow(cancel, "part")'));
+  const close = between(viewBlock, "function closeCollectionDetail(", "function writeCollectionDetail(");
+  assert.match(close, /if \(trigger\) focusSelectableItem\(trigger\.kind, trigger\.encodedKey\);/, "focus returns to the item");
+  const write = between(viewBlock, "function writeCollectionDetail(", "function writeViewList(");
+  assert.match(write, /detail\.setAttribute\("role", sheet \? "dialog" : "region"\);/);
+  assert.match(write, /if \(sheet\) detail\.setAttribute\("aria-modal", "true"\);/);
+});
+
+test("7-2d CSS: side panel only on desktop, bottom sheet only on phones; original tables untouched", () => {
+  const block = styles.slice(styles.indexOf("/* ===== Phase 7-2d: detail panel")).replace(/\/\*[\s\S]*?\*\//g, "");
+  const desktop = between(block, "@media (min-width: 821px) {", "@media (max-width: 820px) {");
+  const phone = block.slice(block.indexOf("@media (max-width: 820px) {"));
+  assert.match(desktop, /\.cv-layout\.has-detail \{\n    display: grid;\n    grid-template-columns: minmax\(0, 1fr\) minmax\(260px, 320px\);/);
+  assert.match(desktop, /position: sticky;/);
+  assert.match(phone, /\.cv-detail \{\n    display: none;\n  \}\n  \.cv-detail\.is-sheet\.is-open \{\n    position: fixed;/);
+  assert.match(phone, /z-index: var\(--ui-z-sheet, 960\);/);
+  assert.doesNotMatch(block, /source-table-box|#beybladeTable|#partTable|collectionSourceTables/);
+});
+
+test("7-2d sheet focus: Tab / Shift+Tab stay inside an open sheet; closed or hidden panels give focus back safely", () => {
+  const trap = between(viewBlock, "function trapSheetFocus(", "function selectCollectionItem(");
+  assert.match(trap, /if \(event\.key !== "Tab" \|\| !collectionViewState\.sheetOpen\) return;/);
+  assert.match(trap, /const sheet = document\.querySelector\("\.cv-detail\.is-sheet\.is-open"\);/);
+  assert.match(trap, /else if \(event\.shiftKey && \(active === first \|\| active === sheet\)\) \{\n    event\.preventDefault\(\);\n    last\.focus/);
+  assert.match(trap, /else if \(!event\.shiftKey && active === last\) \{\n    event\.preventDefault\(\);\n    first\.focus/);
+  assert.match(viewBlock.slice(viewBlock.indexOf("function installCollectionView(")), /document\.addEventListener\("keydown", trapSheetFocus\);/);
+  const focus = between(viewBlock, "function focusSelectableItem(", "// While the phone sheet is open");
+  assert.match(focus, /\(item \|\| document\.querySelector\(`\[data-collection-tab="\$\{kind\}"\]`\)\)\?\.focus/, "falls back to the tab when the item is gone");
+  const render = between(viewBlock, "function renderCollectionView(", "function scheduleCollectionViewRender(");
+  assert.match(render, /const lostFromSheet = sheetWasOpen && !collectionViewState\.sheetOpen && \(!document\.activeElement \|\| document\.activeElement === document\.body\);/);
+  assert.match(render, /if \(lostFromSheet \|\| \(focusedDetail && getComputedStyle\(focusedDetail\)\.display === "none"\)\) \{/);
+  assert.ok(render.indexOf("const lostFromSheet") > render.indexOf("if (restore)"), "runs after the existing focus restore");
+  assert.ok(render.indexOf("const lostFromSheet") < render.indexOf("syncPartEditing("), "an opened row editor still takes focus last");
+});
+
+test("7-2d width changes: the sheet never stays open on a desktop width; the media query listener is kept alive", () => {
+  const render = between(viewBlock, "function renderCollectionView(", "function scheduleCollectionViewRender(");
+  assert.match(render, /if \(collectionViewState\.sheetOpen && !isSheetLayout\(\)\) collectionViewState\.sheetOpen = false;/);
+  assert.ok(render.indexOf("!isSheetLayout()) collectionViewState.sheetOpen = false") < render.indexOf('writeCollectionDetail("stock"'));
+  const install = viewBlock.slice(viewBlock.indexOf("function installCollectionView("));
+  assert.match(install, /collectionViewState\.sheetQuery = matchMedia\("\(max-width: 820px\)"\);\n      collectionViewState\.sheetQuery\.addEventListener\?\.\("change", \(\) => \{\n        collectionViewState\.sheetOpen = false;\n        scheduleCollectionViewRender\(\);/);
 });

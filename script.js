@@ -48,7 +48,7 @@ import {
   normalizeViewMode,
   sortPartItems,
   sortStockItems
-} from "./collection-view.js?v=20261124-phase72c";
+} from "./collection-view.js?v=20261124-phase72d";
 
 import {
   getAuth,
@@ -3713,8 +3713,15 @@ const collectionViewState = {
   // Phase 7-2c: filters and sorting (display only, reset on account change)
   // and the V3 list / card mode (a UI preference, kept in localStorage).
   controls: defaultListControls(),
-  viewMode: "list"
+  viewMode: "list",
+  // Phase 7-2d: the selected item (P-2: a stock selection is the original <tr>
+  // itself, never a content signature; a part selection is its type + name),
+  // whether the phone sheet is open, and a short notice for the panel.
+  selection: null,
+  sheetOpen: false,
+  detailNotice: ""
 };
+const COLLECTION_DETAIL_IDS = Object.freeze({ stock: "stockDetail", parts: "partDetail" });
 const collectionViewKeys = new WeakMap();
 let collectionViewKeySequence = 0;
 
@@ -3779,6 +3786,10 @@ function setAddPanelOpen(kind, open) {
 function setCollectionTab(tab, { focusTab = false, updateHash = false } = {}) {
   if (!isCollectionViewActive()) return;
   const next = tab === "parts" ? "parts" : "stock";
+  if (next !== collectionViewState.tab && collectionViewState.selection) {
+    clearCollectionSelection();
+    scheduleCollectionViewRender();
+  }
   collectionViewState.tab = next;
   Object.entries(COLLECTION_VIEW_TABS).forEach(([name, config]) => {
     const active = name === next;
@@ -3824,17 +3835,18 @@ function isSameDocumentLink(url) {
   return page(url.pathname) === page(location.pathname);
 }
 
-function renderStockViewItem(item) {
+// 7-2d: list items only select; 刪除／修改 are in the detail panel or sheet.
+function selectableItemAttributes(kind, key, selected, label) {
+  // Part keys contain a NUL separator, which HTML attributes cannot carry.
+  return `role="button" tabindex="0" data-view-select="${kind}" data-select-key="${encodeURIComponent(key)}" aria-controls="${COLLECTION_DETAIL_IDS[kind]}" aria-current="${selected ? "true" : "false"}" aria-label="${escapeHtml(label)}，查看詳細資訊"`;
+}
+
+function renderStockViewItem(item, selected = false) {
   const tags = `${item.manual ? '<span class="cv-tag">手動</span>' : ""}${item.inSet ? '<span class="cv-tag">套組</span>' : ""}`;
   const parts = item.parts.map(part => `<span class="cv-part" data-part-tone="${escapeHtml(part.tone)}"><small>${escapeHtml(part.type)}</small>${escapeHtml(part.value)}</span>`).join("");
-  const label = escapeHtml(`${item.model} ${item.title}`.trim());
-  const action = item.canDelete
-    ? `<button type="button" class="cv-action cv-action-danger" data-write-action data-view-action="delete" data-view-key="${item.key}"${item.deleteDisabled ? " disabled" : ""} aria-label="刪除 ${label}">刪除</button>`
-    : "";
-  return `<article class="cv-item" data-series="${escapeHtml(item.series)}">
+  return `<article class="cv-item${selected ? " is-selected" : ""}" data-series="${escapeHtml(item.series)}" ${selectableItemAttributes("stock", item.key, selected, `${item.model} ${item.title}`.trim())}>
     <div class="cv-head"><span class="cv-code">${escapeHtml(item.model)}</span><strong class="cv-title">${escapeHtml(item.title)}</strong>${tags}</div>
     ${parts ? `<div class="cv-parts">${parts}</div>` : ""}
-    ${action ? `<div class="cv-actions">${action}</div>` : ""}
   </article>`;
 }
 
@@ -3853,23 +3865,156 @@ function partMapHasCount(map) {
   return Object.values(map || {}).some(names => Object.keys(names || {}).length > 0);
 }
 
-function renderPartViewItem(item) {
-  const label = escapeHtml(`${item.type} ${item.name}`.trim());
+function renderPartNumbers(item) {
   const over = item.avail < 0;
-  const editing = item.extraRows.some(row => row.editing);
-  const refs = item.configs.length ? `<p class="cv-refs">配置引用：${escapeHtml(item.configs.slice(0, 3).join("、"))}${item.configs.length > 3 ? ` 等 ${item.configs.length} 個` : ""}</p>` : "";
-  const extraLines = item.extraRows.map((row, index) => renderExtraRowLine(row, index, item.extraRows.length, label)).join("");
-  return `<article class="cv-item cv-part-item${editing ? " is-editing" : ""}${over ? " is-over" : ""}" data-inventory-tone="${escapeHtml(getInventoryTypeTone(item.type))}">
-    <div class="cv-head"><span class="cv-type">${escapeHtml(item.type)}</span><strong class="cv-title">${escapeHtml(item.name)}</strong></div>
-    <dl class="cv-nums">
+  return `<dl class="cv-nums">
       <div><dt>原裝內含</dt><dd>${item.orig}</dd></div>
       <div><dt>額外持有</dt><dd>${item.extra}</dd></div>
       <div><dt>配置引用</dt><dd>${item.ref}</dd></div>
       <div class="cv-avail"><dt>${over ? "超用" : "可用"}</dt><dd>${Math.abs(item.avail)}</dd></div>
-    </dl>
-    ${refs}
-    ${extraLines ? `<ul class="cv-extra-rows">${extraLines}</ul>` : ""}
+    </dl>`;
+}
+
+function renderPartViewItem(item, selected = false) {
+  const over = item.avail < 0;
+  const editing = item.extraRows.some(row => row.editing);
+  const extraCount = item.extraRows.length > 1 ? `<span class="cv-tag">額外 ${item.extraRows.length} 筆</span>` : "";
+  return `<article class="cv-item cv-part-item${editing ? " is-editing" : ""}${over ? " is-over" : ""}${selected ? " is-selected" : ""}" data-inventory-tone="${escapeHtml(getInventoryTypeTone(item.type))}" ${selectableItemAttributes("parts", item.key, selected, `${item.type} ${item.name}`.trim())}>
+    <div class="cv-head"><span class="cv-type">${escapeHtml(item.type)}</span><strong class="cv-title">${escapeHtml(item.name)}</strong>${extraCount}</div>
+    ${renderPartNumbers(item)}
   </article>`;
+}
+
+function listConfigNames(configs) {
+  return configs.length
+    ? `<ul class="cv-detail-refs">${configs.map(name => `<li>${escapeHtml(name)}</li>`).join("")}</ul>`
+    : '<p class="cv-detail-hint">目前沒有配置使用。</p>';
+}
+
+// 7-2d detail panel / sheet. Read-only content from the same snapshots and
+// parts model as the list; buttons carry the original row keys and go through
+// runCollectionViewAction (freshness checks, then the existing functions).
+function renderStockDetail(item, { setMembers, bladeConfigs, blade }) {
+  const label = `${item.model} ${item.title}`.trim();
+  const parts = item.parts.map(part => `<dt>${escapeHtml(part.type)}</dt><dd>${escapeHtml(part.value)}</dd>`).join("");
+  const source = item.manual
+    ? "來源：手動輸入。官方型錄不會覆蓋這筆資料；沒有可靠的型錄對照，所以不顯示英文名，也不能用英文名搜尋。"
+    : "來源：型錄自動帶入。型錄更新時，這筆資料會依型錄一併更新。";
+  const set = setMembers.length > 1
+    ? `<section class="cv-detail-box"><h4>套組 ${escapeHtml(item.setCode || "")}（${setMembers.length} 顆，刪除時會一起刪除）</h4><ul class="cv-detail-refs">${setMembers.map(member => `<li>${escapeHtml(`${member.model} ${member.title}`.trim())}</li>`).join("")}</ul></section>`
+    : "";
+  const refs = blade
+    ? `<section class="cv-detail-box"><h4>使用這個${escapeHtml(blade.type)}的配置（${bladeConfigs.length}）</h4>${listConfigNames(bladeConfigs)}</section>`
+    : "";
+  const action = item.canDelete
+    ? `<div class="cv-detail-actions"><button type="button" class="cv-action cv-action-danger" data-write-action data-view-action="delete" data-view-key="${item.key}"${item.deleteDisabled ? " disabled" : ""} aria-label="刪除 ${escapeHtml(label)}">${setMembers.length > 1 ? "刪除整組" : "刪除這顆"}</button></div>`
+    : "";
+  return `<div class="cv-detail-head"><span class="cv-code">${escapeHtml(item.model)}</span><h3 class="cv-detail-title">${escapeHtml(item.title)}</h3>${item.englishName ? `<span class="cv-detail-sub">${escapeHtml(item.englishName)}</span>` : ""}</div>
+    ${parts ? `<dl class="cv-detail-kv">${parts}</dl>` : ""}
+    <p class="cv-detail-src">${source}</p>
+    ${set}${refs}${action}
+    <p class="cv-detail-hint">收藏目前不能直接修改。同款多顆各自一筆，刪除只會刪除這一顆（套組會整組刪除）。</p>`;
+}
+
+function renderPartDetail(item) {
+  const label = `${item.type} ${item.name}`.trim();
+  const over = item.avail < 0
+    ? `<p class="cv-detail-impact">配置引用比持有多 ${-item.avail} 個。只提示，不會阻擋或修改配置。</p>`
+    : "";
+  const orig = item.orig ? `<p class="cv-detail-src">原裝內含 ${item.orig} 個會隨原裝陀螺變動，不能在這裡修改。</p>` : "";
+  const extras = item.extraRows.length
+    ? `<section class="cv-detail-box"><h4>額外持有（${item.extraRows.length} 筆資料）</h4><ul class="cv-extra-rows">${item.extraRows.map((row, index) => renderExtraRowLine(row, index, item.extraRows.length, escapeHtml(label))).join("")}</ul></section>`
+    : '<p class="cv-detail-hint">沒有額外持有可修改或刪除。</p>';
+  return `<div class="cv-detail-head"><span class="cv-type">${escapeHtml(item.type)}</span><h3 class="cv-detail-title">${escapeHtml(item.name)}</h3></div>
+    ${renderPartNumbers(item)}
+    ${over}
+    <section class="cv-detail-box"><h4>引用這個零件的配置（${item.configs.length}）</h4>${listConfigNames(item.configs)}</section>
+    ${orig}${extras}`;
+}
+
+function isSheetLayout() {
+  return typeof matchMedia === "function" && matchMedia("(max-width: 820px)").matches;
+}
+
+function clearCollectionSelection(notice = "") {
+  collectionViewState.selection = null;
+  collectionViewState.sheetOpen = false;
+  collectionViewState.detailNotice = notice;
+}
+
+// Focus the list item again; when it no longer exists (deleted, rebuilt,
+// filtered out) fall back to the tab of that list, never to a stale target.
+function focusSelectableItem(kind, encodedKey) {
+  const item = Array.from(document.querySelectorAll(`[data-view-select="${kind}"]`)).find(element => element.dataset.selectKey === encodedKey);
+  (item || document.querySelector(`[data-collection-tab="${kind}"]`))?.focus({ preventScroll: true });
+}
+
+// While the phone sheet is open, Tab / Shift+Tab stay inside it (the scrim
+// already blocks the mouse), so nothing behind it can be reached or activated.
+function trapSheetFocus(event) {
+  if (event.key !== "Tab" || !collectionViewState.sheetOpen) return;
+  const sheet = document.querySelector(".cv-detail.is-sheet.is-open");
+  if (!sheet) return;
+  const focusables = Array.from(sheet.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"))
+    .filter(element => !element.disabled && element.getClientRects().length > 0);
+  if (!focusables.length) {
+    event.preventDefault();
+    sheet.focus({ preventScroll: true });
+    return;
+  }
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  const active = document.activeElement;
+  if (!sheet.contains(active)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus({ preventScroll: true });
+  } else if (event.shiftKey && (active === first || active === sheet)) {
+    event.preventDefault();
+    last.focus({ preventScroll: true });
+  } else if (!event.shiftKey && active === last) {
+    event.preventDefault();
+    first.focus({ preventScroll: true });
+  }
+}
+
+function selectCollectionItem(kind, encodedKey) {
+  const key = decodeURIComponent(encodedKey);
+  const entry = collectionViewState.refs.get(key);
+  collectionViewState.selection = kind === "stock"
+    ? (entry?.tableId === "beybladeTable" ? { kind, row: entry.row } : null)
+    : { kind, partKey: key };
+  if (!collectionViewState.selection) return;
+  collectionViewState.detailNotice = "";
+  collectionViewState.sheetOpen = isSheetLayout();
+  collectionViewState.trigger = { kind, encodedKey };
+  renderCollectionView();
+  if (collectionViewState.sheetOpen) document.getElementById(COLLECTION_DETAIL_IDS[kind])?.focus({ preventScroll: true });
+  else focusSelectableItem(kind, encodedKey);
+}
+
+// Escape, 關閉 or the scrim: phones close the sheet (the selection stays for the
+// list highlight); desktop clears the selection. Focus goes back to the item.
+function closeCollectionDetail({ clear = !isSheetLayout() } = {}) {
+  const trigger = collectionViewState.trigger;
+  if (clear) clearCollectionSelection();
+  else collectionViewState.sheetOpen = false;
+  renderCollectionView();
+  if (trigger) focusSelectableItem(trigger.kind, trigger.encodedKey);
+}
+
+function writeCollectionDetail(kind, html, { open }) {
+  const detail = document.getElementById(COLLECTION_DETAIL_IDS[kind]);
+  if (!detail) return;
+  const sheet = isSheetLayout();
+  const body = detail.querySelector("[data-detail-body]");
+  if (body) body.innerHTML = html;
+  detail.classList.toggle("is-open", open);
+  detail.classList.toggle("is-sheet", sheet);
+  detail.setAttribute("role", sheet ? "dialog" : "region");
+  if (sheet) detail.setAttribute("aria-modal", "true");
+  else detail.removeAttribute("aria-modal");
+  const scrim = detail.parentElement?.querySelector(".cv-detail-scrim");
+  if (scrim) scrim.hidden = !(sheet && open);
 }
 
 function renderUnmatchedReferences(orphans) {
@@ -3912,6 +4057,9 @@ function renderCollectionView() {
   const signedIn = Boolean(currentUser);
   const loading = dataSessionGuard.snapshot().state === DATA_SESSION_STATES.LOADING;
   const refs = new Map();
+  const sheetWasOpen = collectionViewState.sheetOpen || Boolean(document.querySelector(".cv-detail.is-sheet.is-open"));
+  // The sheet only exists on phone widths; a wider window never keeps it open.
+  if (collectionViewState.sheetOpen && !isSheetLayout()) collectionViewState.sheetOpen = false;
 
   const stockRows = Array.from(document.querySelectorAll("#beybladeTable tbody tr"));
   const stockSnapshots = stockRows.map(row => {
@@ -3943,13 +4091,50 @@ function renderCollectionView() {
     query: document.getElementById("inventorySearchInput")?.value || ""
   }), controls.partStatus), controls.partSort);
 
+  // P-2 check 3: what each set looked like when it was shown (DOM order).
+  stockSnapshots.forEach(snapshot => {
+    const setId = snapshot.meta.stockSetInstanceId;
+    if (!setId) return;
+    refs.get(snapshot.key).setSignatures = stockSnapshots
+      .filter(other => other.meta.stockSetInstanceId === setId)
+      .map(other => refs.get(other.key).signature);
+  });
   collectionViewState.refs = refs;
+
+  // 7-2d selection: a stock selection lives only while its <tr> is connected
+  // (P-2: never found again by content); a part selection while its type +
+  // name is still a part. Otherwise the panel closes with a notice.
+  const selection = collectionViewState.selection;
+  let selectedStock = null;
+  let selectedPart = null;
+  if (selection?.kind === "stock") {
+    const index = selection.row.isConnected ? stockRows.indexOf(selection.row) : -1;
+    if (index >= 0) selectedStock = stockItems[index];
+    else clearCollectionSelection("資料已更新，請重新選擇。");
+  } else if (selection?.kind === "parts") {
+    selectedPart = partsModel.items.find(entry => entry.key === selection.partKey) || null;
+    if (!selectedPart) clearCollectionSelection("資料已更新，請重新選擇。");
+  }
+
   writeViewList(document.getElementById("stockViewList"),
     listNotice({ signedIn, loading, total: stockRows.length, shown: shownStock.length, kind: "stock" }),
-    shownStock.map(renderStockViewItem).join(""));
+    shownStock.map(item => renderStockViewItem(item, item === selectedStock)).join(""));
   writeViewList(document.getElementById("partViewList"),
     listNotice({ signedIn, loading, total: partsModel.items.length, shown: shownParts.length, kind: "parts" }),
-    shownParts.map(renderPartViewItem).join("") + renderUnmatchedReferences(partsModel.orphans));
+    shownParts.map(item => renderPartViewItem(item, item === selectedPart)).join("") + renderUnmatchedReferences(partsModel.orphans));
+
+  const emptyDetail = `<p class="cv-detail-empty">${escapeHtml(collectionViewState.detailNotice || "選擇一筆資料查看詳細資訊。")}</p>`;
+  let stockDetail = emptyDetail;
+  if (selectedStock) {
+    const index = stockItems.indexOf(selectedStock);
+    const setId = stockSnapshots[index].meta.stockSetInstanceId;
+    const setMembers = setId ? stockItems.filter((item, i) => stockSnapshots[i].meta.stockSetInstanceId === setId) : [];
+    const blade = selectedStock.parts.find(part => part.type === "上蓋") || selectedStock.parts.find(part => part.type === "主要戰刃") || null;
+    const bladeItem = blade ? partsModel.items.find(entry => entry.type === blade.type && entry.name === blade.value) : null;
+    stockDetail = renderStockDetail(selectedStock, { setMembers, blade, bladeConfigs: bladeItem ? bladeItem.configs : [] });
+  }
+  writeCollectionDetail("stock", stockDetail, { open: Boolean(selectedStock) && collectionViewState.sheetOpen });
+  writeCollectionDetail("parts", selectedPart ? renderPartDetail(selectedPart) : emptyDetail, { open: Boolean(selectedPart) && collectionViewState.sheetOpen });
 
   const stockCount = document.getElementById("collectionTabStockCount");
   if (stockCount) stockCount.textContent = String(stockRows.length);
@@ -3965,6 +4150,16 @@ function renderCollectionView() {
 
   if (restore) {
     document.querySelector(`[data-view-key="${restore.key}"][data-view-action="${restore.action}"]`)?.focus({ preventScroll: true });
+  } else if (active?.dataset?.viewSelect && !active.isConnected) {
+    focusSelectableItem(active.dataset.viewSelect, active.dataset.selectKey);
+  }
+  // A sheet or panel that just closed or became invisible (rebuild, account
+  // change, width change) must not keep focus: return it to the item or tab.
+  const focusedDetail = document.activeElement?.closest?.(".cv-detail");
+  const lostFromSheet = sheetWasOpen && !collectionViewState.sheetOpen && (!document.activeElement || document.activeElement === document.body);
+  if (lostFromSheet || (focusedDetail && getComputedStyle(focusedDetail).display === "none")) {
+    const trigger = collectionViewState.trigger;
+    focusSelectableItem(trigger?.kind || collectionViewState.tab, trigger?.encodedKey || "");
   }
   syncPartEditing(partRows.find(row => row.dataset.editing === "true") || null);
 }
@@ -3993,10 +4188,24 @@ function runCollectionViewAction(button) {
   const current = row && row.isConnected && row.closest("table")?.id === entry.tableId
     ? readSourceRowSnapshot(row, entry.tableId)
     : null;
-  if (!current || rowSignature(current) !== entry.signature) {
+  // P-2 check 3: a set is deleted together, so every member must still be
+  // exactly what the panel showed.
+  const setId = entry?.tableId === "beybladeTable" && current ? current.meta.stockSetInstanceId : "";
+  const setNow = setId
+    ? Array.from(document.querySelectorAll("#beybladeTable tbody tr"))
+      .map(other => readSourceRowSnapshot(other, "beybladeTable"))
+      .filter(snapshot => snapshot.meta.stockSetInstanceId === setId)
+      .map(rowSignature)
+    : [];
+  const setChanged = Boolean(setId) && JSON.stringify(setNow) !== JSON.stringify(entry.setSignatures || []);
+  if (!current || rowSignature(current) !== entry.signature || setChanged) {
     alert("資料已更新，請確認清單後再操作。");
     scheduleCollectionViewRender();
     return;
+  }
+  if (button.dataset.viewAction === "edit" && isSheetLayout()) {
+    // The original row editor opens below the list; the sheet would cover it.
+    collectionViewState.sheetOpen = false;
   }
   if (button.dataset.viewAction === "delete") {
     const source = getSourceRowButton(row, "deleteRow");
@@ -4022,6 +4231,9 @@ function resetCollectionViewState() {
   collectionViewState.addChoice = { stock: null, parts: null };
   collectionViewState.controls = defaultListControls();
   syncListControls();
+  // 7-2d: the detail panel / sheet closes and forgets the selection.
+  clearCollectionSelection();
+  collectionViewState.trigger = null;
   applyInventoryFilters();
   scheduleCollectionViewRender();
 }
@@ -4108,6 +4320,8 @@ function failCollectionView(error) {
     });
     document.querySelectorAll("[data-add-toggle]").forEach(toggle => { toggle.hidden = true; });
     document.querySelectorAll("[data-list-controls], [data-view-toggle]").forEach(element => { element.hidden = true; });
+    document.querySelectorAll(".cv-detail, .cv-detail-scrim").forEach(element => { element.hidden = true; });
+    document.querySelectorAll("[data-detail-layout]").forEach(layout => layout.classList.remove("has-detail"));
     applyInventoryFilters();
   } catch (fallbackError) {
     console.error(fallbackError);
@@ -4151,12 +4365,43 @@ function installCollectionView() {
     document.getElementById("stockSearchInput")?.addEventListener("input", scheduleCollectionViewRender);
     installListControls();
 
+    // 7-2d: list items select (click, Enter, Space); actions are only in the
+    // detail panel / sheet and go through runCollectionViewAction.
     ["stockViewList", "partViewList"].forEach(id => {
-      document.getElementById(id).addEventListener("click", event => {
-        const button = event.target.closest("[data-view-action]");
+      const list = document.getElementById(id);
+      list.addEventListener("click", event => {
+        const item = event.target.closest("[data-view-select]");
+        if (item) selectCollectionItem(item.dataset.viewSelect, item.dataset.selectKey);
+      });
+      list.addEventListener("keydown", event => {
+        const item = event.target.closest("[data-view-select]");
+        if (!item || (event.key !== "Enter" && event.key !== " ")) return;
+        event.preventDefault();
+        selectCollectionItem(item.dataset.viewSelect, item.dataset.selectKey);
+      });
+    });
+    Object.values(COLLECTION_DETAIL_IDS).forEach(id => {
+      const detail = document.getElementById(id);
+      detail.hidden = false;
+      detail.parentElement?.classList.add("has-detail");
+      detail.parentElement?.addEventListener("click", event => {
+        if (event.target.closest("[data-detail-close]")) {
+          closeCollectionDetail();
+          return;
+        }
+        const button = event.target.closest(".cv-detail [data-view-action]");
         if (button && !button.disabled) runCollectionViewAction(button);
       });
     });
+    if (typeof matchMedia === "function") {
+      // Kept on the state: an unreferenced MediaQueryList can be collected
+      // together with its listener.
+      collectionViewState.sheetQuery = matchMedia("(max-width: 820px)");
+      collectionViewState.sheetQuery.addEventListener?.("change", () => {
+        collectionViewState.sheetOpen = false;
+        scheduleCollectionViewRender();
+      });
+    }
 
     window.addEventListener("hashchange", () => applyCollectionHash(location.hash));
     // A link to the hash that is already in the address bar fires no
@@ -4169,8 +4414,16 @@ function installCollectionView() {
       setTimeout(() => applyCollectionHash(url.hash), 0);
     }, true);
 
+    document.addEventListener("keydown", trapSheetFocus);
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
+      // 7-2d (D-08): the sheet, or a panel that has focus, closes first.
+      const inDetail = document.activeElement?.closest?.(".cv-detail");
+      if (!collectionViewState.editingPartRow && (collectionViewState.sheetOpen || (inDetail && collectionViewState.selection))) {
+        event.preventDefault();
+        closeCollectionDetail();
+        return;
+      }
       const row = collectionViewState.editingPartRow;
       if (!row || !row.isConnected || !document.getElementById("partSourceBox")?.contains(document.activeElement)) return;
       const cancel = row.cells[row.cells.length - 1]?.querySelector('button[onclick^="cancelEditRow("]');

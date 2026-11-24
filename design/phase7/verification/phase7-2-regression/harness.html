@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><title>Phase 7-2 integration regression</title>
+<style>iframe{border:1px solid #888;height:900px;margin:4px;vertical-align:top}</style></head>
+<body>
+<pre id="out">running…</pre>
+<script>
+// Suites: a = 7-2a checks, b = 7-2b, c = 7-2c, d = 7-2d review additions, fail = 7-2a A-08 fallback.
+// Widths 390 / 820 (phone sheet) and 821 / 1440 (desktop panel), dark and beige.
+const RUNS = [];
+["a", "b", "c", "d"].forEach(suite => [[390, "dark"], [820, "beige"], [821, "dark"], [1440, "beige"]].forEach(([w, theme]) => RUNS.push({ suite, w, theme })));
+RUNS.push({ suite: "fail", w: 1440, theme: "dark" });
+const results = [];
+let next = 0;
+function startNext() {
+  const r = RUNS[next++];
+  if (!r) return;
+  const f = document.createElement("iframe");
+  f.style.width = r.w + "px";
+  f.src = `frame.html?suite=${r.suite}&theme=${r.theme}&w=${r.w}`;
+  document.body.appendChild(f);
+}
+window.addEventListener("message", e => {
+  if (!e.data || !e.data.i72r) return;
+  results.push(e.data);
+  startNext();
+  if (results.length === RUNS.length) {
+    const all = results.flatMap(r => (r.checks || []).map(c => ({ ...c, suite: r.suite, width: r.width })));
+    const byCategory = {};
+    all.forEach(c => { const k = `${c.suite}:${c.category}`; byCategory[k] = byCategory[k] || { passed: 0, total: 0 }; byCategory[k].total += 1; if (c.ok) byCategory[k].passed += 1; });
+    window.__i72r = {
+      runs: results.map(r => ({ suite: r.suite, theme: r.theme, width: r.width, ok: r.ok, error: r.error, passed: (r.checks || []).filter(c => c.ok).length, total: (r.checks || []).length, failed: (r.checks || []).filter(c => !c.ok) })),
+      passed: all.filter(c => c.ok).length, total: all.length, byCategory,
+      ids: Object.fromEntries(["a", "b", "c", "d", "fail"].map(s => [s, [...new Set(all.filter(c => c.suite === s).map(c => `${c.category} | ${c.id}`))]]))
+    };
+    document.getElementById("out").textContent = JSON.stringify(window.__i72r.runs.map(r => [r.suite, r.width, r.passed + "/" + r.total, r.error || ""]), null, 0);
+  }
+});
+startNext();
+</script>
+</body></html>

@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body>
+<script type="module">
+// Phase 7-2d integration check (detail panel / phone sheet / P-2 identity / D1 through the panel). Runs the REAL source text of
+// script.js (sliced by markers) on the REAL index.html markup with the REAL
+// style.css / site-menu.css and the REAL catalog files, in a browser.
+// Stubs: sign-in state, write session, saveData (counted, never writes),
+// refreshSelectors, confirm (recorded, answer chosen per step), alert. No Firebase.
+import { fingerprintTable, pickCollectionTables } from "/repo/collection-sync.js";
+import { attachCatalogNames, getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel } from "/repo/stock-catalog-names.js";
+import * as view from "/repo/collection-view.js";
+
+const params = new URLSearchParams(location.search);
+const THEME = params.get("theme") || "dark";
+const report = data => parent.postMessage({ i72d: true, theme: THEME, width: innerWidth, ...data }, "*");
+const frame = () => new Promise(r => setTimeout(r, 60));
+const checks = [];
+const check = (id, ok, detail = "") => checks.push({ id, ok: Boolean(ok), detail: String(detail).slice(0, 400) });
+
+try {
+  const html = await (await fetch("/repo/index.html")).text();
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map(l => l.getAttribute("href")).filter(h => !/^https?:/.test(h));
+  await Promise.all(links.map(href => new Promise(ok => { const l = document.createElement("link"); l.rel = "stylesheet"; l.href = "/repo/" + href; l.onload = l.onerror = ok; document.head.appendChild(l); })));
+  doc.querySelectorAll("script").forEach(s => s.remove());
+  document.body.className = doc.body.className;
+  document.body.innerHTML = doc.body.innerHTML;
+  if (THEME === "beige") document.documentElement.dataset.theme = "beige";
+
+  const src = (await (await fetch("/repo/script.js")).text()).replace(/\r\n/g, "\n");
+  const slice = (a, b) => { const i = src.indexOf(a), j = src.indexOf(b, i + 1); if (i < 0 || j < 0) throw new Error("slice " + a); return src.slice(i, j); };
+  const code = [
+    slice("let inventoryFilterType", "\n") + "\n",
+    slice("const partTypes = [", "function normalizeAllModelCells("),
+    slice("const RANDOM_BOOSTER_MODELS", "// Phase 7-R: the ratchet rules"),
+    slice("function getSeriesFromModel(", "function getConfigStructureModeFromRow("),
+    slice("const TABLE_SORT_ORDER", "function sortConfigTable("),
+    slice("function addStock(", "function closeConfigActionMenus("),
+    slice("function getEditingButtons(", "function normalizeComboValue("),
+    slice("function createHistoryRow(", "function findHistoryByComboKey("),
+    slice("window.deleteRow = async function", "function getConfigEditCurrentValue("),
+    slice("function getTableData(", "/* ===== D-018 collection saves: begin"),
+    slice("const QUICK_ADD_TEXT_FIELD_IDS", "async function handleAuthStateChange("),
+    slice("const STOCK_ROW_METADATA_KEYS", "function applyDataToTables("),
+    slice("function getTotalParts(", "function toHalfWidth("),
+    slice("function hasUnsavedDomInteraction(", "function beginDataSession("),
+    slice("function installUiSummaryObservers(", "/* ===== Phase 7-2a collection view (R2): begin"),
+    slice("/* ===== Phase 7-2a collection view (R2): begin", "/* ===== Phase 7-2b parts model (P2 / U2 / D1, read-only): end")
+  ].join("\n");
+  const counters = { saveData: 0, confirms: [], alerts: [], answer: true };
+  window.confirm = text => { counters.confirms.push(text); return counters.answer; };
+  window.alert = text => { counters.alerts.push(text); };
+  const [productData, nameData] = await Promise.all([
+    fetch("/repo/stock_products_AUTOFILL_SAFE_2026-07-29-v3.json").then(r => r.json()),
+    fetch("/repo/beyblade_x_model_chinese_english_2026-08-29.json").then(r => r.json())
+  ]);
+  const products = attachCatalogNames(productData.stockProducts, nameData.records);
+  const api = new Function("deps", `
+    const { getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel, view, counters, products } = deps;
+    const { ${Object.keys(view).join(", ")} } = view;
+    const requestAnimationFrame = callback => setTimeout(callback, 16);
+    const DATA_SESSION_STATES = { LOADING: "loading", READY: "ready", ERROR: "error", READONLY: "readonly" };
+    const isReadOnly = () => false;
+    const requireLogin = () => true;
+    const dataSessionGuard = { captureWriteSession: () => ({}), isWriteSessionCurrent: () => true, snapshot: () => ({ state: "ready" }) };
+    const refreshSelectors = () => {};
+    const renderStockAutoPreview = () => {};
+    const askDeleteReasonForConfig = async () => null;
+    const saveData = () => { counters.saveData += 1; };
+    let currentUser = { uid: "user-a" };
+    let stockProductsByRecordId = new Map(products.filter(p => p.autoFillEnabled && !p.needsReview && p.recordId).map(p => [String(p.recordId).trim(), p]));
+    ${code}
+    function load(data) {
+      clearAllTables();
+      data.beybladeTable.forEach(item => createBeybladeRow(item.cells, item.mainStockName, item));
+      data.partTable.forEach(item => createPartRow(item.cells));
+      data.historyTable.forEach(item => createHistoryRow(item));
+      data.configTable.forEach(item => createConfigRow(item.cells, item.mainStockName));
+      sortBeybladeTable();
+    }
+    return { load, collectCurrentData, installCollectionView, installUiSummaryObservers, setCollectionTab, computeCollectionPartsModel,
+      setFilter: v => { inventoryFilterType = v; }, resetCollectionViewState, readStoredViewMode, applyInventoryFilters, hasUnsavedDomInteraction, render: renderCollectionView, state: () => collectionViewState };
+  `)({ getOfficialStockCode, getStockCatalogLabel, getStockVariantLabel, view, counters, products });
+
+  const auto = (code, recordId, layer, fix, axis, extra = {}) => ({ cells: [code, layer, "-", "-", "-", "-", "-", fix, axis], mainStockName: "-", stockAutoFilled: "true", stockRecordId: recordId, stockProductCode: code, stockAssemblySystem: "STANDARD", ...extra });
+  const DATA = {
+    beybladeTable: [
+      auto("UX-01", "UX-01", "蒼龍爆刃", "1-60", "A"),
+      auto("BX-01", "BX-01", "蒼龍神劍", "3-60", "F"),
+      auto("BX-01", "BX-01", "蒼龍神劍", "3-60", "F"),
+      auto("BX-00", "BX-00-01-01", "歐比王肯諾比", "4-60", "P", { stockSetId: "BX-00-01", stockSetInstanceId: "set-1" }),
+      auto("BX-00", "BX-00-01-02", "葛里維斯將軍", "3-80", "HN", { stockSetId: "BX-00-01", stockSetInstanceId: "set-1" }),
+      { cells: ["BX-04", "騎士重盾", "-", "-", "-", "-", "-", "3-80", "N"], mainStockName: "-" },               // manual: no English name
+      { cells: ["CX-03", "紋章鎖金屬超越S", "紋章鎖", "超越/金屬", "超越", "金屬", "S", "4-55", "LO"], mainStockName: "", stockAutoFilled: "true", stockRecordId: "CX-03", stockAssemblySystem: "CX_4P" }
+    ],
+    partTable: [
+      { cells: ["固鎖", "3-60", "2"] },
+      { cells: ["軸心", "R", "1"] },
+      { cells: ["軸心", "F", "1"] },
+      { cells: ["軸心", "F", "3"] }
+    ],
+    configTable: [
+      { cells: ["BX-01 CUSTOM", "蒼龍神劍", "-", "-", "-", "-", "-", "3-60", "F"], mainStockName: "-" },
+      { cells: ["BX-CUSTOM", "惡魔重錘", "-", "-", "-", "-", "-", "3-60", "R"], mainStockName: "-" },
+      { cells: ["BX-CUSTOM", "魔導幻箭", "-", "-", "-", "-", "-", "3-60", "R"], mainStockName: "-" },
+      { cells: ["BX-CUSTOM", "騎士重盾", "-", "-", "-", "-", "-", "3-60", "LF"], mainStockName: "-" },
+      { cells: ["CX-CUSTOM", "紋章鎖金屬超越S", "紋章鎖", "超越/金屬", "超越", "金屬", "S", "4-55", "LO"], mainStockName: "" }
+    ],
+    historyTable: []
+  };
+
+  const collect = () => { const out = api.collectCurrentData(); delete out.updatedAt; const t = pickCollectionTables(out); return { json: JSON.stringify(t), prints: Object.values(t).map(fingerprintTable).join("|"), tables: t }; };
+  const rowsOf = id => Array.from(document.querySelectorAll(`#${id} tbody tr`));
+  const text = id => document.getElementById(id)?.textContent;
+
+  api.load(DATA);
+  api.installCollectionView();
+  api.installUiSummaryObservers();
+  await frame(); await frame();
+  const base = collect();
+  const STOCK_DOM = rowsOf("beybladeTable");
+  const PART_DOM = rowsOf("partTable");
+  const unchanged = () => collect().json === base.json && collect().prints === base.prints && counters.saveData === 0;
+  const sheetMode = innerWidth <= 820;
+  const settle = async () => { await frame(); await frame(); };
+  const items = id => [...document.querySelectorAll(`#${id} [data-view-select]`)];
+  const itemText = a => (a.querySelector(".cv-code, .cv-type")?.textContent || "") + " " + a.querySelector(".cv-title").textContent;
+  const findItem = (id, text, nth = 0) => items(id).filter(a => itemText(a) === text)[nth];
+  const detail = id => document.getElementById(id);
+  const detailText = id => detail(id).querySelector("[data-detail-body]").textContent.replace(/\s+/g, " ").trim();
+  const shown = id => getComputedStyle(detail(id)).display !== "none";
+  const setSelect = async (id, value) => { const el = document.getElementById(id); el.value = value; el.dispatchEvent(new Event("change", { bubbles: true })); await settle(); };
+  const lastConfirm = () => counters.confirms.at(-1);
+
+  // ---- Layout: desktop panel / phone sheet.
+  api.setCollectionTab("stock"); await settle();
+  check("no inline actions in the lists", document.querySelectorAll("#stockViewList [data-view-action], #partViewList [data-view-action]").length === 0);
+  check(sheetMode ? "phone: no panel until an item is chosen" : "desktop: panel beside the list with the empty prompt",
+    sheetMode ? !shown("stockDetail") : (shown("stockDetail") && /選擇一筆資料查看詳細資訊/.test(detailText("stockDetail"))
+      && detail("stockDetail").getBoundingClientRect().left > document.getElementById("stockViewList").getBoundingClientRect().right - 1), detail("stockDetail").getBoundingClientRect().left);
+
+  // ---- Select the 2nd BX-01 after a filter + sort (D-01 / K4-01).
+  await setSelect("stockSortSelect", "model");
+  document.querySelector('[data-stock-series="BX"]').click(); await settle();
+  const second = findItem("stockViewList", "BX-01 蒼龍神劍", 1);
+  second.click(); await settle();
+  check("selected item highlighted", findItem("stockViewList", "BX-01 蒼龍神劍", 1)?.classList.contains("is-selected") && findItem("stockViewList", "BX-01 蒼龍神劍", 0)?.getAttribute("aria-current") === "false");
+  check(sheetMode ? "phone: the sheet opens as a dialog with focus inside" : "desktop: the panel shows the selection",
+    sheetMode ? (detail("stockDetail").classList.contains("is-open") && detail("stockDetail").getAttribute("role") === "dialog" && detail("stockDetail").getAttribute("aria-modal") === "true"
+      && !detail("stockDetail").parentElement.querySelector(".cv-detail-scrim").hidden && detail("stockDetail").contains(document.activeElement) && shown("stockDetail"))
+      : (shown("stockDetail") && detail("stockDetail").getAttribute("role") === "region"), detailText("stockDetail").slice(0, 80));
+  const bx01Text = detailText("stockDetail");
+  check("stock detail: name, English name, parts, source, configs using the 上蓋, delete", /BX-01/.test(bx01Text) && /蒼龍神劍/.test(bx01Text) && /DranSword/.test(bx01Text)
+    && /固鎖\s?3-60/.test(bx01Text) && /來源：型錄自動帶入/.test(bx01Text) && /使用這個上蓋的配置（1）/.test(bx01Text) && /蒼龍神劍 3-60 F/.test(bx01Text)
+    && detail("stockDetail").querySelector('[data-view-action="delete"]')?.textContent === "刪除這顆", bx01Text.slice(0, 200));
+  check("viewing does not count as editing (spec F)", api.hasUnsavedDomInteraction() === false);
+  // V3 switch keeps the selection.
+  document.querySelector('#collectionSection [data-view-mode="card"]').click(); await settle();
+  check("list / card switch keeps the panel", detailText("stockDetail") === bx01Text && findItem("stockViewList", "BX-01 蒼龍神劍", 1)?.classList.contains("is-selected"));
+  document.querySelector('#collectionSection [data-view-mode="list"]').click(); await settle();
+  // Cancel then confirm the delete (D1 text unchanged from 7-2b).
+  counters.answer = false;
+  detail("stockDetail").querySelector('[data-view-action="delete"]').click(); await settle();
+  check("D1-1 through the panel", lastConfirm() === "確定要刪除「BX-01 蒼龍神劍」嗎？\n刪除後，下列零件會不夠配置使用：\n・固鎖 3-60：持有 3，配置引用 4（蒼龍神劍 3-60 F、惡魔重錘 3-60 R、魔導幻箭 3-60 R 等 4 個）\n配置不會被修改。", lastConfirm());
+  check("cancel: unchanged, no save", unchanged());
+  const bx01Rows = STOCK_DOM.filter(r => r.cells[0].innerText === "BX-01");
+
+  // ---- K4-04: the row changes between render and the click -> no delete.
+  const before04 = counters.confirms.length;
+  const bx01Second = bx01Rows[1];
+  const oldFix = bx01Second.cells[7].textContent;
+  bx01Second.cells[7].textContent = "9-99";
+  detail("stockDetail").querySelector('[data-view-action="delete"]').click();
+  check("K4-04: changed row -> alert, no confirm, no delete", counters.confirms.length === before04 && counters.alerts.at(-1) === "資料已更新，請確認清單後再操作。" && bx01Second.isConnected);
+  bx01Second.cells[7].textContent = oldFix; await settle();
+  check("K4-04 restored", unchanged());
+
+  // ---- Set (K4-05, K4-06 cancel).
+  document.querySelector('[data-stock-series="all"]').click(); await settle();
+  findItem("stockViewList", "BX-00 葛里維斯將軍").click(); await settle();
+  const setText = detailText("stockDetail");
+  check("set detail: members and 刪除整組", /套組 BX-00-01（2 顆，刪除時會一起刪除）/.test(setText) && /歐比王肯諾比/.test(setText) && detail("stockDetail").querySelector('[data-view-action="delete"]').textContent === "刪除整組", setText.slice(0, 160));
+  const obi = STOCK_DOM.find(r => r.cells[1].innerText === "歐比王肯諾比");
+  const obiNext = obi.nextSibling, obiParent = obi.parentNode;
+  const before05 = counters.confirms.length;
+  obi.remove();
+  detail("stockDetail").querySelector('[data-view-action="delete"]').click();
+  check("K4-05: a set member vanished before the click -> alert, no confirm", counters.confirms.length === before05 && counters.alerts.at(-1) === "資料已更新，請確認清單後再操作。");
+  obiParent.insertBefore(obi, obiNext); await settle();
+  check("K4-05 restored", unchanged());
+  findItem("stockViewList", "BX-00 葛里維斯將軍").click(); await settle();
+  detail("stockDetail").querySelector('[data-view-action="delete"]').click(); await settle();
+  check("D1-2 set confirmation through the panel", lastConfirm() === "「BX-00」是雙陀螺套組。確定要一起刪除「歐比王肯諾比、葛里維斯將軍」嗎？", lastConfirm());
+  check("set cancel: unchanged", unchanged());
+
+  // ---- Parts: same-name rows, D1-3/4/5 through the panel.
+  api.setCollectionTab("parts"); await settle();
+  check("tab switch closes the stock selection", !document.querySelector("#stockViewList .is-selected"));
+  findItem("partViewList", "軸心 F").click(); await settle();
+  const fText = detailText("partDetail");
+  check("part detail: numbers, configs, two extra rows with their own buttons", /額外持有（2 筆資料）/.test(fText) && /額外第 1 筆/.test(fText) && /額外第 2 筆/.test(fText)
+    && detail("partDetail").querySelectorAll('[data-view-action="delete"]').length === 2 && detail("partDetail").querySelectorAll('[data-view-action="edit"]').length === 2
+    && /引用這個零件的配置（1）/.test(fText) && /原裝內含 2 個會隨原裝陀螺變動，不能在這裡修改/.test(fText), fText.slice(0, 220));
+  detail("partDetail").querySelectorAll('[data-view-action="delete"]')[1].click(); await settle();
+  check("same-name identity: the 2nd F row is the one asked about", lastConfirm() === "確定要刪除「軸心：F，數量 3」嗎？", lastConfirm());
+  check("parts cancel: unchanged", unchanged());
+  findItem("partViewList", "軸心 R").click(); await settle();
+  check("over-used hint in the panel", /配置引用比持有多 1 個/.test(detailText("partDetail")));
+  detail("partDetail").querySelector('[data-view-action="delete"]').click(); await settle();
+  check("D1-3 through the panel", lastConfirm() === "確定要刪除「軸心：R，數量 1」嗎？\n軸心 R 原本就不夠配置使用（持有 1，配置引用 2），變更後會更不足。\n配置不會被修改。", lastConfirm());
+  findItem("partViewList", "固鎖 3-60").click(); await settle();
+  const p360 = PART_DOM.find(r => r.cells[1].innerText === "3-60");
+  detail("partDetail").querySelector('[data-view-action="edit"]').click(); await settle();
+  check("edit from the panel opens the original row editor (and closes a phone sheet)", p360.dataset.editing === "true" && !document.getElementById("partSourceBox").classList.contains("is-source-hidden")
+    && api.hasUnsavedDomInteraction() === true && (!sheetMode || !detail("partDetail").classList.contains("is-open")));
+  p360.cells[2].querySelector("input").value = "1";
+  window.saveEditRow(p360.cells[p360.cells.length - 1].querySelector('button[onclick^="saveEditRow("]'), "part");
+  check("D1-4 through the panel", lastConfirm() === "確定要保存這次修改嗎？\n數量減少後，下列零件會不夠配置使用：\n・固鎖 3-60：持有 3，配置引用 4（蒼龍神劍 3-60 F、惡魔重錘 3-60 R、魔導幻箭 3-60 R 等 4 個）\n配置不會被修改。", lastConfirm());
+  counters.answer = true;
+  window.cancelEditRow(p360.cells[p360.cells.length - 1].querySelector('button[onclick^="cancelEditRow("]'), "part"); await settle();
+  counters.answer = false;
+  check("edit cancelled: editor closed, data unchanged", p360.dataset.editing !== "true" && document.getElementById("partSourceBox").classList.contains("is-source-hidden") && unchanged());
+  findItem("partViewList", "軸心 R").click(); await settle();
+  const pR = PART_DOM.find(r => r.cells[1].innerText === "R");
+  detail("partDetail").querySelector('[data-view-action="edit"]').click(); await settle();
+  pR.cells[1].querySelector("input").value = "R2";
+  window.saveEditRow(pR.cells[pR.cells.length - 1].querySelector('button[onclick^="saveEditRow("]'), "part");
+  check("D1-5 through the panel", lastConfirm() === "確定要保存這次修改嗎？\n改名後，下列配置仍使用舊名稱「R」，將找不到對應零件：\n・軸心 R：惡魔重錘 3-60 R、魔導幻箭 3-60 R\n配置不會自動改名。", lastConfirm());
+  counters.answer = true;
+  window.cancelEditRow(pR.cells[pR.cells.length - 1].querySelector('button[onclick^="cancelEditRow("]'), "part"); await settle();
+  check("all cancels: data identical, no save", unchanged());
+
+  // ---- D-07: a disabled original button gives a disabled panel button.
+  findItem("partViewList", "軸心 F").click(); await settle();
+  const fRow = PART_DOM.filter(r => r.cells[1].innerText === "F")[0];
+  const fDelete = fRow.cells[fRow.cells.length - 1].querySelector('button[onclick^="deleteRow("]');
+  fDelete.disabled = true; api.state().renderQueued = false; api.render(); await settle();
+  check("D-07: write gate mirrored in the panel", detail("partDetail").querySelectorAll('[data-view-action="delete"]')[0].disabled === true && detail("partDetail").querySelectorAll('[data-view-action="delete"]')[1].disabled === false);
+  fDelete.disabled = false; api.render(); await settle();
+
+  // ---- Escape: phones close the sheet, desktop clears a focused panel; focus back to the item.
+  findItem("partViewList", "軸心 F").click(); await settle();
+  if (!sheetMode) detail("partDetail").focus();
+  document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); await settle();
+  check("D-08 Escape closes and returns focus to the item", !detail("partDetail").classList.contains("is-open") && document.activeElement?.dataset?.viewSelect === "parts"
+    && (sheetMode || /選擇一筆資料查看詳細資訊/.test(detailText("partDetail"))), document.activeElement?.outerHTML?.slice(0, 80));
+
+  // ---- K4-02: the tables are rebuilt (remote snapshot) -> the panel closes, nothing reselected.
+  api.setCollectionTab("stock"); await settle();
+  findItem("stockViewList", "BX-01 蒼龍神劍", 1).click(); await settle();
+  api.load(DATA); await settle();
+  check("K4-02: rebuilt rows close the panel with a notice; nothing is reselected", !document.querySelector("#stockViewList .is-selected")
+    && !detail("stockDetail").classList.contains("is-open") && (sheetMode || /資料已更新，請重新選擇。/.test(detailText("stockDetail"))), detailText("stockDetail"));
+
+  // ---- Account change closes everything.
+  const STOCK2 = rowsOf("beybladeTable");
+  findItem("stockViewList", "UX-01 蒼龍爆刃").click(); await settle();
+  api.resetCollectionViewState(); await settle();
+  check("account change: panel closed and selection gone", !document.querySelector(".cv-item.is-selected") && !detail("stockDetail").classList.contains("is-open")
+    && api.state().selection === null && (sheetMode || /選擇一筆資料查看詳細資訊/.test(detailText("stockDetail"))));
+
+  // ---- Confirm path after the rebuild: delete the 2nd BX-01 through the panel.
+  const base2 = collect();
+  const bxNow = STOCK2.filter(r => r.cells[0].innerText === "BX-01");
+  findItem("stockViewList", "BX-01 蒼龍神劍", 1).click(); await settle();
+  counters.answer = true;
+  detail("stockDetail").querySelector('[data-view-action="delete"]').click(); await settle();
+  check("D-01 confirm: exactly the 2nd BX-01 row removed, one save, panel closed", !bxNow[1].isConnected && bxNow[0].isConnected && counters.saveData === 1
+    && !document.querySelector("#stockViewList .is-selected") && JSON.parse(collect().json).beybladeTable.length === JSON.parse(base2.json).beybladeTable.length - 1);
+
+  check("layout no horizontal overflow", document.documentElement.scrollWidth <= innerWidth + 1, `${document.documentElement.scrollWidth}/${innerWidth}`);
+  report({ ok: true, checks });
+} catch (error) {
+  report({ ok: false, error: String(error && error.stack || error), checks });
+}
+</script>
+</body>
+</html>
