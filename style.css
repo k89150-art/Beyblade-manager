@@ -4381,3 +4381,72 @@ html[data-theme="beige"] .cv-detail-impact {
     min-height: var(--ui-touch, 44px);
   }
 }
+
+/* ===== Phase 7-3b: config / teardown-log display layer =====
+   Same building blocks as the 7-2 collection view (.cv-*). The original
+   config / history tables stay in their source boxes and are only
+   clip-hidden by script.js (K-1). The list / card mode uses its own attribute
+   so it never meets the collection view's [data-view-mode] controls. */
+.config-tabs {
+  margin-top: var(--ui-space-5, 24px);
+}
+
+.cv-tag-warn {
+  border-color: #d29922;
+  color: #e3b341;
+}
+html[data-theme="beige"] .cv-tag-warn {
+  border-color: #9a6700;
+  color: #7d4e00;
+}
+
+.cv-detail-stock {
+  margin-left: 6px;
+  color: var(--ui-text-muted, #8d99a6);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.cv-detail-stock.is-warn {
+  color: #f0786f;
+}
+html[data-theme="beige"] .cv-detail-stock.is-warn {
+  color: #b3261e;
+}
+
+.cv-detail-warn {
+  padding: 8px 10px;
+  border: 1px solid #d29922;
+  border-radius: var(--ui-radius-sm, 6px);
+}
+html[data-theme="beige"] .cv-detail-warn {
+  border-color: #9a6700;
+}
+
+@media (min-width: 821px) {
+  .collection-view-list[data-config-mode="list"] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    border: 1px solid var(--ui-line, #2b3743);
+    border-radius: var(--ui-radius-md, 10px);
+    overflow: hidden;
+  }
+  .collection-view-list[data-config-mode="list"] .cv-notice {
+    border: 0;
+    border-radius: 0;
+  }
+  .collection-view-list[data-config-mode="list"] .cv-item {
+    grid-template-columns: minmax(180px, 1.1fr) minmax(0, 2fr);
+    align-items: center;
+    gap: var(--ui-space-2, 8px) var(--ui-space-3, 12px);
+    padding: 8px var(--ui-space-3, 12px);
+    border: 0;
+    border-bottom: 1px solid var(--ui-line, #2b3743);
+    border-radius: 0;
+  }
+  .collection-view-list[data-config-mode="list"] .cv-item:last-child {
+    border-bottom: 0;
+  }
+  .collection-view-list[data-config-mode="list"] .cv-title {
+    font-size: 14px;
+  }
+}

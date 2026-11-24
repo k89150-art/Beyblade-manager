@@ -34,6 +34,15 @@
 
 ## 最新紀錄
 
+### 2026-11-25 — Claude Code（Phase 7-3b：配置顯示層，ChatGPT 有條件 PASS → 補測後 commit）
+
+- 任務：v1.14.2 部署後依規格 11 §4 實作 7-3b（只允許本機實作與測試，不 commit、不升版、不 push、不部署），完成後交 ChatGPT 複審。驗收紀錄 `design/phase7/verification/phase7-3b/README.md`。
+- 主要內容：新檔 `config-view.js`（純函式）；`script.js` 新區塊「Phase 7-3b config view」（7-2b 區塊之後），比照 7-2 R2／7-2d：原始配置與拆解紀錄表 clip 隱藏、從原始列快照渲染、「我的配置／拆解紀錄」分頁、搜尋、系列與結構篩選、排序、桌面清單／卡片、桌面面板與手機 sheet、修改／拆解／還原／刪除紀錄經既有入口並先做新鮮度檢查、遠端重建與換帳號時關閉並重設。`index.html` 新增分頁、工具列、清單與面板，原始兩表移到分頁外的 `#configSourceTables`，拆解紀錄標題改名；`style.css` 新增少量樣式；快取 `script.js`／`style.css`／`config-view.js` 為 `20261125-phase73b`。未修改資料一致性與交易核心、`collection-view.js`、`assembly-rules.js`、Rules、Schema；未實作 7-3c／7-3d。
+- 測試：Node 18 檔 439/439（新增 `tests/config-view.test.mjs` 14 項）；Emulator 真實頁面 8 組寬度×主題純顯示操作 0 次 commit、儲存值不變、來源區為 clip；修改、拆解、還原、刪除紀錄各 1 次；過期資料與換帳號防護；Phase 7-2 回歸 505/505；validate、build（36 files）、`git diff --check` PASS；A-09 十段雜湊為核准值，寫入路徑不變。
+- 補測（Emulator 真實頁面，ChatGPT 複審條件）：兩裝置都經詳細面板「修改」同一配置表並同時儲存 → 一方 200、另一方 400 並進入 D-018 衝突、未覆蓋；遠端重建後舊面板按鈕失效；修改（關閉組裝器）、拆解（原因視窗取消）、還原與刪除紀錄（確認取消）都 0 次寫入；手機 sheet：Tab／Shift+Tab 限制在內、從外部 Tab 會進入、Escape／遮罩／關閉按鈕都關閉並把焦點還給項目、背景被遮罩覆蓋（全站選單按鈕 z-index 1200 在遮罩之上，與 7-2d 相同）、選取項目被遠端刪除時 sheet 關閉、焦點回到分頁、焦點限制解除；820→821 重新渲染後不殘留遮罩、dialog 角色與 sheet 狀態（本環境 App 視窗不可見時 `matchMedia` change／resize 事件不會送出，以觸發一次渲染驗證）；登出與換帳號後無選取、無遮罩、搜尋清除、焦點限制解除；強制初始化失敗（測試複本 `?failConfigView`）→ 原始兩表可見可操作、不 inert，新顯示層與面板、遮罩不殘留，載入 0 次寫入，透過原始列「⋯ → 修改」與歷史「還原」各 1 次，其他資料不變。回歸：Node 439/439、Phase 7-2 回歸 505/505、M01～M16 PASS、validate／build（36 files）／diff-check PASS、核准雜湊與寫入路徑不變。未修改程式。
+- Git：功能 commit 見 `git log`（feat(config): implement phase 7-3b configuration management views）。
+- 剩餘：既有確認文字仍寫「歷史測試紀錄」；後備版面順序；Safari／iOS 未驗證。
+
 ### 2026-11-25 — Claude Code（v1.14.2 正式部署與唯讀驗收）
 
 - 發布前驗收：Node 17 檔 425/425；Phase 7-2 整合回歸 505/505（release 樹再跑一次）；M01～M16 PASS 16／FAIL 0；validate PASS；build PASS（35 files）；`git diff --check` PASS；A-09 雜湊：`getTableData` 段 `02f67bb21e597b3e`、`applyDataToTables` 段 `08c1de72b2266fec`、`editRow`→`rebuildRow` `3ec54b27ec414e19`、`getStockNameFromCell`→`escapeHtml` `c1230e4d43e39ba2`（皆為核准的新雜湊），其餘 6 段不變；`addConfig` 儲存格寫入 `da046a3d56a07519`、`checkStock` `0bed51c10a056c87`；`saveData()` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0。

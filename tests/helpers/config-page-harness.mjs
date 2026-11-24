@@ -11,6 +11,7 @@ import * as guardModule from "../../data-session-guard.js";
 import * as collectionModule from "../../collection-sync.js";
 import * as assemblyModule from "../../assembly-rules.js";
 import * as viewModule from "../../collection-view.js";
+import * as configViewModule from "../../config-view.js";
 import * as catalogNamesModule from "../../stock-catalog-names.js";
 
 const SOURCE_URL = new URL("../../script.js", import.meta.url);
@@ -43,6 +44,9 @@ function createDom() {
   // as stored), "rendered" like a visible cell (whitespace runs collapsed,
   // trimmed). Real pages switch between the two when card styles apply (D-023).
   const textView = { mode: "raw" };
+  // Real pages enable every [data-write-action] button once the session is
+  // writable (updateDataAccessUi); the page sets this after it starts.
+  const writeState = { writable: () => false };
   const observers = [];
   const pendingTargets = new Set();
   let flushQueued = false;
@@ -101,6 +105,7 @@ function createDom() {
       setAttribute(name, value) { this.attributes[name] = String(value); },
       getAttribute(name) { return this.attributes[name] ?? null; },
       removeAttribute(name) { delete this.attributes[name]; },
+      toggleAttribute(name, force) { const on = force ?? !(name in this.attributes); if (on) this.attributes[name] = ""; else delete this.attributes[name]; return on; },
       addEventListener(type, handler) { (listeners[type] ||= []).push(handler); },
       removeEventListener(type, handler) { listeners[type] = (listeners[type] || []).filter(item => item !== handler); },
       dispatch(type, event = {}) { (listeners[type] || []).forEach(handler => handler(event)); },
@@ -206,6 +211,23 @@ function createDom() {
         }
       });
       cell.querySelector = selector => {
+        // button[onclick^="x"] / button[onclick*="x"] (one or more): the
+        // first <button> in the cell's HTML whose onclick matches them all.
+        if (/^button\[onclick[*^]=/.test(String(selector))) {
+          const rules = [...String(selector).matchAll(/\[onclick([*^])="([^"]*)"\]/g)].map(match => [match[1], match[2]]);
+          for (const match of html.matchAll(/<button\b([^>]*)>/g)) {
+            const onclick = unescapeHtml((/\bonclick="([^"]*)"/.exec(match[1]) || [])[1] || "");
+            if (!rules.every(([kind, value]) => (kind === "^" ? onclick.startsWith(value) : onclick.includes(value)))) continue;
+            return {
+              tag: "button",
+              get disabled() { return /\bdata-write-action\b/.test(match[1]) ? !writeState.writable() : /\sdisabled(\s|$|=)/.test(match[1]); },
+              getAttribute: name => (name === "onclick" ? onclick : null),
+              closest: name => (name === "tr" ? row : null),
+              parentElement: { parentElement: row }
+            };
+          }
+          return null;
+        }
         const tags = String(selector).split(",").map(part => part.trim());
         const control = controls.find(item => tags.includes(item.tag));
         if (control) return control;
@@ -329,7 +351,7 @@ function createDom() {
       return [];
     }
   };
-  return { document, tables, elements, MutationObserver, textView };
+  return { document, tables, elements, MutationObserver, textView, writeState };
 }
 
 // ---------- page ----------
@@ -355,6 +377,7 @@ export function createConfigPage({ mock, uid = "user-a", email = "a@example.test
     ...collectionModule,
     ...catalogNamesModule,
     ...viewModule,
+    ...configViewModule,
     evaluateAssembly: assemblyModule.evaluateAssembly,
     newAssemblyViolations: assemblyModule.newAssemblyViolations,
     isIntegratedRatchetBlade: assemblyModule.isIntegratedRatchetBlade,
@@ -421,9 +444,12 @@ globalThis.__page = {
   get guard() { return dataSessionGuard; },
   get saving() { return isSavingCloudData; },
   get pending() { return hasPendingCloudSave; },
-  get editorRow() { return configEditorRow; }
+  get editorRow() { return configEditorRow; },
+  get configView() { return configViewState; },
+  get writable() { return Boolean(dataSessionGuard.captureWriteSession()); }
 };`, context);
   const page = context.__page;
+  dom.writeState.writable = () => page.writable;
 
   // What DOMContentLoaded does for the tables (D-023: no delayed config sort).
   context.clearAllTables();

@@ -14,7 +14,7 @@
   <link rel="icon" href="app-icon.svg?v=20260704-pwa1" type="image/svg+xml" />
   <title>戰鬥陀螺管理表</title>
 
-  <link rel="stylesheet" href="style.css?v=20261124-phase72d" />
+  <link rel="stylesheet" href="style.css?v=20261125-phase73b" />
   <link rel="stylesheet" href="site-menu.css?v=20261124-v1100" />
   <style>
 
@@ -502,6 +502,11 @@
     </div>
     </div>
 
+    <div id="configTabs" class="collection-tabs config-tabs" role="tablist" aria-label="配置分頁" hidden>
+      <button type="button" role="tab" id="configTabConfigs" class="collection-tab" data-config-tab="configs" aria-controls="configSection" aria-selected="true">我的配置 <span class="collection-tab-count" id="configTabConfigsCount">0</span></button>
+      <button type="button" role="tab" id="configTabHistory" class="collection-tab" data-config-tab="history" aria-controls="historySection" aria-selected="false" tabindex="-1">拆解紀錄 <span class="collection-tab-count" id="configTabHistoryCount">0</span></button>
+    </div>
+
     <section id="configSection" class="tool-section">
       <div class="section-heading">
         <div><span class="eyebrow">BUILD SETUPS</span><h2>配置紀錄</h2></div>
@@ -512,6 +517,91 @@
       </div>
       <p class="section-note">從收藏與額外庫存挑選零件。已用完的零件仍會由既有數量防呆阻擋。</p>
 
+    <!-- Phase 7-3b: display layer. The original #configTable below stays the
+         only stored data source and is clip-hidden by script.js (K-1). -->
+    <div class="stock-search-toolbar config-search-toolbar" aria-label="配置搜尋、篩選與排序" data-config-toolbar hidden>
+      <label class="stock-search">
+        <span class="sr-only">搜尋配置</span>
+        <input id="configSearchInput" type="search" autocomplete="off" placeholder="搜尋上蓋、組合、零件或型號">
+      </label>
+      <div class="cv-list-controls" data-config-list-controls>
+      <div class="inventory-filters cv-chips" role="group" aria-label="依系列篩選配置">
+        <button type="button" class="inventory-filter active" data-config-series="all" aria-pressed="true">全部</button>
+        <button type="button" class="inventory-filter" data-config-series="BX" aria-pressed="false">BX</button>
+        <button type="button" class="inventory-filter" data-config-series="UX" aria-pressed="false">UX</button>
+        <button type="button" class="inventory-filter" data-config-series="CX" aria-pressed="false">CX</button>
+      </div>
+      <label class="cv-select"><span>結構</span>
+        <select id="configStructureFilter" autocomplete="off">
+          <option value="all">全部</option>
+          <option value="standard">標準三件式</option>
+          <option value="cx3">CX 三件戰刃</option>
+          <option value="cx4">CX 四件戰刃</option>
+          <option value="integratedBlade">固鎖一體上蓋</option>
+          <option value="integratedBit">Tr・Op 軸心</option>
+        </select>
+      </label>
+      <label class="cv-select"><span>排序</span>
+        <select id="configSortSelect" autocomplete="off">
+          <option value="default">預設（UX→BX→CX）</option>
+          <option value="blade">上蓋名稱</option>
+        </select>
+      </label>
+      <div class="cv-view-toggle" role="group" aria-label="配置顯示方式">
+        <button type="button" class="cv-view-button" data-config-view-mode="list" aria-pressed="true">清單</button>
+        <button type="button" class="cv-view-button" data-config-view-mode="card" aria-pressed="false">卡片</button>
+      </div>
+      <span id="configListStatus" class="inventory-filter-status" aria-live="polite"></span>
+      </div>
+    </div>
+
+    <div class="cv-layout" data-config-detail-layout>
+    <div id="configViewList" class="collection-view-list" aria-label="配置清單" hidden></div>
+    <div class="cv-detail-scrim" data-config-detail-close hidden></div>
+    <aside id="configDetail" class="cv-detail" aria-label="配置詳細資訊" tabindex="-1" hidden>
+      <div class="cv-detail-grab" aria-hidden="true"></div>
+      <div class="cv-detail-body" data-detail-body></div>
+      <button type="button" class="cv-detail-close" data-config-detail-close>關閉</button>
+    </aside>
+    </div>
+
+    </section>
+
+    <section id="historySection" class="tool-section history-section">
+      <div class="section-heading">
+        <div><span class="eyebrow">TEARDOWN LOG</span><h2>拆解紀錄</h2></div>
+        <span class="count-pill"><strong id="historyCount">0</strong> 筆</span>
+      </div>
+
+    <div class="history-note">
+      這裡會記錄曾經拆掉的配置。下次如果再加入相同組合，系統會提醒你以前測試過。
+    </div>
+
+    <div class="stock-search-toolbar config-search-toolbar" aria-label="拆解紀錄搜尋" data-config-toolbar hidden>
+      <label class="stock-search">
+        <span class="sr-only">搜尋拆解紀錄</span>
+        <input id="historySearchInput" type="search" autocomplete="off" placeholder="搜尋型號、組合、零件、結果或備註">
+      </label>
+      <span id="historyListStatus" class="inventory-filter-status" aria-live="polite"></span>
+    </div>
+
+    <div class="cv-layout" data-config-detail-layout>
+    <div id="historyViewList" class="collection-view-list" aria-label="拆解紀錄清單" hidden></div>
+    <div class="cv-detail-scrim" data-config-detail-close hidden></div>
+    <aside id="historyDetail" class="cv-detail" aria-label="拆解紀錄詳細資訊" tabindex="-1" hidden>
+      <div class="cv-detail-grab" aria-hidden="true"></div>
+      <div class="cv-detail-body" data-detail-body></div>
+      <button type="button" class="cv-detail-close" data-config-detail-close>關閉</button>
+    </aside>
+    </div>
+
+    </section>
+
+    <!-- Phase 7-3b: the original config / history tables stay the only stored
+         data source, outside the tab panels (which use [hidden]). script.js
+         clip-hides these boxes (never display:none / hidden / visibility:hidden). -->
+    <div id="configSourceTables" class="collection-source-tables">
+    <div id="configSourceBox" class="source-table-box" data-source-table="configTable">
     <div class="table-wrap record-card-wrap config-card-wrap">
       <table id="configTable">
         <thead>
@@ -531,18 +621,8 @@
         <tbody></tbody>
       </table>
     </div>
-    </section>
-
-    <section id="historySection" class="tool-section history-section">
-      <div class="section-heading">
-        <div><span class="eyebrow">TEST HISTORY</span><h2>歷史測試紀錄</h2></div>
-        <span class="count-pill"><strong id="historyCount">0</strong> 筆</span>
-      </div>
-
-    <div class="history-note">
-      這裡會記錄曾經拆掉的配置。下次如果再加入相同組合，系統會提醒你以前測試過。
     </div>
-
+    <div id="historySourceBox" class="source-table-box" data-source-table="historyTable">
     <div class="table-wrap record-card-wrap history-card-wrap">
       <table id="historyTable">
         <thead>
@@ -560,7 +640,8 @@
         <tbody></tbody>
       </table>
     </div>
-    </section>
+    </div>
+    </div>
   </main>
 
   <div id="configQuickEditor" class="quick-editor-shell" hidden>
@@ -804,7 +885,7 @@
       });
     })();
   </script>
-  <script type="module" src="script.js?v=20261124-phase7dc"></script>
+  <script type="module" src="script.js?v=20261125-phase73b"></script>
   <script src="site-menu.js?v=20261124-v1142"></script>
 </body>
 </html>

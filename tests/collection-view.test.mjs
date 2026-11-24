@@ -127,7 +127,8 @@ test("T1: tabs and panels keep the existing section ids; the original tables are
   for (const section of [collection, inventory]) {
     assert.doesNotMatch(section, /id="beybladeTable"|id="partTable"/, "no original table inside a tab panel");
   }
-  const sources = between(html, '<div id="collectionSourceTables"', '<section id="configSection"');
+  // Phase 7-3b: the config tab bar now sits between these sources and #configSection.
+  const sources = between(html, '<div id="collectionSourceTables"', '<div id="configTabs"');
   assert.match(sources, /<div id="beybladeSourceBox" class="source-table-box" data-source-table="beybladeTable">[\s\S]*<table id="beybladeTable">/);
   assert.match(sources, /<div id="partSourceBox" class="source-table-box" data-source-table="partTable">[\s\S]*<table id="partTable">/);
   assert.doesNotMatch(sources, /\shidden[\s>]|display:\s*none|visibility/, "the source area is never hidden in markup");
@@ -156,8 +157,8 @@ test("Q1: add forms stay where they were, wrapped in collapsible panels with the
 });
 
 test("cache versions for the changed files", () => {
-  assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261124-phase72d" \/>/);
-  assert.match(html, /<script type="module" src="script\.js\?v=20261124-phase7dc"><\/script>/);
+  assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261125-phase73b" \/>/);
+  assert.match(html, /<script type="module" src="script\.js\?v=20261125-phase73b"><\/script>/);
   assert.match(script, /from "\.\/collection-view\.js\?v=20261124-phase72d";/);
   // v1.14.2 only changes SITE_VERSION in site-menu.js; the D-020 navigation itself is unchanged.
   assert.match(html, /<script src="site-menu\.js\?v=20261124-v1142"><\/script>/);

@@ -49,6 +49,25 @@ import {
   sortPartItems,
   sortStockItems
 } from "./collection-view.js?v=20261124-phase72d";
+import {
+  CONFIG_STRUCTURE_LABELS,
+  CONFIG_VIEW_MODE_STORAGE_KEY,
+  CONFIG_VIEW_TABS,
+  buildConfigItems,
+  buildHistoryItems,
+  configCountText,
+  configListNotice,
+  configTabFromHash,
+  defaultConfigControls,
+  filterConfigByControls,
+  filterConfigItems,
+  filterHistoryItems,
+  normalizeConfigControls,
+  normalizeConfigViewMode,
+  otherConfigTab,
+  seriesOfModel,
+  sortConfigItems
+} from "./config-view.js?v=20261125-phase73b";
 
 import {
   getAuth,
@@ -3774,6 +3793,8 @@ function installUiSummaryObservers() {
     updateResponsiveTableCells();
     applyInventoryFilters();
     if (typeof scheduleCollectionViewRender === "function") scheduleCollectionViewRender();
+    // Phase 7-3b: the config display layer reads the same rows.
+    if (typeof scheduleConfigViewRender === "function") scheduleConfigViewRender();
   };
 
   ["beybladeTable", "partTable", "configTable", "historyTable"].forEach(tableId => {
@@ -4330,6 +4351,8 @@ function resetCollectionViewState() {
   collectionViewState.trigger = null;
   applyInventoryFilters();
   scheduleCollectionViewRender();
+  // Phase 7-3b: the config display layer resets with it.
+  if (typeof resetConfigViewState === "function") resetConfigViewState();
 }
 
 // Phase 7-2c: show the filter / sort / view-mode state on the controls.
@@ -4534,6 +4557,7 @@ function installCollectionView() {
 }
 /* ===== Phase 7-2a collection view (R2): end ===== */
 
+
 /* ===== Phase 7-2b parts model (P2 / U2 / D1, read-only): begin ===== */
 // Read-only. One part map per original row, built with the same rules as
 // getTotalParts / getUsedParts and the real addStock (neither function is
@@ -4671,6 +4695,563 @@ function getPartEditImpactText(button) {
   });
 }
 /* ===== Phase 7-2b parts model (P2 / U2 / D1, read-only): end ===== */
+
+/* ===== Phase 7-3b config view: begin ===== */
+// Same pattern as the 7-2a collection view (R2): the original #configTable /
+// #historyTable rows stay the only stored data source (getTableData,
+// getHistoryData and the D-018 saves are not changed). This layer reads those
+// rows and draws its own lists outside every table body, so nothing it renders
+// is collected or saved. Search, filters, sorting and the list / card mode are
+// display only. Actions call the existing functions with the original row's
+// own buttons after a freshness check; there is no second write path. The
+// original tables are clip-hidden only (K-1).
+const configViewState = {
+  active: false,
+  failed: false,
+  tab: "configs",
+  renderQueued: false,
+  refs: new Map(),
+  controls: defaultConfigControls(),
+  viewMode: "list",
+  // The selected item is the original <tr> itself (never found again by
+  // content); kind is "configs" or "history".
+  selection: null,
+  sheetOpen: false,
+  detailNotice: "",
+  trigger: null,
+  sheetQuery: null
+};
+const CONFIG_DETAIL_IDS = Object.freeze({ configs: "configDetail", history: "historyDetail" });
+const CONFIG_LIST_IDS = Object.freeze({ configs: "configViewList", history: "historyViewList" });
+const CONFIG_SOURCE_BOX_IDS = Object.freeze(["configSourceBox", "historySourceBox"]);
+
+function isConfigViewActive() {
+  return configViewState.active && !configViewState.failed;
+}
+
+// Read-only: the same reads as getTableData() / getHistoryData().
+function readConfigRowSnapshot(row) {
+  return { cells: getPersistedRowCells(row), mainStockName: row.cells[3]?.dataset.stockName ?? null, meta: {} };
+}
+
+function readHistoryRowSnapshot(row) {
+  return {
+    cells: Array.from(row.cells).slice(0, 7).map(cell => readStoredCellText(cell)),
+    mainStockName: null,
+    meta: { comboKey: row.dataset.comboKey || "" }
+  };
+}
+
+function readConfigViewSnapshot(row, tableId) {
+  return tableId === "historyTable" ? readHistoryRowSnapshot(row) : readConfigRowSnapshot(row);
+}
+
+// The original row's own buttons (config rows: the ⋯ menu; history rows:
+// 還原／刪除). The view never clicks them; it calls the same functions.
+function getConfigSourceButton(row, action) {
+  const cell = row?.cells[row.cells.length - 1];
+  if (!cell) return null;
+  if (action === "edit" || action === "delete") return cell.querySelector(`button[onclick*="runConfigCardAction"][onclick*="'${action}'"]`);
+  if (action === "restore") return cell.querySelector('button[onclick^="restoreHistoryRow("]');
+  if (action === "remove") return cell.querySelector('button[onclick^="deleteHistoryRow("]');
+  return null;
+}
+
+function setConfigTab(tab, { focusTab = false, updateHash = false } = {}) {
+  if (!isConfigViewActive()) return;
+  const next = tab === "history" ? "history" : "configs";
+  if (next !== configViewState.tab && configViewState.selection) clearConfigSelection();
+  configViewState.tab = next;
+  Object.entries(CONFIG_VIEW_TABS).forEach(([name, config]) => {
+    const active = name === next;
+    const section = document.getElementById(config.section);
+    if (section) section.hidden = !active;
+    const button = document.querySelector(`[data-config-tab="${name}"]`);
+    if (!button) return;
+    button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
+    button.classList.toggle("active", active);
+    if (active && focusTab) button.focus();
+  });
+  if (updateHash && typeof history.replaceState === "function") {
+    history.replaceState(null, "", `#${CONFIG_VIEW_TABS[next].section}`);
+  }
+  scheduleConfigViewRender();
+}
+
+function applyConfigHash(hash) {
+  if (!isConfigViewActive()) return false;
+  const tab = configTabFromHash(hash);
+  if (!tab) return false;
+  setConfigTab(tab);
+  return true;
+}
+
+function clearConfigSelection(notice = "") {
+  configViewState.selection = null;
+  configViewState.sheetOpen = false;
+  configViewState.detailNotice = notice;
+}
+
+function configSelectableAttributes(kind, key, selected, label) {
+  return `role="button" tabindex="0" data-config-select="${kind}" data-select-key="${escapeHtml(key)}" aria-controls="${CONFIG_DETAIL_IDS[kind]}" aria-current="${selected ? "true" : "false"}" aria-label="${escapeHtml(label)}，查看詳細資訊"`;
+}
+
+function renderConfigViewItem(item, selected) {
+  const tags = item.structures
+    .filter(tag => tag !== "standard")
+    .map(tag => `<span class="cv-tag">${escapeHtml(CONFIG_STRUCTURE_LABELS[tag])}</span>`)
+    .join("");
+  const warn = item.violations.length ? '<span class="cv-tag cv-tag-warn">不符合規則</span>' : "";
+  const parts = item.parts.map(part => `<span class="cv-part"><small>${escapeHtml(part.type)}</small>${escapeHtml(part.value)}</span>`).join("");
+  return `<article class="cv-item cv-config-item${selected ? " is-selected" : ""}" data-series="${escapeHtml(item.series)}" ${configSelectableAttributes("configs", item.key, selected, `${item.title} ${item.parts.map(part => part.value).join(" ")}`.trim())}>
+    <div class="cv-head"><span class="cv-code">${escapeHtml(item.model)}</span><strong class="cv-title">${escapeHtml(item.title)}</strong>${tags}${warn}</div>
+    ${parts ? `<div class="cv-parts">${parts}</div>` : ""}
+  </article>`;
+}
+
+function renderHistoryViewItem(item, selected) {
+  const meta = [["固鎖", item.fix], ["軸心", item.axis]]
+    .filter(([, value]) => value && value !== "-")
+    .map(([type, value]) => `<span class="cv-part"><small>${type}</small>${escapeHtml(value)}</span>`)
+    .join("");
+  const result = item.result && item.result !== "-" ? `<span class="cv-tag">${escapeHtml(item.result)}</span>` : "";
+  return `<article class="cv-item cv-history-item${selected ? " is-selected" : ""}" data-series="${escapeHtml(seriesOfModel(item.model))}" ${configSelectableAttributes("history", item.key, selected, `${item.combo} ${item.date}`.trim())}>
+    <div class="cv-head"><span class="cv-code">${escapeHtml(item.model)}</span><strong class="cv-title">${escapeHtml(item.combo)}</strong>${result}</div>
+    <div class="cv-parts">${meta}${item.date && item.date !== "-" ? `<span class="cv-part"><small>日期</small>${escapeHtml(item.date)}</span>` : ""}</div>
+  </article>`;
+}
+
+// Read-only availability of one config part from the 7-2b parts model.
+function configPartStock(partsModel, part) {
+  const entry = partsModel.items.find(item => item.type === part.type && item.name === part.value);
+  if (!entry) return { text: "無對應零件", tone: "warn" };
+  if (entry.avail < 0) return { text: `超用 ${-entry.avail}`, tone: "warn" };
+  return { text: `可用 ${entry.avail}`, tone: "" };
+}
+
+function renderConfigDetail(item, { partsModel, history, disabled }) {
+  const kv = item.parts.map(part => {
+    const stock = configPartStock(partsModel, part);
+    return `<dt>${escapeHtml(part.type)}</dt><dd>${escapeHtml(formatPartNameForMenu(part.value))} <span class="cv-detail-stock${stock.tone ? " is-warn" : ""}">${escapeHtml(stock.text)}</span></dd>`;
+  }).join("");
+  const structures = item.structures.map(tag => CONFIG_STRUCTURE_LABELS[tag]).join("、");
+  const rules = item.violations.length
+    ? `<section class="cv-detail-box cv-detail-warn"><h4>不符合組裝規則（既有配置，只提示）</h4><ul class="cv-detail-refs">${item.violations.map(violation => `<li>${escapeHtml(violation.message)}</li>`).join("")}</ul><p class="cv-detail-hint">修改時若沒有產生新的違規，可在確認後儲存。</p></section>`
+    : "";
+  const records = history.length
+    ? `<ul class="cv-detail-refs">${history.map(record => `<li>${escapeHtml([record.date, record.result, record.note].filter(value => value && value !== "-").join("｜") || "（無備註）")}</li>`).join("")}</ul>`
+    : '<p class="cv-detail-hint">拆解紀錄中沒有相同組合。</p>';
+  return `<div class="cv-detail-head"><span class="cv-code">${escapeHtml(item.model)}</span><h3 class="cv-detail-title">${escapeHtml(item.title)}</h3><span class="cv-detail-sub">${escapeHtml(structures)}</span></div>
+    ${kv ? `<dl class="cv-detail-kv">${kv}</dl>` : ""}
+    ${rules}
+    <section class="cv-detail-box"><h4>拆解紀錄中的相同組合（${history.length}）</h4>${records}</section>
+    <div class="cv-detail-actions">
+      <button type="button" class="cv-action" data-write-action data-config-action="edit" data-config-key="${escapeHtml(item.key)}"${disabled.edit ? " disabled" : ""} aria-label="修改 ${escapeHtml(item.title)}">修改</button>
+      <button type="button" class="cv-action cv-action-danger" data-write-action data-config-action="delete" data-config-key="${escapeHtml(item.key)}"${disabled.delete ? " disabled" : ""} aria-label="拆解 ${escapeHtml(item.title)}">拆解</button>
+    </div>
+    <p class="cv-detail-hint">修改會開啟建立配置面板；拆解前會詢問原因，並可保留到拆解紀錄。</p>`;
+}
+
+function renderHistoryDetail(item, { disabled }) {
+  const kv = [["型號", item.model], ["組合", item.combo], ["固鎖", item.fix], ["軸心", item.axis], ["結果", item.result], ["備註", item.note], ["日期", item.date]]
+    .filter(([, value]) => value && value !== "-")
+    .map(([label, value]) => `<dt>${label}</dt><dd>${escapeHtml(value)}</dd>`)
+    .join("");
+  return `<div class="cv-detail-head"><span class="cv-code">${escapeHtml(item.model)}</span><h3 class="cv-detail-title">${escapeHtml(item.combo)}</h3></div>
+    ${kv ? `<dl class="cv-detail-kv">${kv}</dl>` : ""}
+    <div class="cv-detail-actions">
+      <button type="button" class="cv-action" data-write-action data-config-action="restore" data-config-key="${escapeHtml(item.key)}"${disabled.restore ? " disabled" : ""} aria-label="還原 ${escapeHtml(item.combo)}">還原成配置</button>
+      <button type="button" class="cv-action cv-action-danger" data-write-action data-config-action="remove" data-config-key="${escapeHtml(item.key)}"${disabled.remove ? " disabled" : ""} aria-label="刪除 ${escapeHtml(item.combo)} 的拆解紀錄">刪除紀錄</button>
+    </div>
+    <p class="cv-detail-hint">還原會先確認並檢查零件庫存；刪除前也會再次確認。</p>`;
+}
+
+function writeConfigDetail(kind, html, { open }) {
+  const detail = document.getElementById(CONFIG_DETAIL_IDS[kind]);
+  if (!detail) return;
+  const sheet = isSheetLayout();
+  const body = detail.querySelector("[data-detail-body]");
+  if (body) body.innerHTML = html;
+  detail.classList.toggle("is-open", open);
+  detail.classList.toggle("is-sheet", sheet);
+  detail.setAttribute("role", sheet ? "dialog" : "region");
+  if (sheet) detail.setAttribute("aria-modal", "true");
+  else detail.removeAttribute("aria-modal");
+  const scrim = detail.parentElement?.querySelector(".cv-detail-scrim");
+  if (scrim) scrim.hidden = !(sheet && open);
+}
+
+function focusConfigItem(kind, key) {
+  const item = Array.from(document.querySelectorAll(`[data-config-select="${kind}"]`)).find(element => element.dataset.selectKey === key);
+  (item || document.querySelector(`[data-config-tab="${kind}"]`))?.focus({ preventScroll: true });
+}
+
+function renderConfigView() {
+  if (!isConfigViewActive()) return;
+  if (document.body.classList.contains("collection-view-failed")) {
+    failConfigView(new Error("收藏顯示層已改回表格介面"));
+    return;
+  }
+  const signedIn = Boolean(currentUser);
+  const loading = dataSessionGuard.snapshot().state === DATA_SESSION_STATES.LOADING;
+  const refs = new Map();
+  const sheetWasOpen = configViewState.sheetOpen;
+  if (configViewState.sheetOpen && !isSheetLayout()) configViewState.sheetOpen = false;
+
+  const configRows = Array.from(document.querySelectorAll("#configTable tbody tr"));
+  const configSnapshots = configRows.map(row => {
+    const snapshot = readConfigRowSnapshot(row);
+    const key = getCollectionViewKey(row);
+    refs.set(key, { row, tableId: "configTable", signature: rowSignature(snapshot) });
+    return { ...snapshot, key };
+  });
+  const configItems = buildConfigItems(configSnapshots).map(item => ({
+    ...item,
+    violations: evaluateAssembly({ model: item.cells[0], layer: item.cells[1], fix: item.cells[7], axis: item.cells[8] }).violations
+  }));
+  const controls = configViewState.controls;
+  const shownConfigs = sortConfigItems(
+    filterConfigByControls(filterConfigItems(configItems, document.getElementById("configSearchInput")?.value || ""), controls),
+    controls.sort);
+
+  const historyRows = Array.from(document.querySelectorAll("#historyTable tbody tr"));
+  const historySnapshots = historyRows.map(row => {
+    const snapshot = readHistoryRowSnapshot(row);
+    const key = getCollectionViewKey(row);
+    refs.set(key, { row, tableId: "historyTable", signature: rowSignature(snapshot) });
+    return { ...snapshot, key, comboKey: snapshot.meta.comboKey };
+  });
+  const historyItems = buildHistoryItems(historySnapshots);
+  const shownHistory = filterHistoryItems(historyItems, document.getElementById("historySearchInput")?.value || "");
+  configViewState.refs = refs;
+
+  // A selection lives only while its <tr> is connected; otherwise the panel
+  // closes with a notice (remote rebuild, account change, deleted row).
+  const selection = configViewState.selection;
+  let selectedConfig = null;
+  let selectedHistory = null;
+  if (selection) {
+    const rows = selection.kind === "history" ? historyRows : configRows;
+    const index = selection.row.isConnected ? rows.indexOf(selection.row) : -1;
+    if (index < 0) clearConfigSelection("資料已更新，請重新選擇。");
+    else if (selection.kind === "history") selectedHistory = historyItems[index];
+    else selectedConfig = configItems[index];
+  }
+
+  writeViewList(document.getElementById("configViewList"),
+    configListNotice({ signedIn, loading, total: configRows.length, shown: shownConfigs.length, kind: "configs" }),
+    shownConfigs.map(item => renderConfigViewItem(item, item === selectedConfig)).join(""));
+  writeViewList(document.getElementById("historyViewList"),
+    configListNotice({ signedIn, loading, total: historyRows.length, shown: shownHistory.length, kind: "history" }),
+    shownHistory.map(item => renderHistoryViewItem(item, item === selectedHistory)).join(""));
+
+  const emptyDetail = `<p class="cv-detail-empty">${escapeHtml(configViewState.detailNotice || "選擇一筆資料查看詳細資訊。")}</p>`;
+  let configDetail = emptyDetail;
+  if (selectedConfig) {
+    const row = configViewState.selection.row;
+    const comboKey = getConfigComboKeyFromRow(row);
+    const history = historyItems.filter(item => item.comboKey === comboKey);
+    const edit = getConfigSourceButton(row, "edit");
+    const remove = getConfigSourceButton(row, "delete");
+    configDetail = renderConfigDetail(selectedConfig, {
+      partsModel: computeCollectionPartsModel(),
+      history,
+      disabled: { edit: !edit || edit.disabled, delete: !remove || remove.disabled }
+    });
+  }
+  let historyDetail = emptyDetail;
+  if (selectedHistory) {
+    const row = configViewState.selection.row;
+    const restore = getConfigSourceButton(row, "restore");
+    const remove = getConfigSourceButton(row, "remove");
+    historyDetail = renderHistoryDetail(selectedHistory, { disabled: { restore: !restore || restore.disabled, remove: !remove || remove.disabled } });
+  }
+  writeConfigDetail("configs", configDetail, { open: Boolean(selectedConfig) && configViewState.sheetOpen });
+  writeConfigDetail("history", historyDetail, { open: Boolean(selectedHistory) && configViewState.sheetOpen });
+
+  const configCount = document.getElementById("configTabConfigsCount");
+  if (configCount) configCount.textContent = String(configRows.length);
+  const historyCount = document.getElementById("configTabHistoryCount");
+  if (historyCount) historyCount.textContent = String(historyRows.length);
+  const configStatus = document.getElementById("configListStatus");
+  if (configStatus) configStatus.textContent = signedIn ? configCountText(shownConfigs.length, configRows.length, "組") : "";
+  const historyStatus = document.getElementById("historyListStatus");
+  if (historyStatus) historyStatus.textContent = signedIn ? configCountText(shownHistory.length, historyRows.length, "筆") : "";
+
+  // A sheet that closed (rebuild, account change, width change) must not keep
+  // focus behind the scrim: return it to the item or the tab.
+  const focusedDetail = document.activeElement?.closest?.("#configDetail, #historyDetail");
+  const lostFromSheet = sheetWasOpen && !configViewState.sheetOpen && (!document.activeElement || document.activeElement === document.body);
+  if (lostFromSheet || (focusedDetail && getComputedStyle(focusedDetail).display === "none")) {
+    const trigger = configViewState.trigger;
+    focusConfigItem(trigger?.kind || configViewState.tab, trigger?.key || "");
+  }
+}
+
+function scheduleConfigViewRender() {
+  if (!isConfigViewActive() || configViewState.renderQueued) return;
+  configViewState.renderQueued = true;
+  const run = () => {
+    configViewState.renderQueued = false;
+    try {
+      renderConfigView();
+    } catch (error) {
+      failConfigView(error);
+    }
+  };
+  if (typeof requestAnimationFrame === "function") requestAnimationFrame(run);
+  else setTimeout(run, 0);
+}
+
+function selectConfigItem(kind, key) {
+  const entry = configViewState.refs.get(key);
+  const tableId = kind === "history" ? "historyTable" : "configTable";
+  if (!entry || entry.tableId !== tableId) return;
+  configViewState.selection = { kind, row: entry.row };
+  configViewState.detailNotice = "";
+  configViewState.sheetOpen = isSheetLayout();
+  configViewState.trigger = { kind, key };
+  renderConfigView();
+  if (configViewState.sheetOpen) document.getElementById(CONFIG_DETAIL_IDS[kind])?.focus({ preventScroll: true });
+  else focusConfigItem(kind, key);
+}
+
+function closeConfigDetail({ clear = !isSheetLayout() } = {}) {
+  const trigger = configViewState.trigger;
+  if (clear) clearConfigSelection();
+  else configViewState.sheetOpen = false;
+  renderConfigView();
+  if (trigger) focusConfigItem(trigger.kind, trigger.key);
+}
+
+// Confirms, right before acting, that the row the user saw is still there and
+// unchanged; otherwise nothing is called. The existing function then runs its
+// own checks and confirmations (session, D-019 rules, stock, reason dialog).
+function runConfigViewAction(button) {
+  const entry = configViewState.refs.get(button.dataset.configKey);
+  const row = entry?.row;
+  const current = row && row.isConnected && row.closest("table")?.id === entry.tableId
+    ? readConfigViewSnapshot(row, entry.tableId)
+    : null;
+  if (!current || rowSignature(current) !== entry.signature) {
+    alert("資料已更新，請確認清單後再操作。");
+    scheduleConfigViewRender();
+    return;
+  }
+  const action = button.dataset.configAction;
+  const source = getConfigSourceButton(row, action);
+  if (!source || source.disabled) return;
+  // The quick editor, the reason dialog and confirms open above the page; the
+  // phone sheet closes first so it never covers them.
+  if (configViewState.sheetOpen) {
+    configViewState.sheetOpen = false;
+    renderConfigView();
+  }
+  if (action === "edit") window.editRow(source, "config");
+  else if (action === "delete") window.deleteRow(source);
+  else if (action === "restore") window.restoreHistoryRow(source);
+  else if (action === "remove") window.deleteHistoryRow(source);
+}
+
+// Q1 / F-04: account change resets search, filters, sorting and selection.
+function resetConfigViewState() {
+  ["configSearchInput", "historySearchInput"].forEach(id => {
+    const input = document.getElementById(id);
+    if (input) input.value = "";
+  });
+  configViewState.controls = defaultConfigControls();
+  clearConfigSelection();
+  configViewState.trigger = null;
+  syncConfigControls();
+  scheduleConfigViewRender();
+}
+
+function syncConfigControls() {
+  const controls = configViewState.controls;
+  document.querySelectorAll("[data-config-series]").forEach(button => {
+    const active = button.dataset.configSeries === controls.series;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  const structure = document.getElementById("configStructureFilter");
+  if (structure) structure.value = controls.structure;
+  const sort = document.getElementById("configSortSelect");
+  if (sort) sort.value = controls.sort;
+  document.querySelectorAll("[data-config-view-mode]").forEach(button => {
+    button.setAttribute("aria-pressed", String(button.dataset.configViewMode === configViewState.viewMode));
+  });
+  Object.values(CONFIG_LIST_IDS).forEach(id => {
+    document.getElementById(id)?.setAttribute("data-config-mode", configViewState.viewMode);
+  });
+}
+
+function setConfigControl(key, value) {
+  configViewState.controls = normalizeConfigControls({ ...configViewState.controls, [key]: value });
+  syncConfigControls();
+  scheduleConfigViewRender();
+}
+
+// V3: the list / card preference is kept only in localStorage (its own key);
+// a storage error never stops the list from showing.
+function readStoredConfigViewMode() {
+  try {
+    return normalizeConfigViewMode(localStorage.getItem(CONFIG_VIEW_MODE_STORAGE_KEY));
+  } catch (error) {
+    return normalizeConfigViewMode(null);
+  }
+}
+
+function setConfigViewMode(mode) {
+  configViewState.viewMode = normalizeConfigViewMode(mode);
+  try {
+    localStorage.setItem(CONFIG_VIEW_MODE_STORAGE_KEY, configViewState.viewMode);
+  } catch (error) {
+    // Not saved; the current page still switches.
+  }
+  syncConfigControls();
+}
+
+// Fallback: back to the original tables (never an empty page, never a data
+// change).
+function failConfigView(error) {
+  if (configViewState.failed) return;
+  configViewState.failed = true;
+  console.error("配置顯示層無法使用，已改回原本的表格介面。", error);
+  try {
+    document.body.classList.add("config-view-failed");
+    CONFIG_SOURCE_BOX_IDS.forEach(id => setSourceBoxHidden(document.getElementById(id), false));
+    Object.values(CONFIG_VIEW_TABS).forEach(config => {
+      const section = document.getElementById(config.section);
+      if (section) section.hidden = false;
+    });
+    ["configTabs", "configViewList", "historyViewList", "configDetail", "historyDetail"].forEach(id => {
+      const element = document.getElementById(id);
+      if (element) element.hidden = true;
+    });
+    document.querySelectorAll("[data-config-toolbar], [data-config-detail-layout] .cv-detail-scrim").forEach(element => { element.hidden = true; });
+    document.querySelectorAll("[data-config-detail-layout]").forEach(layout => layout.classList.remove("has-detail"));
+  } catch (fallbackError) {
+    console.error(fallbackError);
+  }
+}
+
+function installConfigView() {
+  try {
+    const required = ["configTabs", "configSection", "historySection", "configViewList", "historyViewList",
+      "configDetail", "historyDetail", ...CONFIG_SOURCE_BOX_IDS];
+    const missing = required.filter(id => !document.getElementById(id));
+    if (missing.length) throw new Error(`配置顯示層缺少元素：${missing.join("、")}`);
+    if (document.body.classList.contains("collection-view-failed")) throw new Error("收藏顯示層已改回表格介面");
+
+    configViewState.active = true;
+    configViewState.viewMode = readStoredConfigViewMode();
+    CONFIG_SOURCE_BOX_IDS.forEach(id => setSourceBoxHidden(document.getElementById(id), true));
+    document.getElementById("configTabs").hidden = false;
+    Object.values(CONFIG_LIST_IDS).forEach(id => { document.getElementById(id).hidden = false; });
+    document.querySelectorAll("[data-config-toolbar]").forEach(element => { element.hidden = false; });
+
+    const tabs = document.getElementById("configTabs");
+    tabs.addEventListener("click", event => {
+      const button = event.target.closest("[data-config-tab]");
+      if (button) setConfigTab(button.dataset.configTab, { updateHash: true });
+    });
+    tabs.addEventListener("keydown", event => {
+      const keys = { ArrowRight: otherConfigTab(configViewState.tab), ArrowLeft: otherConfigTab(configViewState.tab), Home: "configs", End: "history" };
+      if (!(event.key in keys)) return;
+      event.preventDefault();
+      setConfigTab(keys[event.key], { focusTab: true, updateHash: true });
+    });
+
+    ["configSearchInput", "historySearchInput"].forEach(id => document.getElementById(id)?.addEventListener("input", scheduleConfigViewRender));
+    document.querySelectorAll("[data-config-series]").forEach(button => {
+      button.addEventListener("click", () => setConfigControl("series", button.dataset.configSeries));
+    });
+    document.getElementById("configStructureFilter")?.addEventListener("change", event => setConfigControl("structure", event.target.value));
+    document.getElementById("configSortSelect")?.addEventListener("change", event => setConfigControl("sort", event.target.value));
+    document.querySelectorAll("[data-config-view-mode]").forEach(button => {
+      button.addEventListener("click", () => setConfigViewMode(button.dataset.configViewMode));
+    });
+    syncConfigControls();
+
+    Object.values(CONFIG_LIST_IDS).forEach(id => {
+      const list = document.getElementById(id);
+      list.addEventListener("click", event => {
+        const item = event.target.closest("[data-config-select]");
+        if (item) selectConfigItem(item.dataset.configSelect, item.dataset.selectKey);
+      });
+      list.addEventListener("keydown", event => {
+        const item = event.target.closest("[data-config-select]");
+        if (!item || (event.key !== "Enter" && event.key !== " ")) return;
+        event.preventDefault();
+        selectConfigItem(item.dataset.configSelect, item.dataset.selectKey);
+      });
+    });
+    Object.values(CONFIG_DETAIL_IDS).forEach(id => {
+      const detail = document.getElementById(id);
+      detail.hidden = false;
+      detail.parentElement?.classList.add("has-detail");
+      detail.parentElement?.addEventListener("click", event => {
+        if (event.target.closest("[data-config-detail-close]")) {
+          closeConfigDetail();
+          return;
+        }
+        const button = event.target.closest(".cv-detail [data-config-action]");
+        if (button && !button.disabled) runConfigViewAction(button);
+      });
+    });
+    if (typeof matchMedia === "function") {
+      configViewState.sheetQuery = matchMedia("(max-width: 820px)");
+      configViewState.sheetQuery.addEventListener?.("change", () => {
+        configViewState.sheetOpen = false;
+        scheduleConfigViewRender();
+      });
+    }
+    window.addEventListener("hashchange", () => applyConfigHash(location.hash));
+    document.addEventListener("keydown", event => {
+      // While the config sheet is open, Tab stays inside it.
+      if (event.key === "Tab" && configViewState.sheetOpen) {
+        const sheet = document.querySelector("#configDetail.is-sheet.is-open, #historyDetail.is-sheet.is-open");
+        if (!sheet) return;
+        const focusables = Array.from(sheet.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"))
+          .filter(element => !element.disabled && element.getClientRects().length > 0);
+        if (!focusables.length) {
+          event.preventDefault();
+          sheet.focus({ preventScroll: true });
+          return;
+        }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement;
+        if (!sheet.contains(active)) {
+          event.preventDefault();
+          (event.shiftKey ? last : first).focus({ preventScroll: true });
+        } else if (event.shiftKey && (active === first || active === sheet)) {
+          event.preventDefault();
+          last.focus({ preventScroll: true });
+        } else if (!event.shiftKey && active === last) {
+          event.preventDefault();
+          first.focus({ preventScroll: true });
+        }
+        return;
+      }
+      if (event.key !== "Escape") return;
+      if (!document.getElementById("configQuickEditor")?.hidden) return;
+      const inDetail = document.activeElement?.closest?.("#configDetail, #historyDetail");
+      if (configViewState.sheetOpen || (inDetail && configViewState.selection)) {
+        event.preventDefault();
+        closeConfigDetail();
+      }
+    });
+
+    document.body.classList.add("config-view-ready");
+    setConfigTab(configTabFromHash(location.hash) || "configs");
+    renderConfigView();
+  } catch (error) {
+    failConfigView(error);
+  }
+}
+/* ===== Phase 7-3b config view: end ===== */
 
 function updateNoRatchetConfigOption() {
   const modelInput = document.getElementById("confModel");
@@ -5389,6 +5970,7 @@ document.addEventListener("DOMContentLoaded", function () {
   clearAllTables();
   refreshSelectors();
   installCollectionView();
+  installConfigView();
   installUiSummaryObservers();
   setSyncStatus("請先使用 Google 登入", "muted");
 
