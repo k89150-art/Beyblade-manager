@@ -160,8 +160,8 @@ test("cache versions for the changed files", () => {
   assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261125-phase73b" \/>/);
   assert.match(html, /<script type="module" src="script\.js\?v=20261125-phase73b"><\/script>/);
   assert.match(script, /from "\.\/collection-view\.js\?v=20261124-phase72d";/);
-  // v1.14.2 only changes SITE_VERSION in site-menu.js; the D-020 navigation itself is unchanged.
-  assert.match(html, /<script src="site-menu\.js\?v=20261124-v1142"><\/script>/);
+  // v1.15.0 only changes SITE_VERSION in site-menu.js; the D-020 navigation itself is unchanged.
+  assert.match(html, /<script src="site-menu\.js\?v=20261125-v1150"><\/script>/);
   assert.match(html, /<link rel="stylesheet" href="site-menu\.css\?v=20261124-v1100" \/>/);
 });
 

@@ -39,7 +39,7 @@ test("六個說明頁只保留共用捷徑掛載點", () => {
     assert.equal((html.match(/data-help-nav/g) || []).length, 1, `${page} 掛載點數量錯誤`);
     assert.match(html, /class="site-nav help-page-nav" data-help-nav/);
     assert.doesNotMatch(html, /<div class="site-nav">/);
-    assert.match(html, /site-menu\.js\?v=20261124-v1142/);
+    assert.match(html, /site-menu\.js\?v=20261125-v1150/);
     assert.match(html, /site-menu\.css\?v=20261124-v1100/);
   });
 });
@@ -53,7 +53,10 @@ test("使用教學符合目前正式操作", () => {
   assert.match(guide, /收藏、額外零件庫存、配置、競賽統計與賽事五個主要功能/);
   assert.match(guide, /上蓋、固鎖、軸心與 CX 分件快速篩選/);
   assert.match(guide, /自訂配置不需要輸入產品型號/);
-  assert.match(guide, /按卡片右側「⋯」才會顯示「修改」與「刪除」/);
+  // v1.15.0 (Phase 7-3b): config actions moved into the detail panel.
+  assert.match(guide, /先點選配置，再按詳細面板中的「修改」（開啟建立配置面板）或「拆解」/);
+  assert.match(guide, /「我的配置」與「拆解紀錄」兩個分頁/);
+  assert.doesNotMatch(guide, /按卡片右側「⋯」才會顯示「修改」與「刪除」/);
   assert.match(guide, /原裝收藏、額外零件庫存、自訂配置、歷史測試與參賽紀錄會儲存在自己的帳號/);
   assert.match(guide, /手機底部導覽為「收藏／配置／＋新增／賽事／更多」/);
   assert.match(guide, /競賽統計、說明頁與主題設定在「更多」/);
@@ -64,14 +67,15 @@ test("使用教學符合目前正式操作", () => {
 
 test("更新紀錄只直接顯示最新版本，其餘版本集中於歷史版本", () => {
   const html = readFileSync("changelog.html", "utf8");
-  const latestVersionIndex = html.indexOf("v1.14.2｜資料一致性修正");
+  const latestVersionIndex = html.indexOf("v1.15.0｜配置管理");
   const historyIndex = html.indexOf('<details class="version-archive">');
-  const previousVersionIndex = html.indexOf("v1.14.1｜組裝規則修正");
+  const previousVersionIndex = html.indexOf("v1.14.2｜資料一致性修正");
 
   assert.equal((html.match(/2026-09-02/g) || []).length, 1);
   assert.equal((html.match(/class="version-archive"/g) || []).length, 1);
   assert.ok(latestVersionIndex >= 0 && latestVersionIndex < historyIndex);
   assert.ok(previousVersionIndex > historyIndex);
+  assert.ok(html.indexOf("v1.14.1｜組裝規則修正") > historyIndex);
   assert.ok(html.indexOf("v1.14.0｜收藏詳細資訊") > historyIndex);
   assert.ok(html.indexOf("v1.13.0｜收藏清單篩選與排序") > historyIndex);
   assert.ok(html.indexOf("v1.12.0｜零件庫存與配置引用") > historyIndex);
@@ -79,7 +83,8 @@ test("更新紀錄只直接顯示最新版本，其餘版本集中於歷史版�
   assert.ok(html.indexOf("v1.10.0｜導覽調整與組裝規則更新") > historyIndex);
   assert.ok(html.indexOf("v1.9.2｜收藏與文字閱讀體驗改善") > historyIndex);
   assert.ok(html.indexOf("v1.9.0｜主題、導覽與管理介面更新") > historyIndex);
-  assert.match(html, /<summary>歷史版本（v1\.2\.0～v1\.14\.1）<\/summary>/);
+  assert.match(html, /<summary>歷史版本（v1\.2\.0～v1\.14\.2）<\/summary>/);
+  assert.equal((html.match(/2026-11-25/g) || []).length, 1, "v1.15.0");
   assert.equal((html.match(/2026-11-24/g) || []).length, 7, "v1.14.2, v1.14.1, v1.14.0, v1.13.0, v1.12.0, v1.11.0 and v1.10.0");
   assert.doesNotMatch(html, /v1\.9\.1｜收藏與庫存資訊顯示優化/);
 });

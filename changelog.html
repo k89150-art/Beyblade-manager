@@ -35,6 +35,21 @@
     <nav class="site-nav help-page-nav" data-help-nav aria-label="說明頁面捷徑"></nav>
 
     <div class="info-card">
+      <div class="version-title">v1.15.0｜配置管理</div>
+      <div class="version-meta">2026-11-25</div>
+      <ul class="update-list">
+        <li><span class="change-tag">配置</span>配置區新增「我的配置」與「拆解紀錄」兩個分頁；原本的「歷史測試紀錄」改稱「拆解紀錄」，資料不變。</li>
+        <li><span class="change-tag">配置</span>可搜尋上蓋、組合、零件名稱或型號，並依系列（BX／UX／CX）與結構（標準三件式、CX 三件、CX 四件、固鎖一體上蓋、Tr・Op 軸心）篩選，排序可選預設或上蓋名稱；這些條件只改變畫面，不會儲存。</li>
+        <li><span class="change-tag">顯示</span>電腦版可切換清單或卡片顯示；手機固定以卡片顯示。</li>
+        <li><span class="change-tag">配置</span>點選配置或拆解紀錄即可查看詳細資訊：電腦版顯示在右側詳細面板，手機從畫面底部開啟詳細資訊視窗；配置的詳細資訊包含各零件的可用／超用數量、結構、組裝規則提示，以及拆解紀錄中的相同組合。</li>
+        <li><span class="change-tag">操作</span>修改、拆解、還原與刪除紀錄改在詳細面板中操作，清單與卡片上不再有操作按鈕；資料在其他分頁或裝置更新、或登出、切換帳號時，詳細面板會自動關閉，不會對已變更的資料執行操作。</li>
+      </ul>
+    </div>
+
+    <details class="version-archive">
+      <summary>歷史版本（v1.2.0～v1.14.2）</summary>
+
+    <div class="info-card">
       <div class="version-title">v1.14.2｜資料一致性修正</div>
       <div class="version-meta">2026-11-24</div>
       <ul class="update-list">
@@ -45,9 +60,6 @@
         <li><span class="change-tag">零件</span>零件依「類別＋完整名稱」計算庫存，只差空白的名稱視為不同零件；建立配置的選單會以 ␣、⇥ 等符號標出這類空白，並保存所選零件的原始名稱。</li>
       </ul>
     </div>
-
-    <details class="version-archive">
-      <summary>歷史版本（v1.2.0～v1.14.1）</summary>
 
     <div class="info-card">
       <div class="version-title">v1.14.1｜組裝規則修正</div>
@@ -354,6 +366,6 @@
     </div>
     </details>
   </div>
-<script src="site-menu.js?v=20261124-v1142"></script>
+<script src="site-menu.js?v=20261125-v1150"></script>
 </body>
 </html>
