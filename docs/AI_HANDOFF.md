@@ -34,6 +34,12 @@
 
 ## 最新紀錄
 
+### 2026-11-25 — Claude Code（v1.17.0 發布準備：快速建立配置）
+
+- 任務：Phase 7-3d 複審補測通過、功能 commit `7580719` 後，依核准流程準備 v1.17.0。
+- 主要內容：`SITE_VERSION` v1.17.0（`site-menu.js` 只改常數），11 頁 `site-menu.js` 快取 `20261125-v1170`；更新紀錄新增 v1.17.0（從既有配置快速複製、從原裝收藏快速建立配置、自動預填對應結構與零件、缺少或庫存不足零件提示、仍須使用者確認儲存並完整檢查庫存與組裝規則），v1.16.0 移入歷史版本（v1.2.0～v1.16.0）；使用教學第四節已於 7-3d 更新。版本與說明頁測試同步。功能程式未修改。
+- 測試：Node 20 檔 469/469；Phase 7-2 回歸 505/505；M01～M16（見部署紀錄）；validate、build（36 files）、`git diff --check` PASS；`saveData(` 17、`runTransaction(` 1。
+
 ### 2026-11-25 — Claude Code（Phase 7-3d：快速建立配置，ChatGPT 有條件 PASS → 補測後 commit）
 
 - 任務：v1.16.0 部署後依規格 11 §6 實作 7-3d（只允許本機實作與測試，不 commit、不升版、不 push、不部署），完成後交 ChatGPT 複審。驗收紀錄 `design/phase7/verification/phase7-3d/README.md`。

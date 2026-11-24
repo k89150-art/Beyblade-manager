@@ -35,6 +35,21 @@
     <nav class="site-nav help-page-nav" data-help-nav aria-label="說明頁面捷徑"></nav>
 
     <div class="info-card">
+      <div class="version-title">v1.17.0｜快速建立配置</div>
+      <div class="version-meta">2026-11-25</div>
+      <ul class="update-list">
+        <li><span class="change-tag">配置</span>配置的詳細面板新增「複製配置」：以這個配置的零件開啟新的配置，可調整後另外儲存，不會改動原配置。</li>
+        <li><span class="change-tag">收藏</span>原裝收藏的詳細面板新增「建立配置」：以這顆陀螺的零件開啟新的配置。</li>
+        <li><span class="change-tag">配置</span>兩者都會自動選好對應的組裝結構（標準三件式、CX 三件戰刃、CX 四件戰刃，一體式零件自動取消固鎖）與零件。</li>
+        <li><span class="change-tag">配置</span>已經沒有庫存、或資料中沒有的零件不會自動選入，組裝器會列出這些零件，請改選後再儲存。</li>
+        <li><span class="change-tag">配置</span>這些入口只預先選好零件，不會自動儲存；按「儲存」時仍會完整檢查庫存與官方組裝規則，複製的配置視為新配置。</li>
+      </ul>
+    </div>
+
+    <details class="version-archive">
+      <summary>歷史版本（v1.2.0～v1.16.0）</summary>
+
+    <div class="info-card">
       <div class="version-title">v1.16.0｜新版組裝器</div>
       <div class="version-meta">2026-11-25</div>
       <ul class="update-list">
@@ -46,9 +61,6 @@
         <li><span class="change-tag">修正</span>修正切換組裝器模式時會影響配置清單顯示狀態、修改配置時重新整理選單可能把自己使用的零件算成已使用，以及關閉組裝器後鍵盤焦點遺失的問題。</li>
       </ul>
     </div>
-
-    <details class="version-archive">
-      <summary>歷史版本（v1.2.0～v1.15.0）</summary>
 
     <div class="info-card">
       <div class="version-title">v1.15.0｜配置管理</div>
@@ -379,6 +391,6 @@
     </div>
     </details>
   </div>
-<script src="site-menu.js?v=20261125-v1160"></script>
+<script src="site-menu.js?v=20261125-v1170"></script>
 </body>
 </html>
