@@ -34,6 +34,12 @@
 
 ## 最新紀錄
 
+### 2026-11-25 — Claude Code（v1.16.0 發布準備：新版組裝器）
+
+- 任務：Phase 7-3c 複審補測通過、功能 commit `afb7472` 後，依核准流程準備 v1.16.0。
+- 主要內容：`SITE_VERSION` v1.16.0（`site-menu.js` 只改常數），11 頁 `site-menu.js` 快取 `20261125-v1160`；更新紀錄新增 v1.16.0（三種組裝結構與零件槽、一體式零件的固鎖處理、即時庫存與規則檢查、拆解紀錄重複提示、桌面與手機新版組裝器、清單模式／修改庫存／焦點修正），v1.15.0 移入歷史版本（v1.2.0～v1.15.0）；使用教學第四節已於 7-3c 更新。未宣稱複製配置或從收藏建立配置。版本與說明頁測試同步（新增不得出現 7-3d 功能字樣的檢查）。功能程式未修改。
+- 測試：Node 19 檔 458/458；Phase 7-2 回歸 505/505；M01～M16（見部署紀錄）；validate、build（36 files）、`git diff --check` PASS；`saveData(` 17、`runTransaction(` 1。
+
 ### 2026-11-25 — Claude Code（Phase 7-3c：組裝器介面，ChatGPT 有條件 PASS → 補測後 commit）
 
 - 任務：v1.15.0 部署後依規格 11 §5 與 integrated-ac 原型實作 7-3c（只允許本機實作與測試，不 commit、不升版、不 push、不部署），完成後交 ChatGPT 複審。驗收紀錄 `design/phase7/verification/phase7-3c/README.md`。

@@ -35,6 +35,22 @@
     <nav class="site-nav help-page-nav" data-help-nav aria-label="說明頁面捷徑"></nav>
 
     <div class="info-card">
+      <div class="version-title">v1.16.0｜新版組裝器</div>
+      <div class="version-meta">2026-11-25</div>
+      <ul class="update-list">
+        <li><span class="change-tag">配置</span>建立與修改配置時，先選擇組裝結構：標準三件式（BX／UX）、CX 三件戰刃或 CX 四件戰刃，只顯示該結構需要的零件欄位；切換結構時，新結構不使用的欄位會清空。</li>
+        <li><span class="change-tag">配置</span>固鎖一體型上蓋（彈丸獅鷲、榮耀戰神、惡魔冥界）與固鎖一體型軸心（Tr、Op）會自動取消固鎖欄位，固鎖欄改顯示「無獨立固鎖」。</li>
+        <li><span class="change-tag">配置</span>選零件時即時檢查：尚未選擇的欄位、庫存不足（並列出占用該零件的配置）、組裝規則（修改既有配置時區分原本就有與新產生的問題），以及 Tr／Op 裝在 CX 四件戰刃下的提示。即時檢查只是提示，按「儲存」時仍會再次檢查庫存與官方組裝規則。</li>
+        <li><span class="change-tag">配置</span>選好的組合若在拆解紀錄中出現過，會先提示並顯示當時的結果。</li>
+        <li><span class="change-tag">顯示</span>電腦版組裝器改為置中視窗，手機為全螢幕視窗；鍵盤操作會留在組裝器內，關閉後回到原本的位置。</li>
+        <li><span class="change-tag">修正</span>修正切換組裝器模式時會影響配置清單顯示狀態、修改配置時重新整理選單可能把自己使用的零件算成已使用，以及關閉組裝器後鍵盤焦點遺失的問題。</li>
+      </ul>
+    </div>
+
+    <details class="version-archive">
+      <summary>歷史版本（v1.2.0～v1.15.0）</summary>
+
+    <div class="info-card">
       <div class="version-title">v1.15.0｜配置管理</div>
       <div class="version-meta">2026-11-25</div>
       <ul class="update-list">
@@ -45,9 +61,6 @@
         <li><span class="change-tag">操作</span>修改、拆解、還原與刪除紀錄改在詳細面板中操作，清單與卡片上不再有操作按鈕；資料在其他分頁或裝置更新、或登出、切換帳號時，詳細面板會自動關閉，不會對已變更的資料執行操作。</li>
       </ul>
     </div>
-
-    <details class="version-archive">
-      <summary>歷史版本（v1.2.0～v1.14.2）</summary>
 
     <div class="info-card">
       <div class="version-title">v1.14.2｜資料一致性修正</div>
@@ -366,6 +379,6 @@
     </div>
     </details>
   </div>
-<script src="site-menu.js?v=20261125-v1150"></script>
+<script src="site-menu.js?v=20261125-v1160"></script>
 </body>
 </html>
