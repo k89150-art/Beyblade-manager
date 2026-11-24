@@ -6,6 +6,7 @@ import fs from "node:fs";
 import vm from "node:vm";
 import * as guardModule from "../../data-session-guard.js";
 import * as syncModule from "../../tournament-sync.js";
+import * as panelModule from "../../tournament-panel.js";
 
 const SOURCE_URL = new URL("../../tournament.js", import.meta.url);
 
@@ -98,7 +99,11 @@ export async function createTournamentPage({
     elements[id] = createElement();
   });
 
-  const list = createElement({ querySelectorAll: () => [] });
+  // Phase 7-4a: tests can place one fake record panel in the list.
+  let panelElement = null;
+  const list = createElement({
+    querySelectorAll: selector => (panelElement && (selector === "[data-round-panel]" || selector === "[data-round-panel][data-match-id]") ? [panelElement] : [])
+  });
   let listHtml = "";
   Object.defineProperty(list, "innerHTML", {
     get: () => listHtml,
@@ -158,7 +163,8 @@ export async function createTournamentPage({
     getDocFromServer: mock.getDocFromServer,
     runTransaction: mock.runTransaction,
     ...guardModule,
-    ...syncModule
+    ...syncModule,
+    ...panelModule
   };
 
   vm.createContext(context);
@@ -191,6 +197,28 @@ export async function createTournamentPage({
     queueConfirms(...answers) { confirmAnswers.push(...answers); },
     queuePrompts(...answers) { promptAnswers.push(...answers); },
     setCard(selector, element) { cards.set(selector, element); },
+    // Phase 7-4a: a record panel for (tournamentId, matchId) holding the round
+    // fields; it is also the first [data-match-id] element, as on the page.
+    setPanel(tournamentId, matchId, values = {}) {
+      const fields = {
+        "[data-round-beyblade]": { value: values.beyblade ?? "" },
+        "[data-round-result]": { value: values.result ?? "" },
+        "[data-round-score-type]": { value: values.scoreType ?? "" },
+        "[data-round-note]": { value: values.note ?? "" }
+      };
+      const message = { textContent: "" };
+      panelElement = {
+        attributes: { "data-round-panel": tournamentId, "data-match-id": matchId },
+        getAttribute(name) { return this.attributes[name] ?? null; },
+        querySelector: selector => (selector === "[data-panel-message]" ? message : fields[selector] || null),
+        querySelectorAll: () => [],
+        fields,
+        message
+      };
+      cards.set(`[data-match-id="${matchId}"]`, panelElement);
+      return panelElement;
+    },
+    clearPanel() { panelElement = null; },
     lastStatus() { return statuses.at(-1) || null; },
     plain(value) { return JSON.parse(JSON.stringify(value ?? null)); },
     setAddForm(values) {

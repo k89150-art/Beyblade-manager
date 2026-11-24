@@ -1,6 +1,6 @@
 # 08｜A＋C 整合原型（Phase 7A）
 
-狀態：**原型，等待使用者檢視**。沒有修改正式網站、Firestore、Rules、Schema、型錄或統計資料；沒有 commit、push、deploy。
+狀態：**已核准為 Phase 7 的設計基礎**（使用者 2026-11-23 確認 3a～3f；README「已確認」各項）。核准設計不代表該部分已實作：各階段依規格 09～13 另行授權。原型本身沒有修改正式網站、Firestore、Rules、Schema、型錄或統計資料。
 
 ## 檔案與開啟方式
 

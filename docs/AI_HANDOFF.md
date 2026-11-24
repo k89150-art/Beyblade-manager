@@ -4,8 +4,8 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（Phase 7-4 唯讀盤點與規格整理，不實作；完成後交 ChatGPT 複審）
-- 寫入範圍：Phase 7-4 只寫規格文件（`design/phase7/`、交接文件）；不修改程式
+- 目前執行者：Claude Code（Phase 7-4a／7-4b／7-4c 本機實作與個別 commit；不升版、不 push、不部署）
+- 寫入範圍：賽事頁顯示層（`tournament.html`、`tournament.js` 渲染與面板區塊、`tournament-panel.js`、測試）；7-4c 另含核准的 T16 `editMatch` 例外
 - 正式版本：`049b0e6`（v1.17.0，`origin/main`，GitHub Pages deployment `8038191756` success）。本機另有 v1.17.0 部署結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
@@ -33,6 +33,22 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-25 — Claude Code（Phase 7-4a：比分板與回合大按鈕，本機 commit）
+
+- 任務：Phase 7-4 規格定案（Q1～Q8），依序實作 7-4a／7-4b／7-4c；本筆為 7-4a。驗收 `design/phase7/verification/phase7-4a/README.md`。
+- 主要內容：比賽詳細最上方的記錄回合面板（比分板、對局切換、陀螺／得分方／勝利方式大按鈕、預覽、近期回合、4 分後完成狀態）；只設定既有 `data-round-*` 欄位並呼叫既有 `addRound`；新增 `tournament-panel.js`、`tests/tournament-protection.test.mjs`、`tests/tournament-panel.test.mjs`；`tournament.html` 樣式與快取 `20261126-phase74a`。規格 13 定案、`08` 狀態更正。
+- 未修改：`tournament-sync.js`、S1～S6、T1～T17、計分與完成判定、收藏與配置端、Rules、Schema。
+- 測試：Node 484/484；Emulator 真實頁面（預設對象、未選擇不送出、記錄 1 次、切換對局草稿不混用、4 分後停用與刪除後恢復、連按 1 次、版面）。
+- Commit：`feat(tournament): implement phase 7-4a round recording panel`（見 `git log`）；未 push、未部署。
+
+### 2026-11-25 — Claude Code（Phase 7-4 前置唯讀盤點與規格草案，未 commit）
+
+- 任務：v1.17.0 部署後，唯讀盤點賽事頁並整理 Phase 7-4 規格；不實作。
+- 產出：`design/phase7/13-phase7-4-tournament-panel-spec.md`（草案，未 commit）：現況資料、計分與完成判定、10 個寫入入口、配置選單、D-017 保護、賽事端寫入路徑基準（`tournament.js`：`runTransaction(` 1、`submitTournamentOperation(` 11、`createTournamentOperation(` 10、`setDoc`／`updateDoc`／`deleteDoc`／`onSnapshot` 0）、`tournament-sync.js` S1～S6 與 `tournament.js` T1～T17 雜湊、設計與現況差異、7-4a／7-4b／7-4c 拆分、驗收矩陣、待決 Q1～Q8。
+- 結論：回合大按鈕與新增對局可完全經既有 `addRound`／`addMatch`／`addDirectAdvance` 入口（顯示層設定既有欄位）完成，不新增寫入途徑；取代修改對局的 `prompt()` 需修改受保護的 `editMatch`（T16），列為待核准例外。
+- 未修改程式；未讀寫正式 Firestore。
+- Commit / Deploy：未 commit。
 
 ### 2026-11-25 — Claude Code（v1.17.0 正式部署與唯讀驗收，Phase 7-3 結案）
 

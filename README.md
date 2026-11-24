@@ -21,7 +21,7 @@
 本專案沒有 `package.json`，不需要安裝 npm 套件。建議使用 Node.js 20 或相容版本執行：
 
 ```powershell
-node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs tests/collection-sync.test.mjs tests/assembly-rules.test.mjs tests/site-navigation.test.mjs tests/collection-view.test.mjs tests/collection-parts.test.mjs tests/config-assembly-wiring.test.mjs tests/data-consistency.test.mjs tests/config-view.test.mjs tests/config-assembler.test.mjs tests/config-quick-create.test.mjs
+node --test tests/catalog-name-merge.test.mjs tests/competition-statistics.test.mjs tests/help-pages.test.mjs tests/manager-ui-refresh.test.mjs tests/retirement.test.mjs tests/data-session-safety.test.mjs tests/collection-autofill-safety.test.mjs tests/tournament-sync.test.mjs tests/tournament-page-sync.test.mjs tests/tournament-sync-regression.test.mjs tests/collection-sync.test.mjs tests/assembly-rules.test.mjs tests/site-navigation.test.mjs tests/collection-view.test.mjs tests/collection-parts.test.mjs tests/config-assembly-wiring.test.mjs tests/data-consistency.test.mjs tests/config-view.test.mjs tests/config-assembler.test.mjs tests/config-quick-create.test.mjs tests/tournament-protection.test.mjs tests/tournament-panel.test.mjs
 node --experimental-vm-modules scripts/validate-site.mjs
 node scripts/build-site.mjs
 git diff --check

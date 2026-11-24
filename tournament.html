@@ -113,6 +113,53 @@
       .round-table td[colspan]::before, .round-table td.round-action-empty { display: none; }
       .round-table td button { width: 100%; margin: 0; }
     }
+    /* ===== Phase 7-4 tournament record panel (approved C large buttons) ===== */
+    .tp-arena { margin: 4px 0 18px; padding: 14px; border-radius: 14px; background: #0f141a; border: 1px solid #2c3540; color: #e8eef5; display: grid; gap: 12px; }
+    .tp-empty, .tp-card-note { margin: 0; color: #aab4bf; font-size: 14px; }
+    .tp-board { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr); gap: 10px; align-items: center; text-align: center; }
+    .tp-side { display: grid; gap: 4px; justify-items: center; }
+    .tp-side > span { font-size: 13px; color: #aab4bf; font-weight: 700; }
+    .tp-side strong { font-size: 54px; line-height: 1; font-weight: 900; }
+    .tp-me strong { color: #4cd38a; }
+    .tp-op strong { color: #ff7b7b; }
+    .tp-pips { display: flex; gap: 4px; }
+    .tp-pip { width: 14px; height: 6px; border-radius: 3px; background: #2c3540; }
+    .tp-me .tp-pip.is-on { background: #4cd38a; }
+    .tp-op .tp-pip.is-on { background: #ff7b7b; }
+    .tp-mid { display: grid; gap: 4px; font-size: 13px; color: #c8d1db; overflow-wrap: anywhere; }
+    .tp-mid strong { font-size: 15px; color: #fff; }
+    .tp-status { margin: 0; font-size: 13px; color: #c8d1db; }
+    .tp-switch { display: grid; gap: 4px; font-size: 13px; color: #aab4bf; }
+    .tp-switch select { min-height: 44px; width: 100%; }
+    .tp-group { display: grid; gap: 6px; }
+    .tp-label { font-size: 13px; color: #aab4bf; font-weight: 700; }
+    .tp-bigs { display: grid; gap: 8px; }
+    .tp-beys { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+    .tp-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tp-four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .tp-arena .tp-big:hover { border-color: #5b6878; background: #212b36; color: #fff; }
+    .tp-arena .tp-big { min-height: 52px; padding: 8px 10px; border-radius: 10px; border: 1px solid #3a4552; background: #1a222c; color: #e8eef5; font-size: 15px; font-weight: 800; display: grid; place-items: center; gap: 2px; overflow-wrap: anywhere; text-align: center; }
+    .tp-arena .tp-big small { font-size: 12px; font-weight: 700; color: #aab4bf; }
+    .tp-arena .tp-big[aria-pressed="true"] { border-color: #4a93ff; background: #1f4f9a; color: #fff; }
+    .tp-arena .tp-big[aria-pressed="true"] small { color: #dce8ff; }
+    .tp-arena .tp-big.tp-win[aria-pressed="true"] { border-color: #4cd38a; background: #1d6b45; }
+    .tp-arena .tp-big.tp-lose[aria-pressed="true"] { border-color: #ff7b7b; background: #8a2e33; }
+    .tp-arena .tp-big:focus-visible, .tp-go:focus-visible, .tp-target-btn:focus-visible { outline: 3px solid #ffcc66; outline-offset: 2px; }
+    .tp-note { display: grid; gap: 4px; font-size: 13px; color: #aab4bf; }
+    .tp-note input { min-height: 44px; }
+    .tp-preview { margin: 0; font-size: 14px; color: #ffcc66; min-height: 1.4em; }
+    .tp-message { margin: 0; font-size: 14px; color: #ff8787; min-height: 0; }
+    .tp-message:empty { display: none; }
+    .tp-go { min-height: 52px; font-size: 16px; }
+    .tp-done { margin: 0; padding: 12px; border-radius: 10px; background: #1a222c; border: 1px dashed #4cd38a; color: #dfe7ee; font-size: 14px; line-height: 1.6; }
+    .tp-recent ol { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13px; }
+    .tp-recent li { display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 6px 8px; border-radius: 8px; background: #161d25; }
+    @media (max-width: 700px) {
+      .tp-arena { padding: 12px; }
+      .tp-side strong { font-size: 44px; }
+      .tp-four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tp-beys { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -194,7 +241,7 @@
       document.body.classList.remove("side-menu-open");
     }
   </script>
-  <script type="module" src="tournament.js?v=20261029-phase4b1"></script>
+  <script type="module" src="tournament.js?v=20261126-phase74a"></script>
 <script src="site-menu.js?v=20261125-v1170"></script>
 </body>
 </html>

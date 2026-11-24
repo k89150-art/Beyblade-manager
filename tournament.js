@@ -33,6 +33,13 @@ import {
   startTournamentTransaction,
   waitForTournamentTransaction
 } from "./tournament-sync.js?v=20261029-phase4b1";
+import {
+  preselectedBeyblade,
+  recordableMatches,
+  resolveRoundPanelTarget,
+  roundPanelBeyblades,
+  roundPanelSelectionError
+} from "./tournament-panel.js?v=20261126-phase74";
 
 const firebaseConfig = {
   apiKey: "AIzaSyABQadKr-Am-55GgFJmhZ0tkRY-joARNAQ",
@@ -411,6 +418,8 @@ function renderTournamentList() {
 
   list.innerHTML = sortedRecords.map(record => renderTournamentCard(record)).join("");
   restoreTournamentFormDrafts();
+  // Phase 7-4a: pressed states, the single-bey preset and the preview.
+  syncRoundPanels();
   updateDataAccessUi();
 }
 
@@ -460,12 +469,12 @@ function renderTournamentDetail(record) {
     <div class="tournament-detail">
       ${isFinished
         ? `<div class="empty-state">這場比賽已完成。若要新增對局或回合，請先按「修改」。</div>`
-        : `<h4>新增對局</h4>${renderAddMatchForm(record.id)}`
+        : `${renderRoundPanel(record)}<h4>新增對局</h4>${renderAddMatchForm(record.id)}`
       }
 
       <h4>對局紀錄</h4>
       ${(record.matches || []).length
-        ? record.matches.map((match, index) => renderMatchCard(record.id, match, isFinished, index + 1)).join("")
+        ? record.matches.map((match, index) => renderMatchCard(record.id, match, isFinished, index + 1, isFinished ? "" : getRoundPanelTarget(record))).join("")
         : `<div class="empty-state">尚未新增對局。</div>`
       }
     </div>
@@ -506,7 +515,7 @@ function renderAddMatchForm(tournamentId) {
   `;
 }
 
-function renderMatchCard(tournamentId, match, isFinished, matchNumber) {
+function renderMatchCard(tournamentId, match, isFinished, matchNumber, panelTargetId = "") {
   const score = calculateMatchScore(match);
   const status = getMatchStatus(match);
   const statusClass = getMatchStatusClass(match);
@@ -523,6 +532,7 @@ function renderMatchCard(tournamentId, match, isFinished, matchNumber) {
             : `<div class="match-score">比分：我方 ${score.myScore} : ${score.opponentScore} 對手 <span class="${statusClass}">${status}</span></div>`}
         </div>
         <div class="match-actions">
+          ${!isFinished && !directAdvance && panelTargetId !== match.id && getMatchOutcome(match) === "incomplete" ? `<button type="button" class="tp-target-btn" onclick="selectRoundPanelTarget('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')">在上方記錄這場</button>` : ""}
           ${!isFinished && !directAdvance ? `<button type="button" data-write-action onclick="editMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')">修改對局</button>` : ""}
           ${!isFinished ? `<button type="button" data-write-action onclick="deleteMatch('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')" class="danger-btn">刪除對局</button>` : ""}
         </div>
@@ -534,7 +544,7 @@ function renderMatchCard(tournamentId, match, isFinished, matchNumber) {
         <div><strong>陀螺 3：</strong>${escapeHtml(deck[2]?.configText || "-")}</div>
       </div>` : ""}
 
-      ${!isFinished && !directAdvance ? `<h5>新增回合</h5>${renderAddRoundForm(tournamentId, match)}` : ""}
+      ${!isFinished && !directAdvance && panelTargetId === match.id ? `<p class="tp-card-note">回合請在上方「記錄回合」面板記錄。</p>` : ""}
 
       ${!directAdvance ? `<div class="table-wrap round-table-wrap">
         <table class="round-table">
@@ -1722,6 +1732,232 @@ window.deleteRound = async function (tournamentId, matchId, roundId) {
 };
 
 /* ===== D-017 tournament transactions: end ===== */
+
+/* ===== Phase 7-4 tournament record panel: begin =====
+   Display layer only (spec 13). The panel fills the existing round fields
+   (data-round-*) and calls the existing window.addRound; the dialogs call the
+   existing addMatch / addDirectAdvance / editMatch. Every write still goes
+   through submitTournamentOperation (D-017). Scores and outcomes come from
+   calculateMatchScore / getMatchOutcome. Nothing here writes. */
+
+// Which match each tournament's panel works on (Q1). Memory only and tied to
+// the signed-in account: another account never inherits it.
+const roundPanelState = { uid: "", targets: new Map() };
+let roundPanelSubmitting = false;
+
+function roundPanelTargets() {
+  const uid = currentUser?.uid || "";
+  if (roundPanelState.uid !== uid) {
+    roundPanelState.uid = uid;
+    roundPanelState.targets = new Map();
+  }
+  return roundPanelState.targets;
+}
+
+const isDirectAdvanceMatch = match => Boolean(DIRECT_ADVANCE_TYPES[match?.advancementType]);
+
+function getRoundPanelTarget(record) {
+  return resolveRoundPanelTarget(record, roundPanelTargets().get(record.id) || "", {
+    isDirectAdvance: isDirectAdvanceMatch,
+    outcomeOf: getMatchOutcome
+  });
+}
+
+function renderScorePips(score) {
+  return Array.from({ length: 4 }, (_, index) => `<span class="tp-pip${index < score ? " is-on" : ""}"></span>`).join("");
+}
+
+function describeMatchForPanel(item) {
+  const score = calculateMatchScore(item.match);
+  const outcome = getMatchOutcome(item.match);
+  const state = outcome === "win" ? "勝" : outcome === "lose" ? "負" : "進行中";
+  return `第 ${item.number} 局｜${item.match.opponentName || "對手未填"}｜${score.myScore}：${score.opponentScore}（${state}）`;
+}
+
+function renderRoundPanel(record) {
+  const items = recordableMatches(record, isDirectAdvanceMatch);
+  if (!items.length) {
+    return `<section class="tp-arena" data-round-panel="${escapeHtml(record.id)}" aria-label="記錄回合"><p class="tp-empty">新增對局後，就能在這裡用大按鈕記錄回合。</p></section>`;
+  }
+  const targetId = getRoundPanelTarget(record);
+  const item = items.find(entry => entry.match.id === targetId);
+  const match = item.match;
+  const score = calculateMatchScore(match);
+  const outcome = getMatchOutcome(match);
+  const decided = outcome === "win" || outcome === "lose";
+  const rounds = match.rounds || [];
+  const beys = roundPanelBeyblades(match);
+  const tId = escapeHtml(record.id);
+  const mId = escapeHtml(match.id);
+  const switcher = items.length > 1
+    ? `<label class="tp-switch"><span>記錄對局</span><select data-panel-target aria-label="切換記錄回合的對局">${items.map(entry => `<option value="${escapeHtml(entry.match.id)}"${entry.match.id === match.id ? " selected" : ""}>${escapeHtml(describeMatchForPanel(entry))}</option>`).join("")}</select></label>`
+    : "";
+  const recent = rounds.slice(-3).reverse().map(round => {
+    const info = SCORE_TYPES[round.scoreType] || { label: "-", point: Number(round.point || 0) };
+    return `<li><span>第 ${escapeHtml(round.roundNumber || "-")} 回合</span><span class="${round.result === "win" ? "win-text" : "lose-text"}">${round.result === "win" ? "我方得分" : "我方失分"}</span><span>${escapeHtml(info.label)} ${escapeHtml(round.point || info.point || "-")} 分</span><span>${escapeHtml(round.myBeyblade || "-")}</span></li>`;
+  }).join("");
+  const big = (field, value, label, extra = "") => `<button type="button" class="tp-big${extra}" data-panel-pick="${field}" data-value="${escapeHtml(value)}" aria-pressed="false">${label}</button>`;
+  const controls = decided
+    ? `<p class="tp-done" role="status">本局已分出勝負（${score.myScore}：${score.opponentScore}，${outcome === "win" ? "我方勝利" : "我方落敗"}）。快速記錄已停用；如需更正，請刪除下方對局卡中的回合紀錄。</p>`
+    : `<div class="tp-group" role="group" aria-label="本回合使用陀螺"><span class="tp-label">本回合陀螺</span><div class="tp-bigs tp-beys">${beys.map(text => big("beyblade", text, escapeHtml(text))).join("")}</div></div>
+      <div class="tp-group" role="group" aria-label="得分或失分"><span class="tp-label">得分方</span><div class="tp-bigs tp-two">${big("result", "win", "我方得分", " tp-win")}${big("result", "lose", "我方失分", " tp-lose")}</div></div>
+      <div class="tp-group" role="group" aria-label="勝利方式"><span class="tp-label">勝利方式</span><div class="tp-bigs tp-four">${Object.entries(SCORE_TYPES).map(([key, info]) => big("score-type", key, `${escapeHtml(info.label)}<small>${info.point} 分</small>`)).join("")}</div></div>
+      <input type="hidden" data-round-beyblade value="">
+      <input type="hidden" data-round-result value="">
+      <input type="hidden" data-round-score-type value="">
+      <label class="tp-note"><span>回合備註（選填）</span><input type="text" data-round-note placeholder="回合備註"></label>
+      <p class="tp-preview" data-panel-preview aria-live="polite"></p>
+      <p class="tp-message" data-panel-message role="alert"></p>
+      <button type="button" class="primary-btn tp-go" data-write-action data-panel-record onclick="recordRoundFromPanel('${tId}', '${mId}')">記錄回合</button>`;
+  return `
+    <section class="tp-arena" data-round-panel="${tId}" data-match-id="${mId}" aria-label="記錄回合：第 ${escapeHtml(item.number)} 局">
+      <div class="tp-board" role="group" aria-label="比分">
+        <div class="tp-side tp-me"><span>我方</span><strong>${score.myScore}</strong><div class="tp-pips">${renderScorePips(score.myScore)}</div></div>
+        <div class="tp-mid"><strong>第 ${escapeHtml(item.number)} 局｜對手：${escapeHtml(match.opponentName || "對手未填")}</strong><span>第 ${rounds.length + 1} 回合</span><span>先到 4 分</span></div>
+        <div class="tp-side tp-op"><span>對手</span><strong>${score.opponentScore}</strong><div class="tp-pips">${renderScorePips(score.opponentScore)}</div></div>
+      </div>
+      <p class="tp-status" aria-live="polite">目前記錄：第 ${escapeHtml(item.number)} 局，比分 ${score.myScore}：${score.opponentScore}，${decided ? (outcome === "win" ? "本局勝利" : "本局落敗") : "進行中"}</p>
+      ${switcher}
+      ${controls}
+      ${recent ? `<div class="tp-recent"><span class="tp-label">近期回合</span><ol>${recent}</ol></div>` : ""}
+    </section>`;
+}
+
+// After a render (and draft restore): pressed states, the single-bey preset
+// (Q3), and the preview. A restored value that is no longer offered is cleared.
+function syncRoundPanels() {
+  const list = document.getElementById("tournamentList");
+  if (!list || typeof list.querySelectorAll !== "function") return;
+  list.querySelectorAll("[data-round-panel][data-match-id]").forEach(panel => {
+    const record = tournamentRecords.find(item => item.id === panel.getAttribute("data-round-panel"));
+    const match = record?.matches?.find(item => item.id === panel.getAttribute("data-match-id"));
+    if (!match) return;
+    const fields = {
+      beyblade: panel.querySelector("[data-round-beyblade]"),
+      result: panel.querySelector("[data-round-result]"),
+      "score-type": panel.querySelector("[data-round-score-type]")
+    };
+    if (!fields.beyblade) return;
+    const beys = roundPanelBeyblades(match);
+    if (fields.beyblade.value && !beys.includes(fields.beyblade.value)) fields.beyblade.value = "";
+    if (!fields.beyblade.value) fields.beyblade.value = preselectedBeyblade(match);
+    if (!["win", "lose"].includes(fields.result.value)) fields.result.value = "";
+    if (!Object.hasOwn(SCORE_TYPES, fields["score-type"].value)) fields["score-type"].value = "";
+    panel.querySelectorAll("[data-panel-pick]").forEach(button => {
+      const field = fields[button.getAttribute("data-panel-pick")];
+      button.setAttribute("aria-pressed", String(Boolean(field) && field.value === button.getAttribute("data-value")));
+    });
+    updateRoundPanelPreview(panel, match);
+  });
+}
+
+function updateRoundPanelPreview(panel, match) {
+  const preview = panel.querySelector("[data-panel-preview]");
+  if (!preview) return;
+  const result = panel.querySelector("[data-round-result]")?.value || "";
+  const scoreType = panel.querySelector("[data-round-score-type]")?.value || "";
+  if (!["win", "lose"].includes(result) || !Object.hasOwn(SCORE_TYPES, scoreType)) {
+    preview.textContent = "選擇陀螺、得分方與勝利方式後即可記錄。";
+    return;
+  }
+  const info = SCORE_TYPES[scoreType];
+  const next = { ...match, rounds: [...(match.rounds || []), { result, scoreType, point: info.point }] };
+  const score = calculateMatchScore(next);
+  const outcome = getMatchOutcome(next);
+  const label = outcome === "win" ? "本局勝利" : outcome === "lose" ? "本局落敗" : "仍在進行";
+  preview.textContent = `${result === "win" ? "我方" : "對手"} +${info.point}，比分變成 ${score.myScore}：${score.opponentScore}｜這回合後：${label}`;
+}
+
+function setRoundPanelMessage(panel, text) {
+  const message = panel?.querySelector?.("[data-panel-message]");
+  if (message) message.textContent = text;
+}
+
+function findRoundPanel(tournamentId) {
+  const list = document.getElementById("tournamentList");
+  if (!list || typeof list.querySelectorAll !== "function") return null;
+  return Array.from(list.querySelectorAll("[data-round-panel]")).find(panel => panel.getAttribute("data-round-panel") === tournamentId) || null;
+}
+
+// Q1: switching only changes what the panel shows. Unsent inputs stay with
+// their own match (drafts are keyed by tournament + match), so nothing typed
+// for one match can be sent to another.
+window.selectRoundPanelTarget = function (tournamentId, matchId) {
+  const record = tournamentRecords.find(item => item.id === tournamentId);
+  const match = record?.matches?.find(item => item.id === matchId);
+  if (!record || !match || isDirectAdvanceMatch(match)) return;
+  roundPanelTargets().set(tournamentId, matchId);
+  openedTournamentIds.add(tournamentId);
+  renderTournamentList();
+  const panel = findRoundPanel(tournamentId);
+  panel?.querySelector?.("[data-panel-target]")?.focus?.({ preventScroll: false });
+};
+
+// Records one round through the existing addRound after checking that the
+// panel still shows this tournament and match, that the match is still open
+// (Q2), and that bey, result and finish type were chosen (Q3).
+window.recordRoundFromPanel = async function (tournamentId, matchId) {
+  if (roundPanelSubmitting) return;
+  const panel = findRoundPanel(tournamentId);
+  const record = tournamentRecords.find(item => item.id === tournamentId);
+  const match = record?.matches?.find(item => item.id === matchId);
+  const stale = !panel || panel.getAttribute("data-match-id") !== matchId || !record || record.isFinished
+    || !match || isDirectAdvanceMatch(match) || getRoundPanelTarget(record) !== matchId
+    || document.querySelector(`[data-match-id="${matchId}"]`) !== panel;
+  if (stale) {
+    alert("資料已更新，請確認記錄對象後再操作。");
+    renderTournamentList();
+    return;
+  }
+  const outcome = getMatchOutcome(match);
+  if (outcome === "win" || outcome === "lose") {
+    renderTournamentList();
+    return;
+  }
+  const selection = {
+    beyblade: panel.querySelector("[data-round-beyblade]")?.value || "",
+    result: panel.querySelector("[data-round-result]")?.value || "",
+    scoreType: panel.querySelector("[data-round-score-type]")?.value || ""
+  };
+  const error = roundPanelSelectionError(selection, match, SCORE_TYPES);
+  if (error) {
+    setRoundPanelMessage(panel, error);
+    return;
+  }
+  roundPanelSubmitting = true;
+  try {
+    await window.addRound(tournamentId, matchId);
+  } finally {
+    roundPanelSubmitting = false;
+  }
+};
+
+function handleRoundPanelClick(event) {
+  const button = event.target?.closest?.("[data-panel-pick]");
+  if (!button) return;
+  const panel = button.closest("[data-round-panel][data-match-id]");
+  const field = panel?.querySelector(`[data-round-${button.getAttribute("data-panel-pick")}]`);
+  if (!field) return;
+  field.value = button.getAttribute("data-value");
+  panel.querySelectorAll(`[data-panel-pick="${button.getAttribute("data-panel-pick")}"]`).forEach(other => {
+    other.setAttribute("aria-pressed", String(other === button));
+  });
+  setRoundPanelMessage(panel, "");
+  const record = tournamentRecords.find(item => item.id === panel.getAttribute("data-round-panel"));
+  const match = record?.matches?.find(item => item.id === panel.getAttribute("data-match-id"));
+  if (match) updateRoundPanelPreview(panel, match);
+}
+
+function handleRoundPanelChange(event) {
+  const select = event.target?.closest?.("[data-panel-target]");
+  if (!select) return;
+  const panel = select.closest("[data-round-panel]");
+  if (panel) window.selectRoundPanelTarget(panel.getAttribute("data-round-panel"), select.value);
+}
+
+document.addEventListener("click", handleRoundPanelClick);
+document.addEventListener("change", handleRoundPanelChange);
+/* ===== Phase 7-4 tournament record panel: end ===== */
 
 document.addEventListener("DOMContentLoaded", function () {
   const googleLoginBtn = document.getElementById("googleLoginBtn");
