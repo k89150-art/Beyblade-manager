@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（Phase 7-3d commit 與 v1.17.0 發布；之後 Phase 7-4 唯讀盤點與規格整理，不實作）
-- 寫入範圍：v1.17.0 發布（版本、快取、更新紀錄、使用教學、測試）；Phase 7-4 只寫規格文件
-- 正式版本：`2cb2f2e`（v1.16.0，`origin/main`，GitHub Pages deployment `8037272446` success）。本機另有 v1.16.0 部署結案 commit，未 push。
+- 目前執行者：Claude Code（Phase 7-4 唯讀盤點與規格整理，不實作；完成後交 ChatGPT 複審）
+- 寫入範圍：Phase 7-4 只寫規格文件（`design/phase7/`、交接文件）；不修改程式
+- 正式版本：`049b0e6`（v1.17.0，`origin/main`，GitHub Pages deployment `8038191756` success）。本機另有 v1.17.0 部署結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -33,6 +33,16 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-25 — Claude Code（v1.17.0 正式部署與唯讀驗收，Phase 7-3 結案）
+
+- 發布前驗收：Node 20 檔 469/469；Phase 7-2 整合回歸 505/505（release 樹）；M01～M16 PASS 16／FAIL 0；validate PASS；build PASS（36 files）；`git diff --check` PASS；核准雜湊與寫入路徑不變（`saveData(` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0）。
+- 備份：**依使用者指示略過**（本次 v1.17.0 另行詢問，使用者選擇「Skip this time」；單次例外，未沿用上次決定），**不是新的 PASS 備份**。最近一份已驗證的正式備份仍為 2026-11-25 00:26 那份（v1.14.2 部署前，PASS）。
+- 部署前：使用者確認所有裝置舊分頁與 PWA 已關閉並授權部署；`origin/main` 仍為 `2cb2f2e`、工作樹乾淨、可 fast-forward。Push `2cb2f2e..049b0e6`（`01d4046`、`7580719`、`049b0e6`），無 force push。Pages workflow run `45468312705` success，deployment `8038191756` success。
+- 正式網站唯讀驗收（未登入）：15 個檔案（含 `tournament.js`、`tournament-sync.js`）與 `049b0e6` 一致；7 頁在 1280 與 375 寬度版本 v1.17.0、`site-menu.js?v=20261125-v1170`、無水平溢出；主頁載入 `script.js?v=20261125-phase73d`，含「複製配置」與收藏「建立配置」入口；更新紀錄最新「v1.17.0｜快速建立配置」、歷史版本 v1.2.0～v1.16.0；Console Error 0。
+- 尚未驗證（正式網站）：登入後的操作（已於 Emulator 真實頁面驗證）；Safari／iOS。
+- 正式 Firestore：沒有任何讀寫；Rules、Schema 未修改。
+- **Phase 7-3 結案**（7-3a～7-3d 全部部署）。下一步：Phase 7-4 唯讀盤點與規格整理（不實作）。
 
 ### 2026-11-25 — Claude Code（v1.17.0 發布準備：快速建立配置）
 
