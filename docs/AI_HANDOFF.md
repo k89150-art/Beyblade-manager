@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（Phase 7-3b 本機實作，不 commit；完成後交 ChatGPT 複審）
-- 寫入範圍：Phase 7-3b 配置顯示層（`config-view.js`、`script.js` 顯示層區塊、`index.html`、`style.css`、測試）
-- 正式版本：`4b791da`（v1.14.2，`origin/main`，GitHub Pages deployment `8033980752` success）。本機另有 v1.14.2 部署結案 commit，未 push。
+- 目前執行者：Claude Code（Phase 7-3c 組裝器介面本機實作，不 commit；完成後交 ChatGPT 複審）
+- 寫入範圍：Phase 7-3c 組裝器顯示與即時檢查（Quick Editor 介面、`config-view.js` 或新純函式、`style.css`、`index.html`、測試）
+- 正式版本：`aa1493a`（v1.15.0，`origin/main`，GitHub Pages deployment `8036157930` success）。本機另有 v1.15.0 部署結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -34,11 +34,20 @@
 
 ## 最新紀錄
 
+### 2026-11-25 — Claude Code（v1.15.0 正式部署與唯讀驗收）
+
+- 發布前驗收：Node 18 檔 439/439；Phase 7-2 整合回歸 505/505（release 樹）；M01～M16 PASS 16／FAIL 0；validate PASS；build PASS（36 files）；`git diff --check` PASS；核准雜湊（`getTableData` `02f67bb21e597b3e`、`applyDataToTables` `08c1de72b2266fec`、`editRow`→`rebuildRow` `3ec54b27ec414e19`、`getStockNameFromCell`→`escapeHtml` `c1230e4d43e39ba2`、`addConfig` 寫入 `da046a3d56a07519`、`checkStock` `0bed51c10a056c87`）與其餘段落不變；`saveData()` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0。
+- 備份：**依使用者指示略過**（使用者回覆「不備份」；本輪核准允許記錄為單次例外），**不是新的 PASS 備份**。最近一份已驗證的正式備份仍為 `C:BeybladeBackupseyblade-appData-backup-20261125-002614.json`（v1.14.2 部署前，2 份文件，PASS，檔案 SHA-256 `bec5122c2c29c2260dc4577787e0402833c9e555476a87142594e55de14e38c5`）。本版只新增配置顯示層，未改資料格式、讀取與儲存流程或寫入路徑。
+- 部署前：使用者確認所有裝置舊分頁與 PWA 已關閉並授權部署；`origin/main` 仍為 `4b791da`、可 fast-forward。Push `4b791da..aa1493a`（`568df18`、`cef1218`、`aa1493a`），無 force push。Pages workflow run `45453047647` success，deployment `8036157930` success。
+- 正式網站唯讀驗收（未登入）：11 頁 `site-menu.js?v=20261125-v1150`、`index.html` 載入 `script.js`／`style.css?v=20261125-phase73b`；`site-menu.js`、`script.js`、`config-view.js`、`collection-view.js`、`collection-sync.js`、`assembly-rules.js`、`style.css`、`changelog.html`、`guide.html`、`index.html` 與 `aa1493a` 一致；7 頁在 1280 與 375 寬度版本 v1.15.0、無水平溢出；主頁配置顯示層已安裝（`config-view-ready`、分頁顯示、原始表 clip）；更新紀錄最新「v1.15.0｜配置管理」、歷史版本 v1.2.0～v1.14.2；index、changelog、tournament Console Error 0。
+- 尚未驗證（正式網站）：登入後的配置清單、面板與操作（不建立正式測試資料；已於 Emulator 真實頁面驗證）；Safari／iOS、正式 `signInWithPopup`。
+- 正式 Firestore：沒有任何讀寫（本次未備份）；Rules、Schema 未修改。
+
 ### 2026-11-25 — Claude Code（v1.15.0 發布準備：配置管理）
 
 - 任務：Phase 7-3b 複審補測通過、功能 commit 後，依核准流程準備 v1.15.0。
 - 主要內容：`SITE_VERSION` v1.15.0（`site-menu.js` 只改常數），11 頁 `site-menu.js` 快取 `20261125-v1150`；更新紀錄新增 v1.15.0（我的配置／拆解紀錄分頁、配置搜尋與系列／結構篩選與排序、桌面清單／卡片、桌面詳細面板與手機詳細資訊視窗、修改／拆解／還原／刪除紀錄的新入口），v1.14.2 移入歷史版本；使用教學第五節改寫為「我的配置與拆解紀錄」。未宣稱組裝器介面改版。版本與說明頁測試同步。功能程式未修改。
-- 測試：見下方部署紀錄。
+- 測試：見上方部署紀錄。Release commit `aa1493a`。
 
 ### 2026-11-25 — Claude Code（Phase 7-3b：配置顯示層，ChatGPT 有條件 PASS → 補測後 commit）
 
