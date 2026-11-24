@@ -4,9 +4,9 @@
 
 ## 協調狀態
 
-- 目前執行者：Claude Code（Phase 7-3c commit 與 v1.16.0 發布；之後 Phase 7-3d 本機實作，不 commit）
-- 寫入範圍：v1.16.0 發布（版本、快取、更新紀錄、使用教學、測試）；Phase 7-3d 快速建立配置（組裝器預填入口、詳細面板按鈕、測試）
-- 正式版本：`aa1493a`（v1.15.0，`origin/main`，GitHub Pages deployment `8036157930` success）。本機另有 v1.15.0 部署結案 commit，未 push。
+- 目前執行者：Claude Code（Phase 7-3d 快速建立配置本機實作，不 commit；完成後交 ChatGPT 複審）
+- 寫入範圍：Phase 7-3d 快速建立配置（組裝器預填入口、配置與收藏詳細面板按鈕、測試）
+- 正式版本：`2cb2f2e`（v1.16.0，`origin/main`，GitHub Pages deployment `8037272446` success）。本機另有 v1.16.0 部署結案 commit，未 push。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -33,6 +33,16 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-25 — Claude Code（v1.16.0 正式部署與唯讀驗收，Phase 7-3c 結案）
+
+- 發布前驗收：Node 19 檔 458/458；Phase 7-2 整合回歸 505/505（release 樹）；M01～M16 PASS 16／FAIL 0；validate PASS；build PASS（36 files）；`git diff --check` PASS；核准雜湊與寫入路徑不變（`saveData(` 17、`runTransaction(` 1、`setDoc`／`updateDoc`／`deleteDoc` 0）。
+- 備份：**依使用者指示略過**（使用者選擇「Skip this time」；本輪核准允許記錄為單次例外），**不是新的 PASS 備份**。最近一份已驗證的正式備份仍為 2026-11-25 00:26 那份（v1.14.2 部署前，PASS）。本版只改組裝器介面，未改資料格式、讀寫流程或寫入路徑。
+- 部署前：使用者確認所有裝置舊分頁與 PWA 已關閉並授權部署；`origin/main` 仍為 `aa1493a`、工作樹乾淨、可 fast-forward。Push `aa1493a..2cb2f2e`（`9cb14ce`、`afb7472`、`2cb2f2e`），無 force push。Pages workflow run `45461318722` success，deployment `8037272446` success。
+- 正式網站唯讀驗收（未登入）：`index.html`、`script.js`、`config-view.js`、`style.css`、`site-menu.js`、`changelog.html`、`guide.html`、`collection-view.js`、`collection-sync.js`、`assembly-rules.js`、`data-session-guard.js`、`home.html`、`tournament.html` 與 `2cb2f2e` 一致；7 頁在 1280 與 375 寬度版本 v1.16.0、`site-menu.js?v=20261125-v1160`、無水平溢出；主頁載入 `script.js?v=20261125-phase73c`，組裝器結構按鈕與即時檢查區存在，配置顯示層已安裝；更新紀錄最新「v1.16.0｜新版組裝器」、歷史版本 v1.2.0～v1.15.0、無 7-3d 字樣；Console Error 0。
+- 尚未驗證（正式網站）：登入後的組裝器操作（不建立正式測試資料；已於 Emulator 真實頁面驗證）；Safari／iOS、正式 `signInWithPopup`。
+- 正式 Firestore：沒有任何讀寫；Rules、Schema 未修改。
+- 下一步：Phase 7-3d 本機實作（不 commit、不升版、不 push、不部署）。
 
 ### 2026-11-25 — Claude Code（v1.16.0 發布準備：新版組裝器）
 

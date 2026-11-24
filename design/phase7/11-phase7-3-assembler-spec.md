@@ -1,6 +1,6 @@
 # 11｜Phase 7-3：組裝器與配置管理（實作規格）
 
-狀態：**7-3a 已隨 v1.14.1 部署**（功能 commit `fca352e`、release `f4d2546`，GitHub Pages deployment `8024719101`，2026-11-24；排序修改已撤回）；**7-3b 已隨 v1.15.0 部署**（2026-11-25；功能 commit `cef1218`、release `aa1493a`，GitHub Pages deployment `8036157930`；驗收 `verification/phase7-3b/README.md`）；**7-3c ChatGPT 有條件 PASS，補測通過後 commit、隨 v1.16.0 發布**（2026-11-25；驗收 `verification/phase7-3c/README.md`）；7-3d 授權本機實作（v1.16.0 部署後）。
+狀態：**7-3a 已隨 v1.14.1 部署**（功能 commit `fca352e`、release `f4d2546`，GitHub Pages deployment `8024719101`，2026-11-24；排序修改已撤回）；**7-3b 已隨 v1.15.0 部署**（2026-11-25；功能 commit `cef1218`、release `aa1493a`，GitHub Pages deployment `8036157930`；驗收 `verification/phase7-3b/README.md`）；**7-3c 已隨 v1.16.0 部署**（2026-11-25；功能 commit `afb7472`、release `2cb2f2e`，GitHub Pages deployment `8037272446`；驗收 `verification/phase7-3c/README.md`）；7-3d 授權本機實作。
 
 基準：`main` = `fa4e419`（origin/main = `17ac204`，正式網站 v1.14.0）。前置審查與 ChatGPT 有條件 PASS：2026-11-24。
 
