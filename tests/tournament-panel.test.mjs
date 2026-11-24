@@ -173,3 +173,91 @@ test("R-09 offline: the panel's round is not sent and nothing is queued (D-017)"
   assert.equal(server(mock)[0].matches[0].rounds.length, 0);
   assert.ok(page.alerts.length >= 1);
 });
+
+/* ---------- 7-4b: new-match dialog and 3on3 hint ---------- */
+
+import { buildConfigPartIndex, checkDeckDuplicates, configRowParts, LIMITED_LOCK_CHIPS } from "../tournament-panel.js";
+import { setMatchForm } from "./helpers/tournament-page-harness.mjs";
+
+const row = (cells, mainStockName) => (mainStockName === undefined ? { cells } : { cells, mainStockName });
+
+test("D-01 config parts: standard, integrated, CX 3-piece, CX 4-piece, legacy split, booster; exact names", () => {
+  assert.deepEqual(configRowParts(row(["BX-01 CUSTOM", "蒼龍  神劍", "-", "-", "-", "-", "-", "3-60", "F"], "-")), [["上蓋", "蒼龍  神劍"], ["固鎖", "3-60"], ["軸心", "F"]]);
+  assert.deepEqual(configRowParts(row(["UX-21-01 CUSTOM", "惡魔冥界", "-", "-", "-", "-", "-", "-", "Z"], "-")), [["上蓋", "惡魔冥界"], ["軸心", "Z"]], "\"-\" is no part");
+  assert.deepEqual(configRowParts(row(["CX-CUSTOM", "飛龍龍騎H", "飛龍", "龍騎", "-", "-", "H", "3-60", "F"], "龍騎")), [["紋章鎖", "飛龍"], ["主要戰刃", "龍騎"], ["輔助戰刃", "H"], ["固鎖", "3-60"], ["軸心", "F"]], "the combined 上蓋 column is not a part");
+  assert.deepEqual(configRowParts(row(["CX-CUSTOM", "紋章鎖金屬超越S", "紋章鎖", "超越/金屬", "超越", "金屬", "S", "4-55", "LO"], "")), [["紋章鎖", "紋章鎖"], ["超越戰刃", "超越"], ["金屬戰刃", "金屬"], ["輔助戰刃", "S"], ["固鎖", "4-55"], ["軸心", "LO"]]);
+  assert.deepEqual(configRowParts(row(["CX-CUSTOM", "x", "L", "超越/金屬", "超越", "金屬", "S", "4-55", "LO"])).map(([type]) => type), ["紋章鎖", "超越戰刃", "金屬戰刃", "輔助戰刃", "固鎖", "軸心"], "without mainStockName the split blade text is not a part");
+  assert.deepEqual(configRowParts(row(["BX-14 CUSTOM", "抽包上蓋", "-", "-", "-", "-", "-", "5-60", "P"], "-"))[0], ["上蓋", "抽包上蓋"]);
+});
+
+const index = rows => buildConfigPartIndex(rows, item => item.cells[0] + "｜" + item.cells[1]);
+const CONFIGS = [
+  row(["A", "蒼龍神劍", "-", "-", "-", "-", "-", "3-60", "F"], "-"),
+  row(["B", "地獄鐮刀", "-", "-", "-", "-", "-", "3-60", "T"], "-"),
+  row(["C", "鳳凰", "-", "-", "-", "-", "-", "4-60", "R"], "-"),
+  row(["D", "x", "戰神", "龍騎", "-", "-", "H", "1-60", "N"], "龍騎"),
+  row(["E", "y", "戰神", "鳳刃", "-", "-", "J", "2-60", "K"], "鳳刃"),
+  row(["F", "z", "飛龍", "獅刃", "-", "-", "M", "5-60", "Q"], "獅刃"),
+  row(["G", "w", "飛龍", "虎刃", "-", "-", "P", "6-60", "U"], "虎刃"),
+  row(["S", "同名", "-", "-", "-", "-", "-", "1-60", "A"], "-"),
+  row(["S", "同名", "-", "-", "-", "-", "-", "2-60", "B"], "-")
+];
+
+test("D-02 3on3: duplicates across beys; lock chips may repeat except 戰神 and 帝王; same config twice repeats all", () => {
+  assert.deepEqual([...LIMITED_LOCK_CHIPS], ["戰神", "帝王"]);
+  const ix = index(CONFIGS);
+  const dup = checkDeckDuplicates(["A｜蒼龍神劍", "B｜地獄鐮刀", "C｜鳳凰"], ix);
+  assert.deepEqual(dup.duplicates, [{ type: "固鎖", name: "3-60", slots: [1, 2] }]);
+  assert.equal(dup.passed, false);
+  const clean = checkDeckDuplicates(["A｜蒼龍神劍", "C｜鳳凰", "F｜z"], ix);
+  assert.equal(clean.passed, true);
+  assert.equal(checkDeckDuplicates(["F｜z", "G｜w", "A｜蒼龍神劍"], ix).passed, true, "飛龍 twice is allowed");
+  assert.deepEqual(checkDeckDuplicates(["D｜x", "E｜y", "A｜蒼龍神劍"], ix).duplicates, [{ type: "紋章鎖", name: "戰神", slots: [1, 2] }]);
+  assert.equal(checkDeckDuplicates(["A｜蒼龍神劍", "A｜蒼龍神劍", "C｜鳳凰"], ix).duplicates.length, 3, "the same config chosen twice");
+});
+
+test("D-03 Q7: custom, empty or ambiguous beys are 'not checked' and never 'passed'", () => {
+  const ix = index(CONFIGS);
+  const custom = checkDeckDuplicates(["A｜蒼龍神劍", "自己寫的", "C｜鳳凰"], ix);
+  assert.equal(custom.passed, false);
+  assert.deepEqual(custom.unchecked.map(slot => [slot.number, slot.status]), [[2, "custom"]]);
+  assert.deepEqual(checkDeckDuplicates(["A｜蒼龍神劍", "", "S｜同名"], ix).unchecked.map(slot => slot.status), ["empty", "ambiguous"]);
+  // Two identical rows (same parts) under one text are not ambiguous.
+  assert.equal(checkDeckDuplicates(["X｜1"], index([row(["X", "1", "-", "-", "-", "-", "-", "1-60", "A"], "-"), row(["X", "1", "-", "-", "-", "-", "-", "1-60", "A"], "-")])).slots[0].status, "checked");
+});
+
+test("D-04 the dialog saves through the existing addMatch and closes only when the match is stored", async () => {
+  const { mock, page } = await openPage([tournament("t1", [])]);
+  page.setMatchDialog("t1");
+  page.window.openMatchDialog("t1");
+  setMatchForm(page, "t1", { opponent: "", deck: ["A", "", "C"] });
+  await page.window.addMatchFromDialog("t1");
+  assert.match(page.alerts.at(-1), /每局請填寫或選擇 3 顆陀螺/);
+  assert.equal(mock.stats.transactions, 0, "addMatch's own validation still applies");
+  setMatchForm(page, "t1", { opponent: "阿明", deck: ["A", "B", "C"] });
+  await page.window.addMatchFromDialog("t1");
+  const saved = server(mock)[0].matches;
+  assert.equal(saved.length, 1);
+  assert.deepEqual(saved[0].deck.map(item => item.configText), ["A", "B", "C"]);
+  assert.equal(saved[0].opponentName, "阿明");
+  assert.deepEqual(saved[0].rounds, []);
+  // Closed after success: a second press does nothing.
+  await page.window.addMatchFromDialog("t1");
+  assert.equal(server(mock)[0].matches.length, 1);
+  assert.equal(mock.stats.transactions, 1);
+});
+
+test("D-05 the dialog does nothing for another tournament or a finished one; direct advance keeps its meaning", async () => {
+  const { mock, page } = await openPage([tournament("t1", []), tournament("t2", [], { isFinished: true })]);
+  page.setMatchDialog("t2");
+  page.window.openMatchDialog("t2");
+  setMatchForm(page, "t2", { opponent: "x", deck: ["A", "B", "C"] });
+  await page.window.addMatchFromDialog("t2");
+  page.setMatchDialog("t1");
+  page.window.openMatchDialog("t1");
+  await page.window.addMatchFromDialog("t2");
+  assert.equal(mock.stats.transactions, 0);
+  await page.window.addDirectAdvance("t1", "walkover");
+  const advance = server(mock)[0].matches[0];
+  assert.deepEqual({ ...advance, id: "x" }, { id: "x", advancementType: "walkover", opponentName: "對手未到", deck: [], rounds: [] });
+});

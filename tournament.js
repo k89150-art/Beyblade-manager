@@ -38,7 +38,9 @@ import {
   recordableMatches,
   resolveRoundPanelTarget,
   roundPanelBeyblades,
-  roundPanelSelectionError
+  roundPanelSelectionError,
+  buildConfigPartIndex,
+  checkDeckDuplicates
 } from "./tournament-panel.js?v=20261126-phase74";
 
 const firebaseConfig = {
@@ -420,6 +422,8 @@ function renderTournamentList() {
   restoreTournamentFormDrafts();
   // Phase 7-4a: pressed states, the single-bey preset and the preview.
   syncRoundPanels();
+  // Phase 7-4b: the open new-match dialog's 3on3 hint.
+  syncMatchDialogs();
   updateDataAccessUi();
 }
 
@@ -469,48 +473,14 @@ function renderTournamentDetail(record) {
     <div class="tournament-detail">
       ${isFinished
         ? `<div class="empty-state">這場比賽已完成。若要新增對局或回合，請先按「修改」。</div>`
-        : `${renderRoundPanel(record)}<h4>新增對局</h4>${renderAddMatchForm(record.id)}`
+        : renderRoundPanel(record)
       }
 
-      <h4>對局紀錄</h4>
+      ${isFinished ? "<h4>對局紀錄</h4>" : `${renderMatchSectionHeader(record)}${renderMatchDialog(record)}`}
       ${(record.matches || []).length
         ? record.matches.map((match, index) => renderMatchCard(record.id, match, isFinished, index + 1, isFinished ? "" : getRoundPanelTarget(record))).join("")
         : `<div class="empty-state">尚未新增對局。</div>`
       }
-    </div>
-  `;
-}
-
-function renderAddMatchForm(tournamentId) {
-  return `
-    <div class="match-form">
-      <div class="direct-advance-actions">
-        <button type="button" data-write-action onclick="addDirectAdvance('${escapeHtml(tournamentId)}', 'bye')">輪空／種子，直接晉級</button>
-        <button type="button" data-write-action onclick="addDirectAdvance('${escapeHtml(tournamentId)}', 'walkover')">對手棄權／未到，直接晉級</button>
-      </div>
-      <div class="direct-advance-note">直接晉級會計入一輪晉級，但不會建立比分或回合紀錄。</div>
-
-      <input type="text" data-match-opponent placeholder="對手名稱">
-
-      <div class="deck-input-group">
-        <label>陀螺 1</label>
-        ${buildConfigSelectHtml('data-deck-select="1"')}
-        <input type="text" data-deck-custom="1" placeholder="或手動輸入陀螺 1">
-      </div>
-
-      <div class="deck-input-group">
-        <label>陀螺 2</label>
-        ${buildConfigSelectHtml('data-deck-select="2"')}
-        <input type="text" data-deck-custom="2" placeholder="或手動輸入陀螺 2">
-      </div>
-
-      <div class="deck-input-group">
-        <label>陀螺 3</label>
-        ${buildConfigSelectHtml('data-deck-select="3"')}
-        <input type="text" data-deck-custom="3" placeholder="或手動輸入陀螺 3">
-      </div>
-
-      <button type="button" data-write-action onclick="addMatch('${escapeHtml(tournamentId)}')" class="primary-btn">新增對局</button>
     </div>
   `;
 }
@@ -567,36 +537,6 @@ function renderMatchCard(tournamentId, match, isFinished, matchNumber, panelTarg
           </tbody>
         </table>
       </div>` : `<div class="empty-state">本局未進行比賽，已直接晉級下一輪。</div>`}
-    </div>
-  `;
-}
-
-function renderAddRoundForm(tournamentId, match) {
-  const deckOptions = (match.deck || [])
-    .map(item => item.configText)
-    .filter(Boolean);
-
-  return `
-    <div class="round-form">
-      <select data-round-beyblade>
-        <option value="">選擇本回合陀螺</option>
-        ${deckOptions.map(text => `<option value="${escapeHtml(text)}">${escapeHtml(text)}</option>`).join("")}
-      </select>
-
-      <select data-round-result>
-        <option value="win">我方得分</option>
-        <option value="lose">我方失分</option>
-      </select>
-
-      <select data-round-score-type>
-        <option value="extreme">極限勝利 3 分</option>
-        <option value="over">擊飛勝利 2 分</option>
-        <option value="burst">爆裂勝利 2 分</option>
-        <option value="spin">迴轉勝利 1 分</option>
-      </select>
-
-      <input type="text" data-round-note placeholder="回合備註">
-      <button type="button" data-write-action onclick="addRound('${escapeHtml(tournamentId)}', '${escapeHtml(match.id)}')" class="primary-btn">新增回合</button>
     </div>
   `;
 }
@@ -1957,6 +1897,191 @@ function handleRoundPanelChange(event) {
 
 document.addEventListener("click", handleRoundPanelClick);
 document.addEventListener("change", handleRoundPanelChange);
+
+/* ----- 7-4b: new-match dialog and 3on3 hint ----- */
+
+// Which tournament's new-match dialog is open. Memory only; another account
+// never inherits it. The dialog lives inside its tournament card, so the
+// existing addMatch / getDeckValue read its fields unchanged.
+const matchDialogState = { uid: "", openFor: "" };
+let matchDialogSubmitting = false;
+
+function getOpenMatchDialog() {
+  const uid = currentUser?.uid || "";
+  if (matchDialogState.uid !== uid) {
+    matchDialogState.uid = uid;
+    matchDialogState.openFor = "";
+  }
+  return matchDialogState.openFor;
+}
+
+function renderMatchSectionHeader(record) {
+  const tId = escapeHtml(record.id);
+  return `<div class="tp-match-head"><h4>對局</h4><div class="tp-match-head-actions">
+    <button type="button" data-write-action onclick="addDirectAdvance('${tId}', 'bye')">輪空／種子</button>
+    <button type="button" data-write-action onclick="addDirectAdvance('${tId}', 'walkover')">對手未到</button>
+    <button type="button" class="primary-btn" data-open-match-dialog="${tId}" onclick="openMatchDialog('${tId}')">＋ 新增對局</button>
+  </div></div>
+  <p class="tp-match-head-note">「輪空／種子」與「對手未到」會直接晉級一輪，不會建立比分或回合紀錄。</p>`;
+}
+
+function renderMatchDialog(record) {
+  if (getOpenMatchDialog() !== record.id) return "";
+  const tId = escapeHtml(record.id);
+  const rows = [1, 2, 3].map(slot => `
+      <div class="tp-deck-row">
+        <label class="tp-field"><span>使用陀螺 ${slot}（從配置選）</span>${buildConfigSelectHtml(`data-deck-select="${slot}" aria-label="使用陀螺 ${slot}（從配置選）"`)}</label>
+        <label class="tp-field"><span>或自填（優先）</span><input type="text" data-deck-custom="${slot}" placeholder="或手動輸入陀螺 ${slot}"></label>
+      </div>`).join("");
+  return `
+    <div class="tp-dialog-shell" data-match-dialog="${tId}">
+      <div class="tp-dialog-backdrop" data-match-dialog-close></div>
+      <section class="tp-dialog" role="dialog" aria-modal="true" aria-labelledby="matchDialogTitle-${tId}">
+        <header class="tp-dialog-head"><h3 id="matchDialogTitle-${tId}">新增對局</h3><button type="button" class="tp-dialog-x" data-match-dialog-close aria-label="關閉新增對局">×</button></header>
+        <label class="tp-field"><span>對手名稱</span><input type="text" data-match-opponent placeholder="對手名稱"></label>
+        ${rows}
+        <div class="tp-hint" data-deck-hint aria-live="polite"></div>
+        <footer class="tp-dialog-actions">
+          <button type="button" data-match-dialog-close>取消</button>
+          <button type="button" class="primary-btn" data-write-action onclick="addMatchFromDialog('${tId}')">新增對局</button>
+        </footer>
+      </section>
+    </div>`;
+}
+
+function findMatchDialog(tournamentId) {
+  const list = document.getElementById("tournamentList");
+  if (!list || typeof list.querySelectorAll !== "function") return null;
+  return Array.from(list.querySelectorAll("[data-match-dialog]")).find(element => element.getAttribute("data-match-dialog") === tournamentId) || null;
+}
+
+function focusMatchDialogOpener(tournamentId) {
+  const list = document.getElementById("tournamentList");
+  if (!list || typeof list.querySelectorAll !== "function") return;
+  Array.from(list.querySelectorAll("[data-open-match-dialog]")).find(element => element.getAttribute("data-open-match-dialog") === tournamentId)?.focus?.();
+}
+
+window.openMatchDialog = function (tournamentId) {
+  const record = tournamentRecords.find(item => item.id === tournamentId);
+  if (!record || record.isFinished) return;
+  getOpenMatchDialog();
+  matchDialogState.openFor = tournamentId;
+  openedTournamentIds.add(tournamentId);
+  renderTournamentList();
+  findMatchDialog(tournamentId)?.querySelector?.("[data-match-opponent]")?.focus?.();
+};
+
+// Closing keeps what was typed as a draft (the existing form drafts); it never writes.
+function closeMatchDialog({ restoreFocus = true } = {}) {
+  const tournamentId = getOpenMatchDialog();
+  if (!tournamentId) return;
+  matchDialogState.openFor = "";
+  renderTournamentList();
+  if (restoreFocus) focusMatchDialogOpener(tournamentId);
+}
+
+// The existing addMatch saves; the dialog closes only once the new match is
+// stored (the existing flow then also clears the submitted inputs).
+window.addMatchFromDialog = async function (tournamentId) {
+  if (matchDialogSubmitting || getOpenMatchDialog() !== tournamentId || !findMatchDialog(tournamentId)) return;
+  const before = new Set((tournamentRecords.find(item => item.id === tournamentId)?.matches || []).map(match => match.id));
+  matchDialogSubmitting = true;
+  try {
+    await window.addMatch(tournamentId);
+  } finally {
+    matchDialogSubmitting = false;
+  }
+  const after = tournamentRecords.find(item => item.id === tournamentId)?.matches || [];
+  if (after.some(match => !before.has(match.id)) && getOpenMatchDialog() === tournamentId) closeMatchDialog();
+};
+
+// Q7: the 3on3 duplicate-part hint for the three chosen beys (hint only).
+function getConfigPartIndex() {
+  return buildConfigPartIndex(mainData.configTable || [], item => buildConfigTextFromCells(item?.cells || []));
+}
+
+function renderDeckHint(result) {
+  const lines = [];
+  result.duplicates.forEach(item => {
+    lines.push(`<p class="tp-hint-warn">！3on3 提示：重複零件 ${escapeHtml(item.type)}「${escapeHtml(item.name)}」（陀螺 ${item.slots.join("、")}）</p>`);
+  });
+  const reasons = { custom: "自填", empty: "尚未選擇", ambiguous: "多個配置文字相同、無法確認零件" };
+  result.unchecked.forEach(slot => {
+    lines.push(`<p class="tp-hint-muted">・陀螺 ${slot.number}：${reasons[slot.status]}，未檢查重複零件</p>`);
+  });
+  if (result.passed) {
+    lines.push(`<p class="tp-hint-ok">✓ 3on3 提示：三顆之間沒有重複零件</p>`);
+  } else if (!result.duplicates.length && result.slots.filter(slot => slot.status === "checked").length >= 2) {
+    lines.push(`<p class="tp-hint-muted">已檢查的陀螺之間沒有重複零件；其他陀螺未檢查，不代表通過。</p>`);
+  }
+  lines.push(`<p class="tp-hint-note">官方規則：三顆之間零件不可重複（紋章鎖只有戰神、帝王各限一個）。只提示，不阻擋儲存；依目前配置的零件判斷。</p>`);
+  return lines.join("");
+}
+
+function updateDeckHint(dialog) {
+  const hint = dialog?.querySelector?.("[data-deck-hint]");
+  if (!hint) return;
+  const texts = [1, 2, 3].map(slot => {
+    const custom = dialog.querySelector(`[data-deck-custom="${slot}"]`)?.value.trim() || "";
+    const select = dialog.querySelector(`[data-deck-select="${slot}"]`)?.value.trim() || "";
+    return custom || select;
+  });
+  hint.innerHTML = renderDeckHint(checkDeckDuplicates(texts, getConfigPartIndex()));
+}
+
+function syncMatchDialogs() {
+  const tournamentId = getOpenMatchDialog();
+  if (!tournamentId) return;
+  const dialog = findMatchDialog(tournamentId);
+  if (!dialog) {
+    matchDialogState.openFor = "";
+    return;
+  }
+  updateDeckHint(dialog);
+}
+
+function handleMatchDialogInput(event) {
+  const dialog = event.target?.closest?.("[data-match-dialog]");
+  if (dialog && event.target.matches?.("[data-deck-select], [data-deck-custom]")) updateDeckHint(dialog);
+}
+
+function handleMatchDialogClick(event) {
+  if (event.target?.closest?.("[data-match-dialog-close]")) closeMatchDialog();
+}
+
+// Tab stays inside the open dialog; Escape closes it without writing.
+function handleMatchDialogKeydown(event) {
+  const tournamentId = getOpenMatchDialog();
+  if (!tournamentId) return;
+  const dialog = findMatchDialog(tournamentId)?.querySelector?.(".tp-dialog");
+  if (!dialog) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeMatchDialog();
+    return;
+  }
+  if (event.key !== "Tab") return;
+  const focusables = Array.from(dialog.querySelectorAll("button, input, select, textarea, [tabindex]:not([tabindex='-1'])"))
+    .filter(element => !element.disabled && element.getClientRects().length > 0);
+  if (!focusables.length) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (!dialog.contains(document.activeElement)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  } else if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+document.addEventListener("input", handleMatchDialogInput);
+document.addEventListener("change", handleMatchDialogInput);
+document.addEventListener("click", handleMatchDialogClick);
+document.addEventListener("keydown", handleMatchDialogKeydown);
 /* ===== Phase 7-4 tournament record panel: end ===== */
 
 document.addEventListener("DOMContentLoaded", function () {

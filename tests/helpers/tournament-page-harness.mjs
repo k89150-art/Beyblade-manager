@@ -101,8 +101,13 @@ export async function createTournamentPage({
 
   // Phase 7-4a: tests can place one fake record panel in the list.
   let panelElement = null;
+  let dialogElement = null;
   const list = createElement({
-    querySelectorAll: selector => (panelElement && (selector === "[data-round-panel]" || selector === "[data-round-panel][data-match-id]") ? [panelElement] : [])
+    querySelectorAll: selector => {
+      if (panelElement && (selector === "[data-round-panel]" || selector === "[data-round-panel][data-match-id]")) return [panelElement];
+      if (dialogElement && selector === "[data-match-dialog]") return [dialogElement];
+      return [];
+    }
   });
   let listHtml = "";
   Object.defineProperty(list, "innerHTML", {
@@ -219,6 +224,11 @@ export async function createTournamentPage({
       return panelElement;
     },
     clearPanel() { panelElement = null; },
+    // Phase 7-4b: the new-match dialog element for one tournament (its fields
+    // are the ones setMatchForm registers for addMatch).
+    setMatchDialog(tournamentId) {
+      dialogElement = tournamentId ? { getAttribute: name => (name === "data-match-dialog" ? tournamentId : null), querySelector: () => null } : null;
+    },
     lastStatus() { return statuses.at(-1) || null; },
     plain(value) { return JSON.parse(JSON.stringify(value ?? null)); },
     setAddForm(values) {

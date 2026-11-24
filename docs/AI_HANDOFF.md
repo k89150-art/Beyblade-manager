@@ -34,6 +34,13 @@
 
 ## 最新紀錄
 
+### 2026-11-25 — Claude Code（Phase 7-4b：新增對局對話框與 3on3 提示，本機 commit）
+
+- 主要內容：對局區標題列（輪空／種子、對手未到、＋ 新增對局）；新增對局對話框在比賽卡內、沿用既有欄位屬性並呼叫既有 `addMatch`，成功存入才關閉；3on3 重複零件提示（類別＋原始名稱、紋章鎖只限戰神與帝王、自填／未選擇／多義顯示未檢查、只提示不阻擋）。驗收 `design/phase7/verification/phase7-4b/README.md`。
+- 未修改：`tournament-sync.js`、S1～S6、T1～T17、`addMatch`／`addDirectAdvance`、資料欄位。
+- 測試：Node 489/489；Emulator 真實頁面（3on3、Esc／Tab、新增 1 次、對手未到、手機 sheet）。
+- Commit：`feat(tournament): implement phase 7-4b match creation and 3on3 hints`；未 push、未部署。
+
 ### 2026-11-25 — Claude Code（Phase 7-4a：比分板與回合大按鈕，本機 commit）
 
 - 任務：Phase 7-4 規格定案（Q1～Q8），依序實作 7-4a／7-4b／7-4c；本筆為 7-4a。驗收 `design/phase7/verification/phase7-4a/README.md`。

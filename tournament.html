@@ -154,6 +154,37 @@
     .tp-done { margin: 0; padding: 12px; border-radius: 10px; background: #1a222c; border: 1px dashed #4cd38a; color: #dfe7ee; font-size: 14px; line-height: 1.6; }
     .tp-recent ol { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13px; }
     .tp-recent li { display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 6px 8px; border-radius: 8px; background: #161d25; }
+    .tp-match-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+    .tp-match-head h4 { margin: 0; }
+    .tp-match-head-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tp-match-head-actions button { min-height: 44px; }
+    .tp-match-head-note { margin: 6px 0 10px; color: #aab4bf; font-size: 13px; }
+    .tp-dialog-shell { position: fixed; inset: 0; z-index: 1400; display: grid; place-items: center; padding: 24px; }
+    .tp-dialog-backdrop { position: absolute; inset: 0; background: rgba(2, 6, 10, 0.72); }
+    .tp-dialog { position: relative; width: min(600px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; display: grid; gap: 12px; padding: 18px; border-radius: 14px; border: 1px solid #31404f; background: #111820; color: #e8eef5; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5); }
+    .tp-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .tp-dialog-head h3 { margin: 0; font-size: 20px; }
+    .tp-dialog-x { width: 44px; height: 44px; min-height: 44px; padding: 0; font-size: 24px; line-height: 1; }
+    .tp-field { display: grid; gap: 4px; font-size: 13px; color: #aab4bf; }
+    .tp-field input, .tp-field select { min-height: 44px; width: 100%; box-sizing: border-box; }
+    .tp-deck-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .tp-hint { display: grid; gap: 4px; font-size: 13px; line-height: 1.5; }
+    .tp-hint p { margin: 0; overflow-wrap: anywhere; }
+    .tp-hint-warn { color: #ffcc66; font-weight: 700; }
+    .tp-hint-ok { color: #4cd38a; font-weight: 700; }
+    .tp-hint-muted, .tp-hint-note { color: #aab4bf; }
+    .tp-dialog-actions { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 10px; }
+    .tp-dialog-actions button { min-height: 48px; }
+    html[data-theme="beige"] .tp-dialog { background: #f8f3ea; color: #292d2b; border-color: #d2c5b3; }
+    html[data-theme="beige"] .tp-field, html[data-theme="beige"] .tp-hint-muted, html[data-theme="beige"] .tp-hint-note, html[data-theme="beige"] .tp-match-head-note { color: #5d625f; }
+    html[data-theme="beige"] .tp-hint-warn { color: #94691f; }
+    html[data-theme="beige"] .tp-hint-ok { color: #397f58; }
+    @media (max-width: 700px) {
+      .tp-dialog-shell { padding: 0; place-items: end stretch; }
+      .tp-dialog { width: 100%; max-height: 100vh; height: 100vh; border-radius: 0; border: 0; padding: 16px 14px calc(16px + env(safe-area-inset-bottom)); align-content: start; }
+      .tp-deck-row { grid-template-columns: 1fr; gap: 6px; }
+      .tp-match-head-actions { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
     @media (max-width: 700px) {
       .tp-arena { padding: 12px; }
       .tp-side strong { font-size: 44px; }
@@ -241,7 +272,7 @@
       document.body.classList.remove("side-menu-open");
     }
   </script>
-  <script type="module" src="tournament.js?v=20261126-phase74a"></script>
+  <script type="module" src="tournament.js?v=20261126-phase74b"></script>
 <script src="site-menu.js?v=20261125-v1170"></script>
 </body>
 </html>
