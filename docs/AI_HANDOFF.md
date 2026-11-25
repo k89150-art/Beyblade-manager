@@ -4,10 +4,10 @@
 
 ## 協調狀態
 
-- 目前執行者：無（Phase 7 技術結案；日常維護模式，每項維護需另行授權）
+- 目前執行者：無（Phase 7 完整結案；日常維護模式，每項維護需另行授權）
 - 寫入範圍：無
-- 正式版本：`97ced93`（v1.18.1，`origin/main`，GitHub Pages deployment `8040915692` success）。本機另有 v1.18.1 部署與 Phase 7 結案文件 commit，未 push。
-- 維護清單與安全基線：`docs/MAINTENANCE_BACKLOG.md`。使用者實機驗收待完成。
+- 正式版本：v1.18.1（網站程式 `97ced93`，GitHub Pages deployment `8040915692` success）；之後只有文件 commit。
+- 維護清單與安全基線：`docs/MAINTENANCE_BACKLOG.md`（M-1～M-9 皆需另行授權）。使用者實機驗收 9/9 PASS。
 - Phase 7 設計文件已 commit 在 `design/phase7/`；Phase 7-2b 已隨 v1.12.0 部署；Phase 7-2c 已隨 v1.13.0 部署；Phase 7-2a～7-2d 已全部部署（7-2d 隨 v1.14.0），Phase 7-2 結案。
 - 維護分工：2026-11-23 起由 Claude Code 接手主要程式維護（先前為 Claude Cowork）；ChatGPT 負責架構審查、風險評估與部署驗收。
 
@@ -34,6 +34,12 @@
 ```
 
 ## 最新紀錄
+
+### 2026-11-25 — Claude Code（Phase 7 使用者實機驗收結案）
+
+- 使用者回報 v1.18.1 實機驗收 **9/9 PASS**（由使用者本人親自操作並回報）：電腦正式 Google 登入；原有收藏及配置資料正常；iPhone Safari 登入與底部導覽；手機詳細資訊 Sheet 及組裝器；手機賽事比分板及回合記錄；iOS PWA 顯示 v1.18.1；配置新增、修改、拆解及刪除；賽事新增、記錄回合、修改及刪除；另一台裝置重新整理後資料一致。
+- ChatGPT 確認 Phase 7 正式結案。**Phase 7 完整結案，進入日常維護模式。** 未開始 Phase 8 或任何 M-1～M-9。
+- 本次只改文件（報告 §10、維護清單、本檔）；未改網站程式、受保護區段、測試基準、Rules、Schema 或正式 Firestore；未重新備份。
 
 ### 2026-11-25 — Claude Code（v1.18.1 正式部署與唯讀驗收，Phase 7 技術結案）
 
